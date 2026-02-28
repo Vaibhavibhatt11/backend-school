@@ -261,6 +261,21 @@ function buildOpenApiSpec() {
       },
     },
   };
+  paths["/api/v1/ready"] = {
+    get: {
+      tags: ["System"],
+      summary: "Readiness check",
+      operationId: "get_api_v1_ready",
+      responses: {
+        200: {
+          description: "Service ready",
+        },
+        503: {
+          description: "Service not ready",
+        },
+      },
+    },
+  };
 
   const servers = [];
   const localServer = `http://localhost:${env.PORT}`;

@@ -280,3 +280,44 @@ Run folders in sequence:
 Notes:
 - Tokens and entity IDs are auto-saved in collection variables.
 - `POST /auth/change-password` needs valid values for `changeCurrentPassword` and `changeNewPassword`.
+
+## AWS Production Deployment (Recommended)
+
+Use this setup for higher traffic:
+
+1. Compute: ECS Fargate (or EKS) with multiple backend tasks.
+2. Load Balancer: ALB in front of backend tasks.
+3. Database: RDS PostgreSQL + RDS Proxy (for pooled DB connections).
+4. Cache/Rate limit: ElastiCache Redis (set `REDIS_URL`).
+5. Secrets: AWS Secrets Manager or SSM Parameter Store.
+
+Required runtime env values:
+
+```env
+NODE_ENV=production
+PORT=5000
+DATABASE_URL=postgresql://<user>:<pass>@<rds-proxy-endpoint>:5432/<db>?schema=public&connection_limit=30&pool_timeout=20
+REDIS_URL=redis://<elasticache-endpoint>:6379
+TRUST_PROXY=1
+CORS_ORIGIN=https://<frontend-domain>
+PUBLIC_BASE_URL=https://<api-domain>
+SWAGGER_ENABLED=false
+REQUEST_BODY_LIMIT=2mb
+LOGIN_RATE_LIMIT_WINDOW_MS=900000
+LOGIN_RATE_LIMIT_MAX=5
+HEALTHCHECK_DB_TIMEOUT_MS=2000
+SERVER_KEEP_ALIVE_TIMEOUT_MS=65000
+SERVER_HEADERS_TIMEOUT_MS=66000
+SERVER_REQUEST_TIMEOUT_MS=120000
+```
+
+Health endpoints for ALB:
+
+- Liveness: `GET /api/v1/health`
+- Readiness: `GET /api/v1/ready`
+
+Deploy order:
+
+1. Run migrations once: `npm run prisma:deploy`
+2. Seed once (only initial): `npm run prisma:seed`
+3. Start app: `npm run start`

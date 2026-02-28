@@ -2,6 +2,7 @@ const router = require("express").Router();
 
 const auth = require("../middlewares/auth");
 const requireRole = require("../middlewares/requireRole");
+const { getReadinessStatus } = require("../services/health");
 
 const authRoutes = require("../modules/auth/auth.routes");
 const dashboardRoutes = require("../modules/dashboard/dashboard.routes");
@@ -17,6 +18,19 @@ router.get("/health", (req, res) => {
     data: {
       service: "school-erp-backend",
       status: "ok",
+      timestamp: new Date().toISOString(),
+      uptimeSeconds: process.uptime(),
+    },
+  });
+});
+
+router.get("/ready", async (req, res) => {
+  const readiness = await getReadinessStatus();
+  return res.status(readiness.ready ? 200 : 503).json({
+    success: readiness.ready,
+    data: {
+      status: readiness.ready ? "ready" : "not_ready",
+      checks: readiness.checks,
       timestamp: new Date().toISOString(),
     },
   });

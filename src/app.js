@@ -1,6 +1,7 @@
 const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
+const compression = require("compression");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const swaggerUi = require("swagger-ui-express");
@@ -18,9 +19,9 @@ const swaggerEnabled =
     : env.NODE_ENV !== "production";
 const openApiSpec = swaggerEnabled ? getOpenApiSpec() : null;
 
-const corsOrigin = env.CORS_ORIGIN
-  ? env.CORS_ORIGIN.split(",").map((origin) => origin.trim())
-  : true;
+const corsOrigins = env.CORS_ORIGIN
+  ? env.CORS_ORIGIN.split(",").map((origin) => origin.trim()).filter(Boolean)
+  : null;
 
 function resolveTrustProxy(value, nodeEnv) {
   if (value === undefined) {
@@ -44,12 +45,13 @@ if (trustProxy !== false) {
 app.use(helmet());
 app.use(
   cors({
-    origin: corsOrigin,
+    origin: corsOrigins || true,
     credentials: true,
   })
 );
+app.use(compression());
 app.use(morgan(env.NODE_ENV === "production" ? "combined" : "dev"));
-app.use(express.json({ limit: "2mb" }));
+app.use(express.json({ limit: env.REQUEST_BODY_LIMIT }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
