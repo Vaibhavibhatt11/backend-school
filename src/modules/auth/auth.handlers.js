@@ -145,7 +145,29 @@ function invalidResetToken(res, message = "Invalid or expired reset token") {
   });
 }
 
-async function login(req, res, next) {
+async function issueLoginTokens(user) {
+  const payload = buildJwtPayload(user);
+  const accessToken = issueAccessToken(payload);
+  const refreshToken = issueRefreshToken(payload);
+
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() },
+    }),
+    prisma.refreshToken.create({
+      data: {
+        userId: user.id,
+        tokenHash: hashToken(refreshToken),
+        expiresAt: tokenExpiryFromJwt(refreshToken),
+      },
+    }),
+  ]);
+
+  return { accessToken, refreshToken };
+}
+
+async function loginByRole(req, res, next) {
   try {
     const { email, password } = loginSchema.parse(req.body);
     const normalizedEmail = email.toLowerCase();
@@ -163,23 +185,7 @@ async function login(req, res, next) {
       return unauthorized(res, "Invalid email or password");
     }
 
-    const payload = buildJwtPayload(user);
-    const accessToken = issueAccessToken(payload);
-    const refreshToken = issueRefreshToken(payload);
-
-    await prisma.$transaction([
-      prisma.user.update({
-        where: { id: user.id },
-        data: { lastLoginAt: new Date() },
-      }),
-      prisma.refreshToken.create({
-        data: {
-          userId: user.id,
-          tokenHash: hashToken(refreshToken),
-          expiresAt: tokenExpiryFromJwt(refreshToken),
-        },
-      }),
-    ]);
+    const { accessToken, refreshToken } = await issueLoginTokens(user);
 
     return res.status(200).json({
       success: true,
@@ -192,6 +198,10 @@ async function login(req, res, next) {
   } catch (error) {
     return next(error);
   }
+}
+
+async function login(req, res, next) {
+  return loginByRole(req, res, next);
 }
 
 async function refresh(req, res, next) {

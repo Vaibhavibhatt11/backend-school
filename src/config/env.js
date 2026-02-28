@@ -13,6 +13,7 @@ const envSchema = z.object({
   REFRESH_TOKEN_EXPIRES_IN: z.string().default("7d"),
   PASSWORD_RESET_TOKEN_EXPIRES_IN: z.string().default("10m"),
   PASSWORD_RESET_OTP_EXPIRES_MINUTES: z.coerce.number().int().positive().default(10),
+  PUBLIC_BASE_URL: z.string().url().optional(),
   CORS_ORIGIN: z.string().optional(),
   TRUST_PROXY: z.string().optional(),
   SWAGGER_ENABLED: z.enum(["true", "false"]).optional(),
