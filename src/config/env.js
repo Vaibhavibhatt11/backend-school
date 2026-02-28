@@ -20,6 +20,7 @@ const envSchema = z.object({
   REQUEST_BODY_LIMIT: z.string().default("2mb"),
   LOGIN_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(15 * 60 * 1000),
   LOGIN_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(5),
+  LOGIN_RATE_LIMIT_USE_REDIS: z.enum(["true", "false"]).default("false"),
   HEALTHCHECK_DB_TIMEOUT_MS: z.coerce.number().int().positive().default(2000),
   SERVER_KEEP_ALIVE_TIMEOUT_MS: z.coerce.number().int().positive().default(65000),
   SERVER_HEADERS_TIMEOUT_MS: z.coerce.number().int().positive().default(66000),
