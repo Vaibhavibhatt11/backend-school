@@ -20,12 +20,17 @@ function getRedis() {
   if (redis) return redis;
 
   redis = new Redis(env.REDIS_URL, {
-    maxRetriesPerRequest: 2,
+    maxRetriesPerRequest: null,
     lazyConnect: true,
+    enableOfflineQueue: false,
+    retryStrategy: (times) => Math.min(times * 100, 5000),
+    connectTimeout: 5000,
+    commandTimeout: 5000,
   });
 
   redis.on("error", (error) => {
-    console.error("Redis error:", error.message);
+    const message = error?.message || error?.code || String(error);
+    console.error("Redis error:", message);
   });
 
   return redis;
