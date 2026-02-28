@@ -22,7 +22,6 @@ function getRedis() {
   redis = new Redis(env.REDIS_URL, {
     maxRetriesPerRequest: null,
     lazyConnect: true,
-    enableOfflineQueue: false,
     retryStrategy: (times) => Math.min(times * 100, 5000),
     connectTimeout: 5000,
     commandTimeout: 5000,

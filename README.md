@@ -210,6 +210,28 @@ npm run smoke:full
 
 This verifies that all critical APIs are working correctly.
 
+## Load Testing (k6)
+
+Run login load baseline:
+
+```bash
+k6 run scripts/k6-auth-load.js
+```
+
+With custom target:
+
+```bash
+BASE_URL=https://your-api-domain/api/v1 LOAD_EMAIL=admin@school.edu LOAD_PASSWORD=Admin123! k6 run scripts/k6-auth-load.js
+```
+
+## Scale Readiness Notes
+
+- Distributed login rate-limit via Redis is opt-in:
+  `LOGIN_RATE_LIMIT_USE_REDIS=true`
+- Keep it `false` until Redis is reachable and stable.
+- New DB indexes are included in migration:
+  `prisma/migrations/20260228230500_scale_indexes/migration.sql`
+
 ---
 
 ## 📁 Folder Structure

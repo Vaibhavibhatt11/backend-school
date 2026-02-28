@@ -312,6 +312,7 @@ model Staff {
 
   @@unique([schoolId, employeeCode])
   @@index([schoolId])
+  @@index([schoolId, department, isActive, createdAt])
 }
 
 model ClassRoom {
@@ -396,6 +397,8 @@ model Student {
 
   @@unique([schoolId, admissionNo])
   @@index([schoolId])
+  @@index([schoolId, status, createdAt])
+  @@index([schoolId, className, section])
 }
 
 model Parent {
@@ -445,6 +448,7 @@ model StudentAttendance {
 
   @@unique([schoolId, studentId, date])
   @@index([schoolId, date])
+  @@index([schoolId, date, status])
 }
 
 model StaffAttendance {
@@ -465,6 +469,7 @@ model StaffAttendance {
 
   @@unique([schoolId, staffId, date])
   @@index([schoolId, date])
+  @@index([schoolId, date, status])
 }
 
 model LeaveRequest {
@@ -567,6 +572,7 @@ model Invoice {
 
   @@unique([schoolId, invoiceNo])
   @@index([schoolId, status])
+  @@index([schoolId, studentId, createdAt])
 }
 
 model Payment {
@@ -590,6 +596,7 @@ model Payment {
 
   @@unique([schoolId, receiptNo])
   @@index([schoolId, paidAt])
+  @@index([schoolId, studentId, paidAt])
 }
 
 model Announcement {
@@ -775,4 +782,5 @@ model AuditLog {
   actor  User?   @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
 
   @@index([schoolId, createdAt])
+  @@index([schoolId, action, createdAt])
 }

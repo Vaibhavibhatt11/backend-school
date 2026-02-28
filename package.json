@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Backend foundation for multi-tenant School ERP",
   "main": "src/server.js",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
@@ -12,6 +15,7 @@
     "prisma:studio": "prisma studio",
     "prisma:seed": "node prisma/seed.js",
     "smoke:full": "node scripts/full-api-smoke.js",
+    "load:k6:auth": "echo \"Run: k6 run scripts/k6-auth-load.js\"",
     "check": "node -e \"console.log('Backend scaffold is ready')\""
   },
   "keywords": [],
