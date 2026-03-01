@@ -19,9 +19,36 @@ const swaggerEnabled =
     : env.NODE_ENV !== "production";
 const openApiSpec = swaggerEnabled ? getOpenApiSpec() : null;
 
+function normalizeOrigin(origin) {
+  return String(origin || "")
+    .trim()
+    .replace(/^['"]+|['"]+$/g, "")
+    .replace(/\/+$/, "");
+}
+
 const corsOrigins = env.CORS_ORIGIN
-  ? env.CORS_ORIGIN.split(",").map((origin) => origin.trim()).filter(Boolean)
+  ? env.CORS_ORIGIN.split(",").map(normalizeOrigin).filter(Boolean)
   : null;
+
+function buildCorsOriginHandler(allowedOrigins) {
+  if (!allowedOrigins || allowedOrigins.length === 0) {
+    return true;
+  }
+
+  const allowedSet = new Set(allowedOrigins);
+
+  return (origin, callback) => {
+    // Allow non-browser callers (curl, Postman, server-to-server).
+    if (!origin) return callback(null, true);
+
+    const normalized = normalizeOrigin(origin);
+    if (allowedSet.has(normalized)) {
+      return callback(null, true);
+    }
+
+    return callback(null, false);
+  };
+}
 
 function resolveTrustProxy(value, nodeEnv) {
   if (value === undefined) {
@@ -45,7 +72,7 @@ if (trustProxy !== false) {
 app.use(helmet());
 app.use(
   cors({
-    origin: corsOrigins || true,
+    origin: buildCorsOriginHandler(corsOrigins),
     credentials: true,
   })
 );
