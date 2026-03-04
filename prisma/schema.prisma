@@ -77,6 +77,28 @@ enum LeaveRequestStatus {
   REJECTED
 }
 
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  CANCELLED
+  EXPIRED
+}
+
+enum SubscriptionPaymentStatus {
+  PAID
+  DUE
+  FAILED
+  REFUNDED
+  PENDING
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  SUSPENDED
+  CANCELLED
+}
+
 model School {
   id           String       @id @default(cuid())
   code         String       @unique
@@ -116,6 +138,7 @@ model School {
   auditLogs            AuditLog[]
   studentAttendanceLog StudentAttendance[]
   staffAttendanceLog   StaffAttendance[]
+  invitations          Invitation[]
 }
 
 model Branch {
@@ -171,6 +194,9 @@ model User {
   uploadedStudentDocs     StudentDocument[]     @relation("StudentDocumentUploadedBy")
   auditLogs               AuditLog[]            @relation("AuditActor")
   staffProfile            Staff?                @relation("StaffUser")
+  sentInvitations         Invitation[]          @relation("InvitationInvitedBy")
+  notifications           SuperadminNotification[] @relation("NotificationUser")
+  uploadedFirebaseCreds   FirebaseCredential[]  @relation("FirebaseCredentialUploadedBy")
 }
 
 model RefreshToken {
@@ -179,6 +205,9 @@ model RefreshToken {
   tokenHash String    @unique
   expiresAt DateTime
   revokedAt DateTime?
+  lastUsedAt DateTime?
+  ipAddress String?
+  userAgent String?
   createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -204,6 +233,8 @@ model SubscriptionPlan {
   priceYearly  Float
   isActive     Boolean  @default(true)
   features     String[]
+  maxStudents  Int?
+  storageGb    Int?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -215,6 +246,8 @@ model SchoolSubscription {
   planCode   String
   autoRenew  Boolean   @default(false)
   validUntil DateTime?
+  paymentStatus SubscriptionPaymentStatus @default(PAID)
+  status        SubscriptionStatus        @default(ACTIVE)
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 
@@ -232,9 +265,83 @@ model PlatformConfiguration {
   defaultTimezone     String
   defaultCurrencyCode String
   maintenanceMode     Boolean  @default(false)
+  newSignups          Boolean  @default(true)
+  trialDays           Int      @default(14)
+  taxRate             Float    @default(0)
+  smsUrl              String?
+  smsApiKey           String?
+  senderId            String?
+  whatsAppAccountId   String?
+  whatsAppToken       String?
   features            Json
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+}
+
+model SecuritySetting {
+  id                 String   @id
+  enforce2FA         Boolean  @default(false)
+  passwordMinLength  Int      @default(8)
+  passwordUppercase  Boolean  @default(true)
+  passwordSpecial    Boolean  @default(true)
+  passwordExpiryDays Int      @default(90)
+  jwtExpiryMinutes   Int      @default(15)
+  refreshExpiryDays  Int      @default(7)
+  apiKeyVersion      Int      @default(1)
+  lastKeyRotationAt  DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Invitation {
+  id          String           @id @default(cuid())
+  email       String
+  role        Role
+  schoolId    String?
+  status      InvitationStatus @default(PENDING)
+  tokenHash   String?
+  message     String?
+  invitedById String?
+  sentAt      DateTime         @default(now())
+  expiresAt   DateTime?
+  acceptedAt  DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  school    School? @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  invitedBy User?   @relation("InvitationInvitedBy", fields: [invitedById], references: [id], onDelete: SetNull)
+
+  @@index([email, status])
+  @@index([schoolId, status])
+}
+
+model SuperadminNotification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      String   @default("INFO")
+  readAt    DateTime?
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  user User @relation("NotificationUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, readAt])
+}
+
+model FirebaseCredential {
+  id           String   @id
+  projectId    String?
+  clientEmail  String?
+  privateKey   String?
+  serviceJson  Json?
+  uploadedById String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  uploadedBy User? @relation("FirebaseCredentialUploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
 }
 
 model SchoolRole {

@@ -131,6 +131,20 @@ function logAuthSecurityEvent(req, reason) {
   console.warn(`[auth] ${reason} path=${req.originalUrl} ip=${ip}`);
 }
 
+function requestIp(req) {
+  if (!req) return null;
+  const forwarded = req.headers["x-forwarded-for"];
+  if (typeof forwarded === "string" && forwarded.trim()) {
+    return forwarded.split(",")[0].trim();
+  }
+  return req.ip || null;
+}
+
+function requestUserAgent(req) {
+  if (!req) return null;
+  return typeof req.headers["user-agent"] === "string" ? req.headers["user-agent"] : null;
+}
+
 function invalidOtp(res, message = "Invalid or expired OTP") {
   return res.status(400).json({
     success: false,
@@ -145,7 +159,7 @@ function invalidResetToken(res, message = "Invalid or expired reset token") {
   });
 }
 
-async function issueLoginTokens(user) {
+async function issueLoginTokens(user, req) {
   const payload = buildJwtPayload(user);
   const accessToken = issueAccessToken(payload);
   const refreshToken = issueRefreshToken(payload);
@@ -160,6 +174,9 @@ async function issueLoginTokens(user) {
         userId: user.id,
         tokenHash: hashToken(refreshToken),
         expiresAt: tokenExpiryFromJwt(refreshToken),
+        lastUsedAt: new Date(),
+        ipAddress: requestIp(req),
+        userAgent: requestUserAgent(req),
       },
     }),
   ]);
@@ -185,7 +202,7 @@ async function loginByRole(req, res, next) {
       return unauthorized(res, "Invalid email or password");
     }
 
-    const { accessToken, refreshToken } = await issueLoginTokens(user);
+    const { accessToken, refreshToken } = await issueLoginTokens(user, req);
 
     return res.status(200).json({
       success: true,
@@ -255,13 +272,16 @@ async function refresh(req, res, next) {
     await prisma.$transaction([
       prisma.refreshToken.update({
         where: { id: storedToken.id },
-        data: { revokedAt: new Date() },
+        data: { revokedAt: new Date(), lastUsedAt: new Date() },
       }),
       prisma.refreshToken.create({
         data: {
           userId: storedToken.user.id,
           tokenHash: hashToken(nextRefreshToken),
           expiresAt: tokenExpiryFromJwt(nextRefreshToken),
+          lastUsedAt: new Date(),
+          ipAddress: requestIp(req),
+          userAgent: requestUserAgent(req),
         },
       }),
     ]);

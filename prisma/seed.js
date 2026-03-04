@@ -12,6 +12,8 @@ async function main() {
       priceYearly: 499,
       isActive: true,
       features: ["Students", "Attendance", "Basic Fees"],
+      maxStudents: 500,
+      storageGb: 25,
     },
     {
       planCode: "PRO",
@@ -20,6 +22,8 @@ async function main() {
       priceYearly: 999,
       isActive: true,
       features: ["Everything in Basic", "Accounting", "HR", "Reports"],
+      maxStudents: 1000,
+      storageGb: 100,
     },
     {
       planCode: "ENTERPRISE",
@@ -28,6 +32,8 @@ async function main() {
       priceYearly: 1999,
       isActive: true,
       features: ["Everything in Pro", "AI", "Priority Support", "Custom Integrations"],
+      maxStudents: 5000,
+      storageGb: 500,
     },
   ];
 
@@ -40,6 +46,8 @@ async function main() {
         priceYearly: plan.priceYearly,
         isActive: plan.isActive,
         features: plan.features,
+        maxStudents: plan.maxStudents,
+        storageGb: plan.storageGb,
       },
       create: plan,
     });
@@ -56,6 +64,14 @@ async function main() {
       defaultTimezone: "UTC",
       defaultCurrencyCode: "USD",
       maintenanceMode: false,
+      newSignups: true,
+      trialDays: 14,
+      taxRate: 0,
+      smsUrl: null,
+      smsApiKey: null,
+      senderId: null,
+      whatsAppAccountId: null,
+      whatsAppToken: null,
       features: {
         aiFaq: true,
         faceCheckin: true,
@@ -63,6 +79,22 @@ async function main() {
         accounting: true,
         hr: true,
       },
+    },
+  });
+
+  await prisma.securitySetting.upsert({
+    where: { id: "GLOBAL" },
+    update: {},
+    create: {
+      id: "GLOBAL",
+      enforce2FA: false,
+      passwordMinLength: 8,
+      passwordUppercase: true,
+      passwordSpecial: true,
+      passwordExpiryDays: 90,
+      jwtExpiryMinutes: 15,
+      refreshExpiryDays: 7,
+      apiKeyVersion: 1,
     },
   });
 
