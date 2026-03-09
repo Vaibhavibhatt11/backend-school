@@ -1,6 +1,6 @@
 const { z } = require("zod");
 
-const { badRequest } = require("../../utils/httpErrors");
+const { badRequest, notFound } = require("../../utils/httpErrors");
 const {
   prisma,
   scopedSchoolId,
@@ -11,6 +11,8 @@ const {
   baseSchoolSearch,
   ensureSchoolExists,
 } = require("./school.common");
+const cache = require("../../lib/cache");
+const { CACHE_TTL } = cache;
 
 const announcementStatusEnum = z.enum(["DRAFT", "SCHEDULED", "SENT", "FAILED"]);
 
@@ -338,15 +340,133 @@ async function deleteAiFaq(req, res, next) {
   }
 }
 
+// --- School profile (current school) - PDF required ---
+async function getSchoolProfile(req, res, next) {
+  try {
+    const schoolId = scopedSchoolId(req, undefined, true);
+    const cacheKey = cache.cacheKeys.schoolProfile(schoolId);
+    const cached = await cache.get(cacheKey);
+    if (cached) return res.status(200).json(cached);
+
+    const school = await ensureSchoolExists(schoolId);
+    const payload = {
+      success: true,
+      data: {
+        profile: {
+          id: school.id,
+          code: school.code,
+          name: school.name,
+          email: school.email,
+          phone: school.phone,
+          status: school.status,
+          timezone: school.timezone,
+          currencyCode: school.currencyCode,
+          createdAt: school.createdAt,
+          updatedAt: school.updatedAt,
+        },
+      },
+    };
+    await cache.set(cacheKey, payload, CACHE_TTL.profile());
+    return res.status(200).json(payload);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+const updateSchoolProfileSchema = z.object({
+  name: z.string().trim().min(1).optional(),
+  email: z.union([z.string().email(), z.null()]).optional(),
+  phone: z.union([z.string().trim().min(1), z.null()]).optional(),
+  timezone: z.string().trim().min(1).optional(),
+  currencyCode: z.string().trim().length(3).optional(),
+});
+
+async function updateSchoolProfile(req, res, next) {
+  try {
+    const payload = updateSchoolProfileSchema.parse(req.body);
+    const schoolId = scopedSchoolId(req, undefined, true);
+    await ensureSchoolExists(schoolId);
+    const data = asUpdateData(payload);
+    if (data.currencyCode) data.currencyCode = data.currencyCode.toUpperCase();
+    if (!Object.keys(data).length) throw badRequest("At least one field is required");
+
+    const school = await prisma.school.update({ where: { id: schoolId }, data });
+    await cache.del(cache.cacheKeys.schoolProfile(schoolId));
+    await prisma.auditLog.create({
+      data: {
+        schoolId,
+        actorId: req.user?.sub || null,
+        action: "SCHOOL_PROFILE_UPDATED",
+        entity: "School",
+        entityId: school.id,
+        meta: data,
+      },
+    });
+    return res.status(200).json({
+      success: true,
+      data: {
+        profile: {
+          id: school.id,
+          code: school.code,
+          name: school.name,
+          email: school.email,
+          phone: school.phone,
+          status: school.status,
+          timezone: school.timezone,
+          currencyCode: school.currencyCode,
+          updatedAt: school.updatedAt,
+        },
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+// --- Announcement by id with delivery status ---
+async function getAnnouncementById(req, res, next) {
+  try {
+    const schoolId = scopedSchoolId(req, undefined, true);
+    const announcement = await prisma.announcement.findUnique({
+      where: { id: req.params.id },
+      include: {
+        createdBy: { select: { id: true, fullName: true, email: true } },
+        notificationLogs: {
+          orderBy: { createdAt: "desc" },
+          take: 50,
+          select: { id: true, channel: true, status: true, targetType: true, createdAt: true, error: true },
+        },
+      },
+    });
+    if (!announcement || announcement.schoolId !== schoolId) throw notFound("Announcement not found", "ANNOUNCEMENT_NOT_FOUND");
+    return res.status(200).json({
+      success: true,
+      data: {
+        announcement,
+        deliverySummary: {
+          total: announcement.notificationLogs.length,
+          sent: announcement.notificationLogs.filter((l) => l.status === "sent" || l.status === "SENT").length,
+          failed: announcement.notificationLogs.filter((l) => l.status === "failed" || l.status === "FAILED").length,
+        },
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   listAnnouncements,
   createAnnouncement,
   updateAnnouncement,
   deleteAnnouncement,
   sendAnnouncement,
+  getAnnouncementById,
   listAuditLogs,
   getSettings,
   updateSettings,
+  getSchoolProfile,
+  updateSchoolProfile,
   listFaceCheckins,
   approveFaceCheckin,
   rejectFaceCheckin,

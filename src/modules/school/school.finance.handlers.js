@@ -404,6 +404,197 @@ async function generateReport(req, res, next) {
   }
 }
 
+const bulkGenerateInvoicesSchema = z.object({
+  schoolId: z.string().trim().min(1).optional(),
+  classId: z.string().trim().min(1).optional(),
+  feeStructureId: z.string().trim().min(1),
+  dueDate: z.coerce.date(),
+  amountPerStudent: z.coerce.number().positive(),
+});
+
+async function bulkGenerateInvoices(req, res, next) {
+  try {
+    const payload = bulkGenerateInvoicesSchema.parse(req.body);
+    const schoolId = scopedSchoolId(req, payload.schoolId, true);
+    await findScopedOrThrow("feeStructure", payload.feeStructureId, schoolId, "Fee structure", "FEE_STRUCTURE_NOT_FOUND");
+
+    const where = { schoolId, status: "ACTIVE" };
+    if (payload.classId) where.classId = payload.classId;
+    const students = await prisma.student.findMany({ where, select: { id: true } });
+    if (students.length === 0) throw badRequest("No students found for the given criteria", "NO_STUDENTS");
+
+    const created = [];
+    for (const s of students) {
+      const invoiceNo = generateCode("INV");
+      const inv = await prisma.invoice.create({
+        data: {
+          schoolId,
+          studentId: s.id,
+          feeStructureId: payload.feeStructureId,
+          invoiceNo,
+          issueDate: new Date(),
+          dueDate: payload.dueDate,
+          amountDue: payload.amountPerStudent,
+          amountPaid: 0,
+          status: "ISSUED",
+        },
+      });
+      created.push({ id: inv.id, invoiceNo: inv.invoiceNo, studentId: s.id });
+    }
+
+    await prisma.auditLog.create({
+      data: {
+        schoolId,
+        actorId: req.user?.sub || null,
+        action: "BULK_INVOICES_GENERATED",
+        entity: "Invoice",
+        meta: { count: created.length, feeStructureId: payload.feeStructureId, classId: payload.classId || null },
+      },
+    });
+    return res.status(201).json({ success: true, data: { generated: created.length, invoices: created.slice(0, 100) } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function getDueList(req, res, next) {
+  try {
+    const query = z
+      .object({
+        schoolId: z.string().trim().min(1).optional(),
+        classId: z.string().trim().min(1).optional(),
+        status: z.enum(["OVERDUE", "PARTIAL", "ISSUED"]).optional(),
+        limit: z.coerce.number().int().positive().max(500).optional(),
+      })
+      .parse(req.query);
+    const schoolId = scopedSchoolId(req, query.schoolId, true);
+    const where = { schoolId };
+    if (query.status) where.status = query.status;
+    else where.status = { in: ["OVERDUE", "PARTIAL", "ISSUED"] };
+    if (query.classId) where.student = { classId: query.classId };
+
+    const invoices = await prisma.invoice.findMany({
+      where,
+      take: query.limit || 200,
+      orderBy: [{ dueDate: "asc" }, { amountDue: "desc" }],
+      include: {
+        student: { select: { id: true, admissionNo: true, firstName: true, lastName: true, className: true, section: true } },
+        feeStructure: { select: { id: true, name: true } },
+      },
+    });
+    const totalDue = invoices.reduce((sum, i) => sum + (i.amountDue - (i.amountPaid || 0)), 0);
+    return res.status(200).json({
+      success: true,
+      data: { items: invoices, totalDue, count: invoices.length },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function getCollectionReport(req, res, next) {
+  try {
+    const query = z
+      .object({
+        schoolId: z.string().trim().min(1).optional(),
+        date: z.preprocess((v) => (v === "" || v === null ? undefined : v), z.coerce.date().optional()),
+        dateFrom: z.preprocess((v) => (v === "" || v === null ? undefined : v), z.coerce.date().optional()),
+        dateTo: z.preprocess((v) => (v === "" || v === null ? undefined : v), z.coerce.date().optional()),
+      })
+      .parse(req.query);
+    const schoolId = scopedSchoolId(req, query.schoolId, true);
+    const start = query.date
+      ? new Date(query.date.getFullYear(), query.date.getMonth(), query.date.getDate(), 0, 0, 0)
+      : query.dateFrom
+        ? new Date(query.dateFrom)
+        : new Date(new Date().setDate(new Date().getDate() - 30));
+    const end = query.date
+      ? new Date(start)
+      : query.dateTo
+        ? new Date(query.dateTo)
+        : new Date();
+    if (query.date) end.setDate(end.getDate() + 1);
+
+    const payments = await prisma.payment.findMany({
+      where: { schoolId, paidAt: { gte: start, lte: end } },
+      orderBy: { paidAt: "asc" },
+      include: {
+        student: { select: { admissionNo: true, firstName: true, lastName: true } },
+        invoice: { select: { invoiceNo: true } },
+      },
+    });
+    const total = payments.reduce((sum, p) => sum + p.amount, 0);
+    const byMethod = payments.reduce((acc, p) => {
+      acc[p.method] = (acc[p.method] || 0) + p.amount;
+      return acc;
+    }, {});
+
+    return res.status(200).json({
+      success: true,
+      data: { dateFrom: start, dateTo: end, totalCollection: total, byMethod, payments: payments.slice(0, 200) },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function getPendingDuesReport(req, res, next) {
+  try {
+    const query = z
+      .object({
+        schoolId: z.string().trim().min(1).optional(),
+        classId: z.string().trim().min(1).optional(),
+      })
+      .parse(req.query);
+    const schoolId = scopedSchoolId(req, query.schoolId, true);
+    const where = { schoolId, status: { in: ["ISSUED", "PARTIAL", "OVERDUE"] } };
+    if (query.classId) where.student = { classId: query.classId };
+
+    const invoices = await prisma.invoice.findMany({
+      where,
+      include: {
+        student: { select: { id: true, admissionNo: true, firstName: true, lastName: true, className: true, section: true } },
+      },
+    });
+    const totalPending = invoices.reduce((sum, i) => sum + (i.amountDue - (i.amountPaid || 0)), 0);
+    return res.status(200).json({
+      success: true,
+      data: { items: invoices, totalPending, count: invoices.length },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function getStudentLedger(req, res, next) {
+  try {
+    const schoolId = scopedSchoolId(req, undefined, true);
+    const studentId = req.params.studentId;
+    await findScopedOrThrow("student", studentId, schoolId, "Student", "STUDENT_NOT_FOUND");
+
+    const [invoices, payments] = await Promise.all([
+      prisma.invoice.findMany({
+        where: { schoolId, studentId },
+        orderBy: { issueDate: "asc" },
+        include: { feeStructure: { select: { name: true } } },
+      }),
+      prisma.payment.findMany({
+        where: { schoolId, studentId },
+        orderBy: { paidAt: "asc" },
+        include: { invoice: { select: { invoiceNo: true } } },
+      }),
+    ]);
+
+    const balance = invoices.reduce((sum, i) => sum + i.amountDue - (i.amountPaid || 0), 0);
+    return res.status(200).json({
+      success: true,
+      data: { studentId, invoices, payments, outstandingBalance: balance },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   getFeesSummary,
   listFeeStructures,
@@ -417,6 +608,11 @@ module.exports = {
   listPayments,
   createPayment,
   getPaymentReceipt,
+  bulkGenerateInvoices,
+  getDueList,
+  getCollectionReport,
+  getPendingDuesReport,
+  getStudentLedger,
   listReportJobs,
   generateReport,
 };

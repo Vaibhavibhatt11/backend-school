@@ -70,6 +70,30 @@ const createDocumentSchema = z.object({
   sizeKb: z.coerce.number().int().positive().optional(),
 });
 
+const importStudentsSchema = z.object({
+  schoolId: z.string().trim().min(1).optional(),
+  students: z.array(
+    z.object({
+      admissionNo: z.string().trim().min(1),
+      firstName: z.string().trim().min(1),
+      lastName: z.string().trim().min(1),
+      dob: z.preprocess((v) => (v === "" || v === null ? undefined : v), z.coerce.date().optional()),
+      gender: z.string().trim().min(1).optional(),
+      className: z.string().trim().min(1),
+      section: z.string().trim().min(1).optional(),
+      rollNo: z.coerce.number().int().positive().optional(),
+      status: studentStatusEnum.optional(),
+      guardianPhone: z.string().trim().min(1).optional(),
+    })
+  ).min(1).max(500),
+});
+
+const moveClassSchema = z.object({
+  classId: z.string().trim().min(1).optional(),
+  className: z.string().trim().min(1),
+  section: z.string().trim().min(1).optional(),
+});
+
 function badRequest(message, code = "BAD_REQUEST") {
   const error = new Error(message);
   error.statusCode = 400;
@@ -434,6 +458,164 @@ async function deleteStudentDocument(req, res, next) {
   }
 }
 
+async function importStudents(req, res, next) {
+  try {
+    const payload = importStudentsSchema.parse(req.body);
+    const schoolId = ensureSchoolScopeForList(req, payload.schoolId);
+
+    const created = [];
+    const errors = [];
+    for (let i = 0; i < payload.students.length; i++) {
+      const row = payload.students[i];
+      try {
+        const existing = await prisma.student.findUnique({
+          where: { schoolId_admissionNo: { schoolId, admissionNo: row.admissionNo } },
+        });
+        if (existing) {
+          errors.push({ row: i + 1, admissionNo: row.admissionNo, error: "Duplicate admission number" });
+          continue;
+        }
+        const student = await prisma.student.create({
+          data: {
+            schoolId,
+            admissionNo: row.admissionNo,
+            firstName: row.firstName,
+            lastName: row.lastName,
+            dob: row.dob,
+            gender: row.gender,
+            className: row.className,
+            section: row.section,
+            rollNo: row.rollNo,
+            status: row.status || "ACTIVE",
+            guardianPhone: row.guardianPhone,
+          },
+        });
+        created.push({ row: i + 1, id: student.id, admissionNo: student.admissionNo });
+      } catch (e) {
+        errors.push({ row: i + 1, admissionNo: row.admissionNo, error: e.message || "Validation failed" });
+      }
+    }
+
+    return res.status(201).json({
+      success: true,
+      data: {
+        imported: created.length,
+        failed: errors.length,
+        created: created.slice(0, 50),
+        errors: errors.slice(0, 50),
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function exportStudents(req, res, next) {
+  try {
+    const query = listQuerySchema.parse(req.query);
+    const schoolId = ensureSchoolScopeForList(req, query.schoolId);
+
+    const where = { schoolId };
+    if (query.status) where.status = query.status;
+    if (query.className) where.className = query.className;
+    if (query.section) where.section = query.section;
+    if (query.search) {
+      where.OR = [
+        { admissionNo: { contains: query.search, mode: "insensitive" } },
+        { firstName: { contains: query.search, mode: "insensitive" } },
+        { lastName: { contains: query.search, mode: "insensitive" } },
+      ];
+    }
+
+    const { MAX_EXPORT_LIMIT } = require("../../utils/schoolScope");
+    const limit = Math.min(query.limit || 1000, MAX_EXPORT_LIMIT);
+    const students = await prisma.student.findMany({
+      where,
+      take: limit,
+      orderBy: [{ className: "asc" }, { section: "asc" }, { rollNo: "asc" }],
+      select: {
+        id: true,
+        admissionNo: true,
+        firstName: true,
+        lastName: true,
+        dob: true,
+        gender: true,
+        className: true,
+        section: true,
+        rollNo: true,
+        status: true,
+        guardianPhone: true,
+        createdAt: true,
+      },
+    });
+
+    const format = (req.query.format || "json").toString().toLowerCase();
+    if (format === "csv") {
+      const header = "admissionNo,firstName,lastName,dob,gender,className,section,rollNo,status,guardianPhone";
+      const rows = students.map((s) =>
+        [
+          s.admissionNo,
+          s.firstName,
+          s.lastName,
+          s.dob ? s.dob.toISOString().slice(0, 10) : "",
+          s.gender || "",
+          s.className,
+          s.section || "",
+          s.rollNo ?? "",
+          s.status,
+          s.guardianPhone || "",
+        ].map((v) => (String(v).includes(",") ? `"${String(v).replace(/"/g, '""')}"` : v)).join(",")
+      );
+      const csv = [header, ...rows].join("\r\n");
+      res.setHeader("Content-Type", "text/csv; charset=utf-8");
+      res.setHeader("Content-Disposition", `attachment; filename="students-export-${Date.now()}.csv"`);
+      return res.status(200).send(csv);
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: { students, total: students.length },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function moveStudentClass(req, res, next) {
+  try {
+    const payload = moveClassSchema.parse(req.body);
+    const schoolId = typeof req.query.schoolId === "string" ? req.query.schoolId : undefined;
+    const student = await findScopedStudentOrThrow(req, req.params.id, schoolId);
+
+    let classId = payload.classId || null;
+    if (payload.classId) {
+      const cls = await prisma.classRoom.findFirst({
+        where: { id: payload.classId, schoolId: student.schoolId },
+      });
+      if (!cls) throw badRequest("Class not found", "CLASS_NOT_FOUND");
+      classId = cls.id;
+    }
+
+    const updated = await prisma.student.update({
+      where: { id: student.id },
+      data: {
+        classId,
+        className: payload.className,
+        section: payload.section || null,
+        rollNo: null,
+      },
+      include: { class: { select: { id: true, name: true, section: true } } },
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: { student: toStudentDto(updated), message: "Student moved to new class/section" },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   listStudents,
   createStudent,
@@ -443,4 +625,7 @@ module.exports = {
   updateStudentStatus,
   addStudentDocument,
   deleteStudentDocument,
+  importStudents,
+  exportStudents,
+  moveStudentClass,
 };

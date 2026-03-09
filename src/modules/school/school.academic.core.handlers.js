@@ -1,6 +1,6 @@
 const { z } = require("zod");
 
-const { badRequest } = require("../../utils/httpErrors");
+const { badRequest, notFound } = require("../../utils/httpErrors");
 const {
   prisma,
   scopedSchoolId,
@@ -391,6 +391,182 @@ async function bulkMarkAttendance(req, res, next) {
   }
 }
 
+async function listAttendanceRecords(req, res, next) {
+  try {
+    const query = z
+      .object({
+        page: z.coerce.number().int().positive().optional(),
+        limit: z.coerce.number().int().positive().optional(),
+        schoolId: z.string().trim().min(1).optional(),
+        type: z.enum(["student", "staff"]).default("student"),
+        date: z.preprocess((v) => (v === "" || v === null ? undefined : v), z.coerce.date()),
+        className: z.string().trim().min(1).optional(),
+        section: z.string().trim().min(1).optional(),
+        classId: z.string().trim().min(1).optional(),
+      })
+      .parse(req.query);
+    const schoolId = scopedSchoolId(req, query.schoolId, true);
+    const { page, limit, skip } = paginationFromQuery(query);
+    const dateStart = dayStart(query.date);
+
+    if (query.type === "student") {
+      const where = { schoolId, date: dateStart };
+      if (query.classId || query.className || query.section) {
+        where.student = {};
+        if (query.classId) where.student.classId = query.classId;
+        if (query.className) where.student.className = query.className;
+        if (query.section) where.student.section = query.section;
+      }
+
+      const [total, items] = await Promise.all([
+        prisma.studentAttendance.count({ where }),
+        prisma.studentAttendance.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: [{ student: { className: "asc" } }, { student: { rollNo: "asc" } }],
+          include: {
+            student: { select: { id: true, admissionNo: true, firstName: true, lastName: true, className: true, section: true, rollNo: true } },
+            markedBy: { select: { id: true, fullName: true } },
+          },
+        }),
+      ]);
+      return res.status(200).json({ success: true, data: paginated(items, total, page, limit) });
+    }
+
+    const where = { schoolId, date: dateStart };
+    if (query.classId) where.staff = {}; // staff has no classId in schema; filter by department if needed
+    const [total, items] = await Promise.all([
+      prisma.staffAttendance.count({ where }),
+      prisma.staffAttendance.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { staff: { fullName: "asc" } },
+        include: {
+          staff: { select: { id: true, employeeCode: true, fullName: true, department: true } },
+          markedBy: { select: { id: true, fullName: true } },
+        },
+      }),
+    ]);
+    return res.status(200).json({ success: true, data: paginated(items, total, page, limit) });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+const updateAttendanceRecordSchema = z.object({
+  status: attendanceStatusEnum,
+  remark: z.string().trim().min(1).optional(),
+  reason: z.string().trim().min(1).optional(),
+});
+
+async function updateAttendanceRecord(req, res, next) {
+  try {
+    const payload = updateAttendanceRecordSchema.parse(req.body);
+    const schoolId = scopedSchoolId(req, undefined, true);
+    const type = (req.query.type || "student").toString().toLowerCase();
+
+    if (type === "student") {
+      const rec = await prisma.studentAttendance.findUnique({ where: { id: req.params.id } });
+      if (!rec || rec.schoolId !== schoolId) throw notFound("Attendance record not found", "ATTENDANCE_NOT_FOUND");
+      const updated = await prisma.studentAttendance.update({
+        where: { id: rec.id },
+        data: { status: payload.status, remark: payload.remark || rec.remark, markedById: req.user?.sub || null },
+      });
+      await prisma.auditLog.create({
+        data: {
+          schoolId,
+          actorId: req.user?.sub || null,
+          action: "ATTENDANCE_EDITED",
+          entity: "StudentAttendance",
+          entityId: rec.id,
+          meta: { reason: payload.reason, status: payload.status },
+        },
+      });
+      return res.status(200).json({ success: true, data: { attendance: updated } });
+    }
+
+    const rec = await prisma.staffAttendance.findUnique({ where: { id: req.params.id } });
+    if (!rec || rec.schoolId !== schoolId) throw notFound("Attendance record not found", "ATTENDANCE_NOT_FOUND");
+    const updated = await prisma.staffAttendance.update({
+      where: { id: rec.id },
+      data: { status: payload.status, remark: payload.remark || rec.remark, markedById: req.user?.sub || null },
+    });
+    await prisma.auditLog.create({
+      data: {
+        schoolId,
+        actorId: req.user?.sub || null,
+        action: "ATTENDANCE_EDITED",
+        entity: "StaffAttendance",
+        entityId: rec.id,
+        meta: { reason: payload.reason, status: payload.status },
+      },
+    });
+    return res.status(200).json({ success: true, data: { attendance: updated } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function exportAttendance(req, res, next) {
+  try {
+    const query = z
+      .object({
+        schoolId: z.string().trim().min(1).optional(),
+        type: z.enum(["student", "staff"]).default("student"),
+        dateFrom: z.preprocess((v) => (v === "" || v === null ? undefined : v), z.coerce.date()),
+        dateTo: z.preprocess((v) => (v === "" || v === null ? undefined : v), z.coerce.date()),
+        classId: z.string().trim().min(1).optional(),
+        format: z.enum(["json", "csv"]).optional(),
+      })
+      .parse(req.query);
+    const schoolId = scopedSchoolId(req, query.schoolId, true);
+    const start = dayStart(query.dateFrom);
+    const end = dayStart(query.dateTo);
+    if (end < start) throw badRequest("dateTo must be >= dateFrom");
+
+    if (query.type === "student") {
+      const where = { schoolId, date: { gte: start, lte: end } };
+      if (query.classId) where.student = { classId: query.classId };
+      const items = await prisma.studentAttendance.findMany({
+        where,
+        orderBy: [{ date: "asc" }, { student: { className: "asc" } }, { student: { rollNo: "asc" } }],
+        include: { student: { select: { admissionNo: true, firstName: true, lastName: true, className: true, section: true } } },
+      });
+      if ((query.format || "json") === "csv") {
+        const header = "date,admissionNo,firstName,lastName,className,section,status,remark";
+        const rows = items.map((a) =>
+          [a.date.toISOString().slice(0, 10), a.student.admissionNo, a.student.firstName, a.student.lastName, a.student.className, a.student.section || "", a.status, a.remark || ""].map((v) => (String(v).includes(",") ? `"${String(v).replace(/"/g, '""')}"` : v)).join(",")
+        );
+        res.setHeader("Content-Type", "text/csv; charset=utf-8");
+        res.setHeader("Content-Disposition", `attachment; filename="attendance-${start.toISOString().slice(0, 10)}-${end.toISOString().slice(0, 10)}.csv"`);
+        return res.status(200).send([header, ...rows].join("\r\n"));
+      }
+      return res.status(200).json({ success: true, data: { records: items, total: items.length } });
+    }
+
+    const where = { schoolId, date: { gte: start, lte: end } };
+    const items = await prisma.staffAttendance.findMany({
+      where,
+      orderBy: [{ date: "asc" }, { staff: { fullName: "asc" } }],
+      include: { staff: { select: { employeeCode: true, fullName: true, department: true } } },
+    });
+    if ((query.format || "json") === "csv") {
+      const header = "date,employeeCode,fullName,department,status,remark";
+      const rows = items.map((a) =>
+        [a.date.toISOString().slice(0, 10), a.staff.employeeCode, a.staff.fullName, a.staff.department || "", a.status, a.remark || ""].map((v) => (String(v).includes(",") ? `"${String(v).replace(/"/g, '""')}"` : v)).join(",")
+      );
+      res.setHeader("Content-Type", "text/csv; charset=utf-8");
+      res.setHeader("Content-Disposition", `attachment; filename="attendance-staff-${start.toISOString().slice(0, 10)}.csv"`);
+      return res.status(200).send([header, ...rows].join("\r\n"));
+    }
+    return res.status(200).json({ success: true, data: { records: items, total: items.length } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   listClasses,
   createClass,
@@ -403,4 +579,7 @@ module.exports = {
   attendanceOverview,
   markAttendance,
   bulkMarkAttendance,
+  listAttendanceRecords,
+  updateAttendanceRecord,
+  exportAttendance,
 };

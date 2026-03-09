@@ -29,10 +29,13 @@ function resolveSchoolId(req, schoolIdInput, options = {}) {
   return req.user.schoolId;
 }
 
+const MAX_PAGE_LIMIT = 100;
+const MAX_EXPORT_LIMIT = 2000;
+
 function parsePagination(query, defaults = {}) {
   const defaultPage = defaults.page || 1;
   const defaultLimit = defaults.limit || 20;
-  const maxLimit = defaults.maxLimit || 100;
+  const maxLimit = defaults.maxLimit ?? MAX_PAGE_LIMIT;
 
   const page = Number.parseInt(String(query.page || defaultPage), 10);
   const limit = Number.parseInt(String(query.limit || defaultLimit), 10);
@@ -56,4 +59,6 @@ module.exports = {
   resolveSchoolId,
   parsePagination,
   getPaginationMeta,
+  MAX_PAGE_LIMIT,
+  MAX_EXPORT_LIMIT,
 };

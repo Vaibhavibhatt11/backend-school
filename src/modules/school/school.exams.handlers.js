@@ -1,6 +1,6 @@
 const { z } = require("zod");
 
-const { badRequest } = require("../../utils/httpErrors");
+const { badRequest, notFound } = require("../../utils/httpErrors");
 const {
   prisma,
   scopedSchoolId,
@@ -175,6 +175,57 @@ async function publishExam(req, res, next) {
   }
 }
 
+async function getExamMarksStatus(req, res, next) {
+  try {
+    const schoolId = scopedSchoolId(req, undefined, true);
+    const exam = await prisma.exam.findUnique({
+      where: { id: req.params.id },
+      include: {
+        classRoom: { select: { id: true, name: true, section: true } },
+        subject: { select: { id: true, name: true, code: true } },
+        results: { select: { studentId: true, marks: true, grade: true } },
+      },
+    });
+    if (!exam || exam.schoolId !== schoolId) throw notFound("Exam not found", "EXAM_NOT_FOUND");
+
+    let expectedStudentIds = [];
+    if (exam.classId) {
+      const students = await prisma.student.findMany({
+        where: { schoolId, classId: exam.classId, status: "ACTIVE" },
+        select: { id: true },
+      });
+      expectedStudentIds = students.map((s) => s.id);
+    }
+    const enteredIds = new Set(exam.results.map((r) => r.studentId));
+    const missing = expectedStudentIds.filter((id) => !enteredIds.has(id));
+    const enteredCount = exam.results.length;
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        exam: {
+          id: exam.id,
+          name: exam.name,
+          examDate: exam.examDate,
+          maxMarks: exam.maxMarks,
+          isPublished: exam.isPublished,
+          classRoom: exam.classRoom,
+          subject: exam.subject,
+        },
+        marksStatus: {
+          totalExpected: expectedStudentIds.length,
+          entered: enteredCount,
+          missing: missing.length,
+          missingStudentIds: missing.slice(0, 100),
+        },
+        results: exam.results,
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   listExams,
   createExam,
@@ -182,4 +233,5 @@ module.exports = {
   deleteExam,
   saveExamMarks,
   publishExam,
+  getExamMarksStatus,
 };

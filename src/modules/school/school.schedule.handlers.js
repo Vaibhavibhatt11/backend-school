@@ -258,12 +258,103 @@ async function endLiveClassSession(req, res, next) {
   }
 }
 
+async function getTimetableByTeacher(req, res, next) {
+  try {
+    const schoolId = scopedSchoolId(req, undefined, true);
+    const staffId = req.params.staffId;
+    await findScopedOrThrow("staff", staffId, schoolId, "Staff", "STAFF_NOT_FOUND");
+    const items = await prisma.liveClassSession.findMany({
+      where: { schoolId, teacherId: staffId, status: { in: ["TIMETABLE", "UPCOMING", "LIVE"] } },
+      orderBy: { startsAt: "asc" },
+      include: {
+        classRoom: { select: { id: true, name: true, section: true } },
+        subject: { select: { id: true, name: true, code: true } },
+      },
+    });
+    return res.status(200).json({ success: true, data: { staffId, items } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function getTimetableByClass(req, res, next) {
+  try {
+    const schoolId = scopedSchoolId(req, undefined, true);
+    const classId = req.params.classId;
+    await findScopedOrThrow("classRoom", classId, schoolId, "Class", "CLASS_NOT_FOUND");
+    const items = await prisma.liveClassSession.findMany({
+      where: { schoolId, classId, status: { in: ["TIMETABLE", "UPCOMING", "LIVE"] } },
+      orderBy: { startsAt: "asc" },
+      include: {
+        subject: { select: { id: true, name: true, code: true } },
+        teacher: { select: { id: true, fullName: true, employeeCode: true } },
+      },
+    });
+    return res.status(200).json({ success: true, data: { classId, items } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+function rangesOverlap(aStart, aEnd, bStart, bEnd) {
+  return aStart < bEnd && bStart < aEnd;
+}
+
+async function getTimetableConflicts(req, res, next) {
+  try {
+    const schoolId = scopedSchoolId(req, undefined, true);
+    const sessions = await prisma.liveClassSession.findMany({
+      where: { schoolId, status: { in: ["TIMETABLE", "UPCOMING"] } },
+      orderBy: { startsAt: "asc" },
+      include: {
+        classRoom: { select: { id: true, name: true, section: true } },
+        teacher: { select: { id: true, fullName: true, employeeCode: true } },
+        subject: { select: { id: true, name: true } },
+      },
+    });
+
+    const teacherConflicts = [];
+    const classConflicts = [];
+    for (let i = 0; i < sessions.length; i++) {
+      for (let j = i + 1; j < sessions.length; j++) {
+        const a = sessions[i];
+        const b = sessions[j];
+        const aStart = a.startsAt.getTime();
+        const aEnd = (a.endsAt || a.startsAt).getTime();
+        const bStart = b.startsAt.getTime();
+        const bEnd = (b.endsAt || b.startsAt).getTime();
+        if (!rangesOverlap(aStart, aEnd, bStart, bEnd)) continue;
+        if (a.teacherId && b.teacherId && a.teacherId === b.teacherId) {
+          teacherConflicts.push({ slotA: a, slotB: b, reason: "Same teacher double-booked" });
+        }
+        if (a.classId && b.classId && a.classId === b.classId) {
+          classConflicts.push({ slotA: a, slotB: b, reason: "Same class double-booked" });
+        }
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        teacherConflicts,
+        classConflicts,
+        summary: { teacherCount: teacherConflicts.length, classCount: classConflicts.length },
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   getTimetable,
   createTimetableSlot,
   updateTimetableSlot,
   deleteTimetableSlot,
   publishTimetable,
+  getTimetableByTeacher,
+  getTimetableByClass,
+  getTimetableConflicts,
   listLiveClassSessions,
   createLiveClassSession,
   updateLiveClassSession,

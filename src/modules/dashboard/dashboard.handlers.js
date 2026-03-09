@@ -2,6 +2,8 @@ const { z } = require("zod");
 
 const prisma = require("../../lib/prisma");
 const { resolveSchoolId } = require("../../utils/schoolScope");
+const cache = require("../../lib/cache");
+const { CACHE_TTL } = cache;
 
 const querySchema = z.object({
   schoolId: z.string().trim().min(1).optional(),
@@ -27,6 +29,10 @@ async function schoolAdminDashboard(req, res, next) {
   try {
     const query = querySchema.parse(req.query);
     const schoolId = resolveSchoolId(req, query.schoolId);
+    const cacheKey = cache.cacheKeys.dashboardSchoolAdmin(schoolId);
+    const cached = await cache.get(cacheKey);
+    if (cached) return res.status(200).json(cached);
+
     const where = schoolId ? { schoolId } : {};
     const { monthStart, monthEnd } = monthWindow();
 
@@ -67,7 +73,7 @@ async function schoolAdminDashboard(req, res, next) {
       prisma.announcement.count({ where }),
     ]);
 
-    return res.status(200).json({
+    const payload = {
       success: true,
       data: {
         scope: schoolId ? { schoolId } : { schoolId: "all" },
@@ -85,7 +91,9 @@ async function schoolAdminDashboard(req, res, next) {
           monthCollection: monthCollection._sum.amount || 0,
         },
       },
-    });
+    };
+    await cache.set(cacheKey, payload, CACHE_TTL.dashboard());
+    return res.status(200).json(payload);
   } catch (error) {
     return next(error);
   }
@@ -95,6 +103,10 @@ async function hrDashboard(req, res, next) {
   try {
     const query = querySchema.parse(req.query);
     const schoolId = resolveSchoolId(req, query.schoolId);
+    const cacheKey = cache.cacheKeys.dashboardHr(schoolId);
+    const cached = await cache.get(cacheKey);
+    if (cached) return res.status(200).json(cached);
+
     const where = schoolId ? { schoolId } : {};
     const { start, end } = todayWindow();
 
@@ -130,7 +142,7 @@ async function hrDashboard(req, res, next) {
       }),
     ]);
 
-    return res.status(200).json({
+    const payload = {
       success: true,
       data: {
         scope: schoolId ? { schoolId } : { schoolId: "all" },
@@ -142,7 +154,9 @@ async function hrDashboard(req, res, next) {
           leave: leaveToday,
         },
       },
-    });
+    };
+    await cache.set(cacheKey, payload, CACHE_TTL.dashboard());
+    return res.status(200).json(payload);
   } catch (error) {
     return next(error);
   }
@@ -152,6 +166,10 @@ async function accountantDashboard(req, res, next) {
   try {
     const query = querySchema.parse(req.query);
     const schoolId = resolveSchoolId(req, query.schoolId);
+    const cacheKey = cache.cacheKeys.dashboardAccountant(schoolId);
+    const cached = await cache.get(cacheKey);
+    if (cached) return res.status(200).json(cached);
+
     const where = schoolId ? { schoolId } : {};
     const { monthStart, monthEnd } = monthWindow();
 
@@ -186,7 +204,7 @@ async function accountantDashboard(req, res, next) {
       (item) => (item._sum.amountDue || 0) - (item._sum.amountPaid || 0) > 0
     ).length;
 
-    return res.status(200).json({
+    const payload = {
       success: true,
       data: {
         scope: schoolId ? { schoolId } : { schoolId: "all" },
@@ -201,7 +219,9 @@ async function accountantDashboard(req, res, next) {
           studentsWithOutstandingBalance: openBalanceStudents,
         },
       },
-    });
+    };
+    await cache.set(cacheKey, payload, CACHE_TTL.dashboard());
+    return res.status(200).json(payload);
   } catch (error) {
     return next(error);
   }

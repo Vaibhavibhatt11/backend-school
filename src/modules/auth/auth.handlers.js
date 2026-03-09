@@ -5,6 +5,7 @@ const { z } = require("zod");
 
 const env = require("../../config/env");
 const prisma = require("../../lib/prisma");
+const cache = require("../../lib/cache");
 const { isMailerConfigured, sendPasswordResetOtpEmail } = require("../../services/mailer");
 
 const loginSchema = z.object({
@@ -336,6 +337,10 @@ async function me(req, res, next) {
       return unauthorized(res, "Invalid access token payload");
     }
 
+    const cacheKey = cache.cacheKeys.me(userId);
+    const cached = await cache.get(cacheKey);
+    if (cached) return res.status(200).json(cached);
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
     });
@@ -347,10 +352,9 @@ async function me(req, res, next) {
       });
     }
 
-    return res.status(200).json({
-      success: true,
-      data: { user: toSafeUser(user) },
-    });
+    const payload = { success: true, data: { user: toSafeUser(user) } };
+    await cache.set(cacheKey, payload, cache.CACHE_TTL.me());
+    return res.status(200).json(payload);
   } catch (error) {
     return next(error);
   }

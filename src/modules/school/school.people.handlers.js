@@ -26,6 +26,35 @@ const parentInviteSchema = z.object({
   isPrimary: z.boolean().optional(),
 });
 
+const createParentSchema = z.object({
+  schoolId: z.string().trim().min(1).optional(),
+  fullName: z.string().trim().min(1),
+  email: z.string().email().optional(),
+  phone: z.string().trim().min(3).optional(),
+  isActive: z.boolean().optional(),
+});
+
+const updateParentSchema = z.object({
+  fullName: z.string().trim().min(1).optional(),
+  email: z.union([z.string().email(), z.null()]).optional(),
+  phone: z.union([z.string().trim().min(3), z.null()]).optional(),
+  isActive: z.boolean().optional(),
+});
+
+const createAdminUserSchema = z.object({
+  schoolId: z.string().trim().min(1).optional(),
+  fullName: z.string().trim().min(1),
+  email: z.string().email(),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  role: z.enum(["SCHOOLADMIN", "ACCOUNTANT", "HR", "TEACHER"]),
+});
+
+const updateAdminUserSchema = z.object({
+  fullName: z.string().trim().min(1).optional(),
+  role: z.enum(["SCHOOLADMIN", "ACCOUNTANT", "HR", "TEACHER"]).optional(),
+  isActive: z.boolean().optional(),
+});
+
 const createStaffSchema = z.object({
   schoolId: z.string().trim().min(1).optional(),
   userId: z.string().trim().min(1).optional(),
@@ -215,6 +244,247 @@ async function resendParentOtp(req, res, next) {
         debugOtp: env.NODE_ENV === "production" ? undefined : otp,
       },
     });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function getParentById(req, res, next) {
+  try {
+    const schoolId = scopedSchoolId(req, undefined, true);
+    const parent = await prisma.parent.findUnique({
+      where: { id: req.params.id },
+      include: {
+        students: {
+          include: {
+            student: {
+              select: {
+                id: true,
+                admissionNo: true,
+                firstName: true,
+                lastName: true,
+                className: true,
+                section: true,
+                status: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!parent || parent.schoolId !== schoolId) throw notFound("Parent not found", "PARENT_NOT_FOUND");
+    return res.status(200).json({
+      success: true,
+      data: {
+        parent: {
+          ...parent,
+          students: parent.students.map((sp) => ({ relationType: sp.relationType, isPrimary: sp.isPrimary, student: sp.student })),
+        },
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function createParent(req, res, next) {
+  try {
+    const payload = createParentSchema.parse(req.body);
+    const schoolId = scopedSchoolId(req, payload.schoolId, true);
+    await ensureSchoolExists(schoolId);
+    if (!payload.email && !payload.phone) throw badRequest("Either email or phone is required");
+
+    const parent = await prisma.parent.create({
+      data: {
+        schoolId,
+        fullName: payload.fullName,
+        email: payload.email,
+        phone: payload.phone,
+        isActive: payload.isActive ?? true,
+      },
+    });
+    return res.status(201).json({ success: true, data: { parent } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function updateParent(req, res, next) {
+  try {
+    const payload = updateParentSchema.parse(req.body);
+    const schoolId = scopedSchoolId(req, undefined, true);
+    const parent = await findScopedOrThrow("parent", req.params.id, schoolId, "Parent", "PARENT_NOT_FOUND");
+    const data = asUpdateData(payload);
+    if (!Object.keys(data).length) throw badRequest("At least one field is required");
+
+    const updated = await prisma.parent.update({ where: { id: parent.id }, data });
+    return res.status(200).json({ success: true, data: { parent: updated } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function getStaffById(req, res, next) {
+  try {
+    const schoolId = scopedSchoolId(req, undefined, true);
+    const staff = await prisma.staff.findUnique({
+      where: { id: req.params.id },
+      include: {
+        user: { select: { id: true, fullName: true, email: true, role: true, isActive: true } },
+        classesAsTeacher: { select: { id: true, name: true, section: true } },
+        classSubjectMappings: {
+          include: {
+            class: { select: { id: true, name: true, section: true } },
+            subject: { select: { id: true, name: true, code: true } },
+          },
+        },
+        documents: { select: { id: true, name: true, type: true, url: true, createdAt: true } },
+      },
+    });
+    if (!staff || staff.schoolId !== schoolId) throw notFound("Staff not found", "STAFF_NOT_FOUND");
+    return res.status(200).json({ success: true, data: { staff } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function listAdminUsers(req, res, next) {
+  try {
+    const query = z
+      .object({
+        page: z.coerce.number().int().positive().optional(),
+        limit: z.coerce.number().int().positive().optional(),
+        role: z.enum(["SCHOOLADMIN", "ACCOUNTANT", "HR", "TEACHER"]).optional(),
+        schoolId: z.string().trim().min(1).optional(),
+      })
+      .parse(req.query);
+    const schoolId = scopedSchoolId(req, query.schoolId, true);
+    const { page, limit, skip } = paginationFromQuery(query);
+    const where = { schoolId, role: { in: ["SCHOOLADMIN", "ACCOUNTANT", "HR", "TEACHER"] } };
+    if (query.role) where.role = query.role;
+
+    const [total, items] = await Promise.all([
+      prisma.user.count({ where }),
+      prisma.user.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          role: true,
+          isActive: true,
+          lastLoginAt: true,
+          createdAt: true,
+          schoolId: true,
+        },
+      }),
+    ]);
+    return res.status(200).json({ success: true, data: paginated(items, total, page, limit) });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function createAdminUser(req, res, next) {
+  try {
+    const bcrypt = require("bcryptjs");
+    const payload = createAdminUserSchema.parse(req.body);
+    const schoolId = scopedSchoolId(req, payload.schoolId, true);
+    await ensureSchoolExists(schoolId);
+
+    const existing = await prisma.user.findUnique({ where: { email: payload.email } });
+    if (existing) throw badRequest("User with this email already exists", "EMAIL_IN_USE");
+
+    const passwordHash = await bcrypt.hash(payload.password, 10);
+    const user = await prisma.user.create({
+      data: {
+        schoolId,
+        fullName: payload.fullName,
+        email: payload.email,
+        passwordHash,
+        role: payload.role,
+        isActive: true,
+      },
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        role: true,
+        isActive: true,
+        schoolId: true,
+        createdAt: true,
+      },
+    });
+    await prisma.auditLog.create({
+      data: {
+        schoolId,
+        actorId: req.user?.sub || null,
+        action: "ADMIN_USER_CREATED",
+        entity: "User",
+        entityId: user.id,
+        meta: { email: user.email, role: user.role },
+      },
+    });
+    return res.status(201).json({ success: true, data: { user } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function updateAdminUser(req, res, next) {
+  try {
+    const payload = updateAdminUserSchema.parse(req.body);
+    const schoolId = scopedSchoolId(req, undefined, true);
+    const user = await prisma.user.findFirst({
+      where: { id: req.params.id, schoolId, role: { in: ["SCHOOLADMIN", "ACCOUNTANT", "HR", "TEACHER"] } },
+    });
+    if (!user) throw notFound("Admin user not found", "ADMIN_USER_NOT_FOUND");
+    const data = asUpdateData(payload);
+    if (!Object.keys(data).length) throw badRequest("At least one field is required");
+
+    const updated = await prisma.user.update({
+      where: { id: user.id },
+      data,
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        role: true,
+        isActive: true,
+        schoolId: true,
+        updatedAt: true,
+      },
+    });
+    await prisma.auditLog.create({
+      data: {
+        schoolId,
+        actorId: req.user?.sub || null,
+        action: "ADMIN_USER_UPDATED",
+        entity: "User",
+        entityId: updated.id,
+        meta: data,
+      },
+    });
+    return res.status(200).json({ success: true, data: { user: updated } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function getPermissionsList(req, res, next) {
+  try {
+    scopedSchoolId(req, undefined, true);
+    const cache = require("../../lib/cache");
+    const cacheKey = cache.cacheKeys.permissionsList();
+    const cached = await cache.get(cacheKey);
+    if (cached) return res.status(200).json(cached);
+    const { PERMISSION_CODES } = require("../../constants/permissions");
+    const payload = { success: true, data: { permissions: PERMISSION_CODES } };
+    await cache.set(cacheKey, payload, cache.CACHE_TTL.permissions());
+    return res.status(200).json(payload);
   } catch (error) {
     return next(error);
   }
@@ -484,9 +754,13 @@ async function deleteRole(req, res, next) {
 
 module.exports = {
   listParents,
+  getParentById,
+  createParent,
+  updateParent,
   inviteParent,
   resendParentOtp,
   listStaff,
+  getStaffById,
   createStaff,
   updateStaff,
   deleteStaff,
@@ -494,4 +768,8 @@ module.exports = {
   createRole,
   updateRole,
   deleteRole,
+  listAdminUsers,
+  createAdminUser,
+  updateAdminUser,
+  getPermissionsList,
 };
