@@ -166,6 +166,64 @@ const {
   updateOfflineSyncRecord,
 } = require("./school.advanced.handlers");
 const { reportStudents, reportAttendance, reportFees, reportExamPerformance } = require("./school.reports.handlers");
+const {
+  listApplications,
+  getApplicationById,
+  createApplication,
+  updateApplicationStatus,
+  addApplicationDocument,
+  onboardApplication,
+} = require("./school.admissions.handlers");
+const {
+  listRoutes,
+  createRoute,
+  updateRoute,
+  deleteRoute,
+  listDrivers,
+  createDriver,
+  listAllocations,
+  createAllocation,
+  updateAllocation,
+  deleteAllocation,
+} = require("./school.transport.handlers");
+const {
+  listRooms,
+  createRoom,
+  updateRoom,
+  deleteRoom,
+  listAllocations: listHostelAllocations,
+  createAllocation: createHostelAllocation,
+  listAttendance: listHostelAttendance,
+  markHostelAttendance,
+  listVisitors,
+  createVisitor,
+} = require("./school.hostel.handlers");
+const {
+  listEvents,
+  getEventById,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+  listRegistrations,
+  registerForEvent,
+  addGalleryImage,
+  deleteGalleryImage,
+} = require("./school.events.handlers");
+const {
+  listHomework,
+  getHomeworkById,
+  createHomework,
+  updateHomework,
+  deleteHomework,
+  submitHomework,
+  listStudyMaterials,
+  createStudyMaterial,
+  updateStudyMaterial,
+  deleteStudyMaterial,
+  listAchievements,
+  createAchievement,
+  deleteAchievement,
+} = require("./school.homework.handlers");
 
 router.get("/profile", getSchoolProfile);
 router.put("/profile", updateSchoolProfile);
@@ -351,5 +409,63 @@ router.get("/reports/students", reportStudents);
 router.get("/reports/attendance", reportAttendance);
 router.get("/reports/fees", reportFees);
 router.get("/reports/exam-performance", reportExamPerformance);
+
+// Admissions
+router.get("/admissions/applications", listApplications);
+router.get("/admissions/applications/:id", getApplicationById);
+router.post("/admissions/applications", createApplication);
+router.patch("/admissions/applications/:id/status", updateApplicationStatus);
+router.post("/admissions/applications/:id/documents", addApplicationDocument);
+router.post("/admissions/applications/:id/onboard", onboardApplication);
+
+// Transport
+router.get("/transport/routes", listRoutes);
+router.post("/transport/routes", createRoute);
+router.put("/transport/routes/:id", updateRoute);
+router.delete("/transport/routes/:id", deleteRoute);
+router.get("/transport/drivers", listDrivers);
+router.post("/transport/drivers", createDriver);
+router.get("/transport/allocations", listAllocations);
+router.post("/transport/allocations", createAllocation);
+router.put("/transport/allocations/:id", updateAllocation);
+router.delete("/transport/allocations/:id", deleteAllocation);
+
+// Hostel
+router.get("/hostel/rooms", listRooms);
+router.post("/hostel/rooms", createRoom);
+router.put("/hostel/rooms/:id", updateRoom);
+router.delete("/hostel/rooms/:id", deleteRoom);
+router.get("/hostel/allocations", listHostelAllocations);
+router.post("/hostel/allocations", createHostelAllocation);
+router.get("/hostel/attendance", listHostelAttendance);
+router.post("/hostel/attendance", markHostelAttendance);
+router.get("/hostel/visitors", listVisitors);
+router.post("/hostel/visitors", createVisitor);
+
+// Events
+router.get("/events", listEvents);
+router.get("/events/:id", getEventById);
+router.post("/events", createEvent);
+router.put("/events/:id", updateEvent);
+router.delete("/events/:id", deleteEvent);
+router.get("/events/:id/registrations", listRegistrations);
+router.post("/events/:id/registrations", registerForEvent);
+router.post("/events/:id/gallery", addGalleryImage);
+router.delete("/events/:id/gallery/:imageId", deleteGalleryImage);
+
+// Homework, study materials, achievements
+router.get("/homework", listHomework);
+router.get("/homework/:id", getHomeworkById);
+router.post("/homework", createHomework);
+router.put("/homework/:id", updateHomework);
+router.delete("/homework/:id", deleteHomework);
+router.post("/homework/:id/submit", submitHomework);
+router.get("/study-materials", listStudyMaterials);
+router.post("/study-materials", createStudyMaterial);
+router.put("/study-materials/:id", updateStudyMaterial);
+router.delete("/study-materials/:id", deleteStudyMaterial);
+router.get("/achievements", listAchievements);
+router.post("/achievements", createAchievement);
+router.delete("/achievements/:id", deleteAchievement);
 
 module.exports = router;

@@ -11,6 +11,7 @@ const schoolRoutes = require("../modules/school/school.routes");
 const studentsRoutes = require("../modules/students/students.routes");
 const hrRoutes = require("../modules/hr/hr.routes");
 const accountantRoutes = require("../modules/accountant/accountant.routes");
+const studentRoutes = require("../modules/student/student.routes");
 
 router.get("/health", (req, res) => {
   return res.status(200).json({
@@ -63,5 +64,7 @@ router.use(
   requireRole(["SUPERADMIN", "SCHOOLADMIN", "ACCOUNTANT"]),
   accountantRoutes
 );
+
+router.use("/student", auth, requireRole(["STUDENT"]), studentRoutes);
 
 module.exports = router;

@@ -410,4 +410,127 @@ Use query params: `page` (default 1), `limit` (default 20, max often 100). Respo
 
 ---
 
+## 8. Admissions (School)
+
+**Base path:** `/api/v1/school/admissions`  
+**Roles:** `SUPERADMIN`, `SCHOOLADMIN`, `HR`, `ACCOUNTANT`.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/school/admissions/applications` | List applications. Query: page, limit, status, search, schoolId. |
+| GET | `/school/admissions/applications/:id` | Get application by id (with documents). |
+| POST | `/school/admissions/applications` | Create application (firstName, lastName, email?, phone?, appliedClass, appliedSection?, dob?, gender?). |
+| PATCH | `/school/admissions/applications/:id/status` | Update status. Body: status (UNDER_REVIEW, APPROVED, REJECTED). |
+| POST | `/school/admissions/applications/:id/documents` | Add document. Body: name, url, type?. |
+| POST | `/school/admissions/applications/:id/onboard` | Onboard approved application (creates Student, sets registration no). |
+
+---
+
+## 9. Transport (School)
+
+**Base path:** `/api/v1/school/transport`  
+**Roles:** `SUPERADMIN`, `SCHOOLADMIN`, `HR`, `ACCOUNTANT`.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/school/transport/routes` | List routes. Query: page, limit, schoolId. |
+| POST | `/school/transport/routes` | Create route. Body: name, routeCode, stops?, isActive?. |
+| PUT | `/school/transport/routes/:id` | Update route. |
+| DELETE | `/school/transport/routes/:id` | Delete route. |
+| GET | `/school/transport/drivers` | List drivers. Query: page, limit, schoolId. |
+| POST | `/school/transport/drivers` | Create driver. Body: fullName, phone?, licenseNo?, routeId?, isActive?. |
+| GET | `/school/transport/allocations` | List allocations. Query: page, limit, routeId?, studentId?, schoolId. |
+| POST | `/school/transport/allocations` | Create allocation. Body: studentId, routeId, stopName?, feeAmount?. |
+| PUT | `/school/transport/allocations/:id` | Update allocation. |
+| DELETE | `/school/transport/allocations/:id` | Delete allocation. |
+
+---
+
+## 10. Hostel (School)
+
+**Base path:** `/api/v1/school/hostel`  
+**Roles:** `SUPERADMIN`, `SCHOOLADMIN`, `HR`, `ACCOUNTANT`.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/school/hostel/rooms` | List rooms. Query: schoolId. |
+| POST | `/school/hostel/rooms` | Create room. Body: block, roomNo, capacity?, isActive?. |
+| PUT | `/school/hostel/rooms/:id` | Update room. |
+| DELETE | `/school/hostel/rooms/:id` | Delete room. |
+| GET | `/school/hostel/allocations` | List allocations. Query: page, limit, roomId?, studentId?, schoolId. |
+| POST | `/school/hostel/allocations` | Create allocation. Body: studentId, roomId, fromDate?, toDate?. |
+| GET | `/school/hostel/attendance` | List attendance. Query: date?, schoolId. |
+| POST | `/school/hostel/attendance` | Mark attendance. Body: studentId, date, status?, remark?. |
+| GET | `/school/hostel/visitors` | List visitors. Query: page, limit, schoolId. |
+| POST | `/school/hostel/visitors` | Create visitor log. Body: visitorName, studentId?, purpose?, idProof?. |
+
+---
+
+## 11. Events (School)
+
+**Base path:** `/api/v1/school/events`  
+**Roles:** `SUPERADMIN`, `SCHOOLADMIN`, `HR`, `ACCOUNTANT`.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/school/events` | List events. Query: page, limit, eventType, from?, to?, schoolId. |
+| GET | `/school/events/:id` | Get event by id (with registrations, gallery). |
+| POST | `/school/events` | Create event. Body: title, description?, eventType?, startDate, endDate?, location?, isPublished?. |
+| PUT | `/school/events/:id` | Update event. |
+| DELETE | `/school/events/:id` | Delete event. |
+| GET | `/school/events/:id/registrations` | List registrations. |
+| POST | `/school/events/:id/registrations` | Register. Body: studentId?, userId?, email?. |
+| POST | `/school/events/:id/gallery` | Add gallery image. Body: url, caption?, sortOrder?. |
+| DELETE | `/school/events/:id/gallery/:imageId` | Delete gallery image. |
+
+---
+
+## 12. Homework, Study materials, Achievements (School)
+
+**Base path:** `/api/v1/school`  
+**Roles:** `SUPERADMIN`, `SCHOOLADMIN`, `HR`, `ACCOUNTANT`.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/school/homework` | List homework. Query: page, limit, classId?, subjectId?, dueFrom?, dueTo?, schoolId. |
+| GET | `/school/homework/:id` | Get homework by id (with submissions). |
+| POST | `/school/homework` | Create homework. Body: classId?, subjectId?, title, description?, dueDate, isPublished?. |
+| PUT | `/school/homework/:id` | Update homework. |
+| DELETE | `/school/homework/:id` | Delete homework. |
+| POST | `/school/homework/:id/submit` | Submit homework (admin: body studentId, url?, fileUrls?, status?). |
+| GET | `/school/study-materials` | List study materials. Query: page, limit, classId?, subjectId?, schoolId. |
+| POST | `/school/study-materials` | Create study material. Body: classId?, subjectId?, title, description?, url, type?, chapter?, isPublished?. |
+| PUT | `/school/study-materials/:id` | Update study material. |
+| DELETE | `/school/study-materials/:id` | Delete study material. |
+| GET | `/school/achievements` | List achievements. Query: page, limit, studentId?, schoolId. |
+| POST | `/school/achievements` | Create achievement. Body: studentId, title, description?, type?, url?, issuedAt?. |
+| DELETE | `/school/achievements/:id` | Delete achievement. |
+
+---
+
+## 13. Student portal (Student-facing)
+
+**Base path:** `/api/v1/student`  
+**Roles:** `STUDENT` only (user must have linked Student profile).
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/student/dashboard` | Dashboard (attendance summary, upcoming exams, pending dues, announcements count). |
+| GET | `/student/profile` | Own profile (with parents, class). |
+| GET | `/student/timetable` | Own class timetable (live sessions). |
+| GET | `/student/attendance` | Own attendance. Query: page, limit, month?. |
+| GET | `/student/homework` | Homework list (with own submission status). Query: page, limit. |
+| POST | `/student/homework/:id/submit` | Submit homework. Body: url?, fileUrls?, status?. |
+| GET | `/student/study-materials` | Study materials (by class). |
+| GET | `/student/exams` | Exams (with own results). |
+| GET | `/student/fees` | Invoices, payments, pending dues. |
+| GET | `/student/announcements` | Announcements. Query: page, limit. |
+| GET | `/student/events` | Upcoming events (with registration status). |
+| POST | `/student/events/:id/register` | Register for event. |
+| GET | `/student/transport` | Own transport allocation (if any). |
+| GET | `/student/library` | Own library borrows. |
+| GET | `/student/achievements` | Own achievements. |
+
+---
+
 *Document generated for frontend integration. Base URL and env (e.g. CORS) should be set per environment.*

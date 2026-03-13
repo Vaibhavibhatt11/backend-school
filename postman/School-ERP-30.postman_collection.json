@@ -8,10 +8,18 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:5000/api/v1"
+      "value": "https://backend-school-app.onrender.com/api/v1"
+    },
+    {
+      "key": "base_url",
+      "value": "https://backend-school-app.onrender.com/api/v1"
     },
     {
       "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "auth_token",
       "value": ""
     },
     {
@@ -61,6 +69,27 @@
   ],
   "item": [
     {
+      "name": "00 Health",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health"
+          }
+        },
+        {
+          "name": "GET /ready",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/ready"
+          }
+        }
+      ]
+    },
+    {
       "name": "01 Auth (7 + optional change-password)",
       "item": [
         {
@@ -93,6 +122,7 @@
                   "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
                   "const j = pm.response.json();",
                   "pm.collectionVariables.set('accessToken', j.data.accessToken);",
+                  "pm.collectionVariables.set('auth_token', j.data.accessToken);",
                   "pm.collectionVariables.set('refreshToken', j.data.refreshToken);"
                 ]
               }
@@ -158,6 +188,7 @@
                   "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
                   "const j = pm.response.json();",
                   "pm.collectionVariables.set('accessToken', j.data.accessToken);",
+                  "pm.collectionVariables.set('auth_token', j.data.accessToken);",
                   "pm.collectionVariables.set('refreshToken', j.data.refreshToken);"
                 ]
               }

@@ -160,3 +160,16 @@ npx prisma generate
 ---
 
 With the above in place (especially **Redis**, **connection pooling / PgBouncer**, and **horizontal scaling**), the APIs are in a position to handle **~1 lakh users**; tune rate limits and pool sizes based on real traffic and load tests.
+
+---
+
+## 7. New modules (Admissions, Transport, Hostel, Events, Homework, Student portal)
+
+All new school and student-portal APIs use the same scalability patterns:
+
+- **Pagination:** List endpoints use `page` and `limit` (capped at 100 via `parsePagination` in `schoolScope.js`).
+- **School-scoped:** Queries are filtered by `schoolId`; SUPERADMIN passes `schoolId` in query/body.
+- **Indexes:** New Prisma models include `@@index([schoolId, ...])` where needed for list/filter performance.
+- **Stateless:** Student portal uses JWT; no server-side session store.
+
+For **millions of concurrent users**, continue to use Redis (rate limit + cache), PgBouncer/connection pool, multiple API instances, and consider read replicas for report/analytics and background workers for bulk operations (e.g. admission onboarding, report generation).
