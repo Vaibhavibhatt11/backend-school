@@ -98,6 +98,7 @@ CACHE_TTL_PERMISSIONS_SEC=3600
   - `GET /school/permissions` (TTL `CACHE_TTL_PERMISSIONS_SEC`, default 3600s).  
   - `GET /auth/me` (TTL `CACHE_TTL_ME_SEC`, default 120s).
 - Set `CACHE_ENABLED=true` and `REDIS_URL` for cache to be active.
+- **List caches (1M users, quick responses):** Admissions, transport routes/allocations, hostel rooms/allocations, events, homework, study materials use short-TTL list cache (`CACHE_TTL_LIST_SEC`, default 60s). Student portal dashboard and profile use `CACHE_TTL_STUDENT_DASHBOARD_SEC` (default 60s). All list caches are invalidated on create/update/delete.
 
 ### 3.2 Background jobs (bulk & reports)
 - **Bulk import (students):** For very large files (e.g. 10k+ rows), consider queuing a job and processing in a worker; API returns job id and frontend polls status.

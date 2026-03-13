@@ -2,26 +2,49 @@
 
 const { z } = require("zod");
 const { prisma, scopedSchoolId, findScopedOrThrow, paginationFromQuery, paginated } = require("./school.common");
+const cache = require("../../lib/cache");
+const { getPaginationMeta } = require("../../utils/schoolScope");
+
+function invalidateEvents(schoolId) {
+  cache.delByPrefix(`events:list:${schoolId}`);
+}
 
 async function listEvents(req, res, next) {
   try {
     const schoolId = scopedSchoolId(req, req.query.schoolId, true);
     const { page, limit, skip } = paginationFromQuery(req.query);
-    const where = { schoolId };
-    if (req.query.eventType) where.eventType = req.query.eventType;
-    if (req.query.from) where.startDate = { gte: new Date(req.query.from) };
-    if (req.query.to) where.endDate = { ...(where.endDate || {}), lte: new Date(req.query.to) };
-    const [total, items] = await Promise.all([
-      prisma.event.count({ where }),
-      prisma.event.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { startDate: "desc" },
-        include: { _count: { select: { registrations: true } } },
-      }),
-    ]);
-    return res.status(200).json({ success: true, data: paginated(items, total, page, limit) });
+    const from = typeof req.query.from === "string" ? req.query.from : "";
+    const to = typeof req.query.to === "string" ? req.query.to : "";
+    const cacheKey = cache.cacheKeys.eventsList(schoolId, page, limit, from, to);
+    const ttl = cache.CACHE_TTL.list();
+    const result = await cache.getOrSet(cacheKey, ttl, async () => {
+      const where = { schoolId };
+      if (req.query.eventType) where.eventType = String(req.query.eventType).trim().slice(0, 30);
+      if (req.query.from) where.startDate = { gte: new Date(req.query.from) };
+      if (req.query.to) where.endDate = { lte: new Date(req.query.to) };
+      const [total, items] = await Promise.all([
+        prisma.event.count({ where }),
+        prisma.event.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { startDate: "desc" },
+          select: {
+            id: true,
+            title: true,
+            eventType: true,
+            startDate: true,
+            endDate: true,
+            location: true,
+            isPublished: true,
+            createdAt: true,
+            _count: { select: { registrations: true } },
+          },
+        }),
+      ]);
+      return { items, pagination: getPaginationMeta(total, page, limit) };
+    });
+    return res.status(200).json({ success: true, data: result });
   } catch (e) {
     return next(e);
   }
@@ -33,7 +56,19 @@ async function getEventById(req, res, next) {
     const event = await findScopedOrThrow("event", req.params.id, schoolId, "Event", "NOT_FOUND");
     const withRelations = await prisma.event.findUnique({
       where: { id: event.id },
-      include: { registrations: true, gallery: true },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        eventType: true,
+        startDate: true,
+        endDate: true,
+        location: true,
+        isPublished: true,
+        createdAt: true,
+        registrations: { select: { id: true, studentId: true, userId: true, email: true, status: true, createdAt: true } },
+        gallery: { select: { id: true, url: true, caption: true, sortOrder: true }, orderBy: { sortOrder: "asc" } },
+      },
     });
     return res.status(200).json({ success: true, data: withRelations });
   } catch (e) {
@@ -45,12 +80,12 @@ async function createEvent(req, res, next) {
   try {
     const body = z.object({
       schoolId: z.string().optional(),
-      title: z.string().trim().min(1),
-      description: z.string().optional(),
-      eventType: z.string().default("GENERAL"),
+      title: z.string().trim().min(1).max(200),
+      description: z.string().max(5000).optional(),
+      eventType: z.string().max(30).default("GENERAL"),
       startDate: z.coerce.date(),
       endDate: z.coerce.date().optional().nullable(),
-      location: z.string().optional(),
+      location: z.string().max(200).optional(),
       isPublished: z.boolean().optional(),
     }).parse(req.body);
     const schoolId = scopedSchoolId(req, body.schoolId, true);
@@ -66,6 +101,7 @@ async function createEvent(req, res, next) {
         isPublished: body.isPublished !== false,
       },
     });
+    invalidateEvents(schoolId);
     return res.status(201).json({ success: true, data: event });
   } catch (e) {
     return next(e);
@@ -77,15 +113,16 @@ async function updateEvent(req, res, next) {
     const schoolId = scopedSchoolId(req, undefined, true);
     await findScopedOrThrow("event", req.params.id, schoolId, "Event", "NOT_FOUND");
     const body = z.object({
-      title: z.string().optional(),
-      description: z.string().optional(),
-      eventType: z.string().optional(),
+      title: z.string().max(200).optional(),
+      description: z.string().max(5000).optional(),
+      eventType: z.string().max(30).optional(),
       startDate: z.coerce.date().optional(),
       endDate: z.coerce.date().optional().nullable(),
-      location: z.string().optional(),
+      location: z.string().max(200).optional(),
       isPublished: z.boolean().optional(),
     }).parse(req.body);
     const event = await prisma.event.update({ where: { id: req.params.id }, data: body });
+    invalidateEvents(schoolId);
     return res.status(200).json({ success: true, data: event });
   } catch (e) {
     return next(e);
@@ -97,6 +134,7 @@ async function deleteEvent(req, res, next) {
     const schoolId = scopedSchoolId(req, undefined, true);
     await findScopedOrThrow("event", req.params.id, schoolId, "Event", "NOT_FOUND");
     await prisma.event.delete({ where: { id: req.params.id } });
+    invalidateEvents(schoolId);
     return res.status(200).json({ success: true, data: { deleted: true } });
   } catch (e) {
     return next(e);
@@ -124,7 +162,7 @@ async function registerForEvent(req, res, next) {
     const body = z.object({
       studentId: z.string().optional(),
       userId: z.string().optional(),
-      email: z.string().email().optional(),
+      email: z.string().email().max(120).optional(),
     }).parse(req.body);
     const reg = await prisma.eventRegistration.create({
       data: {
@@ -136,6 +174,7 @@ async function registerForEvent(req, res, next) {
         status: "REGISTERED",
       },
     });
+    invalidateEvents(schoolId);
     return res.status(201).json({ success: true, data: reg });
   } catch (e) {
     return next(e);
@@ -146,10 +185,11 @@ async function addGalleryImage(req, res, next) {
   try {
     const schoolId = scopedSchoolId(req, undefined, true);
     await findScopedOrThrow("event", req.params.id, schoolId, "Event", "NOT_FOUND");
-    const body = z.object({ url: z.string().trim().min(1), caption: z.string().optional(), sortOrder: z.number().optional() }).parse(req.body);
+    const body = z.object({ url: z.string().trim().min(1).max(2000), caption: z.string().max(200).optional(), sortOrder: z.number().int().optional() }).parse(req.body);
     const img = await prisma.eventGalleryImage.create({
       data: { eventId: req.params.id, url: body.url, caption: body.caption || null, sortOrder: body.sortOrder ?? 0 },
     });
+    invalidateEvents(schoolId);
     return res.status(201).json({ success: true, data: img });
   } catch (e) {
     return next(e);

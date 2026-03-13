@@ -9,51 +9,78 @@ const {
   paginationFromQuery,
   paginated,
   baseSchoolSearch,
-  generateCode,
 } = require("./school.common");
-const { badRequest, notFound } = require("../../utils/httpErrors");
+const { badRequest } = require("../../utils/httpErrors");
+const cache = require("../../lib/cache");
+const { getPaginationMeta } = require("../../utils/schoolScope");
 
 const createSchema = z.object({
   schoolId: z.string().trim().optional(),
-  firstName: z.string().trim().min(1),
-  lastName: z.string().trim().min(1),
+  firstName: z.string().trim().min(1).max(120),
+  lastName: z.string().trim().min(1).max(120),
   email: z.string().email().optional().or(z.literal("")),
-  phone: z.string().trim().optional(),
+  phone: z.string().trim().max(20).optional(),
   dob: z.coerce.date().optional(),
-  gender: z.string().trim().optional(),
-  appliedClass: z.string().trim().min(1),
-  appliedSection: z.string().trim().optional(),
+  gender: z.string().trim().max(20).optional(),
+  appliedClass: z.string().trim().min(1).max(50),
+  appliedSection: z.string().trim().max(20).optional(),
 });
 
 const updateStatusSchema = z.object({
   status: z.enum(["UNDER_REVIEW", "APPROVED", "REJECTED"]),
 });
 
+function hashForCache(s) {
+  if (!s || typeof s !== "string") return "";
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h << 5) - h + s.charCodeAt(i) | 0;
+  return String(h >>> 0);
+}
+
 async function listApplications(req, res, next) {
   try {
     const query = z.object({
       page: z.coerce.number().int().positive().optional(),
       limit: z.coerce.number().int().positive().optional(),
-      status: z.string().trim().optional(),
-      search: z.string().trim().optional(),
+      status: z.string().trim().max(30).optional(),
+      search: z.string().trim().max(100).optional(),
       schoolId: z.string().trim().optional(),
     }).parse(req.query);
     const schoolId = scopedSchoolId(req, query.schoolId, true);
     const { page, limit, skip } = paginationFromQuery(query);
-    const where = { schoolId };
-    if (query.status) where.status = query.status;
-    baseSchoolSearch(where, query.search, ["firstName", "lastName", "email", "applicationNo"]);
-    const [total, items] = await Promise.all([
-      prisma.admissionApplication.count({ where }),
-      prisma.admissionApplication.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: "desc" },
-        include: { documents: true },
-      }),
-    ]);
-    return res.status(200).json({ success: true, data: paginated(items, total, page, limit) });
+    const cacheKey = cache.cacheKeys.admissionsList(schoolId, page, limit, query.status || "", hashForCache(query.search));
+    const ttl = cache.CACHE_TTL.list();
+    const result = await cache.getOrSet(cacheKey, ttl, async () => {
+      const where = { schoolId };
+      if (query.status) where.status = query.status;
+      baseSchoolSearch(where, query.search, ["firstName", "lastName", "email", "applicationNo"]);
+      const [total, items] = await Promise.all([
+        prisma.admissionApplication.count({ where }),
+        prisma.admissionApplication.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            applicationNo: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true,
+            appliedClass: true,
+            appliedSection: true,
+            status: true,
+            admissionFeePaid: true,
+            registrationNo: true,
+            createdAt: true,
+            _count: { select: { documents: true } },
+          },
+        }),
+      ]);
+      return { items, pagination: getPaginationMeta(total, page, limit) };
+    });
+    return res.status(200).json({ success: true, data: result });
   } catch (e) {
     return next(e);
   }
@@ -65,12 +92,34 @@ async function getApplicationById(req, res, next) {
     const item = await findScopedOrThrow("admissionApplication", req.params.id, schoolId, "Application", "APPLICATION_NOT_FOUND");
     const withDocs = await prisma.admissionApplication.findUnique({
       where: { id: item.id },
-      include: { documents: true },
+      select: {
+        id: true,
+        applicationNo: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+        dob: true,
+        gender: true,
+        appliedClass: true,
+        appliedSection: true,
+        status: true,
+        admissionFeePaid: true,
+        registrationNo: true,
+        studentId: true,
+        createdAt: true,
+        updatedAt: true,
+        documents: { select: { id: true, name: true, url: true, type: true, createdAt: true } },
+      },
     });
     return res.status(200).json({ success: true, data: withDocs });
   } catch (e) {
     return next(e);
   }
+}
+
+function invalidateAdmissionsList(schoolId) {
+  cache.delByPrefix(`admissions:list:${schoolId}`);
 }
 
 async function createApplication(req, res, next) {
@@ -94,6 +143,7 @@ async function createApplication(req, res, next) {
         appliedSection: body.appliedSection || null,
       },
     });
+    invalidateAdmissionsList(schoolId);
     return res.status(201).json({ success: true, data: application });
   } catch (e) {
     return next(e);
@@ -109,6 +159,7 @@ async function updateApplicationStatus(req, res, next) {
       where: { id: req.params.id },
       data: { status },
     });
+    invalidateAdmissionsList(schoolId);
     return res.status(200).json({ success: true, data: updated });
   } catch (e) {
     return next(e);
@@ -119,7 +170,11 @@ async function addApplicationDocument(req, res, next) {
   try {
     const schoolId = scopedSchoolId(req, undefined, true);
     const app = await findScopedOrThrow("admissionApplication", req.params.id, schoolId, "Application", "APPLICATION_NOT_FOUND");
-    const body = z.object({ name: z.string().trim().min(1), url: z.string().trim().min(1), type: z.string().trim().optional() }).parse(req.body);
+    const body = z.object({
+      name: z.string().trim().min(1).max(200),
+      url: z.string().trim().min(1).max(2000),
+      type: z.string().trim().max(50).optional(),
+    }).parse(req.body);
     const doc = await prisma.admissionDocument.create({
       data: {
         applicationId: app.id,
@@ -128,40 +183,8 @@ async function addApplicationDocument(req, res, next) {
         type: body.type || "document",
       },
     });
+    invalidateAdmissionsList(schoolId);
     return res.status(201).json({ success: true, data: doc });
-  } catch (e) {
-    return next(e);
-  }
-}
-
-async function onboardApplication(req, res, next) {
-  try {
-    const schoolId = scopedSchoolId(req, undefined, true);
-    const app = await findScopedOrThrow("admissionApplication", req.params.id, schoolId, "Application", "APPLICATION_NOT_FOUND");
-    if (app.status !== "APPROVED") throw badRequest("Only approved applications can be onboarded", "INVALID_STATUS");
-    if (app.studentId) throw badRequest("Already onboarded", "ALREADY_ONBOARDED");
-
-    const regNo = await generateRegistrationNo(schoolId);
-    const student = await prisma.student.create({
-      data: {
-        schoolId,
-        admissionNo: regNo,
-        firstName: app.firstName,
-        lastName: app.lastName,
-        className: app.appliedClass,
-        section: app.appliedSection || null,
-        dob: app.dob,
-        gender: app.gender,
-        guardianPhone: app.phone,
-        status: "ACTIVE",
-      },
-    });
-    await prisma.admissionApplication.update({
-      where: { id: app.id },
-      data: { studentId: student.id, registrationNo: regNo, status: "ONBOARDED" },
-    });
-    const updatedApp = await prisma.admissionApplication.findUnique({ where: { id: app.id } });
-    return res.status(200).json({ success: true, data: { student, application: updatedApp } });
   } catch (e) {
     return next(e);
   }
@@ -177,6 +200,43 @@ async function generateRegistrationNo(schoolId) {
   });
   const nextNum = last ? parseInt(last.admissionNo.replace(prefix, ""), 10) + 1 : 1;
   return `${prefix}${String(nextNum).padStart(5, "0")}`;
+}
+
+async function onboardApplication(req, res, next) {
+  try {
+    const schoolId = scopedSchoolId(req, undefined, true);
+    const app = await findScopedOrThrow("admissionApplication", req.params.id, schoolId, "Application", "APPLICATION_NOT_FOUND");
+    if (app.status !== "APPROVED") throw badRequest("Only approved applications can be onboarded", "INVALID_STATUS");
+    if (app.studentId) throw badRequest("Already onboarded", "ALREADY_ONBOARDED");
+
+    const regNo = await generateRegistrationNo(schoolId);
+    const result = await prisma.$transaction(async (tx) => {
+      const student = await tx.student.create({
+        data: {
+          schoolId,
+          admissionNo: regNo,
+          firstName: app.firstName,
+          lastName: app.lastName,
+          className: app.appliedClass,
+          section: app.appliedSection || null,
+          dob: app.dob,
+          gender: app.gender,
+          guardianPhone: app.phone,
+          status: "ACTIVE",
+        },
+      });
+      await tx.admissionApplication.update({
+        where: { id: app.id },
+        data: { studentId: student.id, registrationNo: regNo, status: "ONBOARDED" },
+      });
+      const updatedApp = await tx.admissionApplication.findUnique({ where: { id: app.id } });
+      return { student, application: updatedApp };
+    });
+    invalidateAdmissionsList(schoolId);
+    return res.status(200).json({ success: true, data: result });
+  } catch (e) {
+    return next(e);
+  }
 }
 
 module.exports = {

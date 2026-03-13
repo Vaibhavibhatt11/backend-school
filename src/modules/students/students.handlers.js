@@ -1,5 +1,6 @@
 const { z } = require("zod");
 const prisma = require("../../lib/prisma");
+const cache = require("../../lib/cache");
 
 const studentStatusEnum = z.enum(["ACTIVE", "INACTIVE"]);
 
@@ -322,6 +323,9 @@ async function updateStudent(req, res, next) {
       },
     });
 
+    cache.del(cache.cacheKeys.studentDashboard(existing.id));
+    cache.del(cache.cacheKeys.studentProfile(existing.id));
+
     return res.status(200).json({
       success: true,
       data: { student: toStudentDto(updated) },
@@ -364,6 +368,9 @@ async function updateStudentStatus(req, res, next) {
         },
       },
     });
+
+    cache.del(cache.cacheKeys.studentDashboard(existing.id));
+    cache.del(cache.cacheKeys.studentProfile(existing.id));
 
     return res.status(200).json({
       success: true,
@@ -606,6 +613,9 @@ async function moveStudentClass(req, res, next) {
       },
       include: { class: { select: { id: true, name: true, section: true } } },
     });
+
+    cache.del(cache.cacheKeys.studentDashboard(student.id));
+    cache.del(cache.cacheKeys.studentProfile(student.id));
 
     return res.status(200).json({
       success: true,

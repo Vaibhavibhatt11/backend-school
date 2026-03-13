@@ -2,13 +2,28 @@
 
 const { z } = require("zod");
 const { prisma, scopedSchoolId, findScopedOrThrow, paginationFromQuery, paginated } = require("./school.common");
+const cache = require("../../lib/cache");
+const { getPaginationMeta } = require("../../utils/schoolScope");
+
+function invalidateHostel(schoolId) {
+  cache.delByPrefix(`hostel:rooms:${schoolId}`);
+  cache.delByPrefix(`hostel:allocations:${schoolId}`);
+}
 
 async function listRooms(req, res, next) {
   try {
     const schoolId = scopedSchoolId(req, req.query.schoolId, true);
-    const where = { schoolId };
-    const items = await prisma.hostelRoom.findMany({ where, orderBy: [{ block: "asc" }, { roomNo: "asc" }] });
-    return res.status(200).json({ success: true, data: { items } });
+    const cacheKey = cache.cacheKeys.hostelRoomsList(schoolId);
+    const ttl = cache.CACHE_TTL.list();
+    const result = await cache.getOrSet(cacheKey, ttl, async () => {
+      const items = await prisma.hostelRoom.findMany({
+        where: { schoolId },
+        orderBy: [{ block: "asc" }, { roomNo: "asc" }],
+        select: { id: true, block: true, roomNo: true, capacity: true, isActive: true, createdAt: true },
+      });
+      return { items };
+    });
+    return res.status(200).json({ success: true, data: result });
   } catch (e) {
     return next(e);
   }
@@ -18,15 +33,16 @@ async function createRoom(req, res, next) {
   try {
     const body = z.object({
       schoolId: z.string().optional(),
-      block: z.string().trim().min(1),
-      roomNo: z.string().trim().min(1),
-      capacity: z.number().int().min(1).default(1),
+      block: z.string().trim().min(1).max(50),
+      roomNo: z.string().trim().min(1).max(20),
+      capacity: z.number().int().min(1).max(50).default(1),
       isActive: z.boolean().optional(),
     }).parse(req.body);
     const schoolId = scopedSchoolId(req, body.schoolId, true);
     const room = await prisma.hostelRoom.create({
       data: { schoolId, block: body.block, roomNo: body.roomNo, capacity: body.capacity, isActive: body.isActive !== false },
     });
+    invalidateHostel(schoolId);
     return res.status(201).json({ success: true, data: room });
   } catch (e) {
     return next(e);
@@ -37,8 +53,9 @@ async function updateRoom(req, res, next) {
   try {
     const schoolId = scopedSchoolId(req, undefined, true);
     await findScopedOrThrow("hostelRoom", req.params.id, schoolId, "Room", "NOT_FOUND");
-    const body = z.object({ block: z.string().optional(), roomNo: z.string().optional(), capacity: z.number().optional(), isActive: z.boolean().optional() }).parse(req.body);
+    const body = z.object({ block: z.string().max(50).optional(), roomNo: z.string().max(20).optional(), capacity: z.number().int().min(1).optional(), isActive: z.boolean().optional() }).parse(req.body);
     const room = await prisma.hostelRoom.update({ where: { id: req.params.id }, data: body });
+    invalidateHostel(schoolId);
     return res.status(200).json({ success: true, data: room });
   } catch (e) {
     return next(e);
@@ -50,6 +67,7 @@ async function deleteRoom(req, res, next) {
     const schoolId = scopedSchoolId(req, undefined, true);
     await findScopedOrThrow("hostelRoom", req.params.id, schoolId, "Room", "NOT_FOUND");
     await prisma.hostelRoom.delete({ where: { id: req.params.id } });
+    invalidateHostel(schoolId);
     return res.status(200).json({ success: true, data: { deleted: true } });
   } catch (e) {
     return next(e);
@@ -60,20 +78,34 @@ async function listAllocations(req, res, next) {
   try {
     const schoolId = scopedSchoolId(req, req.query.schoolId, true);
     const { page, limit, skip } = paginationFromQuery(req.query);
-    const where = { schoolId };
-    if (req.query.roomId) where.roomId = req.query.roomId;
-    if (req.query.studentId) where.studentId = req.query.studentId;
-    const [total, items] = await Promise.all([
-      prisma.hostelAllocation.count({ where }),
-      prisma.hostelAllocation.findMany({
-        where,
-        skip,
-        take: limit,
-        include: { student: true, room: true },
-        orderBy: { createdAt: "desc" },
-      }),
-    ]);
-    return res.status(200).json({ success: true, data: paginated(items, total, page, limit) });
+    const cacheKey = cache.cacheKeys.hostelAllocationsList(schoolId, page, limit);
+    const ttl = cache.CACHE_TTL.list();
+    const result = await cache.getOrSet(cacheKey, ttl, async () => {
+      const where = { schoolId };
+      if (req.query.roomId) where.roomId = req.query.roomId;
+      if (req.query.studentId) where.studentId = req.query.studentId;
+      const [total, items] = await Promise.all([
+        prisma.hostelAllocation.count({ where }),
+        prisma.hostelAllocation.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            studentId: true,
+            roomId: true,
+            fromDate: true,
+            toDate: true,
+            createdAt: true,
+            student: { select: { id: true, firstName: true, lastName: true, admissionNo: true } },
+            room: { select: { id: true, block: true, roomNo: true, capacity: true } },
+          },
+        }),
+      ]);
+      return { items, pagination: getPaginationMeta(total, page, limit) };
+    });
+    return res.status(200).json({ success: true, data: result });
   } catch (e) {
     return next(e);
   }
@@ -91,8 +123,9 @@ async function createAllocation(req, res, next) {
     await findScopedOrThrow("hostelRoom", body.roomId, schoolId, "Room", "NOT_FOUND");
     const allocation = await prisma.hostelAllocation.create({
       data: { schoolId, studentId: body.studentId, roomId: body.roomId, fromDate: body.fromDate || new Date(), toDate: body.toDate || null },
-      include: { student: true, room: true },
+      include: { student: { select: { id: true, firstName: true, lastName: true, admissionNo: true } }, room: { select: { id: true, block: true, roomNo: true, capacity: true } } },
     });
+    invalidateHostel(schoolId);
     return res.status(201).json({ success: true, data: allocation });
   } catch (e) {
     return next(e);

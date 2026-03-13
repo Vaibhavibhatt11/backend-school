@@ -1,8 +1,9 @@
 "use strict";
 
 const prisma = require("../../lib/prisma");
+const cache = require("../../lib/cache");
 const { notFound, forbidden } = require("../../utils/httpErrors");
-const { parsePagination, getPaginationMeta } = require("../../utils/schoolScope");
+const { parsePagination } = require("../../utils/schoolScope");
 
 async function resolveStudent(req) {
   const userId = req.user?.sub;
@@ -19,31 +20,33 @@ async function resolveStudent(req) {
 async function dashboard(req, res, next) {
   try {
     const student = await resolveStudent(req);
-    const [attendanceSummary, upcomingExams, duesCount, announcementsCount] = await Promise.all([
-      prisma.studentAttendance.groupBy({
-        by: ["status"],
-        where: { studentId: student.id, date: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } },
-        _count: true,
-      }),
-      prisma.exam.findMany({
-        where: { schoolId: student.schoolId, examDate: { gte: new Date() }, isPublished: false },
-        take: 5,
-        orderBy: { examDate: "asc" },
-        select: { id: true, name: true, examDate: true, subjectId: true },
-      }),
-      prisma.invoice.count({ where: { studentId: student.id, status: { in: ["ISSUED", "OVERDUE", "PARTIAL"] } } }),
-      prisma.announcement.count({ where: { schoolId: student.schoolId, status: "SENT" } }),
-    ]);
-    return res.status(200).json({
-      success: true,
-      data: {
+    const cacheKey = cache.cacheKeys.studentDashboard(student.id);
+    const ttl = cache.CACHE_TTL.studentDashboard();
+    const result = await cache.getOrSet(cacheKey, ttl, async () => {
+      const [attendanceSummary, upcomingExams, duesCount, announcementsCount] = await Promise.all([
+        prisma.studentAttendance.groupBy({
+          by: ["status"],
+          where: { studentId: student.id, date: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } },
+          _count: true,
+        }),
+        prisma.exam.findMany({
+          where: { schoolId: student.schoolId, examDate: { gte: new Date() }, isPublished: false },
+          take: 5,
+          orderBy: { examDate: "asc" },
+          select: { id: true, name: true, examDate: true, subjectId: true },
+        }),
+        prisma.invoice.count({ where: { studentId: student.id, status: { in: ["ISSUED", "OVERDUE", "PARTIAL"] } } }),
+        prisma.announcement.count({ where: { schoolId: student.schoolId, status: "SENT" } }),
+      ]);
+      return {
         studentId: student.id,
         attendanceSummary: attendanceSummary.reduce((a, b) => ({ ...a, [b.status]: b._count }), {}),
         upcomingExams,
         pendingDuesCount: duesCount,
         announcementsCount,
-      },
+      };
     });
+    return res.status(200).json({ success: true, data: result });
   } catch (e) {
     return next(e);
   }
@@ -52,12 +55,32 @@ async function dashboard(req, res, next) {
 async function getProfile(req, res, next) {
   try {
     const student = await resolveStudent(req);
-    const full = await prisma.student.findUnique({
-      where: { id: student.id },
-      include: { parents: { include: { parent: true } }, class: true },
+    const cacheKey = cache.cacheKeys.studentProfile(student.id);
+    const ttl = cache.CACHE_TTL.studentDashboard();
+    const result = await cache.getOrSet(cacheKey, ttl, async () => {
+      const full = await prisma.student.findUnique({
+        where: { id: student.id },
+        select: {
+          id: true,
+          admissionNo: true,
+          firstName: true,
+          lastName: true,
+          dob: true,
+          gender: true,
+          className: true,
+          section: true,
+          rollNo: true,
+          status: true,
+          guardianPhone: true,
+          createdAt: true,
+          parents: { select: { relationType: true, isPrimary: true, parent: { select: { id: true, fullName: true, email: true, phone: true } } } },
+          class: { select: { id: true, name: true, section: true } },
+        },
+      });
+      if (!full) throw notFound("Student not found");
+      return full;
     });
-    if (!full) throw notFound("Student not found");
-    return res.status(200).json({ success: true, data: full });
+    return res.status(200).json({ success: true, data: result });
   } catch (e) {
     return next(e);
   }

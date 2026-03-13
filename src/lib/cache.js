@@ -75,7 +75,7 @@ async function del(key) {
 }
 
 /**
- * Cache key builders for consistency
+ * Cache key builders for consistency (production: 1M users, quick responses)
  */
 const cacheKeys = {
   dashboardSchoolAdmin: (schoolId) => `dashboard:school-admin:${schoolId || "all"}`,
@@ -84,12 +84,60 @@ const cacheKeys = {
   schoolProfile: (schoolId) => `school:profile:${schoolId}`,
   permissionsList: () => `permissions:list`,
   me: (userId) => `me:${userId}`,
+  // List caches (invalidate on write); key should include page/limit/status etc. for correctness
+  admissionsList: (schoolId, page, limit, status, searchHash) =>
+    `admissions:list:${schoolId}:${page}:${limit}:${status || ""}:${searchHash || ""}`,
+  transportRoutesList: (schoolId, page, limit) => `transport:routes:${schoolId}:${page}:${limit}`,
+  transportAllocationsList: (schoolId, page, limit, routeId) =>
+    `transport:allocations:${schoolId}:${page}:${limit}:${routeId || ""}`,
+  hostelRoomsList: (schoolId) => `hostel:rooms:${schoolId}`,
+  hostelAllocationsList: (schoolId, page, limit) => `hostel:allocations:${schoolId}:${page}:${limit}`,
+  eventsList: (schoolId, page, limit, from, to) => `events:list:${schoolId}:${page}:${limit}:${from || ""}:${to || ""}`,
+  homeworkList: (schoolId, page, limit, classId) => `homework:list:${schoolId}:${page}:${limit}:${classId || ""}`,
+  studyMaterialsList: (schoolId, page, limit) => `study:list:${schoolId}:${page}:${limit}`,
+  studentDashboard: (studentId) => `student:dashboard:${studentId}`,
+  studentProfile: (studentId) => `student:profile:${studentId}`,
 };
+
+const CACHE_TTL_LIST = () => (env.CACHE_TTL_LIST_SEC != null ? env.CACHE_TTL_LIST_SEC : 60);
+const CACHE_TTL_STUDENT_DASHBOARD = () => (env.CACHE_TTL_STUDENT_DASHBOARD_SEC != null ? env.CACHE_TTL_STUDENT_DASHBOARD_SEC : 60);
+
+/**
+ * Get from cache or compute and set (for list/dashboard endpoints). TTL in seconds.
+ * @param {string} key
+ * @param {number} ttlSeconds
+ * @param {() => Promise<object>} fn - async function that returns the value to cache
+ * @returns {Promise<object>}
+ */
+async function getOrSet(key, ttlSeconds, fn) {
+  const cached = await get(key);
+  if (cached != null) return cached;
+  const value = await fn();
+  if (ttlSeconds > 0) await set(key, value, ttlSeconds);
+  return value;
+}
+
+/**
+ * Invalidate all keys that start with prefix (e.g. "admissions:list:schoolId" to clear all list pages for that school)
+ */
+async function delByPrefix(prefix) {
+  if (!isCacheEnabled()) return;
+  const redis = getRedis();
+  try {
+    const fullPrefix = keyWithPrefix(prefix);
+    const keys = await redis.keys(`${fullPrefix}*`);
+    if (keys.length > 0) await redis.del(...keys);
+  } catch (err) {
+    if (env.NODE_ENV !== "production") console.warn("[cache] delByPrefix error:", err?.message);
+  }
+}
 
 module.exports = {
   get,
   set,
   del,
+  delByPrefix,
+  getOrSet,
   isCacheEnabled,
   cacheKeys,
   CACHE_TTL: {
@@ -97,5 +145,7 @@ module.exports = {
     profile: () => env.CACHE_TTL_PROFILE_SEC,
     me: () => env.CACHE_TTL_ME_SEC,
     permissions: () => env.CACHE_TTL_PERMISSIONS_SEC,
+    list: CACHE_TTL_LIST,
+    studentDashboard: CACHE_TTL_STUDENT_DASHBOARD,
   },
 };

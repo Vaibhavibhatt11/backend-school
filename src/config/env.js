@@ -29,6 +29,8 @@ const envSchema = z.object({
   CACHE_TTL_PROFILE_SEC: z.coerce.number().int().min(0).default(300),
   CACHE_TTL_ME_SEC: z.coerce.number().int().min(0).default(120),
   CACHE_TTL_PERMISSIONS_SEC: z.coerce.number().int().min(0).default(3600),
+  CACHE_TTL_LIST_SEC: z.coerce.number().int().min(0).default(60),
+  CACHE_TTL_STUDENT_DASHBOARD_SEC: z.coerce.number().int().min(0).default(60),
   CACHE_KEY_PREFIX: z.string().max(32).default("se:cache:"),
   HEALTHCHECK_DB_TIMEOUT_MS: z.coerce.number().int().positive().default(2000),
   SERVER_KEEP_ALIVE_TIMEOUT_MS: z.coerce.number().int().positive().default(65000),
