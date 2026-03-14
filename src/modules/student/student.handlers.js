@@ -4,6 +4,17 @@ const prisma = require("../../lib/prisma");
 const cache = require("../../lib/cache");
 const { notFound, forbidden } = require("../../utils/httpErrors");
 const { parsePagination } = require("../../utils/schoolScope");
+const {
+  validateId,
+  validateLeaveRequest,
+  validateHomeworkSubmit,
+  validateProfileUpdate,
+  validateSettings,
+  validateAiAsk,
+  validateMeetingRequest,
+  validateQueryMonth,
+  validateSearch,
+} = require("./student.security");
 
 async function resolveStudent(req) {
   const userId = req.user?.sub;
@@ -30,7 +41,7 @@ async function dashboard(req, res, next) {
           _count: true,
         }),
         prisma.exam.findMany({
-          where: { schoolId: student.schoolId, examDate: { gte: new Date() }, isPublished: false },
+          where: { schoolId: student.schoolId, examDate: { gte: new Date() }, isPublished: true },
           take: 5,
           orderBy: { examDate: "asc" },
           select: { id: true, name: true, examDate: true, subjectId: true },
@@ -90,13 +101,18 @@ async function getTimetable(req, res, next) {
   try {
     const student = await resolveStudent(req);
     if (!student.classId) return res.status(200).json({ success: true, data: { slots: [] } });
-    const slots = await prisma.liveClassSession.findMany({
-      where: { classId: student.classId, startsAt: { gte: new Date() } },
-      include: { subject: true },
-      orderBy: { startsAt: "asc" },
-      take: 50,
+    const cacheKey = cache.cacheKeys.studentTimetable(student.classId);
+    const ttl = cache.CACHE_TTL.studentTimetable?.() ?? cache.CACHE_TTL.studentDashboard?.() ?? 60;
+    const result = await cache.getOrSet(cacheKey, ttl, async () => {
+      const slots = await prisma.liveClassSession.findMany({
+        where: { classId: student.classId, startsAt: { gte: new Date() } },
+        include: { subject: { select: { id: true, name: true } } },
+        orderBy: { startsAt: "asc" },
+        take: 50,
+      });
+      return { slots };
     });
-    return res.status(200).json({ success: true, data: { slots } });
+    return res.status(200).json({ success: true, data: result });
   } catch (e) {
     return next(e);
   }
@@ -107,10 +123,11 @@ async function getAttendance(req, res, next) {
     const student = await resolveStudent(req);
     const { page, limit, skip } = parsePagination(req.query);
     const where = { studentId: student.id };
-    if (req.query.month) {
-      const d = new Date(req.query.month);
-      const start = new Date(d.getFullYear(), d.getMonth(), 1);
-      const end = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+    const month = validateQueryMonth(req.query.month);
+    if (month) {
+      const [y, m] = month.split("-").map(Number);
+      const start = new Date(y, m - 1, 1);
+      const end = new Date(y, m - 1 + 1, 0, 23, 59, 59);
       where.date = { gte: start, lte: end };
     }
     const [total, items] = await Promise.all([
@@ -152,20 +169,24 @@ async function getHomework(req, res, next) {
 async function submitHomework(req, res, next) {
   try {
     const student = await resolveStudent(req);
-    const homeworkId = req.params.id;
+    const homeworkId = validateId(req.params.id, "homeworkId");
     const hw = await prisma.homework.findFirst({ where: { id: homeworkId, schoolId: student.schoolId } });
     if (!hw) throw notFound("Homework not found");
-    const body = req.body || {};
+    const body = validateHomeworkSubmit(req.body || {});
     const sub = await prisma.homeworkSubmission.upsert({
       where: { homeworkId_studentId: { homeworkId, studentId: student.id } },
       create: {
         homeworkId,
         studentId: student.id,
-        url: body.url || null,
-        fileUrls: Array.isArray(body.fileUrls) ? body.fileUrls : [],
+        url: body.url ?? null,
+        fileUrls: body.fileUrls || [],
         status: body.status || "SUBMITTED",
       },
-      update: { url: body.url || undefined, fileUrls: Array.isArray(body.fileUrls) ? body.fileUrls : undefined, status: body.status || "SUBMITTED" },
+      update: {
+        ...(body.url !== undefined && { url: body.url }),
+        ...(body.fileUrls !== undefined && { fileUrls: body.fileUrls }),
+        ...(body.status !== undefined && { status: body.status }),
+      },
     });
     return res.status(200).json({ success: true, data: sub });
   } catch (e) {
@@ -178,7 +199,11 @@ async function getStudyMaterials(req, res, next) {
     const student = await resolveStudent(req);
     const where = { schoolId: student.schoolId, isPublished: true };
     if (student.classId) where.OR = [{ classId: null }, { classId: student.classId }];
-    const items = await prisma.studyMaterial.findMany({ where, orderBy: { createdAt: "desc" } });
+    const items = await prisma.studyMaterial.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    });
     return res.status(200).json({ success: true, data: { items } });
   } catch (e) {
     return next(e);
@@ -188,20 +213,27 @@ async function getStudyMaterials(req, res, next) {
 async function getExams(req, res, next) {
   try {
     const student = await resolveStudent(req);
-    const where = { schoolId: student.schoolId };
-    if (student.classId) where.classId = student.classId;
-    const items = await prisma.exam.findMany({
-      where,
-      orderBy: { examDate: "desc" },
-      include: { subject: true },
+    const cacheKey = cache.cacheKeys.studentExams(student.id);
+    const ttl = cache.CACHE_TTL.studentExams?.() ?? cache.CACHE_TTL.studentDashboard?.() ?? 120;
+    const result = await cache.getOrSet(cacheKey, ttl, async () => {
+      const where = { schoolId: student.schoolId };
+      if (student.classId) where.classId = student.classId;
+      const items = await prisma.exam.findMany({
+        where,
+        orderBy: { examDate: "desc" },
+        include: { subject: { select: { id: true, name: true } } },
+      });
+      const examIds = items.map((e) => e.id);
+      const results = examIds.length
+        ? await prisma.examResult.findMany({
+            where: { examId: { in: examIds }, studentId: student.id },
+          })
+        : [];
+      const resultByExam = Object.fromEntries(results.map((r) => [r.examId, r]));
+      const withResults = items.map((e) => ({ ...e, result: resultByExam[e.id] ?? null }));
+      return { items: withResults };
     });
-    const withResults = await Promise.all(
-      items.map(async (e) => {
-        const r = await prisma.examResult.findUnique({ where: { examId_studentId: { examId: e.id, studentId: student.id } } });
-        return { ...e, result: r };
-      })
-    );
-    return res.status(200).json({ success: true, data: { items: withResults } });
+    return res.status(200).json({ success: true, data: result });
   } catch (e) {
     return next(e);
   }
@@ -246,14 +278,16 @@ async function getEvents(req, res, next) {
     const student = await resolveStudent(req);
     const where = { schoolId: student.schoolId, isPublished: true, startDate: { gte: new Date() } };
     const items = await prisma.event.findMany({ where, orderBy: { startDate: "asc" }, take: 50 });
-    const withReg = await Promise.all(
-      items.map(async (ev) => {
-        const reg = await prisma.eventRegistration.findUnique({
-          where: { eventId_studentId: { eventId: ev.id, studentId: student.id } },
-        }).catch(() => null);
-        return { ...ev, registered: !!reg };
-      })
-    );
+    const eventIds = items.map((e) => e.id);
+    const registrations =
+      eventIds.length > 0
+        ? await prisma.eventRegistration.findMany({
+            where: { eventId: { in: eventIds }, studentId: student.id },
+            select: { eventId: true },
+          })
+        : [];
+    const registeredSet = new Set(registrations.map((r) => r.eventId));
+    const withReg = items.map((ev) => ({ ...ev, registered: registeredSet.has(ev.id) }));
     return res.status(200).json({ success: true, data: { items: withReg } });
   } catch (e) {
     return next(e);
@@ -263,7 +297,7 @@ async function getEvents(req, res, next) {
 async function registerForEvent(req, res, next) {
   try {
     const student = await resolveStudent(req);
-    const eventId = req.params.id;
+    const eventId = validateId(req.params.id, "eventId");
     const event = await prisma.event.findFirst({ where: { id: eventId, schoolId: student.schoolId, isPublished: true } });
     if (!event) throw notFound("Event not found");
     const reg = await prisma.eventRegistration.upsert({
@@ -295,8 +329,9 @@ async function getLibrary(req, res, next) {
     const student = await resolveStudent(req);
     const borrows = await prisma.libraryBorrow.findMany({
       where: { schoolId: student.schoolId, borrowerType: "STUDENT", borrowerRefId: student.id },
-      include: { book: true },
+      include: { book: { select: { id: true, title: true, author: true } } },
       orderBy: { issuedAt: "desc" },
+      take: 50,
     });
     return res.status(200).json({ success: true, data: { items: borrows } });
   } catch (e) {
@@ -310,6 +345,337 @@ async function getAchievements(req, res, next) {
     const items = await prisma.studentAchievement.findMany({
       where: { studentId: student.id },
       orderBy: { issuedAt: "desc" },
+      take: 100,
+    });
+    return res.status(200).json({ success: true, data: { items } });
+  } catch (e) {
+    return next(e);
+  }
+}
+
+async function updateProfile(req, res, next) {
+  try {
+    const student = await resolveStudent(req);
+    const data = validateProfileUpdate(req.body || {});
+    if (Object.keys(data).length === 0) {
+      return res.status(200).json({ success: true, data: await prisma.student.findUnique({ where: { id: student.id } }) });
+    }
+    const updated = await prisma.student.update({ where: { id: student.id }, data });
+    if (cache.delByPrefix) cache.delByPrefix(`student:profile:${student.id}`);
+    return res.status(200).json({ success: true, data: updated });
+  } catch (e) {
+    return next(e);
+  }
+}
+
+async function getHomeworkById(req, res, next) {
+  try {
+    const student = await resolveStudent(req);
+    const id = validateId(req.params.id, "id");
+    const where = { id, schoolId: student.schoolId, isPublished: true };
+    if (student.classId) where.OR = [{ classId: null }, { classId: student.classId }];
+    const hw = await prisma.homework.findFirst({
+      where,
+      include: { subject: true, submissions: { where: { studentId: student.id }, take: 1 } },
+    });
+    if (!hw) throw notFound("Homework not found");
+    return res.status(200).json({ success: true, data: hw });
+  } catch (e) {
+    return next(e);
+  }
+}
+
+async function getExamResultById(req, res, next) {
+  try {
+    const student = await resolveStudent(req);
+    const examId = validateId(req.params.id, "examId");
+    const exam = await prisma.exam.findFirst({
+      where: { id: examId, schoolId: student.schoolId },
+      include: { subject: true },
+    });
+    if (!exam) throw notFound("Exam not found");
+    const result = await prisma.examResult.findUnique({
+      where: { examId_studentId: { examId, studentId: student.id } },
+    });
+    return res.status(200).json({ success: true, data: { exam, result } });
+  } catch (e) {
+    return next(e);
+  }
+}
+
+async function getFeesReceipts(req, res, next) {
+  try {
+    const student = await resolveStudent(req);
+    const payments = await prisma.payment.findMany({
+      where: { studentId: student.id },
+      include: { invoice: true },
+      orderBy: { paidAt: "desc" },
+    });
+    return res.status(200).json({ success: true, data: { items: payments } });
+  } catch (e) {
+    return next(e);
+  }
+}
+
+async function getPaymentReceipt(req, res, next) {
+  try {
+    const student = await resolveStudent(req);
+    const id = validateId(req.params.id, "paymentId");
+    const payment = await prisma.payment.findFirst({
+      where: { id, studentId: student.id },
+      include: { invoice: true, collectedBy: { select: { fullName: true } } },
+    });
+    if (!payment) throw notFound("Receipt not found");
+    return res.status(200).json({ success: true, data: payment });
+  } catch (e) {
+    return next(e);
+  }
+}
+
+async function getNotifications(req, res, next) {
+  try {
+    const student = await resolveStudent(req);
+    const { page, limit, skip } = parsePagination(req.query);
+    const where = { schoolId: student.schoolId, status: "SENT" };
+    const [total, items] = await Promise.all([
+      prisma.announcement.count({ where }),
+      prisma.announcement.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { sentAt: "desc" },
+        select: { id: true, title: true, content: true, sentAt: true, audience: true },
+      }),
+    ]);
+    const totalPages = Math.ceil(total / limit);
+    return res.status(200).json({ success: true, data: { items, pagination: { page, limit, total, totalPages } } });
+  } catch (e) {
+    return next(e);
+  }
+}
+
+async function getCirculars(req, res, next) {
+  try {
+    const student = await resolveStudent(req);
+    const { page, limit, skip } = parsePagination(req.query);
+    const where = { schoolId: student.schoolId, status: "SENT" };
+    if (req.query.type) where.audience = req.query.type;
+    const [total, items] = await Promise.all([
+      prisma.announcement.count({ where }),
+      prisma.announcement.findMany({ where, skip, take: limit, orderBy: { sentAt: "desc" } }),
+    ]);
+    const totalPages = Math.ceil(total / limit);
+    return res.status(200).json({ success: true, data: { items, pagination: { page, limit, total, totalPages } } });
+  } catch (e) {
+    return next(e);
+  }
+}
+
+async function getHealth(req, res, next) {
+  try {
+    const student = await resolveStudent(req);
+    const s = await prisma.student.findUnique({
+      where: { id: student.id },
+      select: { medicalInfo: true },
+    });
+    return res.status(200).json({ success: true, data: { medicalInfo: s?.medicalInfo ?? null } });
+  } catch (e) {
+    return next(e);
+  }
+}
+
+async function getSettings(req, res, next) {
+  try {
+    const student = await resolveStudent(req);
+    const s = await prisma.studentSettings.findUnique({ where: { studentId: student.id } });
+    return res.status(200).json({
+      success: true,
+      data: s?.preferences ?? { notifications: true, language: "en", privacy: {} },
+    });
+  } catch (e) {
+    return next(e);
+  }
+}
+
+async function updateSettings(req, res, next) {
+  try {
+    const student = await resolveStudent(req);
+    const prefs = validateSettings(req.body || {});
+    const rec = await prisma.studentSettings.upsert({
+      where: { studentId: student.id },
+      create: { schoolId: student.schoolId, studentId: student.id, preferences: prefs },
+      update: { preferences: prefs },
+    });
+    return res.status(200).json({ success: true, data: rec.preferences });
+  } catch (e) {
+    return next(e);
+  }
+}
+
+async function getLeaveRequests(req, res, next) {
+  try {
+    const student = await resolveStudent(req);
+    const { page, limit, skip } = parsePagination(req.query);
+    const where = { studentId: student.id };
+    const [total, items] = await Promise.all([
+      prisma.studentLeaveRequest.count({ where }),
+      prisma.studentLeaveRequest.findMany({ where, skip, take: limit, orderBy: { createdAt: "desc" } }),
+    ]);
+    const totalPages = Math.ceil(total / limit);
+    return res.status(200).json({ success: true, data: { items, pagination: { page, limit, total, totalPages } } });
+  } catch (e) {
+    return next(e);
+  }
+}
+
+async function createLeaveRequest(req, res, next) {
+  try {
+    const student = await resolveStudent(req);
+    const { fromDate, toDate, reason } = validateLeaveRequest(req.body || {});
+    const rec = await prisma.studentLeaveRequest.create({
+      data: {
+        schoolId: student.schoolId,
+        studentId: student.id,
+        fromDate,
+        toDate,
+        reason,
+      },
+    });
+    return res.status(201).json({ success: true, data: rec });
+  } catch (e) {
+    return next(e);
+  }
+}
+
+async function getSubjectTeachers(req, res, next) {
+  try {
+    const student = await resolveStudent(req);
+    if (!student.classId) return res.status(200).json({ success: true, data: { items: [] } });
+    const classData = await prisma.classRoom.findUnique({
+      where: { id: student.classId },
+      include: { subjectMappings: { include: { subject: true } } },
+    });
+    if (!classData?.subjectMappings?.length) return res.status(200).json({ success: true, data: { items: [] } });
+    const teacherIds = [...new Set(classData.subjectMappings.map((s) => s.teacherId).filter(Boolean))];
+    const teachers = await prisma.staff.findMany({
+      where: { id: { in: teacherIds }, schoolId: student.schoolId },
+      select: { id: true, fullName: true, email: true, phone: true, designation: true },
+    });
+    const bySubject = classData.subjectMappings
+      .filter((s) => s.teacherId)
+      .map((s) => ({
+        subject: s.subject?.name,
+        teacher: teachers.find((t) => t.id === s.teacherId),
+      }));
+    return res.status(200).json({ success: true, data: { items: bySubject } });
+  } catch (e) {
+    return next(e);
+  }
+}
+
+async function getExamTimetable(req, res, next) {
+  try {
+    const student = await resolveStudent(req);
+    const where = { schoolId: student.schoolId };
+    if (student.classId) where.classId = student.classId;
+    const items = await prisma.exam.findMany({
+      where,
+      include: { subject: true },
+      orderBy: { examDate: "asc" },
+    });
+    return res.status(200).json({ success: true, data: { items } });
+  } catch (e) {
+    return next(e);
+  }
+}
+
+async function createMeetingRequest(req, res, next) {
+  try {
+    const student = await resolveStudent(req);
+    const { staffId, preferredDate, purpose } = validateMeetingRequest(req.body || {});
+    const rec = await prisma.meetingRequest.create({
+      data: {
+        schoolId: student.schoolId,
+        studentId: student.id,
+        staffId,
+        preferredDate,
+        purpose,
+      },
+    });
+    return res.status(201).json({ success: true, data: rec });
+  } catch (e) {
+    return next(e);
+  }
+}
+
+async function getLibraryBooks(req, res, next) {
+  try {
+    const student = await resolveStudent(req);
+    const { page, limit, skip } = parsePagination(req.query);
+    const where = { schoolId: student.schoolId, isActive: true };
+    const search = validateSearch(req.query.search);
+    if (search) where.title = { contains: search, mode: "insensitive" };
+    if (req.query.category != null && req.query.category !== "") {
+      where.category = String(req.query.category).trim().slice(0, 100);
+    }
+    const [total, items] = await Promise.all([
+      prisma.libraryBook.count({ where }),
+      prisma.libraryBook.findMany({ where, skip, take: limit, orderBy: { title: "asc" } }),
+    ]);
+    const totalPages = Math.ceil(total / limit);
+    return res.status(200).json({ success: true, data: { items, pagination: { page, limit, total, totalPages } } });
+  } catch (e) {
+    return next(e);
+  }
+}
+
+async function aiAsk(req, res, next) {
+  try {
+    await resolveStudent(req);
+    validateAiAsk(req.body || {});
+    return res.status(200).json({
+      success: true,
+      data: { answer: "AI Study Assistant is not yet configured. Please contact your school admin.", stub: true },
+    });
+  } catch (e) {
+    return next(e);
+  }
+}
+
+async function aiCareer(req, res, next) {
+  try {
+    await resolveStudent(req);
+    return res.status(200).json({
+      success: true,
+      data: { message: "AI Career Advisor is not yet configured. Please contact your school admin.", stub: true },
+    });
+  } catch (e) {
+    return next(e);
+  }
+}
+
+async function getReportCards(req, res, next) {
+  try {
+    const student = await resolveStudent(req);
+    const results = await prisma.examResult.findMany({
+      where: { studentId: student.id },
+      include: { exam: { include: { subject: { select: { id: true, name: true } } } } },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    });
+    return res.status(200).json({ success: true, data: { items: results } });
+  } catch (e) {
+    return next(e);
+  }
+}
+
+async function getDocuments(req, res, next) {
+  try {
+    const student = await resolveStudent(req);
+    const items = await prisma.studentDocument.findMany({
+      where: { studentId: student.id },
+      orderBy: { createdAt: "desc" },
+      take: 100,
     });
     return res.status(200).json({ success: true, data: { items } });
   } catch (e) {
@@ -320,17 +686,37 @@ async function getAchievements(req, res, next) {
 module.exports = {
   dashboard,
   getProfile,
+  updateProfile,
   getTimetable,
   getAttendance,
   getHomework,
+  getHomeworkById,
   submitHomework,
   getStudyMaterials,
   getExams,
+  getExamResultById,
+  getExamTimetable,
   getFees,
+  getFeesReceipts,
+  getPaymentReceipt,
   getAnnouncements,
   getEvents,
   registerForEvent,
   getTransport,
   getLibrary,
+  getLibraryBooks,
   getAchievements,
+  getNotifications,
+  getCirculars,
+  getHealth,
+  getSettings,
+  updateSettings,
+  getLeaveRequests,
+  createLeaveRequest,
+  getSubjectTeachers,
+  createMeetingRequest,
+  aiAsk,
+  aiCareer,
+  getReportCards,
+  getDocuments,
 };

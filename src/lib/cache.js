@@ -97,10 +97,13 @@ const cacheKeys = {
   studyMaterialsList: (schoolId, page, limit) => `study:list:${schoolId}:${page}:${limit}`,
   studentDashboard: (studentId) => `student:dashboard:${studentId}`,
   studentProfile: (studentId) => `student:profile:${studentId}`,
+  studentTimetable: (classId) => `student:timetable:${classId || "none"}`,
+  studentExams: (studentId) => `student:exams:${studentId}`,
 };
 
 const CACHE_TTL_LIST = () => (env.CACHE_TTL_LIST_SEC != null ? env.CACHE_TTL_LIST_SEC : 60);
 const CACHE_TTL_STUDENT_DASHBOARD = () => (env.CACHE_TTL_STUDENT_DASHBOARD_SEC != null ? env.CACHE_TTL_STUDENT_DASHBOARD_SEC : 60);
+const CACHE_TTL_STUDENT_OTHER = () => (env.CACHE_TTL_STUDENT_OTHER_SEC != null ? env.CACHE_TTL_STUDENT_OTHER_SEC : 120);
 
 /**
  * Get from cache or compute and set (for list/dashboard endpoints). TTL in seconds.
@@ -147,5 +150,7 @@ module.exports = {
     permissions: () => env.CACHE_TTL_PERMISSIONS_SEC,
     list: CACHE_TTL_LIST,
     studentDashboard: CACHE_TTL_STUDENT_DASHBOARD,
+    studentTimetable: CACHE_TTL_STUDENT_OTHER,
+    studentExams: CACHE_TTL_STUDENT_OTHER,
   },
 };
