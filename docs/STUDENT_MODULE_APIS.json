@@ -1,7 +1,8 @@
 {
   "module": "Student Portal",
   "description": "All APIs for the student-facing app. User must be logged in with role STUDENT and have a linked Student profile. Every endpoint returns { success: true, data: ... } on success.",
-  "baseUrl": "{{BASE_URL}}/api/v1",
+  "dataSource": "All student data is created and managed on the admin side (School Admin, Staff, Accountant, etc.). Student APIs only expose that data to the logged-in student—read-only for most resources; students can submit homework, register for events, request leave, and update limited profile/settings.",
+  "baseUrl": "https://backend-school-app.onrender.com/api/v1",
   "totalEndpoints": 35,
   "submodules": {
     "Dashboard": ["GET /student/dashboard"],
@@ -554,7 +555,7 @@
     "errorCode": "string (optional)"
   },
   "notes": [
-    "Base URL: use your backend root, e.g. https://your-api.com/api/v1",
+    "Base URL: https://backend-school-app.onrender.com/api/v1",
     "All /student/* routes require header: Authorization: Bearer <accessToken>",
     "User role must be STUDENT; Student profile must be linked (userId on Student)",
     "Pagination: page (1-based), limit (default 20, max 100). List responses include data.pagination: { page, limit, total, totalPages }",

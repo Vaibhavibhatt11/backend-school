@@ -177,12 +177,70 @@ async function main() {
     });
   }
 
+  // Test student for frontend development
+  const studentPasswordHash = await bcrypt.hash("Student123!", 10);
+  const studentUser = await prisma.user.upsert({
+    where: { email: "student@school.edu" },
+    update: {
+      fullName: "Demo Student",
+      role: "STUDENT",
+      schoolId: school.id,
+      isActive: true,
+      passwordHash: studentPasswordHash,
+    },
+    create: {
+      fullName: "Demo Student",
+      email: "student@school.edu",
+      role: "STUDENT",
+      schoolId: school.id,
+      passwordHash: studentPasswordHash,
+      isActive: true,
+    },
+  });
+
+  const demoClass = await prisma.classRoom.upsert({
+    where: {
+      schoolId_name_section: { schoolId: school.id, name: "Class 10", section: "A" },
+    },
+    update: {},
+    create: {
+      schoolId: school.id,
+      name: "Class 10",
+      section: "A",
+    },
+  });
+
+  await prisma.student.upsert({
+    where: { schoolId_admissionNo: { schoolId: school.id, admissionNo: "STU001" } },
+    update: {
+      userId: studentUser.id,
+      firstName: "Demo",
+      lastName: "Student",
+      className: "Class 10",
+      section: "A",
+      status: "ACTIVE",
+    },
+    create: {
+      schoolId: school.id,
+      classId: demoClass.id,
+      admissionNo: "STU001",
+      firstName: "Demo",
+      lastName: "Student",
+      className: "Class 10",
+      section: "A",
+      status: "ACTIVE",
+      userId: studentUser.id,
+    },
+  });
+
   console.log("Seed complete.");
   console.log("Login users (password: Admin123!):");
   console.log("- super@school.edu (superadmin)");
   console.log("- admin@school.edu (schooladmin)");
   console.log("- acc@school.edu (accountant)");
   console.log("- hr@school.edu (hr)");
+  console.log("\nTest student (password: Student123!):");
+  console.log("- student@school.edu (STUDENT)");
 }
 
 main()
