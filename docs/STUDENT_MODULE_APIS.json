@@ -1,0 +1,583 @@
+{
+  "module": "Student Portal",
+  "description": "All APIs for the student-facing app. User must be logged in with role STUDENT and have a linked Student profile. Every endpoint returns { success: true, data: ... } on success.",
+  "dataSource": "All student data is created and managed on the admin side (School Admin, Staff, Accountant, etc.). Student APIs only expose that data to the logged-in student—read-only for most resources; students can submit homework, register for events, request leave, and update limited profile/settings.",
+  "baseUrl": "https://backend-school-app.onrender.com/api/v1",
+  "totalEndpoints": 35,
+  "submodules": {
+    "Dashboard": ["GET /student/dashboard"],
+    "Profile": ["GET /student/profile", "PUT /student/profile"],
+    "Timetable": ["GET /student/timetable"],
+    "Attendance": ["GET /student/attendance"],
+    "Homework": ["GET /student/homework", "GET /student/homework/:id", "POST /student/homework/:id/submit"],
+    "Study Materials": ["GET /student/study-materials"],
+    "Exams": ["GET /student/exams", "GET /student/exams/:id/result", "GET /student/exam-timetable"],
+    "Fees": ["GET /student/fees", "GET /student/fees/receipts", "GET /student/payments/:id/receipt"],
+    "Announcements": ["GET /student/announcements"],
+    "Notifications": ["GET /student/notifications"],
+    "Circulars": ["GET /student/circulars"],
+    "Events": ["GET /student/events", "POST /student/events/:id/register"],
+    "Transport": ["GET /student/transport"],
+    "Library": ["GET /student/library", "GET /student/library/books"],
+    "Achievements": ["GET /student/achievements"],
+    "Leave Requests": ["GET /student/leave-requests", "POST /student/leave-requests"],
+    "Subject Teachers": ["GET /student/subject-teachers"],
+    "Meetings": ["POST /student/meetings/request"],
+    "Settings": ["GET /student/settings", "PUT /student/settings"],
+    "Health": ["GET /student/health"],
+    "Report Cards": ["GET /student/report-cards"],
+    "Documents": ["GET /student/documents"],
+    "AI (stub)": ["POST /student/ai/ask", "GET /student/ai/career"]
+  },
+  "auth": {
+    "type": "Bearer",
+    "header": "Authorization",
+    "value": "Bearer <accessToken>",
+    "note": "Use token from POST /auth/login. Role must be STUDENT."
+  },
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/student/dashboard",
+      "description": "Student dashboard: attendance summary (last 30 days), upcoming exams (5), pending dues count, announcements count.",
+      "query": {},
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "studentId": "string",
+          "attendanceSummary": { "PRESENT": "number", "ABSENT": "number", "LATE": "number", "LEAVE": "number" },
+          "upcomingExams": [{ "id": "string", "name": "string", "examDate": "string (ISO)", "subjectId": "string" }],
+          "pendingDuesCount": "number",
+          "announcementsCount": "number"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/profile",
+      "description": "Logged-in student's full profile with parents and class.",
+      "query": {},
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "id": "string",
+          "admissionNo": "string",
+          "firstName": "string",
+          "lastName": "string",
+          "dob": "string (ISO) | null",
+          "gender": "string | null",
+          "className": "string",
+          "section": "string | null",
+          "rollNo": "number | null",
+          "status": "ACTIVE | INACTIVE",
+          "guardianPhone": "string | null",
+          "createdAt": "string (ISO)",
+          "parents": [{ "relationType": "string", "isPrimary": "boolean", "parent": { "id": "string", "fullName": "string", "email": "string | null", "phone": "string | null" } }],
+          "class": { "id": "string", "name": "string", "section": "string" }
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/timetable",
+      "description": "Own class timetable (upcoming live sessions for student's class).",
+      "query": {},
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "slots": [{ "id": "string", "title": "string", "startsAt": "string (ISO)", "endsAt": "string (ISO) or null", "subject": { "id": "string", "name": "string" } }]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/attendance",
+      "description": "Own attendance records with pagination. Optional filter by month.",
+      "query": {
+        "page": "number (default 1)",
+        "limit": "number (default 20, max 100)",
+        "month": "string (YYYY-MM) optional"
+      },
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "items": [{ "id": "string", "date": "string (ISO)", "status": "PRESENT | ABSENT | LATE | LEAVE", "remark": "string | null" }],
+          "pagination": { "page": "number", "limit": "number", "total": "number", "totalPages": "number" }
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/homework",
+      "description": "Homework list for student's class with own submission status per homework.",
+      "query": {
+        "page": "number (default 1)",
+        "limit": "number (default 20, max 100)"
+      },
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "items": [{ "id": "string", "title": "string", "dueDate": "string (ISO)", "classId": "string | null", "subjectId": "string | null", "submissions": [{ "id": "string", "status": "string", "submittedAt": "string (ISO)" }] }],
+          "pagination": { "page": "number", "limit": "number", "total": "number", "totalPages": "number" }
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/student/homework/:id/submit",
+      "description": "Submit or update homework submission for the logged-in student.",
+      "query": {},
+      "body": {
+        "url": "string (optional) – single file URL",
+        "fileUrls": "string[] (optional) – array of file URLs, max 20",
+        "status": "string (optional, default SUBMITTED)"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "id": "string",
+          "homeworkId": "string",
+          "studentId": "string",
+          "url": "string | null",
+          "fileUrls": "string[]",
+          "status": "string",
+          "submittedAt": "string (ISO)"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/study-materials",
+      "description": "Study materials for student's class (published only).",
+      "query": {},
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "items": [{ "id": "string", "title": "string", "description": "string | null", "url": "string", "type": "string", "chapter": "string | null", "classId": "string | null", "subjectId": "string | null", "createdAt": "string (ISO)" }]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/exams",
+      "description": "Exams for student's class with own result (marks/grade) per exam.",
+      "query": {},
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "items": [{ "id": "string", "name": "string", "examDate": "string (ISO)", "maxMarks": "number", "isPublished": "boolean", "subject": { "id": "string", "name": "string" }, "result": { "marks": "number", "grade": "string", "remarks": "string" } }]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/fees",
+      "description": "Invoices, recent payments, and total pending dues for the student.",
+      "query": {},
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "invoices": [{ "id": "string", "invoiceNo": "string", "dueDate": "string (ISO)", "amountDue": "number", "amountPaid": "number", "status": "string" }],
+          "payments": [{ "id": "string", "receiptNo": "string", "amount": "number", "paidAt": "string (ISO)", "method": "string" }],
+          "pendingDues": "number"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/announcements",
+      "description": "Sent announcements for the school (paginated).",
+      "query": {
+        "page": "number (default 1)",
+        "limit": "number (default 20, max 100)"
+      },
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "items": [{ "id": "string", "title": "string", "content": "string", "audience": "string", "sentAt": "string (ISO) or null", "createdAt": "string (ISO)" }],
+          "pagination": { "page": "number", "limit": "number", "total": "number", "totalPages": "number" }
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/events",
+      "description": "Upcoming published events with registration status for the student.",
+      "query": {},
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "items": [{ "id": "string", "title": "string", "eventType": "string", "startDate": "string (ISO)", "endDate": "string (ISO) | null", "location": "string | null", "registered": "boolean" }]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/student/events/:id/register",
+      "description": "Register the logged-in student for an event.",
+      "query": {},
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "id": "string",
+          "eventId": "string",
+          "studentId": "string",
+          "status": "string"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/transport",
+      "description": "Own transport allocation (route and stop) if assigned.",
+      "query": {},
+      "body": null,
+      "response": {
+        "success": true,
+        "data": "Transport allocation object or null when student has no transport assigned",
+        "dataShape": {
+          "id": "string",
+          "studentId": "string",
+          "routeId": "string",
+          "stopName": "string | null",
+          "feeAmount": "number | null",
+          "route": { "id": "string", "name": "string", "routeCode": "string", "stops": "object | null" }
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/library",
+      "description": "Own library borrows (current and past) with book details.",
+      "query": {},
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "items": [{ "id": "string", "bookId": "string", "issuedAt": "string (ISO)", "dueDate": "string (ISO)", "returnedAt": "string (ISO) | null", "status": "string", "book": { "id": "string", "title": "string", "author": "string | null" } }]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/achievements",
+      "description": "Own achievements/certificates.",
+      "query": {},
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "items": [{ "id": "string", "title": "string", "description": "string | null", "type": "string", "url": "string | null", "issuedAt": "string (ISO)" }]
+        }
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/student/profile",
+      "description": "Update limited profile fields (e.g. guardianPhone). Only whitelisted fields allowed.",
+      "query": {},
+      "body": { "guardianPhone": "string (optional)" },
+      "response": {
+        "success": true,
+        "data": { "id": "string", "admissionNo": "string", "firstName": "string", "lastName": "string", "guardianPhone": "string | null", "updatedAt": "string (ISO)", "otherStudentFields": "..." }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/homework/:id",
+      "description": "Single homework detail with subject and own submission.",
+      "query": {},
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "id": "string",
+          "title": "string",
+          "dueDate": "string (ISO)",
+          "description": "string | null",
+          "subject": { "id": "string", "name": "string" },
+          "submissions": [{ "id": "string", "status": "string", "submittedAt": "string (ISO)" }]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/exams/:id/result",
+      "description": "Result for a specific exam.",
+      "query": {},
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "exam": { "id": "string", "name": "string", "examDate": "string (ISO)", "subject": { "id": "string", "name": "string" } },
+          "result": { "marks": "number", "grade": "string", "remarks": "string" }
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/exam-timetable",
+      "description": "Exam schedule for student's class.",
+      "query": {},
+      "body": null,
+      "response": {
+        "success": true,
+        "data": { "items": [{ "id": "string", "name": "string", "examDate": "string (ISO)", "subject": { "id": "string", "name": "string" } }] }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/fees/receipts",
+      "description": "List all payment receipts for the student.",
+      "query": {},
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "items": [{ "id": "string", "receiptNo": "string", "amount": "number", "paidAt": "string (ISO)", "method": "string", "invoice": "object or null" }]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/payments/:id/receipt",
+      "description": "Single payment receipt by ID.",
+      "query": {},
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "id": "string",
+          "receiptNo": "string",
+          "amount": "number",
+          "paidAt": "string (ISO)",
+          "method": "string",
+          "invoice": "object or null",
+          "collectedBy": { "fullName": "string" }
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/notifications",
+      "description": "Notifications for the student (announcements).",
+      "query": { "page": "number", "limit": "number" },
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "items": [{ "id": "string", "title": "string", "content": "string", "sentAt": "string (ISO) or null", "audience": "string" }],
+          "pagination": { "page": "number", "limit": "number", "total": "number", "totalPages": "number" }
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/circulars",
+      "description": "Circulars / announcements. Optional filter by type (audience).",
+      "query": { "page": "number", "limit": "number", "type": "string (optional – audience filter)" },
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "items": "Announcement[]",
+          "pagination": { "page": "number", "limit": "number", "total": "number", "totalPages": "number" }
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/health",
+      "description": "Student medical info (Json field).",
+      "query": {},
+      "body": null,
+      "response": { "success": true, "data": { "medicalInfo": "object | null" } }
+    },
+    {
+      "method": "GET",
+      "path": "/student/settings",
+      "description": "Student preferences (notifications, language, privacy).",
+      "query": {},
+      "body": null,
+      "response": {
+        "success": true,
+        "data": { "notifications": "boolean", "language": "string", "privacy": "object" }
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/student/settings",
+      "description": "Update student preferences.",
+      "query": {},
+      "body": { "preferences": "object" },
+      "response": { "success": true, "data": "updated preferences object" }
+    },
+    {
+      "method": "GET",
+      "path": "/student/leave-requests",
+      "description": "List own leave requests (paginated).",
+      "query": { "page": "number (default 1)", "limit": "number (default 20, max 100)" },
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "items": [{ "id": "string", "fromDate": "string (ISO)", "toDate": "string (ISO)", "reason": "string", "status": "string", "remark": "string | null", "createdAt": "string (ISO)" }],
+          "pagination": { "page": "number", "limit": "number", "total": "number", "totalPages": "number" }
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/student/leave-requests",
+      "description": "Submit a leave request.",
+      "query": {},
+      "body": { "fromDate": "string (ISO)", "toDate": "string (ISO)", "reason": "string" },
+      "response": {
+        "success": true,
+        "data": { "id": "string", "schoolId": "string", "studentId": "string", "fromDate": "string (ISO)", "toDate": "string (ISO)", "reason": "string", "status": "PENDING", "createdAt": "string (ISO)" }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/subject-teachers",
+      "description": "Teachers for student's class by subject.",
+      "query": {},
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "items": [{ "subject": "string", "teacher": { "id": "string", "fullName": "string", "email": "string | null", "phone": "string | null", "designation": "string | null" } }]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/student/meetings/request",
+      "description": "Request parent-teacher meeting.",
+      "query": {},
+      "body": { "staffId": "string (optional)", "preferredDate": "string (ISO, optional)", "purpose": "string (optional)" },
+      "response": {
+        "success": true,
+        "data": { "id": "string", "schoolId": "string", "studentId": "string", "staffId": "string | null", "preferredDate": "string (ISO) | null", "purpose": "string | null", "status": "PENDING", "createdAt": "string (ISO)" }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/library/books",
+      "description": "Browse library catalog. Paginated, optional search and category.",
+      "query": { "page": "number", "limit": "number", "search": "string", "category": "string" },
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "items": [{ "id": "string", "title": "string", "author": "string | null", "category": "string | null", "availableCopies": "number" }],
+          "pagination": { "page": "number", "limit": "number", "total": "number", "totalPages": "number" }
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/student/ai/ask",
+      "description": "AI Study Assistant (stub – returns placeholder).",
+      "query": {},
+      "body": { "question": "string" },
+      "response": { "success": true, "data": { "answer": "string", "stub": true } }
+    },
+    {
+      "method": "GET",
+      "path": "/student/ai/career",
+      "description": "AI Career Advisor (stub – returns placeholder).",
+      "query": {},
+      "body": null,
+      "response": { "success": true, "data": { "message": "string", "stub": true } }
+    },
+    {
+      "method": "GET",
+      "path": "/student/report-cards",
+      "description": "List exam results (report cards).",
+      "query": {},
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "items": [{ "exam": { "name": "string", "subject": { "name": "string" } }, "marks": "number", "grade": "string | null", "remarks": "string | null" }]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/student/documents",
+      "description": "Own documents uploaded by school.",
+      "query": {},
+      "body": null,
+      "response": {
+        "success": true,
+        "data": {
+          "items": [{ "id": "string", "name": "string", "url": "string", "type": "string", "createdAt": "string (ISO)" }]
+        }
+      }
+    }
+  ],
+  "authEndpoint": {
+    "method": "POST",
+    "path": "/auth/login",
+    "description": "Login to get accessToken. Use email/password. For student app, user must have role STUDENT and linked Student profile.",
+    "body": { "email": "string", "password": "string" },
+    "response": {
+      "success": true,
+      "data": {
+        "accessToken": "string",
+        "refreshToken": "string",
+        "user": { "id": "string", "fullName": "string", "email": "string", "role": "STUDENT", "schoolId": "string" }
+      }
+    }
+  },
+  "refreshToken": {
+    "method": "POST",
+    "path": "/auth/refresh",
+    "body": { "refreshToken": "string" },
+    "response": { "success": true, "data": { "accessToken": "string", "refreshToken": "string" } }
+  },
+  "errorResponse": {
+    "success": false,
+    "error": "string (message)",
+    "errorCode": "string (optional)"
+  },
+  "notes": [
+    "Base URL: https://backend-school-app.onrender.com/api/v1",
+    "All /student/* routes require header: Authorization: Bearer <accessToken>",
+    "User role must be STUDENT; Student profile must be linked (userId on Student)",
+    "Pagination: page (1-based), limit (default 20, max 100). List responses include data.pagination: { page, limit, total, totalPages }",
+    "Success: every API returns { success: true, data: ... }. Errors return { success: false, error: \"message\" } with 4xx/5xx status",
+    "GET /student/transport returns data: null when student has no transport allocation",
+    "Performance: dashboard, profile, timetable, and exams use server-side caching for fast responses; list endpoints use batched DB queries and capped result sizes"
+  ],
+  "databaseAndScale": {
+    "indexes": "StudentAttendance (studentId, date), ExamResult (studentId, createdAt), Homework (schoolId, classId, isPublished), plus existing Invoice/Payment/Event indexes for fast student queries.",
+    "connectionPool": "Use single Prisma client per process; set DATABASE_URL with ?connection_limit=N (e.g. 20–50) in production.",
+    "caching": "Redis recommended; CACHE_ENABLED=true. Dashboard, profile, timetable, exams cached for quick response under load.",
+    "readiness": "GET /api/v1/ready checks DB and Redis; use for load balancer health.",
+    "seeAlso": "backend/docs/SCALING_AND_RELIABILITY.md for 1M+ user checklist."
+  },
+  "security": {
+    "authentication": "All routes require valid JWT (Bearer). Missing or invalid token returns 401 Unauthorized.",
+    "authorization": "User must have role STUDENT and a linked Student profile; otherwise 403 Forbidden.",
+    "dataIsolation": "Every query is scoped by schoolId and studentId so students only access their own data.",
+    "inputValidation": "IDs (params) validated format/length; request body validated and sanitized (max lengths, required fields). Invalid input returns 400 with errorCode INVALID_INPUT.",
+    "limits": "reason 2000 chars, purpose 500, question 2000, preferences 10KB, fileUrls max 20 items, search 100 chars, month YYYY-MM.",
+    "idorPrevention": "Resource IDs (homework, exam, event, payment) validated; access always checked against logged-in student/school."
+  },
+  "exampleSuccess": { "success": true, "data": { "items": [], "pagination": { "page": 1, "limit": 20, "total": 0, "totalPages": 0 } } },
+  "exampleError": { "success": false, "error": "Homework not found" }
+}
