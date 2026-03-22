@@ -333,7 +333,9 @@ const environment = {
   name: "School ERP - Local",
   values: [
     { key: "baseUrl", value: "http://localhost:5000/api/v1", enabled: true },
+    { key: "base_url", value: "http://localhost:5000/api/v1", enabled: true },
     { key: "accessToken", value: "", enabled: true },
+    { key: "auth_token", value: "", enabled: true },
     { key: "refreshToken", value: "", enabled: true },
     { key: "forgotEmail", value: "admin@school.edu", enabled: true },
     { key: "otp", value: "654321", enabled: true },

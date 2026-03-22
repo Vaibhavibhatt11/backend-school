@@ -363,6 +363,43 @@ const items = [
     req('GET /accountant/students/balances', 'GET', '/accountant/students/balances'),
     req('GET /accountant/reports/jobs', 'GET', '/accountant/reports/jobs'),
     req('POST /accountant/reports/generate', 'POST', '/accountant/reports/generate', { type: '', params: {} })
+  ]),
+  folder('08 Student app (STUDENT role JWT)', [
+    req('GET /student/dashboard', 'GET', '/student/dashboard'),
+    req('GET /student/profile', 'GET', '/student/profile'),
+    req('PUT /student/profile', 'PUT', '/student/profile', {}),
+    req('GET /student/timetable', 'GET', '/student/timetable'),
+    req('GET /student/attendance', 'GET', '/student/attendance'),
+    req('GET /student/homework', 'GET', '/student/homework'),
+    req('GET /student/homework/:id', 'GET', '/student/homework/{{homeworkId}}'),
+    req('POST /student/homework/:id/submit', 'POST', '/student/homework/{{homeworkId}}/submit', {}),
+    req('GET /student/study-materials', 'GET', '/student/study-materials'),
+    req('GET /student/exams', 'GET', '/student/exams'),
+    req('GET /student/exams/:id/result', 'GET', '/student/exams/{{examId}}/result'),
+    req('GET /student/exam-timetable', 'GET', '/student/exam-timetable'),
+    req('GET /student/fees', 'GET', '/student/fees'),
+    req('GET /student/fees/receipts', 'GET', '/student/fees/receipts'),
+    req('GET /student/payments/:id/receipt', 'GET', '/student/payments/{{paymentId}}/receipt'),
+    req('GET /student/announcements', 'GET', '/student/announcements'),
+    req('GET /student/events', 'GET', '/student/events'),
+    req('POST /student/events/:id/register', 'POST', '/student/events/{{eventId}}/register', {}),
+    req('GET /student/transport', 'GET', '/student/transport'),
+    req('GET /student/library', 'GET', '/student/library'),
+    req('GET /student/library/books', 'GET', '/student/library/books'),
+    req('GET /student/achievements', 'GET', '/student/achievements'),
+    req('GET /student/notifications', 'GET', '/student/notifications'),
+    req('GET /student/circulars', 'GET', '/student/circulars'),
+    req('GET /student/health', 'GET', '/student/health'),
+    req('GET /student/settings', 'GET', '/student/settings'),
+    req('PUT /student/settings', 'PUT', '/student/settings', {}),
+    req('GET /student/leave-requests', 'GET', '/student/leave-requests'),
+    req('POST /student/leave-requests', 'POST', '/student/leave-requests', {}),
+    req('GET /student/subject-teachers', 'GET', '/student/subject-teachers'),
+    req('POST /student/meetings/request', 'POST', '/student/meetings/request', {}),
+    req('POST /student/ai/ask', 'POST', '/student/ai/ask', { message: '' }),
+    req('GET /student/ai/career', 'GET', '/student/ai/career'),
+    req('GET /student/report-cards', 'GET', '/student/report-cards'),
+    req('GET /student/documents', 'GET', '/student/documents')
   ])
 ];
 
@@ -390,7 +427,7 @@ const collection = {
     _postman_id: 'school-erp-full-' + Date.now(),
     name: 'School ERP - Full API Collection',
     schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
-    description: 'All APIs from API_LIST_FOR_FRONTEND.md. Base URL: Render. Run 01 Auth > POST /auth/login first to set auth_token.'
+    description: 'School ERP API collection. Set collection variable `base_url` (or import an environment). Run **01 Auth > POST /auth/login** first to set `auth_token`. For **08 Student app**, use a user with role STUDENT in the login body.'
   },
   variable: [
     { key: 'base_url', value: 'https://backend-school-app.onrender.com/api/v1' },
@@ -434,7 +471,10 @@ const collection = {
     { key: 'ticketId', value: '' },
     { key: 'accountantId', value: '' },
     { key: 'invitationId', value: '' },
-    { key: 'notificationId', value: '' }
+    { key: 'notificationId', value: '' },
+    { key: 'homeworkId', value: '' },
+    { key: 'eventId', value: '' },
+    { key: 'docId', value: '' }
   ],
   item: items.map(toPostmanItem)
 };
