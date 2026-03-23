@@ -1,3 +1,13 @@
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "..", ".env") });
+
+if (!process.env.DATABASE_URL) {
+  console.error(
+    "DATABASE_URL is not set. Create a `.env` file in the project root (copy from `.env.example`) and add your PostgreSQL connection string."
+  );
+  process.exit(1);
+}
+
 const bcrypt = require("bcryptjs");
 const { PrismaClient } = require("@prisma/client");
 
