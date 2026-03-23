@@ -624,6 +624,7 @@ model Parent {
   students StudentParent[]
 
   @@index([schoolId])
+  @@index([schoolId, email])
 }
 
 model StudentParent {
@@ -638,6 +639,7 @@ model StudentParent {
   parent  Parent  @relation(fields: [parentId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, parentId])
+  @@index([parentId])
 }
 
 model StudentAttendance {

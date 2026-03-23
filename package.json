@@ -15,8 +15,10 @@
     "prisma:studio": "prisma studio",
     "prisma:seed": "node prisma/seed.js",
     "smoke:full": "node scripts/full-api-smoke.js",
-    "load:k6:auth": "echo \"Run: k6 run scripts/k6-auth-load.js\"",
-    "check": "node -e \"console.log('Backend scaffold is ready')\""
+    "load:k6:auth": "k6 run scripts/k6-auth-load.js",
+    "postman:admin": "node postman/build-admin-collection.js",
+    "postman:parent": "node postman/build-parent-collection.js",
+    "postman:build": "node postman/build-admin-collection.js && node postman/build-parent-collection.js"
   },
   "keywords": [],
   "author": "",

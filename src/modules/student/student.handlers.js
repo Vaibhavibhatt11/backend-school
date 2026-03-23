@@ -10,7 +10,6 @@ const {
   validateHomeworkSubmit,
   validateProfileUpdate,
   validateSettings,
-  validateAiAsk,
   validateMeetingRequest,
   validateQueryMonth,
   validateSearch,
@@ -629,31 +628,6 @@ async function getLibraryBooks(req, res, next) {
   }
 }
 
-async function aiAsk(req, res, next) {
-  try {
-    await resolveStudent(req);
-    validateAiAsk(req.body || {});
-    return res.status(200).json({
-      success: true,
-      data: { answer: "AI Study Assistant is not yet configured. Please contact your school admin.", stub: true },
-    });
-  } catch (e) {
-    return next(e);
-  }
-}
-
-async function aiCareer(req, res, next) {
-  try {
-    await resolveStudent(req);
-    return res.status(200).json({
-      success: true,
-      data: { message: "AI Career Advisor is not yet configured. Please contact your school admin.", stub: true },
-    });
-  } catch (e) {
-    return next(e);
-  }
-}
-
 async function getReportCards(req, res, next) {
   try {
     const student = await resolveStudent(req);
@@ -715,8 +689,6 @@ module.exports = {
   createLeaveRequest,
   getSubjectTeachers,
   createMeetingRequest,
-  aiAsk,
-  aiCareer,
   getReportCards,
   getDocuments,
 };

@@ -51,6 +51,23 @@ function eventTest() {
   ];
 }
 
+function eventSaveFirstChild() {
+  return [
+    {
+      listen: "test",
+      script: {
+        type: "text/javascript",
+        exec: [
+          "pm.test('Status 2xx', function () { pm.response.to.be.success; });",
+          "const j = pm.response.json();",
+          "const ch = j && j.data && j.data.children && j.data.children[0];",
+          "if (ch && ch.id) pm.collectionVariables.set('childId', ch.id);",
+        ],
+      },
+    },
+  ];
+}
+
 function toPostmanItem(it) {
   if (it.item) {
     return { name: it.name, item: it.item.map(toPostmanItem) };
@@ -90,23 +107,25 @@ const items = [
     req("GET /auth/me", "GET", "/auth/me"),
   ]),
   folder("02 Parent app (/parent/*) — requires PARENT JWT", [
-    req("GET /parent/children", "GET", "/parent/children"),
-    req("GET /parent/home", "GET", "/parent/home"),
-    req("GET /parent/announcements", "GET", "/parent/announcements"),
-    req("GET /parent/notifications", "GET", "/parent/notifications"),
-    req("GET /parent/attendance", "GET", "/parent/attendance"),
-    req("GET /parent/fees", "GET", "/parent/fees"),
+    (() => {
+      const r = req("GET /parent/children", "GET", "/parent/children");
+      r.event = eventSaveFirstChild();
+      return r;
+    })(),
+    req("GET /parent/home", "GET", "/parent/home?childId={{childId}}"),
+    req("GET /parent/announcements", "GET", "/parent/announcements?childId={{childId}}"),
+    req("GET /parent/notifications", "GET", "/parent/notifications?childId={{childId}}"),
+    req("GET /parent/attendance", "GET", "/parent/attendance?childId={{childId}}"),
+    req("GET /parent/fees", "GET", "/parent/fees?childId={{childId}}"),
     req("GET /parent/invoices/:invoiceId", "GET", "/parent/invoices/{{invoiceId}}"),
-    req("GET /parent/timetable", "GET", "/parent/timetable"),
-    req("GET /parent/progress-reports", "GET", "/parent/progress-reports"),
-    req("GET /parent/live-classes", "GET", "/parent/live-classes"),
-    req("GET /parent/profile-hub", "GET", "/parent/profile-hub"),
-    req("GET /parent/library", "GET", "/parent/library"),
-    req("GET /parent/documents", "GET", "/parent/documents"),
-    req("POST /parent/ai/ask", "POST", "/parent/ai/ask", { message: "" }),
-    req("GET /parent/ai/career", "GET", "/parent/ai/career"),
-    req("GET /parent/settings", "GET", "/parent/settings"),
-    req("PUT /parent/settings", "PUT", "/parent/settings", {}),
+    req("GET /parent/timetable", "GET", "/parent/timetable?childId={{childId}}"),
+    req("GET /parent/progress-reports", "GET", "/parent/progress-reports?childId={{childId}}"),
+    req("GET /parent/live-classes", "GET", "/parent/live-classes?childId={{childId}}"),
+    req("GET /parent/profile-hub", "GET", "/parent/profile-hub?childId={{childId}}"),
+    req("GET /parent/library", "GET", "/parent/library?childId={{childId}}"),
+    req("GET /parent/documents", "GET", "/parent/documents?childId={{childId}}"),
+    req("GET /parent/settings", "GET", "/parent/settings?childId={{childId}}"),
+    req("PUT /parent/settings", "PUT", "/parent/settings?childId={{childId}}", {}),
   ]),
 ];
 
@@ -116,9 +135,9 @@ const collection = {
     name: "School ERP — Parent app (PARENT role)",
     schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     description:
-      "Parent app APIs under `/api/v1/parent`. **CRITICAL:** Set `base_url` to `https://YOUR-HOST/api/v1` (must end with `/api/v1`). " +
-      "If you omit `/api/v1`, URLs become `.../parent/...` and the server returns 404 NOT_FOUND. " +
-      "Source: `backend/src/modules/parent/parent.routes.js`. Run **01 Auth → POST /auth/login (PARENT user)** first.",
+      "Parent app APIs under `/api/v1/parent`. Same family account can use PARENT login (student app may share parent phone — use this collection for parent dashboard). " +
+      "**CRITICAL:** Set `base_url` to `https://YOUR-HOST/api/v1`. Run **01 Auth → login**, then **GET /parent/children** (saves `childId`), then other requests. " +
+      "Most endpoints require `?childId=...` for the selected child. Source: `src/modules/parent/parent.routes.js`.",
   },
   variable: [
     { key: "base_url", value: "https://backend-school-app.onrender.com/api/v1" },
@@ -128,6 +147,7 @@ const collection = {
     { key: "parentEmail", value: "" },
     { key: "parentPassword", value: "" },
     { key: "invoiceId", value: "" },
+    { key: "childId", value: "" },
   ],
   item: items.map(toPostmanItem),
 };

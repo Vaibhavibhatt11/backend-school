@@ -32,8 +32,6 @@ const {
   createLeaveRequest,
   getSubjectTeachers,
   createMeetingRequest,
-  aiAsk,
-  aiCareer,
   getReportCards,
   getDocuments,
 } = require("./student.handlers");
@@ -72,8 +70,6 @@ router.get("/leave-requests", getLeaveRequests);
 router.post("/leave-requests", createLeaveRequest);
 router.get("/subject-teachers", getSubjectTeachers);
 router.post("/meetings/request", createMeetingRequest);
-router.post("/ai/ask", aiAsk);
-router.get("/ai/career", aiCareer);
 router.get("/report-cards", getReportCards);
 router.get("/documents", getDocuments);
 

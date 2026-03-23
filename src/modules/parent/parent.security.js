@@ -36,12 +36,6 @@ function validateSettingsBody(body) {
   return prefs;
 }
 
-function validateAiAsk(body) {
-  const q = sanitizeString(body?.question, 2000, "question");
-  if (!q) throw badRequest("question is required", "INVALID_INPUT");
-  return { question: q };
-}
-
 module.exports = {
   requireChildId,
   validateId,
@@ -49,6 +43,5 @@ module.exports = {
   validateSearch,
   parseDayQuery,
   validateSettingsBody,
-  validateAiAsk,
 };
 

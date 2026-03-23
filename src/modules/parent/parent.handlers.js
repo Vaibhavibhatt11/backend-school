@@ -11,7 +11,6 @@ const {
   validateSearch,
   parseDayQuery,
   validateSettingsBody,
-  validateAiAsk,
 } = require("./parent.security");
 
 function isMissingTableError(error, tableName) {
@@ -918,48 +917,13 @@ async function updateSettings(req, res, next) {
     const rec = await prisma.studentSettings.upsert({
       where: { studentId: child.id },
       update: { preferences },
-      create: { studentId: child.id, preferences },
+      create: { schoolId: child.schoolId, studentId: child.id, preferences },
     });
 
     return res.status(200).json({ success: true, data: rec });
   } catch (e) {
     if (isClientError(e)) return next(e);
     return res.status(200).json({ success: true, data: { preferences: validateSettingsBody(req.body ?? {}) } });
-  }
-}
-
-async function aiAsk(req, res, next) {
-  try {
-    await resolveParent(req);
-    const body = validateAiAsk(req.body ?? {});
-    return res.status(200).json({
-      success: true,
-      data: {
-        answer: `AI assistant is under setup. Your question: ${body.question}`,
-      },
-    });
-  } catch (e) {
-    if (isClientError(e)) return next(e);
-    return res.status(200).json({
-      success: true,
-      data: { answer: "AI assistant is under setup.", stub: true },
-    });
-  }
-}
-
-async function aiCareer(req, res, next) {
-  try {
-    await resolveParent(req);
-    return res.status(200).json({
-      success: true,
-      data: { suggestions: [] },
-    });
-  } catch (e) {
-    if (isClientError(e)) return next(e);
-    return res.status(200).json({
-      success: true,
-      data: { suggestions: [] },
-    });
   }
 }
 
@@ -977,8 +941,6 @@ module.exports = {
   getProfileHub,
   getLibrary,
   getDocuments,
-  aiAsk,
-  aiCareer,
   getSettings,
   updateSettings,
 };

@@ -9,7 +9,6 @@ const SAFE_ID_REGEX = /^[a-zA-Z0-9_-]{15,50}$/;
 const LIMITS = {
   reason: 2000,
   purpose: 500,
-  question: 2000,
   preferencesJsonLength: 10000,
   fileUrlsMax: 20,
   fileUrlLength: 2048,
@@ -112,15 +111,6 @@ function validateSettings(body) {
 }
 
 /**
- * Validate AI ask body: question required and length limit.
- */
-function validateAiAsk(body) {
-  const question = sanitizeString(body?.question, LIMITS.question, "question");
-  if (!question) throw badRequest("question is required", "INVALID_INPUT");
-  return { question };
-}
-
-/**
  * Validate meeting request body: optional staffId, preferredDate, purpose.
  */
 function validateMeetingRequest(body) {
@@ -167,7 +157,6 @@ module.exports = {
   validateHomeworkSubmit,
   validateProfileUpdate,
   validateSettings,
-  validateAiAsk,
   validateMeetingRequest,
   validateQueryMonth,
   validateSearch,

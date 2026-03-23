@@ -208,7 +208,7 @@ Exact paths are in `src/modules/school/school.routes.js`.
 - `npm run start` — node
 - `prisma:generate`, `prisma:migrate`, `prisma:deploy`, `prisma:studio`, `prisma:seed`
 - `smoke:full` — full API smoke test
-- `load:k6:auth` — reminder for k6 auth load script
+- `load:k6:auth` — k6 auth load (`scripts/k6-auth-load.js`; requires k6 installed)
 
 ---
 

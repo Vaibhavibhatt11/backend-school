@@ -1,5 +1,5 @@
 /**
- * Builds School-ERP-Full.postman_collection.json from API_LIST_FOR_FRONTEND.md
+ * Builds School-ERP-Full.postman_collection.json (routes embedded in this script).
  * Run: node build-full-collection.js
  */
 const fs = require('fs');
@@ -396,8 +396,6 @@ const items = [
     req('POST /student/leave-requests', 'POST', '/student/leave-requests', {}),
     req('GET /student/subject-teachers', 'GET', '/student/subject-teachers'),
     req('POST /student/meetings/request', 'POST', '/student/meetings/request', {}),
-    req('POST /student/ai/ask', 'POST', '/student/ai/ask', { message: '' }),
-    req('GET /student/ai/career', 'GET', '/student/ai/career'),
     req('GET /student/report-cards', 'GET', '/student/report-cards'),
     req('GET /student/documents', 'GET', '/student/documents')
   ])

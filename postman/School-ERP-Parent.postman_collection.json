@@ -1,9 +1,9 @@
 {
   "info": {
-    "_postman_id": "school-erp-parent-1774208513131",
+    "_postman_id": "school-erp-parent-1774242371136",
     "name": "School ERP — Parent app (PARENT role)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Parent app APIs under `/api/v1/parent`. **CRITICAL:** Set `base_url` to `https://YOUR-HOST/api/v1` (must end with `/api/v1`). If you omit `/api/v1`, URLs become `.../parent/...` and the server returns 404 NOT_FOUND. Source: `backend/src/modules/parent/parent.routes.js`. Run **01 Auth → POST /auth/login (PARENT user)** first."
+    "description": "Parent app APIs under `/api/v1/parent`. Same family account can use PARENT login (student app may share parent phone — use this collection for parent dashboard). **CRITICAL:** Set `base_url` to `https://YOUR-HOST/api/v1`. Run **01 Auth → login**, then **GET /parent/children** (saves `childId`), then other requests. Most endpoints require `?childId=...` for the selected child. Source: `src/modules/parent/parent.routes.js`."
   },
   "variable": [
     {
@@ -32,6 +32,10 @@
     },
     {
       "key": "invoiceId",
+      "value": ""
+    },
+    {
+      "key": "childId",
       "value": ""
     }
   ],
@@ -157,14 +161,28 @@
                 }
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 2xx', function () { pm.response.to.be.success; });",
+                  "const j = pm.response.json();",
+                  "const ch = j && j.data && j.data.children && j.data.children[0];",
+                  "if (ch && ch.id) pm.collectionVariables.set('childId', ch.id);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "GET /parent/home",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{base_url}}/parent/home",
+            "url": "{{base_url}}/parent/home?childId={{childId}}",
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -182,7 +200,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{base_url}}/parent/announcements",
+            "url": "{{base_url}}/parent/announcements?childId={{childId}}",
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -200,7 +218,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{base_url}}/parent/notifications",
+            "url": "{{base_url}}/parent/notifications?childId={{childId}}",
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -218,7 +236,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{base_url}}/parent/attendance",
+            "url": "{{base_url}}/parent/attendance?childId={{childId}}",
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -236,7 +254,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{base_url}}/parent/fees",
+            "url": "{{base_url}}/parent/fees?childId={{childId}}",
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -272,7 +290,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{base_url}}/parent/timetable",
+            "url": "{{base_url}}/parent/timetable?childId={{childId}}",
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -290,7 +308,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{base_url}}/parent/progress-reports",
+            "url": "{{base_url}}/parent/progress-reports?childId={{childId}}",
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -308,7 +326,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{base_url}}/parent/live-classes",
+            "url": "{{base_url}}/parent/live-classes?childId={{childId}}",
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -326,7 +344,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{base_url}}/parent/profile-hub",
+            "url": "{{base_url}}/parent/profile-hub?childId={{childId}}",
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -344,7 +362,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{base_url}}/parent/library",
+            "url": "{{base_url}}/parent/library?childId={{childId}}",
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -362,57 +380,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{base_url}}/parent/documents",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{auth_token}}",
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "POST /parent/ai/ask",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{base_url}}/parent/ai/ask",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{auth_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"message\": \"\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "GET /parent/ai/career",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{base_url}}/parent/ai/career",
+            "url": "{{base_url}}/parent/documents?childId={{childId}}",
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -430,7 +398,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{base_url}}/parent/settings",
+            "url": "{{base_url}}/parent/settings?childId={{childId}}",
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -453,7 +421,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/parent/settings",
+            "url": "{{base_url}}/parent/settings?childId={{childId}}",
             "auth": {
               "type": "bearer",
               "bearer": [

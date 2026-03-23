@@ -15,8 +15,6 @@ const {
   getProfileHub,
   getLibrary,
   getDocuments,
-  aiAsk,
-  aiCareer,
   getSettings,
   updateSettings,
 } = require("./parent.handlers");
@@ -37,9 +35,6 @@ router.get("/live-classes", getLiveClasses);
 router.get("/profile-hub", getProfileHub);
 router.get("/library", getLibrary);
 router.get("/documents", getDocuments);
-
-router.post("/ai/ask", aiAsk);
-router.get("/ai/career", aiCareer);
 
 router.get("/settings", getSettings);
 router.put("/settings", updateSettings);
