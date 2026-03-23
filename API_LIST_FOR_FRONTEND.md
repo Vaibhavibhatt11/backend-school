@@ -381,6 +381,7 @@
 | DELETE | `/accountant/fees/structures/:id` | Delete fee structure. |
 | GET | `/accountant/invoices` | List invoices. |
 | POST | `/accountant/invoices` | Create invoice. |
+| POST | `/accountant/invoices/bulk-generate` | Bulk generate invoices. Body: feeStructureId, dueDate, amountPerStudent, classId?. |
 | GET | `/accountant/invoices/:id` | Get invoice by id. |
 | PATCH | `/accountant/invoices/:id/status` | Update invoice status. |
 | GET | `/accountant/payments` | List payments. |

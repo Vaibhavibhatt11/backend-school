@@ -15,6 +15,7 @@
     "prisma:studio": "prisma studio",
     "prisma:seed": "node prisma/seed.js",
     "smoke:full": "node scripts/full-api-smoke.js",
+    "smoke:parent-admin": "node scripts/parent-admin-smoke.js",
     "load:k6:auth": "k6 run scripts/k6-auth-load.js",
     "postman:admin": "node postman/build-admin-collection.js",
     "postman:parent": "node postman/build-parent-collection.js",

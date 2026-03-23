@@ -7,6 +7,7 @@ const {
   deleteFeeStructure,
   listInvoices,
   createInvoice,
+  bulkGenerateInvoices,
   getInvoiceById,
   updateInvoiceStatus,
   listPayments,
@@ -27,6 +28,7 @@ router.delete("/fees/structures/:id", deleteFeeStructure);
 
 router.get("/invoices", listInvoices);
 router.post("/invoices", createInvoice);
+router.post("/invoices/bulk-generate", bulkGenerateInvoices);
 router.get("/invoices/:id", getInvoiceById);
 router.patch("/invoices/:id/status", updateInvoiceStatus);
 

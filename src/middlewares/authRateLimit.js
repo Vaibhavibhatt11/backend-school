@@ -26,6 +26,10 @@ function buildRedisLimiter() {
 
   const redis = getRedis();
   if (!redis) return null;
+  if (redis.status !== "ready" && redis.status !== "connect") {
+    console.warn("[rate-limit] redis not ready, using memory store");
+    return null;
+  }
 
   try {
     const store = new RedisStore({

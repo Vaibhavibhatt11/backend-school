@@ -32,7 +32,7 @@ const baseOptions = {
 function buildApiRateLimiter() {
   if (env.API_RATE_LIMIT_USE_REDIS === "true") {
     const redis = getRedis();
-    if (redis) {
+    if (redis && (redis.status === "ready" || redis.status === "connect")) {
       try {
         const store = new RedisStore({
           prefix: "rl:api:",
@@ -46,6 +46,8 @@ function buildApiRateLimiter() {
       } catch (err) {
         console.warn("[apiRateLimit] Redis store init failed, using memory:", err.message);
       }
+    } else if (redis) {
+      console.warn("[apiRateLimit] Redis not ready, using memory store");
     }
   }
   return rateLimit(baseOptions);

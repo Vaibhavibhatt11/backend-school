@@ -46,7 +46,7 @@ async function resolveParent(req) {
 async function resolveChildForParent(parentId, studentId) {
   // Ensure the student is actually linked to this parent (prevents IDOR).
   const rel = await prisma.studentParent.findFirst({
-    where: { studentId_parentId: { studentId, parentId } },
+    where: { studentId, parentId },
     include: {
       student: {
         select: {
@@ -179,20 +179,25 @@ async function getChildFees(child) {
     },
     orderBy: { dueDate: "asc" },
     take: 50,
-    select: { id: true, title: true, amountDue: true, dueDate: true, status: true },
+    include: {
+      feeStructure: {
+        select: { name: true },
+      },
+    },
   });
 
-  const totalOutstanding = invoices.reduce((sum, i) => sum + (i.amountDue ?? 0), 0);
+  const totalOutstanding = invoices.reduce((sum, i) => sum + Math.max(0, (i.amountDue ?? 0) - (i.amountPaid ?? 0)), 0);
   const overdueInvoices = invoices.filter((i) => i.status === "OVERDUE");
 
   const mapInvoice = (i) => {
     const dueDate = i.dueDate ? new Date(i.dueDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short" }) : null;
     const type = i.status === "OVERDUE" ? "overdue" : "pending";
+    const outstandingAmount = Math.max(0, (i.amountDue ?? 0) - (i.amountPaid ?? 0));
     return {
       id: i.id,
-      title: i.title ?? "Invoice",
+      title: i.feeStructure?.name ?? i.invoiceNo ?? "Invoice",
       subtitle: null,
-      amount: i.amountDue ?? 0,
+      amount: outstandingAmount,
       dueDate,
       type,
     };
@@ -649,9 +654,9 @@ async function getProgressReports(req, res, next) {
             status: { in: ["ISSUED", "OVERDUE", "PARTIAL"] },
             dueDate: { gte: start, lte: end },
           },
-          _sum: { amountDue: true },
+          _sum: { amountDue: true, amountPaid: true },
         });
-        return Math.round((sum._sum.amountDue ?? 0) * 100) / 100;
+        return Math.round(Math.max(0, (sum._sum.amountDue ?? 0) - (sum._sum.amountPaid ?? 0)) * 100) / 100;
       })
     );
 

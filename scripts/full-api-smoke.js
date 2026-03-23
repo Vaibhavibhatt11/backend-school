@@ -1002,6 +1002,18 @@ async function run() {
       name: "POST /accountant/invoices",
     });
     state.accInvoiceId = accInvoice.data.invoice.id;
+    await api("/accountant/invoices/bulk-generate", {
+      method: "POST",
+      token: state.admin.accessToken,
+      body: {
+        feeStructureId: state.accFeeId,
+        dueDate: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000).toISOString(),
+        amountPerStudent: 550,
+        classId: state.classId,
+      },
+      expected: [201],
+      name: "POST /accountant/invoices/bulk-generate",
+    });
     await api(`/accountant/invoices/${state.accInvoiceId}`, {
       token: state.admin.accessToken,
       expected: [200],

@@ -4,7 +4,7 @@
  * Values are JSON-serialized.
  */
 const env = require("../config/env");
-const { getRedis } = require("../config/redis");
+const { getRedis, connectRedis } = require("../config/redis");
 
 function isCacheEnabled() {
   try {
@@ -27,6 +27,7 @@ async function get(key) {
   if (!isCacheEnabled()) return null;
   const redis = getRedis();
   try {
+    await connectRedis(redis);
     const fullKey = keyWithPrefix(key);
     const raw = await redis.get(fullKey);
     if (raw == null) return null;
@@ -48,6 +49,7 @@ async function set(key, value, ttlSeconds) {
   if (!isCacheEnabled() || ttlSeconds <= 0) return;
   const redis = getRedis();
   try {
+    await connectRedis(redis);
     const fullKey = keyWithPrefix(key);
     const serialized = JSON.stringify(value);
     await redis.setex(fullKey, ttlSeconds, serialized);
@@ -66,6 +68,7 @@ async function del(key) {
   if (!isCacheEnabled()) return;
   const redis = getRedis();
   try {
+    await connectRedis(redis);
     await redis.del(keyWithPrefix(key));
   } catch (err) {
     if (env.NODE_ENV !== "production") {
@@ -99,6 +102,14 @@ const cacheKeys = {
   studentProfile: (studentId) => `student:profile:${studentId}`,
   studentTimetable: (classId) => `student:timetable:${classId || "none"}`,
   studentExams: (studentId) => `student:exams:${studentId}`,
+  parentHome: (studentId) => `parent:home:${studentId}`,
+  parentAnnouncements: (studentId) => `parent:announcements:${studentId}`,
+  parentNotifications: (studentId) => `parent:notifications:${studentId}`,
+  parentAttendance: (studentId, monthKey) => `parent:attendance:${studentId}:${monthKey || "current"}`,
+  parentFees: (studentId) => `parent:fees:${studentId}`,
+  parentTimetable: (studentId, dayKey) => `parent:timetable:${studentId}:${dayKey || "today"}`,
+  parentLiveClasses: (studentId) => `parent:live-classes:${studentId}`,
+  parentProfileHub: (studentId) => `parent:profile-hub:${studentId}`,
 };
 
 const CACHE_TTL_LIST = () => (env.CACHE_TTL_LIST_SEC != null ? env.CACHE_TTL_LIST_SEC : 60);
@@ -127,6 +138,7 @@ async function delByPrefix(prefix) {
   if (!isCacheEnabled()) return;
   const redis = getRedis();
   try {
+    await connectRedis(redis);
     const fullPrefix = keyWithPrefix(prefix);
     const keys = await redis.keys(`${fullPrefix}*`);
     if (keys.length > 0) await redis.del(...keys);
@@ -152,5 +164,13 @@ module.exports = {
     studentDashboard: CACHE_TTL_STUDENT_DASHBOARD,
     studentTimetable: CACHE_TTL_STUDENT_OTHER,
     studentExams: CACHE_TTL_STUDENT_OTHER,
+    parentHome: CACHE_TTL_STUDENT_OTHER,
+    parentAnnouncements: CACHE_TTL_STUDENT_OTHER,
+    parentNotifications: CACHE_TTL_STUDENT_OTHER,
+    parentAttendance: CACHE_TTL_STUDENT_OTHER,
+    parentFees: CACHE_TTL_STUDENT_OTHER,
+    parentTimetable: CACHE_TTL_STUDENT_OTHER,
+    parentLiveClasses: CACHE_TTL_STUDENT_OTHER,
+    parentProfileHub: CACHE_TTL_STUDENT_OTHER,
   },
 };

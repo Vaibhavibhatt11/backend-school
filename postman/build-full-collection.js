@@ -354,6 +354,7 @@ const items = [
     req('DELETE /accountant/fees/structures/:id', 'DELETE', '/accountant/fees/structures/{{feeStructureId}}'),
     req('GET /accountant/invoices', 'GET', '/accountant/invoices'),
     req('POST /accountant/invoices', 'POST', '/accountant/invoices', {}),
+    req('POST /accountant/invoices/bulk-generate', 'POST', '/accountant/invoices/bulk-generate', { feeStructureId: '', dueDate: '', amountPerStudent: 0, classId: '' }),
     req('GET /accountant/invoices/:id', 'GET', '/accountant/invoices/{{invoiceId}}'),
     req('PATCH /accountant/invoices/:id/status', 'PATCH', '/accountant/invoices/{{invoiceId}}/status', { status: '' }),
     req('GET /accountant/payments', 'GET', '/accountant/payments'),

@@ -111,6 +111,7 @@ module.exports = {
   deleteFeeStructure: financeHandlers.deleteFeeStructure,
   listInvoices: financeHandlers.listInvoices,
   createInvoice: financeHandlers.createInvoice,
+  bulkGenerateInvoices: financeHandlers.bulkGenerateInvoices,
   getInvoiceById: financeHandlers.getInvoiceById,
   updateInvoiceStatus: financeHandlers.updateInvoiceStatus,
   listPayments: financeHandlers.listPayments,
