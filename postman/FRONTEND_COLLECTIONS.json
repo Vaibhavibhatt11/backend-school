@@ -1,7 +1,7 @@
 {
   "version": 1,
   "description": "Import these Postman files for frontend integration. Regenerate with: npm run postman:build",
-  "baseUrlPattern": "https://YOUR-RENDER-HOST/api/v1",
+  "productionBaseUrl": "https://backend-school-app.onrender.com/api/v1",
   "collections": [
     {
       "file": "School-ERP-Admin.postman_collection.json",

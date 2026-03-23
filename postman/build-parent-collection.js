@@ -136,7 +136,7 @@ const collection = {
     schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     description:
       "Parent app APIs under `/api/v1/parent`. Same family account can use PARENT login (student app may share parent phone — use this collection for parent dashboard). " +
-      "**CRITICAL:** Set `base_url` to `https://YOUR-HOST/api/v1`. Run **01 Auth → login**, then **GET /parent/children** (saves `childId`), then other requests. " +
+      "Production base URL: `https://backend-school-app.onrender.com/api/v1`. Use environment **School ERP - Production (Render)** or set `base_url`. Run **01 Auth → login**, then **GET /parent/children** (saves `childId`), then other requests. " +
       "Most endpoints require `?childId=...` for the selected child. Source: `src/modules/parent/parent.routes.js`.",
   },
   variable: [

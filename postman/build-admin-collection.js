@@ -358,7 +358,7 @@ const collection = {
     schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     description:
       "Admin & school staff APIs: `/api/v1/school/*`, `/api/v1/school/students/*`, `/api/v1/dashboard/*`. " +
-      "Set `base_url` to `https://YOUR-HOST/api/v1`. Run **01 Auth → POST /auth/login** first. " +
+      "Production base URL: `https://backend-school-app.onrender.com/api/v1` (override `base_url` in environment if needed). Run **01 Auth → POST /auth/login** first. " +
       "Use a user with role SCHOOLADMIN, SUPERADMIN, HR, or ACCOUNTANT as required by each route. " +
       "Many POST/PUT bodies are placeholders — adjust to match `zod` schemas in handlers.",
   },

@@ -59,7 +59,7 @@ const collection = {
       "Module-wise 30 API collection for School ERP. Run auth first, then modules. Uses collection variables for tokens and IDs.",
   },
   variable: [
-    { key: "baseUrl", value: "http://localhost:5000/api/v1" },
+    { key: "baseUrl", value: "https://backend-school-app.onrender.com/api/v1" },
     { key: "accessToken", value: "" },
     { key: "refreshToken", value: "" },
     { key: "forgotEmail", value: "admin@school.edu" },
@@ -332,8 +332,8 @@ const environment = {
   id: crypto.randomUUID(),
   name: "School ERP - Local",
   values: [
-    { key: "baseUrl", value: "http://localhost:5000/api/v1", enabled: true },
-    { key: "base_url", value: "http://localhost:5000/api/v1", enabled: true },
+    { key: "baseUrl", value: "https://backend-school-app.onrender.com/api/v1", enabled: true },
+    { key: "base_url", value: "https://backend-school-app.onrender.com/api/v1", enabled: true },
     { key: "accessToken", value: "", enabled: true },
     { key: "auth_token", value: "", enabled: true },
     { key: "refreshToken", value: "", enabled: true },
