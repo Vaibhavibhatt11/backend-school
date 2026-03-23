@@ -3,7 +3,7 @@
   "description": "All APIs for the student-facing app. User must be logged in with role STUDENT and have a linked Student profile. Every endpoint returns { success: true, data: ... } on success.",
   "dataSource": "All student data is created and managed on the admin side (School Admin, Staff, Accountant, etc.). Student APIs only expose that data to the logged-in student—read-only for most resources; students can submit homework, register for events, request leave, and update limited profile/settings.",
   "baseUrl": "https://backend-school-app.onrender.com/api/v1",
-  "totalEndpoints": 35,
+  "totalEndpoints": 33,
   "submodules": {
     "Dashboard": ["GET /student/dashboard"],
     "Profile": ["GET /student/profile", "PUT /student/profile"],
@@ -26,8 +26,7 @@
     "Settings": ["GET /student/settings", "PUT /student/settings"],
     "Health": ["GET /student/health"],
     "Report Cards": ["GET /student/report-cards"],
-    "Documents": ["GET /student/documents"],
-    "AI (stub)": ["POST /student/ai/ask", "GET /student/ai/career"]
+    "Documents": ["GET /student/documents"]
   },
   "auth": {
     "type": "Bearer",
@@ -485,22 +484,6 @@
           "pagination": { "page": "number", "limit": "number", "total": "number", "totalPages": "number" }
         }
       }
-    },
-    {
-      "method": "POST",
-      "path": "/student/ai/ask",
-      "description": "AI Study Assistant (stub – returns placeholder).",
-      "query": {},
-      "body": { "question": "string" },
-      "response": { "success": true, "data": { "answer": "string", "stub": true } }
-    },
-    {
-      "method": "GET",
-      "path": "/student/ai/career",
-      "description": "AI Career Advisor (stub – returns placeholder).",
-      "query": {},
-      "body": null,
-      "response": { "success": true, "data": { "message": "string", "stub": true } }
     },
     {
       "method": "GET",
