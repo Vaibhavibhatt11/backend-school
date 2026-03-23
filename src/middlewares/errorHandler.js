@@ -1,4 +1,17 @@
 function errorHandler(error, req, res, next) {
+  // express/body-parser: malformed JSON body (Postman raw typo, wrong Content-Type, etc.)
+  if (error?.type === "entity.parse.failed") {
+    return res.status(400).json({
+      success: false,
+      error: {
+        code: "INVALID_JSON_BODY",
+        message:
+          "Request body is not valid JSON. In Postman: Body → raw → JSON. Use double quotes, commas between fields, no trailing comma after the last property.",
+        detail: error.message,
+      },
+    });
+  }
+
   if (error?.name === "ZodError") {
     return res.status(400).json({
       success: false,
