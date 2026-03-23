@@ -87,7 +87,11 @@ const items = [
       r.event = eventLogin();
       return r;
     })(),
-    req("POST /auth/refresh", "POST", "/auth/refresh", { refreshToken: "{{refreshToken}}" }, true),
+    (() => {
+      const r = req("POST /auth/refresh", "POST", "/auth/refresh", { refreshToken: "{{refreshToken}}" }, true);
+      r.event = eventLogin();
+      return r;
+    })(),
     req("GET /auth/me", "GET", "/auth/me"),
     req("POST /auth/logout", "POST", "/auth/logout", { refreshToken: "{{refreshToken}}" }),
   ]),

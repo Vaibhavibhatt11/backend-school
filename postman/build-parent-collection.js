@@ -103,7 +103,11 @@ const items = [
       r.event = eventTest();
       return r;
     })(),
-    req("POST /auth/refresh", "POST", "/auth/refresh", { refreshToken: "{{refreshToken}}" }, true),
+    (() => {
+      const r = req("POST /auth/refresh", "POST", "/auth/refresh", { refreshToken: "{{refreshToken}}" }, true);
+      r.event = eventTest();
+      return r;
+    })(),
     req("GET /auth/me", "GET", "/auth/me"),
   ]),
   folder("02 Parent app (/parent/*) — requires PARENT JWT", [

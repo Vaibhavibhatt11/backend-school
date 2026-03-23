@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "school-erp-admin-1774245090845",
+    "_postman_id": "school-erp-admin-1774250199703",
     "name": "School ERP — Admin / School panel",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Admin & school staff APIs: `/api/v1/school/*`, `/api/v1/school/students/*`, `/api/v1/dashboard/*`. Production base URL: `https://backend-school-app.onrender.com/api/v1` (override `base_url` in environment if needed). Run **01 Auth → POST /auth/login** first. Use a user with role SCHOOLADMIN, SUPERADMIN, HR, or ACCOUNTANT as required by each route. Many POST/PUT bodies are placeholders — adjust to match `zod` schemas in handlers."
@@ -272,7 +272,21 @@
                 }
               }
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 2xx', function () { pm.response.to.be.success; });",
+                  "const j = pm.response.json();",
+                  "if (j && j.data && j.data.accessToken) { pm.collectionVariables.set('auth_token', j.data.accessToken); pm.collectionVariables.set('accessToken', j.data.accessToken); }",
+                  "if (j && j.data && j.data.refreshToken) pm.collectionVariables.set('refreshToken', j.data.refreshToken);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "GET /auth/me",
