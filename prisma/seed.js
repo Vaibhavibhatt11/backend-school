@@ -210,7 +210,7 @@ async function main() {
     },
   });
 
-  await prisma.student.upsert({
+  const demoStudent = await prisma.student.upsert({
     where: { schoolId_admissionNo: { schoolId: school.id, admissionNo: "STU001" } },
     update: {
       userId: studentUser.id,
@@ -233,6 +233,60 @@ async function main() {
     },
   });
 
+  // Demo parent (same email on User + Parent so /parent APIs resolve)
+  const parentPasswordHash = await bcrypt.hash("Parent123!", 10);
+  await prisma.user.upsert({
+    where: { email: "parent@school.edu" },
+    update: {
+      fullName: "Demo Parent",
+      role: "PARENT",
+      schoolId: school.id,
+      isActive: true,
+      passwordHash: parentPasswordHash,
+    },
+    create: {
+      fullName: "Demo Parent",
+      email: "parent@school.edu",
+      role: "PARENT",
+      schoolId: school.id,
+      passwordHash: parentPasswordHash,
+      isActive: true,
+    },
+  });
+
+  let demoParentRecord = await prisma.parent.findFirst({
+    where: { schoolId: school.id, email: "parent@school.edu" },
+  });
+  if (!demoParentRecord) {
+    demoParentRecord = await prisma.parent.create({
+      data: {
+        schoolId: school.id,
+        fullName: "Demo Parent",
+        email: "parent@school.edu",
+        phone: "+1-555-0199",
+        isActive: true,
+      },
+    });
+  } else {
+    await prisma.parent.update({
+      where: { id: demoParentRecord.id },
+      data: { fullName: "Demo Parent", email: "parent@school.edu", isActive: true },
+    });
+  }
+
+  await prisma.studentParent.upsert({
+    where: {
+      studentId_parentId: { studentId: demoStudent.id, parentId: demoParentRecord.id },
+    },
+    update: { relationType: "GUARDIAN", isPrimary: true },
+    create: {
+      studentId: demoStudent.id,
+      parentId: demoParentRecord.id,
+      relationType: "GUARDIAN",
+      isPrimary: true,
+    },
+  });
+
   console.log("Seed complete.");
   console.log("Login users (password: Admin123!):");
   console.log("- super@school.edu (superadmin)");
@@ -241,6 +295,8 @@ async function main() {
   console.log("- hr@school.edu (hr)");
   console.log("\nTest student (password: Student123!):");
   console.log("- student@school.edu (STUDENT)");
+  console.log("\nTest parent (password: Parent123!):");
+  console.log("- parent@school.edu (PARENT) — linked to demo student STU001");
 }
 
 main()

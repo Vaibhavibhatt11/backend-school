@@ -130,6 +130,10 @@ You can log in with:
 | Admin       | admin@school.edu  | Admin123!  |
 | Accountant  | acc@school.edu    | Admin123!  |
 | HR          | hr@school.edu     | Admin123!  |
+| Student (test) | student@school.edu | Student123! |
+| Parent (test)  | parent@school.edu  | Parent123!  |
+
+The **parent** user is linked to the demo student (STU001) for `/api/v1/parent/*` testing.
 
 ---
 
