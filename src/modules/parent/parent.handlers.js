@@ -5,12 +5,12 @@ const cache = require("../../lib/cache");
 const { forbidden, notFound } = require("../../utils/httpErrors");
 const { parsePagination } = require("../../utils/schoolScope");
 const {
-  requireChildId,
   validateId,
   validateQueryMonth,
   validateSearch,
   parseDayQuery,
   validateSettingsBody,
+  validateAiAsk,
 } = require("./parent.security");
 
 function isMissingTableError(error, tableName) {
@@ -71,6 +71,14 @@ async function resolveChildForParent(parentId, studentId) {
 
   if (!rel?.student) throw notFound("Child not linked to parent");
   return rel.student;
+}
+
+async function resolveRequestedOrDefaultChild(parent, requestedChildId) {
+  const childId = requestedChildId
+    ? validateId(String(requestedChildId), "childId")
+    : parent.students?.[0]?.student?.id;
+  if (!childId) throw notFound("No child linked to parent");
+  return resolveChildForParent(parent.id, childId);
 }
 
 function formatRelativeTime(date) {
@@ -277,8 +285,7 @@ async function listChildren(req, res, next) {
 async function getHome(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
-    const child = await resolveChildForParent(parent.id, childId);
+    const child = await resolveRequestedOrDefaultChild(parent, req.query?.childId);
 
     const monthKey = req.query.month ? String(req.query.month) : "current";
     const cacheKey = `${cache.cacheKeys.parentHome(child.id)}:${monthKey}`;
@@ -381,8 +388,7 @@ async function getHome(req, res, next) {
 async function getAnnouncements(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
-    const child = await resolveChildForParent(parent.id, childId); // scope / authorization check
+    const child = await resolveRequestedOrDefaultChild(parent, req.query?.childId); // scope / authorization check
 
     const type = req.query.type ? String(req.query.type).toLowerCase() : "all";
     const where = { status: "SENT" };
@@ -431,8 +437,7 @@ async function getAnnouncements(req, res, next) {
 async function getNotifications(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
-    const child = await resolveChildForParent(parent.id, childId);
+    const child = await resolveRequestedOrDefaultChild(parent, req.query?.childId);
 
     const cacheKey = cache.cacheKeys.parentNotifications(child.id);
     const ttl = cache.CACHE_TTL.parentNotifications();
@@ -493,8 +498,7 @@ async function getNotifications(req, res, next) {
 async function getAttendance(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
-    const child = await resolveChildForParent(parent.id, childId);
+    const child = await resolveRequestedOrDefaultChild(parent, req.query?.childId);
     const monthKey = req.query.month ? String(req.query.month) : "current";
     const cacheKey = cache.cacheKeys.parentAttendance(child.id, monthKey);
     const ttl = cache.CACHE_TTL.parentAttendance();
@@ -513,8 +517,7 @@ async function getAttendance(req, res, next) {
 async function getFees(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
-    const child = await resolveChildForParent(parent.id, childId);
+    const child = await resolveRequestedOrDefaultChild(parent, req.query?.childId);
     const cacheKey = cache.cacheKeys.parentFees(child.id);
     const ttl = cache.CACHE_TTL.parentFees();
 
@@ -564,8 +567,7 @@ async function getInvoiceDetail(req, res, next) {
 async function getTimetable(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
-    const child = await resolveChildForParent(parent.id, childId);
+    const child = await resolveRequestedOrDefaultChild(parent, req.query?.childId);
 
     const day = parseDayQuery(req.query.day);
     const dayKey = day ? String(day) : "today";
@@ -620,8 +622,7 @@ async function getTimetable(req, res, next) {
 async function getProgressReports(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
-    const child = await resolveChildForParent(parent.id, childId);
+    const child = await resolveRequestedOrDefaultChild(parent, req.query?.childId);
 
     const termInfo = getLatestTerm();
     const examResults = await prisma.examResult.findMany({
@@ -694,8 +695,7 @@ async function getProgressReports(req, res, next) {
 async function getLiveClasses(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
-    const child = await resolveChildForParent(parent.id, childId);
+    const child = await resolveRequestedOrDefaultChild(parent, req.query?.childId);
 
     const cacheKey = cache.cacheKeys.parentLiveClasses(child.id);
     const ttl = cache.CACHE_TTL.parentLiveClasses();
@@ -746,8 +746,7 @@ async function getLiveClasses(req, res, next) {
 async function getProfileHub(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
-    const child = await resolveChildForParent(parent.id, childId);
+    const child = await resolveRequestedOrDefaultChild(parent, req.query?.childId);
 
     const cacheKey = cache.cacheKeys.parentProfileHub(child.id);
     const ttl = cache.CACHE_TTL.parentProfileHub();
@@ -790,8 +789,7 @@ async function getProfileHub(req, res, next) {
 async function getLibrary(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
-    const child = await resolveChildForParent(parent.id, childId);
+    const child = await resolveRequestedOrDefaultChild(parent, req.query?.childId);
 
     const { page, limit, skip } = parsePagination(req.query);
     const search = validateSearch(req.query.search);
@@ -845,8 +843,7 @@ async function getLibrary(req, res, next) {
 async function getDocuments(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
-    const child = await resolveChildForParent(parent.id, childId);
+    const child = await resolveRequestedOrDefaultChild(parent, req.query?.childId);
 
     const { page, limit, skip } = parsePagination(req.query);
     const where = { studentId: child.id };
@@ -883,8 +880,7 @@ async function getDocuments(req, res, next) {
 async function getSettings(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
-    const child = await resolveChildForParent(parent.id, childId);
+    const child = await resolveRequestedOrDefaultChild(parent, req.query?.childId);
 
     const s = await prisma.studentSettings.findUnique({ where: { studentId: child.id } });
     return res.status(200).json({
@@ -915,8 +911,7 @@ async function getSettings(req, res, next) {
 async function updateSettings(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
-    const child = await resolveChildForParent(parent.id, childId);
+    const child = await resolveRequestedOrDefaultChild(parent, req.query?.childId);
 
     const preferences = validateSettingsBody(req.body ?? {});
     const rec = await prisma.studentSettings.upsert({
@@ -929,6 +924,41 @@ async function updateSettings(req, res, next) {
   } catch (e) {
     if (isClientError(e)) return next(e);
     return res.status(200).json({ success: true, data: { preferences: validateSettingsBody(req.body ?? {}) } });
+  }
+}
+
+async function aiAsk(req, res, next) {
+  try {
+    await resolveParent(req);
+    const body = validateAiAsk(req.body ?? {});
+    return res.status(200).json({
+      success: true,
+      data: {
+        answer: `AI assistant is under setup. Your question: ${body.question}`,
+      },
+    });
+  } catch (e) {
+    if (isClientError(e)) return next(e);
+    return res.status(200).json({
+      success: true,
+      data: { answer: "AI assistant is under setup.", stub: true },
+    });
+  }
+}
+
+async function aiCareer(req, res, next) {
+  try {
+    await resolveParent(req);
+    return res.status(200).json({
+      success: true,
+      data: { suggestions: [] },
+    });
+  } catch (e) {
+    if (isClientError(e)) return next(e);
+    return res.status(200).json({
+      success: true,
+      data: { suggestions: [] },
+    });
   }
 }
 
@@ -946,6 +976,8 @@ module.exports = {
   getProfileHub,
   getLibrary,
   getDocuments,
+  aiAsk,
+  aiCareer,
   getSettings,
   updateSettings,
 };
