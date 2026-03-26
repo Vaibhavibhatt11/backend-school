@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../common/services/parent/parent_academics_service.dart';
+import '../../../../common/services/parent/parent_context_service.dart';
 
 class LiveClassController extends GetxController {
+  final ParentAcademicsService _academicsService = Get.find<ParentAcademicsService>();
+  final ParentContextService _parentContext = Get.find<ParentContextService>();
+
+  final isLoading = false.obs;
   final subject = ''.obs;
   @override
   void onInit() {
     super.onInit();
     subject.value = Get.arguments['subject'] ?? 'Physics';
+    loadLiveClasses();
   }
 
   final selectedDate = DateTime.now().obs;
@@ -40,6 +47,29 @@ class LiveClassController extends GetxController {
           'room': 'Lab A',
         },
       ].obs;
+
+  Future<void> loadLiveClasses() async {
+    isLoading.value = true;
+    try {
+      final data = await _academicsService.getLiveClasses(
+        childId: _parentContext.selectedChildId.value,
+      );
+      final current = data['liveClass'];
+      if (current is Map) {
+        liveClass.assignAll(Map<String, Object>.from(current));
+      }
+      final upcoming = data['upcomingClasses'];
+      if (upcoming is List) {
+        upcomingClasses.assignAll(
+          upcoming.whereType<Map>().map(
+            (e) => e.map((k, v) => MapEntry(k.toString(), v?.toString() ?? '')),
+          ),
+        );
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   void joinClass() {
     Get.dialog(

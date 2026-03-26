@@ -1,7 +1,13 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:get/get.dart';
+import '../../../../common/services/parent/parent_academics_service.dart';
+import '../../../../common/services/parent/parent_context_service.dart';
 
 class TimetableController extends GetxController {
+  final ParentAcademicsService _academicsService = Get.find<ParentAcademicsService>();
+  final ParentContextService _parentContext = Get.find<ParentContextService>();
+
+  final isLoading = false.obs;
   final selectedDate = DateTime.now().obs;
   final selectedDay = 24.obs; // 24th
   final dayView = true.obs;
@@ -45,9 +51,39 @@ class TimetableController extends GetxController {
         },
       ].obs;
 
+  @override
+  void onInit() {
+    super.onInit();
+    loadTimetable();
+  }
+
+  Future<void> loadTimetable() async {
+    isLoading.value = true;
+    try {
+      final day = selectedDate.value.toIso8601String().split('T').first;
+      final data = await _academicsService.getTimetable(
+        childId: _parentContext.selectedChildId.value,
+        day: day,
+      );
+      final items = data['items'];
+      if (items is List) {
+        timetable.assignAll(
+          items.whereType<Map>().map((e) => Map<String, Object>.from(e)),
+        );
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   void changeDate(int day) {
     selectedDay.value = day;
-    // reload timetable for that day
+    selectedDate.value = DateTime(
+      selectedDate.value.year,
+      selectedDate.value.month,
+      day,
+    );
+    loadTimetable();
   }
 
   void toggleView() {

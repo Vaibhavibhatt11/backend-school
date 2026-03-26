@@ -27,7 +27,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeService = Get.find<ThemeService>();
+    // Widget tests may pump `MyApp` directly (without running `main()`),
+    // so ensure ThemeService is registered before we read it.
+    final themeService = Get.isRegistered<ThemeService>()
+        ? Get.find<ThemeService>()
+        : Get.put<ThemeService>(ThemeService(), permanent: true);
     return Obx(
       () => GetMaterialApp(
         initialBinding: ControllerBinding(),

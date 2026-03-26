@@ -7,6 +7,7 @@ import '../services/system_service.dart';
 import '../services/parent/parent_academics_service.dart';
 import '../services/parent/parent_ai_service.dart';
 import '../services/parent/parent_communication_service.dart';
+import '../services/parent/parent_context_service.dart';
 import '../services/parent/parent_dashboard_service.dart';
 import '../services/parent/parent_finance_service.dart';
 import '../services/parent/parent_profile_service.dart';
@@ -42,6 +43,9 @@ class ControllerBinding extends Bindings {
         ParentDashboardService(Get.find<ApiClient>()),
         permanent: true,
       );
+    }
+    if (!Get.isRegistered<ParentContextService>()) {
+      Get.put<ParentContextService>(ParentContextService(), permanent: true);
     }
     if (!Get.isRegistered<ParentCommunicationService>()) {
       Get.put<ParentCommunicationService>(

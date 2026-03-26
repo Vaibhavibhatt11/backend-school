@@ -1,45 +1,66 @@
 import '../../api/api_client.dart';
 import '../../api/api_endpoints.dart';
+import 'parent_api_utils.dart';
 
 class ParentAcademicsService {
   ParentAcademicsService(this._apiClient);
 
   final ApiClient _apiClient;
 
-  Future<Map<String, dynamic>> getAttendance() async {
-    final res = await _apiClient.get(ApiEndpoints.parentAttendance);
-    final body = res.data;
-    if (body is! Map<String, dynamic>) {
-      throw Exception('Invalid attendance response.');
-    }
-    return body;
+  Future<Map<String, dynamic>> getAttendance({
+    String? childId,
+    String? month,
+  }) async {
+    final query = <String, dynamic>{
+      if (childId != null && childId.isNotEmpty) 'childId': childId,
+      if (month != null && month.isNotEmpty) 'month': month,
+    };
+    final res = await _apiClient.get(
+      ApiEndpoints.parentAttendance,
+      query: query.isEmpty ? null : query,
+    );
+    return extractApiData(res.data, context: 'attendance');
   }
 
-  Future<Map<String, dynamic>> getTimetable() async {
-    final res = await _apiClient.get(ApiEndpoints.parentTimetable);
-    final body = res.data;
-    if (body is! Map<String, dynamic>) {
-      throw Exception('Invalid timetable response.');
-    }
-    return body;
+  Future<Map<String, dynamic>> getTimetable({
+    String? childId,
+    String? day,
+  }) async {
+    final query = <String, dynamic>{
+      if (childId != null && childId.isNotEmpty) 'childId': childId,
+      if (day != null && day.isNotEmpty) 'day': day,
+    };
+    final res = await _apiClient.get(
+      ApiEndpoints.parentTimetable,
+      query: query.isEmpty ? null : query,
+    );
+    return extractApiData(res.data, context: 'timetable');
   }
 
-  Future<Map<String, dynamic>> getProgressReports() async {
-    final res = await _apiClient.get(ApiEndpoints.parentProgressReports);
-    final body = res.data;
-    if (body is! Map<String, dynamic>) {
-      throw Exception('Invalid progress reports response.');
-    }
-    return body;
+  Future<Map<String, dynamic>> getProgressReports({
+    String? childId,
+    String? term,
+  }) async {
+    final query = <String, dynamic>{
+      if (childId != null && childId.isNotEmpty) 'childId': childId,
+      if (term != null && term.isNotEmpty) 'term': term,
+    };
+    final res = await _apiClient.get(
+      ApiEndpoints.parentProgressReports,
+      query: query.isEmpty ? null : query,
+    );
+    return extractApiData(res.data, context: 'progress reports');
   }
 
-  Future<Map<String, dynamic>> getLiveClasses() async {
-    final res = await _apiClient.get(ApiEndpoints.parentLiveClasses);
-    final body = res.data;
-    if (body is! Map<String, dynamic>) {
-      throw Exception('Invalid live classes response.');
-    }
-    return body;
+  Future<Map<String, dynamic>> getLiveClasses({String? childId}) async {
+    final query = <String, dynamic>{
+      if (childId != null && childId.isNotEmpty) 'childId': childId,
+    };
+    final res = await _apiClient.get(
+      ApiEndpoints.parentLiveClasses,
+      query: query.isEmpty ? null : query,
+    );
+    return extractApiData(res.data, context: 'live classes');
   }
 }
 

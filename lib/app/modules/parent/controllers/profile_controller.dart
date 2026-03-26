@@ -1,7 +1,13 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:get/get.dart';
+import '../../../../common/services/parent/parent_context_service.dart';
+import '../../../../common/services/parent/parent_profile_service.dart';
 
 class ProfileController extends GetxController {
+  final ParentProfileService _profileService = Get.find<ParentProfileService>();
+  final ParentContextService _parentContext = Get.find<ParentContextService>();
+
+  final isLoading = false.obs;
   final studentName = 'Arjun Malhotra'.obs;
   final studentClass = 'Class 10-B • Roll 2024082'.obs;
   final academicYear = 'Academic Year 2023-24'.obs;
@@ -28,6 +34,42 @@ class ProfileController extends GetxController {
           'icon': 'badge',
         },
       ].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadProfile();
+  }
+
+  Future<void> loadProfile() async {
+    isLoading.value = true;
+    try {
+      final data = await _profileService.getProfileHub(
+        childId: _parentContext.selectedChildId.value,
+      );
+      studentName.value = data['studentName']?.toString() ?? studentName.value;
+      studentClass.value = data['studentClass']?.toString() ?? studentClass.value;
+      academicYear.value = data['academicYear']?.toString() ?? academicYear.value;
+      dob.value = data['dob']?.toString() ?? dob.value;
+      bloodGroup.value = data['bloodGroup']?.toString() ?? bloodGroup.value;
+      fatherName.value = data['fatherName']?.toString() ?? fatherName.value;
+      motherName.value = data['motherName']?.toString() ?? motherName.value;
+      final termPercent = data['currentTermPercentage'];
+      if (termPercent is num) currentTermPercentage.value = termPercent.toDouble();
+      final avg = data['classAvg'];
+      if (avg is num) classAvg.value = avg.toDouble();
+      final docs = data['documents'];
+      if (docs is List) {
+        documents.assignAll(
+          docs.whereType<Map>().map(
+            (e) => e.map((k, v) => MapEntry(k.toString(), v?.toString() ?? '')),
+          ),
+        );
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   void editPersonal() => Get.snackbar('Edit', 'Edit personal info');
   void editGuardian() => Get.snackbar('Edit', 'Edit guardian info');

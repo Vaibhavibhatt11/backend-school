@@ -254,7 +254,7 @@ class SettingsView extends GetView<SettingsController> {
             return Switch(
               value: currentValue,
               onChanged: onChanged,
-              activeThumbColor: AppColors.primary,
+              activeColor: AppColors.primary,
             );
           }),
         ],

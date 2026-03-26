@@ -2,11 +2,16 @@ import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:get/get.dart';
 import '../../../services/app_storage.dart';
 import '../../../services/theme_service.dart';
+import '../../../../common/services/parent/parent_context_service.dart';
+import '../../../../common/services/parent/parent_settings_service.dart';
 
 class SettingsController extends GetxController {
   final _storage = AppStorage();
   final _themeService = Get.find<ThemeService>();
+  final ParentSettingsService _settingsService = Get.find<ParentSettingsService>();
+  final ParentContextService _parentContext = Get.find<ParentContextService>();
 
+  final isLoading = false.obs;
   final userName = 'Sarah Jenkins'.obs;
   final userRole = 'Parent'.obs;
   final userId = '8829-XJ'.obs;
@@ -15,9 +20,45 @@ class SettingsController extends GetxController {
   final selectedLanguage = 'English (US)'.obs;
   final darkModeOption = 'Auto'.obs; // 'Auto', 'On', 'Off'
 
-  void toggleFaceId(bool value) => faceIdEnabled.value = value;
-  void togglePushNotifications(bool value) =>
-      pushNotificationsEnabled.value = value;
+  @override
+  void onInit() {
+    super.onInit();
+    loadSettings();
+  }
+
+  Future<void> loadSettings() async {
+    isLoading.value = true;
+    try {
+      final data = await _settingsService.getSettings(
+        childId: _parentContext.selectedChildId.value,
+      );
+      if (data['pushNotificationsEnabled'] is bool) {
+        pushNotificationsEnabled.value = data['pushNotificationsEnabled'] as bool;
+      }
+      if (data['faceIdEnabled'] is bool) {
+        faceIdEnabled.value = data['faceIdEnabled'] as bool;
+      }
+      if (data['selectedLanguage'] != null) {
+        selectedLanguage.value = data['selectedLanguage'].toString();
+      }
+      if (data['darkModeOption'] != null) {
+        darkModeOption.value = data['darkModeOption'].toString();
+        setDarkMode(darkModeOption.value);
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void toggleFaceId(bool value) {
+    faceIdEnabled.value = value;
+    _saveSettings();
+  }
+
+  void togglePushNotifications(bool value) {
+    pushNotificationsEnabled.value = value;
+    _saveSettings();
+  }
 
   void setDarkMode(String option) {
     darkModeOption.value = option;
@@ -28,6 +69,20 @@ class SettingsController extends GetxController {
     } else {
       // Auto: follow system? For now, just toggle based on current
       // We'll keep as is
+    }
+    _saveSettings();
+  }
+
+  Future<void> _saveSettings() async {
+    try {
+      await _settingsService.updateSettings({
+        'pushNotificationsEnabled': pushNotificationsEnabled.value,
+        'faceIdEnabled': faceIdEnabled.value,
+        'selectedLanguage': selectedLanguage.value,
+        'darkModeOption': darkModeOption.value,
+      }, childId: _parentContext.selectedChildId.value);
+    } catch (_) {
+      // Keep local state even if backend update fails.
     }
   }
 

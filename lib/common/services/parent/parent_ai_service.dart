@@ -1,5 +1,6 @@
 import '../../api/api_client.dart';
 import '../../api/api_endpoints.dart';
+import 'parent_api_utils.dart';
 
 class ParentAiService {
   ParentAiService(this._apiClient);
@@ -14,25 +15,18 @@ class ParentAiService {
     final res = await _apiClient.post(
       ApiEndpoints.parentAiAsk,
       data: {
+        'question': prompt,
         'prompt': prompt,
         if (childId != null && childId.isNotEmpty) 'childId': childId,
         if (context != null && context.isNotEmpty) 'context': context,
       },
     );
-    final body = res.data;
-    if (body is! Map<String, dynamic>) {
-      throw Exception('Invalid AI ask response.');
-    }
-    return body;
+    return extractApiData(res.data, context: 'ai ask');
   }
 
   Future<Map<String, dynamic>> getCareerSuggestions() async {
     final res = await _apiClient.get(ApiEndpoints.parentAiCareer);
-    final body = res.data;
-    if (body is! Map<String, dynamic>) {
-      throw Exception('Invalid AI career response.');
-    }
-    return body;
+    return extractApiData(res.data, context: 'ai career');
   }
 }
 

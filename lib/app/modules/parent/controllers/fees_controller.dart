@@ -1,8 +1,14 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../common/services/parent/parent_context_service.dart';
+import '../../../../common/services/parent/parent_finance_service.dart';
 
 class FeesController extends GetxController {
+  final ParentFinanceService _financeService = Get.find<ParentFinanceService>();
+  final ParentContextService _parentContext = Get.find<ParentContextService>();
+
+  final isLoading = false.obs;
   final studentName = 'Alex Johnson'.obs;
   final studentGrade = 'Grade 5-B'.obs;
   final totalOutstanding = 1425.00.obs;
@@ -25,6 +31,45 @@ class FeesController extends GetxController {
           'type': 'pending',
         },
       ].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadFees();
+  }
+
+  Future<void> loadFees() async {
+    isLoading.value = true;
+    try {
+      final data = await _financeService.getFees(
+        childId: _parentContext.selectedChildId.value,
+      );
+      if (data['studentName'] != null) {
+        studentName.value = data['studentName'].toString();
+      }
+      if (data['studentGrade'] != null) {
+        studentGrade.value = data['studentGrade'].toString();
+      }
+      final outstanding = data['totalOutstanding'];
+      if (outstanding is num) {
+        totalOutstanding.value = outstanding.toDouble();
+      }
+      final apiInvoices = data['invoices'];
+      if (apiInvoices is List) {
+        invoices.assignAll(
+          apiInvoices.whereType<Map>().map((e) => Map<String, Object>.from(e)),
+        );
+      }
+      final apiOverdue = data['overdueInvoices'];
+      if (apiOverdue is List) {
+        overdueInvoices.assignAll(
+          apiOverdue.whereType<Map>().map((e) => Map<String, Object>.from(e)),
+        );
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   final overdueInvoices =
       [

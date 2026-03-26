@@ -1,6 +1,11 @@
 import 'package:get/get.dart';
+import '../../../../common/services/parent/parent_ai_service.dart';
+import '../../../../common/services/parent/parent_context_service.dart';
 
 class AIAssistantController extends GetxController {
+  final ParentAiService _aiService = Get.find<ParentAiService>();
+  final ParentContextService _parentContext = Get.find<ParentContextService>();
+
   final messages =
       [
         {
@@ -27,21 +32,36 @@ class AIAssistantController extends GetxController {
 
   void sendMessage() {
     if (inputText.trim().isEmpty) return;
+    final question = inputText.value.trim();
     messages.add({
       'sender': 'user',
-      'text': inputText.value,
+      'text': question,
       'time': 'Just now',
     });
     inputText.value = '';
-    // Simulate AI typing
     isTyping.value = true;
-    Future.delayed(const Duration(seconds: 2), () {
+    _aiService
+        .ask(
+          prompt: question,
+          childId: _parentContext.selectedChildId.value,
+        )
+        .then((data) {
+          final answer = data['answer']?.toString() ?? 'No response received.';
+          messages.add({
+            'sender': 'ai',
+            'text': answer,
+            'time': 'Just now',
+          });
+        })
+        .catchError((_) {
+          messages.add({
+            'sender': 'ai',
+            'text': 'Sorry, I could not fetch an answer right now.',
+            'time': 'Just now',
+          });
+        })
+        .whenComplete(() {
       isTyping.value = false;
-      messages.add({
-        'sender': 'ai',
-        'text': 'I\'ll help you with that shortly.',
-        'time': 'Just now',
-      });
     });
   }
 }
