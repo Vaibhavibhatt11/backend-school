@@ -9,47 +9,10 @@ class TimetableController extends GetxController {
 
   final isLoading = false.obs;
   final selectedDate = DateTime.now().obs;
-  final selectedDay = 24.obs; // 24th
+  final selectedDay = DateTime.now().day.obs;
   final dayView = true.obs;
 
-  final timetable =
-      [
-        {
-          'time': '08:00 AM - 08:50 AM',
-          'subject': 'Advanced Mathematics',
-          'teacher': 'Mr. Alexander Smith',
-          'room': 'Block A, Room 102',
-          'period': 'Period 1',
-          'isLive': false,
-          'progress': null,
-        },
-        {
-          'time': '09:00 AM - 09:50 AM',
-          'subject': 'Theoretical Physics',
-          'teacher': 'Dr. Sarah Connor',
-          'room': 'Science Lab B-4',
-          'period': 'Period 2',
-          'isLive': true,
-          'progress': 0.65,
-          'remaining': '15 mins',
-        },
-        {
-          'time': '10:15 AM - 11:05 AM',
-          'subject': 'World Literature',
-          'teacher': 'Ms. Elena Gilbert',
-          'room': 'Humanities Hall 205',
-          'period': 'Period 3',
-          'isLive': false,
-        },
-        {
-          'time': '11:15 AM - 12:05 PM',
-          'subject': 'Computer Science',
-          'teacher': 'Prof. Alan Turing',
-          'room': 'IT Lab 02',
-          'period': 'Period 4',
-          'isLive': false,
-        },
-      ].obs;
+  final timetable = <Map<String, dynamic>>[].obs;
 
   @override
   void onInit() {
@@ -68,7 +31,7 @@ class TimetableController extends GetxController {
       final items = data['items'];
       if (items is List) {
         timetable.assignAll(
-          items.whereType<Map>().map((e) => Map<String, Object>.from(e)),
+          items.whereType<Map>().map((e) => Map<String, dynamic>.from(e)),
         );
       }
     } finally {

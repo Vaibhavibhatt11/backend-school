@@ -9,28 +9,12 @@ class FeesController extends GetxController {
   final ParentContextService _parentContext = Get.find<ParentContextService>();
 
   final isLoading = false.obs;
-  final studentName = 'Alex Johnson'.obs;
-  final studentGrade = 'Grade 5-B'.obs;
-  final totalOutstanding = 1425.00.obs;
+  final studentName = ''.obs;
+  final studentGrade = ''.obs;
+  final totalOutstanding = 0.0.obs;
   final selectedTab = 0.obs; // 0: Pending, 1: Paid, 2: Overdue
 
-  final invoices =
-      [
-        {
-          'title': 'Tuition Fee',
-          'subtitle': 'Quarter 4 • #INV-089',
-          'amount': 1250.00,
-          'dueDate': 'Oct 25',
-          'type': 'pending',
-        },
-        {
-          'title': 'Sports Club',
-          'subtitle': 'Annual Membership • #INV-102',
-          'amount': 175.00,
-          'dueDate': 'Nov 10',
-          'type': 'pending',
-        },
-      ].obs;
+  final invoices = <Map<String, dynamic>>[].obs;
 
   @override
   void onInit() {
@@ -57,13 +41,13 @@ class FeesController extends GetxController {
       final apiInvoices = data['invoices'];
       if (apiInvoices is List) {
         invoices.assignAll(
-          apiInvoices.whereType<Map>().map((e) => Map<String, Object>.from(e)),
+          apiInvoices.whereType<Map>().map((e) => Map<String, dynamic>.from(e)),
         );
       }
       final apiOverdue = data['overdueInvoices'];
       if (apiOverdue is List) {
         overdueInvoices.assignAll(
-          apiOverdue.whereType<Map>().map((e) => Map<String, Object>.from(e)),
+          apiOverdue.whereType<Map>().map((e) => Map<String, dynamic>.from(e)),
         );
       }
     } finally {
@@ -71,10 +55,7 @@ class FeesController extends GetxController {
     }
   }
 
-  final overdueInvoices =
-      [
-        {'title': 'Library Fine', 'amount': 15.00, 'dueDate': 'Sept 12'},
-      ].obs;
+  final overdueInvoices = <Map<String, dynamic>>[].obs;
 
   void goToInvoiceDetail(String invoiceId) {
     Get.toNamed(AppRoutes.PARENT_INVOICE_DETAIL, arguments: {'id': invoiceId});

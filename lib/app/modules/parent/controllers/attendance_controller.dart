@@ -7,13 +7,13 @@ class AttendanceController extends GetxController {
   final ParentContextService _parentContext = Get.find<ParentContextService>();
 
   final isLoading = false.obs;
-  final studentName = 'Marcus Johnson'.obs;
-  final studentClass = 'Class 10-B • Roll No. 24'.obs;
-  final month = 'October 2023'.obs;
+  final studentName = ''.obs;
+  final studentClass = ''.obs;
+  final month = ''.obs;
   final currentMonthOffset = 0.obs;
 
   final calendarDays = <int?>[].obs;
-  final attendanceStats = {'present': 18, 'absent': 2, 'late': 1}.obs;
+  final attendanceStats = <String, int>{'present': 0, 'absent': 0, 'late': 0}.obs;
 
   @override
   void onInit() {

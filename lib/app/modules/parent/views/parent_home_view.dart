@@ -38,14 +38,15 @@ class ParentHomeView extends GetView<ParentHomeController> {
         onPressed: controller.goToAIAssistant,
         child: const Icon(Icons.video_call),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
+      body: Obx(
+        () => SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 8),
             Text(
-              'Monday, Oct 24',
+              '${DateTime.now().weekday}, ${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().day.toString().padLeft(2, '0')}',
               style: TextStyle(
                 color: isDark ? AppColors.textSecondaryDark : Colors.grey[600],
               ),
@@ -55,7 +56,9 @@ class ParentHomeView extends GetView<ParentHomeController> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Hi, Sarah',
+                  controller.childName.value.isEmpty
+                      ? 'Hi'
+                      : 'Hi, ${controller.childName.value.split(' ').first}',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -402,6 +405,7 @@ class ParentHomeView extends GetView<ParentHomeController> {
             const SizedBox(height: 80), // bottom padding
           ],
         ),
+      ),
       ),
       bottomNavigationBar: _buildBottomNavBar(0),
     );

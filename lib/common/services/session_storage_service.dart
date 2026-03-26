@@ -1,9 +1,11 @@
 import 'dart:convert';
 
+import 'package:get_storage/get_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SessionStorageService {
   static const String _tokenKey = 'auth_token';
+  static const String _legacyTokenKey = 'token';
   static const String _loginResponseKey = 'login_response_json';
 
   SharedPreferences? _prefs;
@@ -19,7 +21,11 @@ class SessionStorageService {
 
   Future<String?> getToken() async {
     await _ensureReady();
-    return _prefs!.getString(_tokenKey);
+    final token = _prefs!.getString(_tokenKey);
+    if (token != null && token.isNotEmpty) return token;
+    // Fallback for legacy auth flow that stores token in GetStorage.
+    final legacy = GetStorage().read<String>(_legacyTokenKey);
+    return (legacy != null && legacy.isNotEmpty) ? legacy : null;
   }
 
   Future<void> saveLoginResponse(Map<String, dynamic> json) async {

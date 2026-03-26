@@ -1,10 +1,10 @@
-import 'package:erp_frontend/app/data/repositories/user_repository.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:get/get.dart';
+import '../../../../common/services/auth_service.dart';
 import '../../../services/app_storage.dart';
 
 class LoginController extends GetxController {
-  final UserRepository _userRepository = Get.find<UserRepository>();
+  final AuthService _authService = Get.find<AuthService>();
   final _storage = AppStorage();
 
   final emailOrPhone = ''.obs;
@@ -21,20 +21,22 @@ class LoginController extends GetxController {
     }
     isLoading.value = true;
     try {
-      // Step 1: Validate credentials and request OTP
-      final success = await _userRepository.requestLoginOtp(
-        emailOrPhone.value,
-        password.value,
+      final response = await _authService.login(
+        email: emailOrPhone.value,
+        password: password.value,
       );
-      if (success) {
-        // Navigate to OTP screen with purpose='login' and identifier
-        Get.toNamed(
-          AppRoutes.OTP,
-          arguments: {'purpose': 'login', 'identifier': emailOrPhone.value},
-        );
-      } else {
-        Get.snackbar('Error', 'Invalid credentials');
+
+      // Keep GetStorage in sync with SharedPreferences token for legacy flows.
+      _storage.token = response.token;
+
+      final user = response.data?['user'];
+      if (user is Map && user['role'] != null) {
+        _storage.userRole = user['role'].toString();
       }
+
+      Get.offNamed(AppRoutes.ROLE_SELECTION);
+    } catch (e) {
+      Get.snackbar('Login Failed', e.toString().replaceFirst('Exception: ', ''));
     } finally {
       isLoading.value = false;
     }

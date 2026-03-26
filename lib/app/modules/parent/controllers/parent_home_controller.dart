@@ -9,40 +9,17 @@ class ParentHomeController extends GetxController {
 
   final isLoading = false.obs;
   final errorMessage = ''.obs;
-  final childName = 'Liam Jenkins'.obs;
-  final childGrade = '4-B'.obs;
-  final attendance = 96.obs;
-  final feesDue = 245.obs;
-  final feesDueDate = 'Nov 15'.obs;
-  final upcomingClass = 'Mathematics • Room 302'.obs;
-  final classStartIn = '12 minutes'.obs;
+  final childName = ''.obs;
+  final childGrade = ''.obs;
+  final attendance = 0.obs;
+  final feesDue = 0.obs;
+  final feesDueDate = ''.obs;
+  final upcomingClass = ''.obs;
+  final classStartIn = ''.obs;
 
-  final recentNotices = [
-    {
-      'title': 'Annual Sports Day 2024 Registration Open',
-      'description':
-          'Ensure your child\'s participation by filling the consent form...',
-      'postedBy': 'Admin',
-      'time': '2h ago',
-      'type': 'Events',
-    },
-    {
-      'title': 'Mid-Term Assessment Schedule',
-      'description':
-          'The assessment schedule for the month of November has been released...',
-      'postedBy': 'Mr. Smith',
-      'time': '5h ago',
-      'type': 'Academics',
-    },
-  ].obs;
+  final recentNotices = <Map<String, dynamic>>[].obs;
 
-  final subjectScores = {
-    'Eng': 60,
-    'Math': 85,
-    'Sci': 75,
-    'Art': 65,
-    'Hist': 90,
-  }.obs;
+  final subjectScores = <String, int>{}.obs;
 
   @override
   void onInit() {
@@ -68,11 +45,7 @@ class ParentHomeController extends GetxController {
 
       final notices = data['recentNotices'];
       if (notices is List) {
-        recentNotices.assignAll(
-          notices.whereType<Map>().map(
-            (e) => e.map((k, v) => MapEntry(k.toString(), v?.toString() ?? '')),
-          ),
-        );
+        recentNotices.assignAll(notices.whereType<Map>().map((e) => Map<String, dynamic>.from(e)));
       }
       final scores = data['subjectScores'];
       if (scores is Map) {

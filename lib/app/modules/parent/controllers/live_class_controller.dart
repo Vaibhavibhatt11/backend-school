@@ -12,41 +12,14 @@ class LiveClassController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    subject.value = Get.arguments['subject'] ?? 'Physics';
+    subject.value = Get.arguments['subject'] ?? '';
     loadLiveClasses();
   }
 
   final selectedDate = DateTime.now().obs;
-  final liveClass =
-      {
-        'subject': 'Physics',
-        'title': 'Quantum Mechanics & Particle Theory',
-        'teacher': 'Dr. Robert Chen',
-        'time': '09:00 AM - 10:30 AM',
-        'participants': 24,
-      }.obs;
+  final liveClass = <String, dynamic>{}.obs;
 
-  final upcomingClasses =
-      [
-        {
-          'time': '11:00 AM',
-          'subject': 'Advanced Mathematics',
-          'teacher': 'Prof. Alan Turing',
-          'room': 'Room 402',
-        },
-        {
-          'time': '01:30 PM',
-          'subject': 'English Literature',
-          'teacher': 'Sarah Jenkins',
-          'room': 'Room 101',
-        },
-        {
-          'time': '03:00 PM',
-          'subject': 'Computer Science',
-          'teacher': 'Marco Rossi',
-          'room': 'Lab A',
-        },
-      ].obs;
+  final upcomingClasses = <Map<String, dynamic>>[].obs;
 
   Future<void> loadLiveClasses() async {
     isLoading.value = true;
@@ -56,14 +29,12 @@ class LiveClassController extends GetxController {
       );
       final current = data['liveClass'];
       if (current is Map) {
-        liveClass.assignAll(Map<String, Object>.from(current));
+        liveClass.assignAll(Map<String, dynamic>.from(current));
       }
       final upcoming = data['upcomingClasses'];
       if (upcoming is List) {
         upcomingClasses.assignAll(
-          upcoming.whereType<Map>().map(
-            (e) => e.map((k, v) => MapEntry(k.toString(), v?.toString() ?? '')),
-          ),
+          upcoming.whereType<Map>().map((e) => Map<String, dynamic>.from(e)),
         );
       }
     } finally {

@@ -7,11 +7,11 @@ class DocumentViewerController extends GetxController {
   final ParentContextService _parentContext = Get.find<ParentContextService>();
 
   final isLoading = false.obs;
-  final documentTitle = 'Term 1 Report Card'.obs;
-  final studentName = 'Arjun Sharma'.obs;
-  final studentClass = 'Grade 10-B'.obs;
+  final documentTitle = ''.obs;
+  final studentName = ''.obs;
+  final studentClass = ''.obs;
   final currentPage = 1.obs;
-  final totalPages = 2.obs;
+  final totalPages = 1.obs;
 
   @override
   void onInit() {

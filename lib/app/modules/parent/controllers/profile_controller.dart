@@ -8,32 +8,18 @@ class ProfileController extends GetxController {
   final ParentContextService _parentContext = Get.find<ParentContextService>();
 
   final isLoading = false.obs;
-  final studentName = 'Arjun Malhotra'.obs;
-  final studentClass = 'Class 10-B • Roll 2024082'.obs;
-  final academicYear = 'Academic Year 2023-24'.obs;
-  final dob = '14 May 2008'.obs;
-  final bloodGroup = 'O Positive (O+)'.obs;
-  final fatherName = 'Rajesh Malhotra'.obs;
-  final motherName = 'Suman Malhotra'.obs;
-  final currentTermGrade = 'A+'.obs;
-  final currentTermPercentage = 92.4.obs;
-  final classAvg = 78.0.obs;
+  final studentName = ''.obs;
+  final studentClass = ''.obs;
+  final academicYear = ''.obs;
+  final dob = ''.obs;
+  final bloodGroup = ''.obs;
+  final fatherName = ''.obs;
+  final motherName = ''.obs;
+  final currentTermGrade = ''.obs;
+  final currentTermPercentage = 0.0.obs;
+  final classAvg = 0.0.obs;
 
-  final documents =
-      [
-        {
-          'name': 'Aadhar Card',
-          'status': 'Verified',
-          'size': '1.2 MB',
-          'icon': 'description',
-        },
-        {
-          'name': 'Birth Certificate',
-          'status': 'Verified',
-          'size': '0.8 MB',
-          'icon': 'badge',
-        },
-      ].obs;
+  final documents = <Map<String, dynamic>>[].obs;
 
   @override
   void onInit() {
@@ -60,11 +46,7 @@ class ProfileController extends GetxController {
       if (avg is num) classAvg.value = avg.toDouble();
       final docs = data['documents'];
       if (docs is List) {
-        documents.assignAll(
-          docs.whereType<Map>().map(
-            (e) => e.map((k, v) => MapEntry(k.toString(), v?.toString() ?? '')),
-          ),
-        );
+        documents.assignAll(docs.whereType<Map>().map((e) => Map<String, dynamic>.from(e)));
       }
     } finally {
       isLoading.value = false;

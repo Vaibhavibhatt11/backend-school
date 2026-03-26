@@ -139,7 +139,9 @@ class OtpController extends GetxController {
           identifier,
         );
         if (user != null) {
-          _storage.token = 'dummy_token';
+          // OTP flow is legacy/mock in this build.
+          // Keep storage clear so API-backed screens don't use fake tokens.
+          _storage.token = null;
           _storage.user = user;
           Get.offNamed(AppRoutes.ROLE_SELECTION);
         } else {

@@ -41,6 +41,7 @@ class ChildSwitcherView extends GetView<ChildSwitcherController> {
                     controller.children.asMap().entries.map((entry) {
                       final index = entry.key;
                       final child = entry.value;
+                      final isActive = child['active'] == true;
                       return GestureDetector(
                         onTap: () => controller.selectChild(index),
                         child: Container(
@@ -48,7 +49,7 @@ class ChildSwitcherView extends GetView<ChildSwitcherController> {
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color:
-                                child['active'] as bool
+                                isActive
                                     ? AppColors.primary.withOpacity(0.05)
                                     : (isDark
                                         ? AppColors.surfaceDark
@@ -56,12 +57,12 @@ class ChildSwitcherView extends GetView<ChildSwitcherController> {
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color:
-                                  child['active'] as bool
+                                  isActive
                                       ? AppColors.primary
                                       : (isDark
                                           ? AppColors.borderDark
                                           : AppColors.borderLight),
-                              width: child['active'] as bool ? 2 : 1,
+                              width: isActive ? 2 : 1,
                             ),
                           ),
                           child: Row(
@@ -90,7 +91,7 @@ class ChildSwitcherView extends GetView<ChildSwitcherController> {
                                         color: Colors.grey,
                                       ),
                                     ),
-                                    if (child['active'] as bool)
+                                    if (isActive)
                                       const Padding(
                                         padding: EdgeInsets.only(top: 4),
                                         child: Text(
@@ -104,7 +105,7 @@ class ChildSwitcherView extends GetView<ChildSwitcherController> {
                                   ],
                                 ),
                               ),
-                              if (child['active'] as bool)
+                              if (isActive)
                                 Container(
                                   width: 24,
                                   height: 24,

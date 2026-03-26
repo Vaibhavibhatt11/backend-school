@@ -8,25 +8,20 @@ class ProgressReportsController extends GetxController {
   final ParentContextService _parentContext = Get.find<ParentContextService>();
 
   final isLoading = false.obs;
-  final studentName = 'Alex Johnson'.obs;
-  final studentClass = 'Grade 10-B • Rank: 04/42'.obs;
-  final academicYear = 'Academic Year 2023-24'.obs;
+  final studentName = ''.obs;
+  final studentClass = ''.obs;
+  final academicYear = ''.obs;
   final selectedTerm = 0.obs; // 0: Term 2, 1: Term 1, etc.
-  final gpa = 3.82.obs;
-  final gpaChange = 0.12.obs;
-  final attendance = 94.2.obs;
-  final attendanceStatus = 'High'.obs;
+  final gpa = 0.0.obs;
+  final gpaChange = 0.0.obs;
+  final attendance = 0.0.obs;
+  final attendanceStatus = ''.obs;
 
-  final subjects =
-      [
-        {'name': 'Mathematics', 'score': 92, 'avg': 85},
-        {'name': 'Science', 'score': 88, 'avg': 82},
-        {'name': 'English', 'score': 76, 'avg': 78},
-      ].obs;
+  final subjects = <Map<String, dynamic>>[].obs;
 
-  final attendanceDistribution = {'present': 172, 'late': 8, 'absent': 2}.obs;
+  final attendanceDistribution = <String, int>{'present': 0, 'late': 0, 'absent': 0}.obs;
 
-  final feeHistory = [75, 100, 60, 40, 20].obs; // 5 items ✅
+  final feeHistory = <int>[].obs;
 
   @override
   void onInit() {
@@ -52,7 +47,7 @@ class ProgressReportsController extends GetxController {
       if (attendanceValue is num) attendance.value = attendanceValue.toDouble();
       final scores = data['subjectScores'];
       if (scores is List) {
-        subjects.assignAll(scores.whereType<Map>().map((e) => Map<String, Object>.from(e)));
+        subjects.assignAll(scores.whereType<Map>().map((e) => Map<String, dynamic>.from(e)));
       }
       final fees = data['feeHistory'];
       if (fees is List) {

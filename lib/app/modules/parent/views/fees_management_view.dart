@@ -120,10 +120,12 @@ class FeesManagementView extends GetView<FeesController> {
                 children:
                     controller.invoices.map((invoice) {
                       return _buildInvoiceCard(
-                        title: invoice['title']! as String,
-                        subtitle: invoice['subtitle']! as String,
-                        amount: invoice['amount'] as double,
-                        dueDate: invoice['dueDate']! as String,
+                        title: (invoice['title'] ?? '').toString(),
+                        subtitle: (invoice['subtitle'] ?? '').toString(),
+                        amount: (invoice['amount'] is num)
+                            ? (invoice['amount'] as num).toDouble()
+                            : double.tryParse(invoice['amount']?.toString() ?? '') ?? 0,
+                        dueDate: (invoice['dueDate'] ?? '').toString(),
                         onViewDetails:
                             () => controller.viewDetails(
                               invoice['id'] as String? ?? '',
