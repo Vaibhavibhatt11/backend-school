@@ -15,10 +15,15 @@ class FeesController extends GetxController {
   final selectedTab = 0.obs; // 0: Pending, 1: Paid, 2: Overdue
 
   final invoices = <Map<String, dynamic>>[].obs;
+  Worker? _childWorker;
 
   @override
   void onInit() {
     super.onInit();
+    _childWorker = ever<String?>(
+      _parentContext.selectedChildId,
+      (_) => loadFees(),
+    );
     loadFees();
   }
 
@@ -41,7 +46,17 @@ class FeesController extends GetxController {
       final apiInvoices = data['invoices'];
       if (apiInvoices is List) {
         invoices.assignAll(
-          apiInvoices.whereType<Map>().map((e) => Map<String, dynamic>.from(e)),
+          apiInvoices.whereType<Map>().map((e) {
+            final m = Map<String, dynamic>.from(e);
+            return {
+              'id': (m['id'] ?? m['_id'] ?? '').toString(),
+              'title': (m['title'] ?? m['name'] ?? 'Invoice').toString(),
+              'subtitle': (m['subtitle'] ?? m['invoiceNo'] ?? '').toString(),
+              'amount': m['amount'],
+              'dueDate': (m['dueDate'] ?? '').toString(),
+              'type': (m['type'] ?? 'pending').toString(),
+            };
+          }),
         );
       }
       final apiOverdue = data['overdueInvoices'];
@@ -99,5 +114,11 @@ class FeesController extends GetxController {
         ],
       ),
     );
+  }
+
+  @override
+  void onClose() {
+    _childWorker?.dispose();
+    super.onClose();
   }
 }

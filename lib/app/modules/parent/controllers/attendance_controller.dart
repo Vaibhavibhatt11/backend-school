@@ -14,11 +14,17 @@ class AttendanceController extends GetxController {
 
   final calendarDays = <int?>[].obs;
   final attendanceStats = <String, int>{'present': 0, 'absent': 0, 'late': 0}.obs;
+  final dayStatusMap = <int, String>{}.obs;
+  Worker? _childWorker;
 
   @override
   void onInit() {
     super.onInit();
     _generateDays();
+    _childWorker = ever<String?>(
+      _parentContext.selectedChildId,
+      (_) => loadAttendance(),
+    );
     loadAttendance();
   }
 
@@ -50,7 +56,18 @@ class AttendanceController extends GetxController {
       }
       final days = data['calendarDays'];
       if (days is List) {
-        calendarDays.assignAll(days.map((e) => e == null ? null : _asInt(e)));
+        if (days.isNotEmpty && days.first is Map) {
+          final mapped = <int?>[];
+          dayStatusMap.clear();
+          for (final entry in days.whereType<Map>()) {
+            final day = _asInt(entry['day']);
+            mapped.add(day);
+            dayStatusMap[day] = (entry['status'] ?? '').toString().toLowerCase();
+          }
+          calendarDays.assignAll(mapped);
+        } else {
+          calendarDays.assignAll(days.map((e) => e == null ? null : _asInt(e)));
+        }
       }
     } finally {
       isLoading.value = false;
@@ -64,6 +81,8 @@ class AttendanceController extends GetxController {
   }
 
   String getStatusForDay(int day) {
+    final apiStatus = dayStatusMap[day];
+    if (apiStatus != null && apiStatus.isNotEmpty) return apiStatus;
     if (day == 13) return 'late';
     if (day % 2 == 0) return 'present';
     return 'absent';
@@ -79,5 +98,11 @@ class AttendanceController extends GetxController {
     currentMonthOffset.value++;
     month.value = 'November 2023';
     loadAttendance();
+  }
+
+  @override
+  void onClose() {
+    _childWorker?.dispose();
+    super.onClose();
   }
 }

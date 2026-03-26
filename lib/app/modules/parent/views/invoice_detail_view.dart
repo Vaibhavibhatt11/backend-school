@@ -175,13 +175,13 @@ class InvoiceDetailView extends GetView<InvoiceDetailController> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      item['item']! as String,
+                                      (item['item'] ?? '').toString(),
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                     Text(
-                                      item['description']! as String,
+                                      (item['description'] ?? '').toString(),
                                       style: const TextStyle(
                                         fontSize: 12,
                                         color: Colors.grey,

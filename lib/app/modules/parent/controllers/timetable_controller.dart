@@ -13,10 +13,15 @@ class TimetableController extends GetxController {
   final dayView = true.obs;
 
   final timetable = <Map<String, dynamic>>[].obs;
+  Worker? _childWorker;
 
   @override
   void onInit() {
     super.onInit();
+    _childWorker = ever<String?>(
+      _parentContext.selectedChildId,
+      (_) => loadTimetable(),
+    );
     loadTimetable();
   }
 
@@ -31,7 +36,20 @@ class TimetableController extends GetxController {
       final items = data['items'];
       if (items is List) {
         timetable.assignAll(
-          items.whereType<Map>().map((e) => Map<String, dynamic>.from(e)),
+          items.whereType<Map>().map((e) {
+            final m = Map<String, dynamic>.from(e);
+            final isLive = m['isLive'] == true || m['status'] == 'live';
+            return {
+              'time': (m['time'] ?? '').toString(),
+              'subject': (m['subject'] ?? '').toString(),
+              'teacher': (m['teacher'] ?? '').toString(),
+              'room': (m['room'] ?? '').toString(),
+              'period': (m['period'] ?? '').toString(),
+              'isLive': isLive,
+              'progress': m['progress'],
+              'remaining': m['remaining']?.toString(),
+            };
+          }),
         );
       }
     } finally {
@@ -55,5 +73,11 @@ class TimetableController extends GetxController {
 
   void joinLiveClass(String subject) {
     Get.toNamed(AppRoutes.PARENT_LIVE_CLASS, arguments: {'subject': subject});
+  }
+
+  @override
+  void onClose() {
+    _childWorker?.dispose();
+    super.onClose();
   }
 }

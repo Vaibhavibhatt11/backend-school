@@ -71,15 +71,19 @@ class NotificationsCenterView extends GetView<NotificationsController> {
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             child: Text(
-                              section['section']! as String,
+                              (section['section'] ?? '').toString(),
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
-                          ...(section['items'] as List).map(
-                            (item) => _buildNotificationCard(item, isDark),
-                          ),
+                          ...((section['items'] is List ? section['items'] as List : const [])
+                              .map(
+                            (item) => _buildNotificationCard(
+                              Map<String, dynamic>.from(item as Map),
+                              isDark,
+                            ),
+                          )),
                         ],
                       );
                     }).toList(),
@@ -139,23 +143,23 @@ class NotificationsCenterView extends GetView<NotificationsController> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      item['title']!,
+                      (item['title'] ?? '').toString(),
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      item['time']!,
+                      (item['time'] ?? '').toString(),
                       style: const TextStyle(fontSize: 10, color: Colors.grey),
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(item['description']!),
+                Text((item['description'] ?? '').toString()),
                 if (item['action'] != null) ...[
                   const SizedBox(height: 8),
                   TextButton(
                     onPressed: () {},
                     child: Text(
-                      item['action']!,
+                      (item['action'] ?? '').toString(),
                       style: const TextStyle(color: AppColors.primary),
                     ),
                   ),

@@ -13,6 +13,10 @@ class LiveClassController extends GetxController {
   void onInit() {
     super.onInit();
     subject.value = Get.arguments['subject'] ?? '';
+    _childWorker = ever<String?>(
+      _parentContext.selectedChildId,
+      (_) => loadLiveClasses(),
+    );
     loadLiveClasses();
   }
 
@@ -20,6 +24,13 @@ class LiveClassController extends GetxController {
   final liveClass = <String, dynamic>{}.obs;
 
   final upcomingClasses = <Map<String, dynamic>>[].obs;
+  Worker? _childWorker;
+
+  @override
+  void onClose() {
+    _childWorker?.dispose();
+    super.onClose();
+  }
 
   Future<void> loadLiveClasses() async {
     isLoading.value = true;
@@ -30,6 +41,9 @@ class LiveClassController extends GetxController {
       final current = data['liveClass'];
       if (current is Map) {
         liveClass.assignAll(Map<String, dynamic>.from(current));
+        if (subject.value.isEmpty && liveClass['subject'] != null) {
+          subject.value = liveClass['subject'].toString();
+        }
       }
       final upcoming = data['upcomingClasses'];
       if (upcoming is List) {

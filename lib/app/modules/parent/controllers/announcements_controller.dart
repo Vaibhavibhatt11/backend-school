@@ -10,10 +10,15 @@ class AnnouncementsController extends GetxController {
   final selectedFilter = 'All'.obs;
 
   final announcements = <Map<String, dynamic>>[].obs;
+  Worker? _childWorker;
 
   @override
   void onInit() {
     super.onInit();
+    _childWorker = ever<String?>(
+      _parentContext.selectedChildId,
+      (_) => loadAnnouncements(),
+    );
     loadAnnouncements();
   }
 
@@ -30,7 +35,19 @@ class AnnouncementsController extends GetxController {
       final items = data['announcements'];
       if (items is List) {
         announcements.assignAll(
-          items.whereType<Map>().map((e) => Map<String, dynamic>.from(e)),
+          items.whereType<Map>().map((e) {
+            final m = Map<String, dynamic>.from(e);
+            return {
+              'type': (m['type'] ?? 'general').toString().toLowerCase(),
+              'title': (m['title'] ?? '').toString(),
+              'description': (m['description'] ?? '').toString(),
+              'postedBy': (m['postedBy'] ?? '').toString(),
+              'time': (m['time'] ?? '').toString(),
+              'teacherName': (m['teacherName'] ?? '').toString(),
+              'teacherClass': (m['teacherClass'] ?? '').toString(),
+              'attachment': m['attachment']?.toString(),
+            };
+          }),
         );
       }
     } finally {
@@ -41,5 +58,11 @@ class AnnouncementsController extends GetxController {
   void setFilter(String filter) {
     selectedFilter.value = filter;
     loadAnnouncements();
+  }
+
+  @override
+  void onClose() {
+    _childWorker?.dispose();
+    super.onClose();
   }
 }

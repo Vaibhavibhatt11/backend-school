@@ -20,11 +20,22 @@ class ParentHomeController extends GetxController {
   final recentNotices = <Map<String, dynamic>>[].obs;
 
   final subjectScores = <String, int>{}.obs;
+  Worker? _childWorker;
 
   @override
   void onInit() {
     super.onInit();
+    _childWorker = ever<String?>(
+      _parentContext.selectedChildId,
+      (_) => loadHome(),
+    );
     loadHome();
+  }
+
+  @override
+  void onClose() {
+    _childWorker?.dispose();
+    super.onClose();
   }
 
   Future<void> loadHome({String? month}) async {

@@ -142,18 +142,20 @@ class DailyTimetableView extends GetView<TimetableController> {
                 children:
                     controller.timetable.map((item) {
                       return _buildClassCard(
-                        time: item['time']! as String,
-                        subject: item['subject']! as String,
-                        teacher: item['teacher']! as String,
-                        room: item['room']! as String,
-                        period: item['period']! as String,
-                        isLive: item['isLive'] as bool,
-                        progress: item['progress'] as double?,
-                        remaining: item['remaining'] as String?,
+                        time: (item['time'] ?? '').toString(),
+                        subject: (item['subject'] ?? '').toString(),
+                        teacher: (item['teacher'] ?? '').toString(),
+                        room: (item['room'] ?? '').toString(),
+                        period: (item['period'] ?? '').toString(),
+                        isLive: item['isLive'] == true,
+                        progress: item['progress'] is num
+                            ? (item['progress'] as num).toDouble()
+                            : null,
+                        remaining: item['remaining']?.toString(),
                         onJoin:
-                            item['isLive'] as bool
+                            item['isLive'] == true
                                 ? () => controller.joinLiveClass(
-                                  item['subject']! as String,
+                                  (item['subject'] ?? '').toString(),
                                 )
                                 : null,
                       );

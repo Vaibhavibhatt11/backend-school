@@ -111,11 +111,11 @@ class SchoolAnnouncementsView extends GetView<AnnouncementsController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      ann['title']!,
+                      (ann['title'] ?? '').toString(),
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      'Posted ${ann['time']} by ${ann['postedBy']}',
+                      'Posted ${(ann['time'] ?? '').toString()} by ${(ann['postedBy'] ?? '').toString()}',
                       style: const TextStyle(fontSize: 10, color: Colors.grey),
                     ),
                   ],
@@ -124,7 +124,7 @@ class SchoolAnnouncementsView extends GetView<AnnouncementsController> {
             ],
           ),
           const SizedBox(height: 8),
-          Text(ann['description']!),
+          Text((ann['description'] ?? '').toString()),
         ],
       ),
     );
@@ -157,11 +157,11 @@ class SchoolAnnouncementsView extends GetView<AnnouncementsController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      ann['teacherName']!,
+                      (ann['teacherName'] ?? '').toString(),
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      '${ann['teacherClass']} • ${ann['time']}',
+                      '${(ann['teacherClass'] ?? '').toString()} • ${(ann['time'] ?? '').toString()}',
                       style: const TextStyle(fontSize: 10, color: Colors.grey),
                     ),
                   ],
@@ -172,11 +172,11 @@ class SchoolAnnouncementsView extends GetView<AnnouncementsController> {
           ),
           const SizedBox(height: 8),
           Text(
-            ann['title']!,
+            (ann['title'] ?? '').toString(),
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           const SizedBox(height: 4),
-          Text(ann['description']!),
+          Text((ann['description'] ?? '').toString()),
           if (ann['attachment'] != null) ...[
             const SizedBox(height: 12),
             Container(
@@ -190,7 +190,7 @@ class SchoolAnnouncementsView extends GetView<AnnouncementsController> {
                 children: [
                   const Icon(Icons.description, size: 16),
                   const SizedBox(width: 4),
-                  Text(ann['attachment']!),
+                  Text((ann['attachment'] ?? '').toString()),
                 ],
               ),
             ),

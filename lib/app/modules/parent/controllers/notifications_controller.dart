@@ -10,10 +10,15 @@ class NotificationsController extends GetxController {
   final selectedFilter = 'All'.obs;
 
   final notifications = <Map<String, dynamic>>[].obs;
+  Worker? _childWorker;
 
   @override
   void onInit() {
     super.onInit();
+    _childWorker = ever<String?>(
+      _parentContext.selectedChildId,
+      (_) => loadNotifications(),
+    );
     loadNotifications();
   }
 
@@ -26,7 +31,26 @@ class NotificationsController extends GetxController {
       final items = data['notifications'];
       if (items is List) {
         notifications.assignAll(
-          items.whereType<Map>().map((e) => Map<String, dynamic>.from(e)),
+          items.whereType<Map>().map((e) {
+            final section = Map<String, dynamic>.from(e);
+            final rawItems = section['items'];
+            return {
+              'section': (section['section'] ?? '').toString(),
+              'items': rawItems is List
+                  ? rawItems.whereType<Map>().map((item) {
+                      final m = Map<String, dynamic>.from(item);
+                      return {
+                        'type': (m['type'] ?? 'general').toString(),
+                        'title': (m['title'] ?? '').toString(),
+                        'description': (m['description'] ?? '').toString(),
+                        'time': (m['time'] ?? '').toString(),
+                        'unread': m['unread'] == true,
+                        'action': m['action']?.toString(),
+                      };
+                    }).toList()
+                  : <Map<String, dynamic>>[],
+            };
+          }),
         );
       }
     } finally {
@@ -37,4 +61,10 @@ class NotificationsController extends GetxController {
   void setFilter(String filter) => selectedFilter.value = filter;
   void markAllRead() =>
       Get.snackbar('Mark Read', 'All notifications marked as read');
+
+  @override
+  void onClose() {
+    _childWorker?.dispose();
+    super.onClose();
+  }
 }

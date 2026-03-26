@@ -20,10 +20,15 @@ class ProfileController extends GetxController {
   final classAvg = 0.0.obs;
 
   final documents = <Map<String, dynamic>>[].obs;
+  Worker? _childWorker;
 
   @override
   void onInit() {
     super.onInit();
+    _childWorker = ever<String?>(
+      _parentContext.selectedChildId,
+      (_) => loadProfile(),
+    );
     loadProfile();
   }
 
@@ -65,4 +70,10 @@ class ProfileController extends GetxController {
     AppRoutes.PARENT_DOCUMENT_VIEWER,
     arguments: {'document': docName},
   );
+
+  @override
+  void onClose() {
+    _childWorker?.dispose();
+    super.onClose();
+  }
 }

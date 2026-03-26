@@ -22,10 +22,15 @@ class ProgressReportsController extends GetxController {
   final attendanceDistribution = <String, int>{'present': 0, 'late': 0, 'absent': 0}.obs;
 
   final feeHistory = <int>[].obs;
+  Worker? _childWorker;
 
   @override
   void onInit() {
     super.onInit();
+    _childWorker = ever<String?>(
+      _parentContext.selectedChildId,
+      (_) => loadProgressReport(),
+    );
     loadProgressReport();
   }
 
@@ -45,6 +50,14 @@ class ProgressReportsController extends GetxController {
       if (gpaValue is num) gpa.value = gpaValue.toDouble();
       final attendanceValue = data['attendance'];
       if (attendanceValue is num) attendance.value = attendanceValue.toDouble();
+      if (data['attendanceStats'] is Map) {
+        final stats = data['attendanceStats'] as Map;
+        attendanceDistribution.assignAll({
+          'present': int.tryParse('${stats['present'] ?? 0}') ?? 0,
+          'late': int.tryParse('${stats['late'] ?? 0}') ?? 0,
+          'absent': int.tryParse('${stats['absent'] ?? 0}') ?? 0,
+        });
+      }
       final scores = data['subjectScores'];
       if (scores is List) {
         subjects.assignAll(scores.whereType<Map>().map((e) => Map<String, dynamic>.from(e)));
@@ -81,5 +94,11 @@ class ProgressReportsController extends GetxController {
         ],
       ),
     );
+  }
+
+  @override
+  void onClose() {
+    _childWorker?.dispose();
+    super.onClose();
   }
 }

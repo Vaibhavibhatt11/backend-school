@@ -13,10 +13,15 @@ class LibraryController extends GetxController {
   final recommendedBooks = <Map<String, dynamic>>[].obs;
 
   final activeLoans = <Map<String, dynamic>>[].obs;
+  Worker? _childWorker;
 
   @override
   void onInit() {
     super.onInit();
+    _childWorker = ever<String?>(
+      _parentContext.selectedChildId,
+      (_) => loadLibrary(),
+    );
     loadLibrary();
   }
 
@@ -59,5 +64,11 @@ class LibraryController extends GetxController {
         ],
       ),
     );
+  }
+
+  @override
+  void onClose() {
+    _childWorker?.dispose();
+    super.onClose();
   }
 }
