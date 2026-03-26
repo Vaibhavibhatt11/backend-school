@@ -13,6 +13,12 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
+function addDays(base, days) {
+  const d = new Date(base);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
 async function main() {
   const defaultPlans = [
     {
@@ -294,6 +300,547 @@ async function main() {
       parentId: demoParentRecord.id,
       relationType: "GUARDIAN",
       isPrimary: true,
+    },
+  });
+
+  // ---------------------------------------------------------------------------
+  // Demo enrichment for Parent/Admin module showcase (non-breaking additions)
+  // ---------------------------------------------------------------------------
+  const adminUser = await prisma.user.findUnique({ where: { email: "admin@school.edu" } });
+  const teacherPasswordHash = await bcrypt.hash("Teacher123!", 10);
+  const teacherUser = await prisma.user.upsert({
+    where: { email: "teacher@school.edu" },
+    update: {
+      fullName: "Class Teacher",
+      role: "TEACHER",
+      schoolId: school.id,
+      isActive: true,
+      passwordHash: teacherPasswordHash,
+    },
+    create: {
+      fullName: "Class Teacher",
+      email: "teacher@school.edu",
+      role: "TEACHER",
+      schoolId: school.id,
+      isActive: true,
+      passwordHash: teacherPasswordHash,
+    },
+  });
+
+  const teacherStaff = await prisma.staff.upsert({
+    where: { schoolId_employeeCode: { schoolId: school.id, employeeCode: "EMP-TEA-001" } },
+    update: {
+      userId: teacherUser.id,
+      fullName: "Class Teacher",
+      email: "teacher@school.edu",
+      designation: "Teacher",
+      department: "Academics",
+      isActive: true,
+    },
+    create: {
+      schoolId: school.id,
+      userId: teacherUser.id,
+      employeeCode: "EMP-TEA-001",
+      fullName: "Class Teacher",
+      email: "teacher@school.edu",
+      designation: "Teacher",
+      department: "Academics",
+      isActive: true,
+      joinDate: addDays(new Date(), -240),
+    },
+  });
+
+  await prisma.classRoom.update({
+    where: { id: demoClass.id },
+    data: { classTeacherId: teacherStaff.id },
+  });
+
+  const subjectSpecs = [
+    { code: "ENG", name: "English" },
+    { code: "MATH", name: "Mathematics" },
+    { code: "SCI", name: "Science" },
+    { code: "HIST", name: "History" },
+  ];
+  const subjects = [];
+  for (const spec of subjectSpecs) {
+    const subject = await prisma.subject.upsert({
+      where: { schoolId_code: { schoolId: school.id, code: spec.code } },
+      update: { name: spec.name, isActive: true },
+      create: {
+        schoolId: school.id,
+        code: spec.code,
+        name: spec.name,
+        isActive: true,
+      },
+    });
+    subjects.push(subject);
+    await prisma.classSubject.upsert({
+      where: { classId_subjectId: { classId: demoClass.id, subjectId: subject.id } },
+      update: { teacherId: teacherStaff.id },
+      create: { classId: demoClass.id, subjectId: subject.id, teacherId: teacherStaff.id },
+    });
+  }
+
+  const feeStructure = await prisma.feeStructure.upsert({
+    where: { schoolId_name: { schoolId: school.id, name: "Term Fee" } },
+    update: { amount: 1200, currency: "USD", frequency: "TERM", isActive: true },
+    create: {
+      schoolId: school.id,
+      name: "Term Fee",
+      amount: 1200,
+      currency: "USD",
+      frequency: "TERM",
+      isActive: true,
+    },
+  });
+
+  const now = new Date();
+  const invoiceRows = [
+    {
+      invoiceNo: "INV-DEMO-001",
+      issueDate: addDays(now, -35),
+      dueDate: addDays(now, -7),
+      amountDue: 1200,
+      amountPaid: 300,
+      status: "PARTIAL",
+    },
+    {
+      invoiceNo: "INV-DEMO-002",
+      issueDate: addDays(now, -12),
+      dueDate: addDays(now, 10),
+      amountDue: 950,
+      amountPaid: 0,
+      status: "ISSUED",
+    },
+  ];
+
+  const invoices = [];
+  for (const inv of invoiceRows) {
+    const invoice = await prisma.invoice.upsert({
+      where: { schoolId_invoiceNo: { schoolId: school.id, invoiceNo: inv.invoiceNo } },
+      update: {
+        studentId: demoStudent.id,
+        feeStructureId: feeStructure.id,
+        issueDate: inv.issueDate,
+        dueDate: inv.dueDate,
+        amountDue: inv.amountDue,
+        amountPaid: inv.amountPaid,
+        status: inv.status,
+      },
+      create: {
+        schoolId: school.id,
+        studentId: demoStudent.id,
+        feeStructureId: feeStructure.id,
+        invoiceNo: inv.invoiceNo,
+        issueDate: inv.issueDate,
+        dueDate: inv.dueDate,
+        amountDue: inv.amountDue,
+        amountPaid: inv.amountPaid,
+        status: inv.status,
+      },
+    });
+    invoices.push(invoice);
+  }
+
+  await prisma.payment.upsert({
+    where: { schoolId_receiptNo: { schoolId: school.id, receiptNo: "RCPT-DEMO-001" } },
+    update: {
+      studentId: demoStudent.id,
+      invoiceId: invoices[0].id,
+      amount: 300,
+      method: "ONLINE",
+      paidAt: addDays(now, -20),
+      collectedById: adminUser?.id || null,
+      transactionRef: "TXN-DEMO-001",
+    },
+    create: {
+      schoolId: school.id,
+      studentId: demoStudent.id,
+      invoiceId: invoices[0].id,
+      receiptNo: "RCPT-DEMO-001",
+      amount: 300,
+      method: "ONLINE",
+      paidAt: addDays(now, -20),
+      collectedById: adminUser?.id || null,
+      transactionRef: "TXN-DEMO-001",
+    },
+  });
+
+  const attendanceRows = [
+    { days: -9, status: "PRESENT" },
+    { days: -8, status: "PRESENT" },
+    { days: -7, status: "LATE" },
+    { days: -6, status: "PRESENT" },
+    { days: -5, status: "ABSENT" },
+    { days: -4, status: "PRESENT" },
+    { days: -3, status: "PRESENT" },
+    { days: -2, status: "PRESENT" },
+    { days: -1, status: "LATE" },
+  ];
+  for (const row of attendanceRows) {
+    const date = addDays(now, row.days);
+    date.setHours(9, 0, 0, 0);
+    await prisma.studentAttendance.upsert({
+      where: {
+        schoolId_studentId_date: {
+          schoolId: school.id,
+          studentId: demoStudent.id,
+          date,
+        },
+      },
+      update: { status: row.status, markedById: adminUser?.id || null },
+      create: {
+        schoolId: school.id,
+        studentId: demoStudent.id,
+        date,
+        status: row.status,
+        markedById: adminUser?.id || null,
+      },
+    });
+  }
+
+  const announcements = [
+    {
+      title: "Annual Sports Day Registration Open",
+      content: "Register before Friday to confirm participation.",
+      audience: "PARENT,STUDENT",
+    },
+    {
+      title: "Mid-Term Assessment Schedule Published",
+      content: "Please review the date sheet and prepare accordingly.",
+      audience: "PARENT,STUDENT",
+    },
+    {
+      title: "Fee Reminder",
+      content: "Pending invoices are due soon. Kindly clear dues on time.",
+      audience: "PARENT,FEE",
+    },
+  ];
+  for (let i = 0; i < announcements.length; i += 1) {
+    const item = announcements[i];
+    const existing = await prisma.announcement.findFirst({
+      where: { schoolId: school.id, title: item.title },
+    });
+    if (existing) {
+      await prisma.announcement.update({
+        where: { id: existing.id },
+        data: {
+          content: item.content,
+          audience: item.audience,
+          status: "SENT",
+          sentAt: addDays(now, -(i + 1)),
+          createdById: adminUser?.id || null,
+        },
+      });
+    } else {
+      await prisma.announcement.create({
+        data: {
+          schoolId: school.id,
+          title: item.title,
+          content: item.content,
+          audience: item.audience,
+          status: "SENT",
+          sentAt: addDays(now, -(i + 1)),
+          createdById: adminUser?.id || null,
+        },
+      });
+    }
+  }
+
+  for (const [idx, subject] of subjects.entries()) {
+    const exam = await prisma.exam.upsert({
+      where: { id: `DEMO-EXAM-${subject.code}` },
+      update: {
+        schoolId: school.id,
+        classId: demoClass.id,
+        subjectId: subject.id,
+        name: `${subject.name} Unit Test`,
+        examDate: addDays(now, -(25 - idx * 3)),
+        maxMarks: 100,
+        status: "PUBLISHED",
+        isPublished: true,
+      },
+      create: {
+        id: `DEMO-EXAM-${subject.code}`,
+        schoolId: school.id,
+        classId: demoClass.id,
+        subjectId: subject.id,
+        name: `${subject.name} Unit Test`,
+        examDate: addDays(now, -(25 - idx * 3)),
+        maxMarks: 100,
+        status: "PUBLISHED",
+        isPublished: true,
+      },
+    });
+
+    await prisma.examResult.upsert({
+      where: { examId_studentId: { examId: exam.id, studentId: demoStudent.id } },
+      update: { marks: 72 + idx * 5, grade: idx > 1 ? "A" : "B+", remarks: "Good progress" },
+      create: {
+        examId: exam.id,
+        studentId: demoStudent.id,
+        marks: 72 + idx * 5,
+        grade: idx > 1 ? "A" : "B+",
+        remarks: "Good progress",
+      },
+    });
+  }
+
+  const liveStart1 = addDays(now, 1);
+  liveStart1.setHours(10, 0, 0, 0);
+  const liveEnd1 = addDays(now, 1);
+  liveEnd1.setHours(11, 0, 0, 0);
+  const liveStart2 = addDays(now, 2);
+  liveStart2.setHours(9, 30, 0, 0);
+  const liveEnd2 = addDays(now, 2);
+  liveEnd2.setHours(10, 30, 0, 0);
+
+  await prisma.liveClassSession.upsert({
+    where: { id: "DEMO-LIVE-1" },
+    update: {
+      schoolId: school.id,
+      classId: demoClass.id,
+      subjectId: subjects[1]?.id || null,
+      teacherId: teacherStaff.id,
+      title: "Mathematics Live Revision",
+      platform: "Google Meet",
+      joinUrl: "https://meet.google.com/demo-math",
+      startsAt: liveStart1,
+      endsAt: liveEnd1,
+      status: "UPCOMING",
+    },
+    create: {
+      id: "DEMO-LIVE-1",
+      schoolId: school.id,
+      classId: demoClass.id,
+      subjectId: subjects[1]?.id || null,
+      teacherId: teacherStaff.id,
+      title: "Mathematics Live Revision",
+      platform: "Google Meet",
+      joinUrl: "https://meet.google.com/demo-math",
+      startsAt: liveStart1,
+      endsAt: liveEnd1,
+      status: "UPCOMING",
+    },
+  });
+  await prisma.liveClassSession.upsert({
+    where: { id: "DEMO-LIVE-2" },
+    update: {
+      schoolId: school.id,
+      classId: demoClass.id,
+      subjectId: subjects[2]?.id || null,
+      teacherId: teacherStaff.id,
+      title: "Science Doubt Session",
+      platform: "Zoom",
+      joinUrl: "https://zoom.us/j/demo-science",
+      startsAt: liveStart2,
+      endsAt: liveEnd2,
+      status: "UPCOMING",
+    },
+    create: {
+      id: "DEMO-LIVE-2",
+      schoolId: school.id,
+      classId: demoClass.id,
+      subjectId: subjects[2]?.id || null,
+      teacherId: teacherStaff.id,
+      title: "Science Doubt Session",
+      platform: "Zoom",
+      joinUrl: "https://zoom.us/j/demo-science",
+      startsAt: liveStart2,
+      endsAt: liveEnd2,
+      status: "UPCOMING",
+    },
+  });
+
+  await prisma.studentDocument.upsert({
+    where: { id: "DEMO-DOC-1" },
+    update: {
+      schoolId: school.id,
+      studentId: demoStudent.id,
+      name: "Birth Certificate",
+      url: "https://example.com/docs/birth-certificate.pdf",
+      type: "PDF",
+      sizeKb: 240,
+      uploadedById: adminUser?.id || null,
+    },
+    create: {
+      id: "DEMO-DOC-1",
+      schoolId: school.id,
+      studentId: demoStudent.id,
+      name: "Birth Certificate",
+      url: "https://example.com/docs/birth-certificate.pdf",
+      type: "PDF",
+      sizeKb: 240,
+      uploadedById: adminUser?.id || null,
+    },
+  });
+  await prisma.studentDocument.upsert({
+    where: { id: "DEMO-DOC-2" },
+    update: {
+      schoolId: school.id,
+      studentId: demoStudent.id,
+      name: "ID Card",
+      url: "https://example.com/docs/student-id.pdf",
+      type: "PDF",
+      sizeKb: 110,
+      uploadedById: adminUser?.id || null,
+    },
+    create: {
+      id: "DEMO-DOC-2",
+      schoolId: school.id,
+      studentId: demoStudent.id,
+      name: "ID Card",
+      url: "https://example.com/docs/student-id.pdf",
+      type: "PDF",
+      sizeKb: 110,
+      uploadedById: adminUser?.id || null,
+    },
+  });
+
+  const libraryBook = await prisma.libraryBook.upsert({
+    where: { id: "DEMO-BOOK-1" },
+    update: {
+      schoolId: school.id,
+      title: "Mathematics Practice Workbook",
+      author: "A. Sharma",
+      category: "Academics",
+      totalCopies: 10,
+      availableCopies: 7,
+      isActive: true,
+    },
+    create: {
+      id: "DEMO-BOOK-1",
+      schoolId: school.id,
+      isbn: "9780000000001",
+      title: "Mathematics Practice Workbook",
+      author: "A. Sharma",
+      category: "Academics",
+      totalCopies: 10,
+      availableCopies: 7,
+      isActive: true,
+    },
+  });
+
+  await prisma.libraryBorrow.upsert({
+    where: { id: "DEMO-BORROW-1" },
+    update: {
+      schoolId: school.id,
+      bookId: libraryBook.id,
+      borrowerType: "STUDENT",
+      borrowerRefId: demoStudent.id,
+      issuedAt: addDays(now, -6),
+      dueDate: addDays(now, 8),
+      status: "BORROWED",
+    },
+    create: {
+      id: "DEMO-BORROW-1",
+      schoolId: school.id,
+      bookId: libraryBook.id,
+      borrowerType: "STUDENT",
+      borrowerRefId: demoStudent.id,
+      issuedAt: addDays(now, -6),
+      dueDate: addDays(now, 8),
+      status: "BORROWED",
+    },
+  });
+
+  await prisma.studentSettings.upsert({
+    where: { studentId: demoStudent.id },
+    update: {
+      preferences: {
+        pushNotificationsEnabled: true,
+        faceIdEnabled: false,
+        language: "en",
+        darkModeOption: "system",
+      },
+    },
+    create: {
+      schoolId: school.id,
+      studentId: demoStudent.id,
+      preferences: {
+        pushNotificationsEnabled: true,
+        faceIdEnabled: false,
+        language: "en",
+        darkModeOption: "system",
+      },
+    },
+  });
+
+  await prisma.reportJob.upsert({
+    where: { id: "DEMO-REPORT-1" },
+    update: {
+      schoolId: school.id,
+      type: "FEE_COLLECTION",
+      status: "COMPLETED",
+      fileUrl: "https://example.com/reports/fee-collection.pdf",
+      requestedBy: adminUser?.id || null,
+    },
+    create: {
+      id: "DEMO-REPORT-1",
+      schoolId: school.id,
+      type: "FEE_COLLECTION",
+      status: "COMPLETED",
+      fileUrl: "https://example.com/reports/fee-collection.pdf",
+      requestedBy: adminUser?.id || null,
+    },
+  });
+  await prisma.reportJob.upsert({
+    where: { id: "DEMO-REPORT-2" },
+    update: {
+      schoolId: school.id,
+      type: "ATTENDANCE",
+      status: "COMPLETED",
+      fileUrl: "https://example.com/reports/attendance.pdf",
+      requestedBy: adminUser?.id || null,
+    },
+    create: {
+      id: "DEMO-REPORT-2",
+      schoolId: school.id,
+      type: "ATTENDANCE",
+      status: "COMPLETED",
+      fileUrl: "https://example.com/reports/attendance.pdf",
+      requestedBy: adminUser?.id || null,
+    },
+  });
+
+  await prisma.auditLog.upsert({
+    where: { id: "DEMO-AUDIT-1" },
+    update: {
+      schoolId: school.id,
+      actorId: adminUser?.id || null,
+      action: "INVOICE_CREATED",
+      entity: "Invoice",
+      entityId: invoices[0].id,
+      meta: { source: "seed" },
+    },
+    create: {
+      id: "DEMO-AUDIT-1",
+      schoolId: school.id,
+      actorId: adminUser?.id || null,
+      action: "INVOICE_CREATED",
+      entity: "Invoice",
+      entityId: invoices[0].id,
+      meta: { source: "seed" },
+    },
+  });
+  await prisma.auditLog.upsert({
+    where: { id: "DEMO-AUDIT-2" },
+    update: {
+      schoolId: school.id,
+      actorId: adminUser?.id || null,
+      action: "ANNOUNCEMENT_SENT",
+      entity: "Announcement",
+      entityId: null,
+      meta: { source: "seed" },
+    },
+    create: {
+      id: "DEMO-AUDIT-2",
+      schoolId: school.id,
+      actorId: adminUser?.id || null,
+      action: "ANNOUNCEMENT_SENT",
+      entity: "Announcement",
+      entityId: null,
+      meta: { source: "seed" },
     },
   });
 
