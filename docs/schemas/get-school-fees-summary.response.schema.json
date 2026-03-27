@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://school-erp.local/schemas/get-school-fees-summary.response.json",
+  "title": "GET /api/v1/school/fees/summary",
+  "description": "Stable response shape for school fee summary including per–fee-structure category breakdown. Schema version is bumped only when breaking changes are made to data.*.",
+  "type": "object",
+  "required": ["success", "data"],
+  "additionalProperties": false,
+  "properties": {
+    "success": { "const": true },
+    "data": {
+      "type": "object",
+      "required": ["schemaVersion", "totals", "categories"],
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "type": "string",
+          "description": "Semantic version for this payload shape. Clients should treat unknown versions as forward-compatible if success=true.",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "totals": {
+          "type": "object",
+          "required": ["amountDue", "amountPaid", "outstanding", "collections", "feeStructures"],
+          "additionalProperties": false,
+          "properties": {
+            "amountDue": { "type": "number" },
+            "amountPaid": { "type": "number" },
+            "outstanding": { "type": "number" },
+            "collections": { "type": "number", "description": "Sum of all payment amounts (cash flow)" },
+            "feeStructures": { "type": "integer", "minimum": 0, "description": "Count of fee structure definitions for the school" }
+          }
+        },
+        "categories": {
+          "type": "array",
+          "description": "Breakdown by fee structure (category = fee structure name). Invoices without feeStructureId are rolled into one row with feeStructureId null and name \"Uncategorized\".",
+          "items": {
+            "type": "object",
+            "required": ["feeStructureId", "name", "amountDue", "amountPaid", "outstanding", "invoiceCount"],
+            "additionalProperties": false,
+            "properties": {
+              "feeStructureId": { "type": ["string", "null"] },
+              "name": { "type": "string" },
+              "amountDue": { "type": "number" },
+              "amountPaid": { "type": "number" },
+              "outstanding": { "type": "number" },
+              "invoiceCount": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    }
+  }
+}

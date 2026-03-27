@@ -64,25 +64,63 @@ const reportSchema = z.object({
   params: z.record(z.string(), z.any()).optional(),
 });
 
+const FEES_SUMMARY_SCHEMA_VERSION = "1.0.0";
+
 async function getFeesSummary(req, res, next) {
   try {
     const schoolId = scopedSchoolId(req, undefined, true);
-    const [invoice, payment, structures] = await Promise.all([
+    const [invoice, payment, structuresCount, byFeeStructure] = await Promise.all([
       prisma.invoice.aggregate({ where: { schoolId }, _sum: { amountDue: true, amountPaid: true } }),
       prisma.payment.aggregate({ where: { schoolId }, _sum: { amount: true } }),
       prisma.feeStructure.count({ where: { schoolId } }),
+      prisma.invoice.groupBy({
+        by: ["feeStructureId"],
+        where: { schoolId },
+        _sum: { amountDue: true, amountPaid: true },
+        _count: { _all: true },
+      }),
     ]);
+
+    const structureIds = byFeeStructure.map((g) => g.feeStructureId).filter((id) => id != null);
+    const feeNames =
+      structureIds.length > 0
+        ? await prisma.feeStructure.findMany({
+            where: { id: { in: structureIds }, schoolId },
+            select: { id: true, name: true },
+          })
+        : [];
+    const nameById = new Map(feeNames.map((f) => [f.id, f.name]));
+
+    const categories = byFeeStructure
+      .map((g) => {
+        const amountDue = g._sum.amountDue || 0;
+        const amountPaid = g._sum.amountPaid || 0;
+        const feeStructureId = g.feeStructureId ?? null;
+        const name =
+          feeStructureId == null ? "Uncategorized" : nameById.get(feeStructureId) || "Unknown fee";
+        return {
+          feeStructureId,
+          name,
+          amountDue,
+          amountPaid,
+          outstanding: amountDue - amountPaid,
+          invoiceCount: g._count._all,
+        };
+      })
+      .sort((a, b) => a.name.localeCompare(b.name, "en"));
 
     return res.status(200).json({
       success: true,
       data: {
+        schemaVersion: FEES_SUMMARY_SCHEMA_VERSION,
         totals: {
           amountDue: invoice._sum.amountDue || 0,
           amountPaid: invoice._sum.amountPaid || 0,
           outstanding: (invoice._sum.amountDue || 0) - (invoice._sum.amountPaid || 0),
           collections: payment._sum.amount || 0,
-          feeStructures: structures,
+          feeStructures: structuresCount,
         },
+        categories,
       },
     });
   } catch (error) {
