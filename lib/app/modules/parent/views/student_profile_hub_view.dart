@@ -1,3 +1,4 @@
+import 'package:erp_frontend/common/widgets/app_user_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
@@ -41,10 +42,12 @@ class StudentProfileHubView extends GetView<ProfileController> {
               ),
               child: Row(
                 children: [
-                  const CircleAvatar(
-                    radius: 40,
-                    backgroundImage: NetworkImage(
-                      'https://via.placeholder.com/80',
+                  Obx(
+                    () => AppUserAvatar(
+                      radius: 40,
+                      photoUrl: controller.studentPhotoUrl.value.isEmpty
+                          ? null
+                          : controller.studentPhotoUrl.value,
                     ),
                   ),
                   const SizedBox(width: 16),

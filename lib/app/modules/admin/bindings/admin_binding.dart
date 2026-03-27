@@ -9,6 +9,7 @@ import '../controllers/admin_audit_logs_controller.dart';
 import '../controllers/admin_profile_controller.dart';
 import '../controllers/admin_settings_controller.dart';
 import '../controllers/admin_shell_controller.dart';
+import 'package:erp_frontend/common/services/admin/admin_service.dart';
 
 class AdminBinding extends Bindings {
   @override
@@ -17,31 +18,55 @@ class AdminBinding extends Bindings {
       Get.put(AdminShellController(), permanent: true);
     }
     if (!Get.isRegistered<AdminDashboardController>()) {
-      Get.put(AdminDashboardController(), permanent: true);
+      Get.put(
+        AdminDashboardController(Get.find<AdminService>()),
+        permanent: true,
+      );
     }
     if (!Get.isRegistered<AdminApprovalsController>()) {
-      Get.put(AdminApprovalsController(), permanent: true);
+      Get.put(
+        AdminApprovalsController(Get.find<AdminService>()),
+        permanent: true,
+      );
     }
     if (!Get.isRegistered<AdminFeeSnapshotController>()) {
-      Get.put(AdminFeeSnapshotController(), permanent: true);
+      Get.put(
+        AdminFeeSnapshotController(Get.find<AdminService>()),
+        permanent: true,
+      );
     }
     if (!Get.isRegistered<AdminAttendanceController>()) {
-      Get.put(AdminAttendanceController(), permanent: true);
+      Get.put(
+        AdminAttendanceController(Get.find<AdminService>()),
+        permanent: true,
+      );
     }
     if (!Get.isRegistered<AdminReportsController>()) {
       Get.put(AdminReportsController(), permanent: true);
     }
     if (!Get.isRegistered<AdminNoticeBoardController>()) {
-      Get.put(AdminNoticeBoardController(), permanent: true);
+      Get.put(
+        AdminNoticeBoardController(Get.find<AdminService>()),
+        permanent: true,
+      );
     }
     if (!Get.isRegistered<AdminAuditLogsController>()) {
-      Get.put(AdminAuditLogsController(), permanent: true);
+      Get.put(
+        AdminAuditLogsController(Get.find<AdminService>()),
+        permanent: true,
+      );
     }
     if (!Get.isRegistered<AdminProfileController>()) {
-      Get.put(AdminProfileController(), permanent: true);
+      Get.put(
+        AdminProfileController(Get.find<AdminService>()),
+        permanent: true,
+      );
     }
     if (!Get.isRegistered<AdminSettingsController>()) {
-      Get.put(AdminSettingsController(), permanent: true);
+      Get.put(
+        AdminSettingsController(Get.find<AdminService>()),
+        permanent: true,
+      );
     }
   }
 }

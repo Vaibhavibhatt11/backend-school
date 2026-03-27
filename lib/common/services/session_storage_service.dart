@@ -46,6 +46,18 @@ class SessionStorageService {
     }
   }
 
+  /// Refresh JWT from last [saveLoginResponse] (`data.refreshToken`).
+  Future<String?> getRefreshToken() async {
+    final login = await getLoginResponse();
+    if (login == null) return null;
+    final data = login['data'];
+    if (data is Map<String, dynamic>) {
+      final rt = data['refreshToken'];
+      if (rt != null && rt.toString().isNotEmpty) return rt.toString();
+    }
+    return null;
+  }
+
   Future<void> clearSession() async {
     await _ensureReady();
     await _prefs!.remove(_tokenKey);

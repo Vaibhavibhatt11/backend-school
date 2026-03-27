@@ -1,5 +1,7 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
+import 'package:erp_frontend/common/utils/auth_route_resolver.dart';
 import 'package:get/get.dart';
 import '../../../../common/services/auth_service.dart';
 import '../../../services/app_storage.dart';
@@ -31,13 +33,15 @@ class LoginController extends GetxController {
       _storage.token = response.token;
 
       final user = response.data?['user'];
+      String? role;
       if (user is Map && user['role'] != null) {
-        _storage.userRole = user['role'].toString();
+        role = user['role'].toString();
+        _storage.userRole = role;
       }
 
-      Get.offNamed(AppRoutes.ROLE_SELECTION);
+      AuthRouteResolver.goHomeForRole(role);
     } catch (e) {
-      AppToast.show(e.toString().replaceFirst('Exception: ', ''));
+      AppToast.show(dioOrApiErrorMessage(e));
     } finally {
       isLoading.value = false;
     }

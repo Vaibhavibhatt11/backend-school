@@ -10,6 +10,7 @@ class InvoiceDetailController extends GetxController {
   final issuedDate = ''.obs;
   final studentName = ''.obs;
   final studentDetail = ''.obs;
+  final studentPhotoUrl = ''.obs;
   final dueDate = ''.obs;
   final totalDue = 0.0.obs;
 
@@ -42,6 +43,9 @@ class InvoiceDetailController extends GetxController {
         issuedDate.value = map['issuedDate']?.toString() ?? issuedDate.value;
         studentName.value = map['studentName']?.toString() ?? studentName.value;
         studentDetail.value = map['studentDetail']?.toString() ?? studentDetail.value;
+        studentPhotoUrl.value =
+            (map['studentPhotoUrl'] ?? map['photoUrl'] ?? map['avatarUrl'] ?? studentPhotoUrl.value)
+                .toString();
         dueDate.value = map['dueDate']?.toString() ?? dueDate.value;
         final due = map['totalDue'];
         if (due is num) totalDue.value = due.toDouble();

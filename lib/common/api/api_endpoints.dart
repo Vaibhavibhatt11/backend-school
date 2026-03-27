@@ -9,6 +9,7 @@ class ApiEndpoints {
   static const String authLogin = '/auth/login';
   static const String authRefresh = '/auth/refresh';
   static const String authMe = '/auth/me';
+  static const String authLogout = '/auth/logout';
 
   // Parent app
   static const String parentChildren = '/parent/children';
@@ -27,5 +28,20 @@ class ApiEndpoints {
   static const String parentAiAsk = '/parent/ai/ask';
   static const String parentAiCareer = '/parent/ai/career';
   static const String parentSettings = '/parent/settings';
+
+  // Admin app
+  static const String dashboardSchoolAdmin = '/dashboard/school-admin';
+  static const String schoolApprovalsPendingSummary =
+      '/school/approvals/pending-summary';
+  static const String schoolNotifications = '/school/notifications';
+  static const String schoolFeesSnapshot = '/school/fees/snapshot';
+  static const String schoolFeesSummary = '/school/fees/summary';
+  static const String schoolAttendanceTrend = '/school/attendance/trend';
+  static const String schoolAttendanceOverview = '/school/attendance/overview';
+  static const String schoolProfile = '/school/profile';
+  static const String schoolProfileMe = '/school/profile/me';
+  static const String schoolSettings = '/school/settings';
+  static const String schoolAnnouncements = '/school/announcements';
+  static const String schoolAuditLogs = '/school/audit-logs';
 }
 

@@ -123,6 +123,9 @@ class AdminNoticeBoardView extends GetView<AdminNoticeBoardController> {
             // Notice list
             Expanded(
               child: Obx(() {
+                if (controller.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
                 List<Notice> filtered =
                     controller.notices.where((n) {
                       if (controller.selectedTab.value == 0) return true;

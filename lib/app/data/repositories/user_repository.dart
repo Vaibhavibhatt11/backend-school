@@ -1,10 +1,6 @@
-import 'package:get/get.dart';
 import '../models/user_model.dart';
-import '../providers/api_provider.dart';
 
 class UserRepository {
-  final ApiProvider _apiProvider = Get.find<ApiProvider>();
-
   Future<UserModel?> login(String email, String password) async {
     // Simulate API call
     await Future.delayed(const Duration(seconds: 1));

@@ -1,15 +1,15 @@
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 
-import '../../../app/routes/app_pages.dart';
-import '../../../common/services/auth_service.dart';
+import '../../../app/services/app_storage.dart';
 import '../../../common/routes/common_routes_screens.dart';
+import '../../../common/services/auth_service.dart';
 import '../../../common/utils/app_toast.dart';
+import '../../../common/utils/auth_route_resolver.dart';
 
 class LoginController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
-  static const String _adminEmail = 'admin@gmail.com';
-  static const String _adminPassword = 'Admin@111';
+  final AppStorage _storage = AppStorage();
 
   final RxString email = ''.obs;
   final RxString password = ''.obs;
@@ -50,18 +50,20 @@ class LoginController extends GetxController {
       return;
     }
 
-    // Admin credential shortcut: keep student/parent API login unchanged.
-    if (e.toLowerCase() == _adminEmail && p == _adminPassword) {
-      Get.offAllNamed(AppRoutes.ADMIN_HOME);
-      return;
-    }
-
     try {
       isLoading.value = true;
-      await _authService.login(email: e, password: p);
+      final response = await _authService.login(email: e, password: p);
 
-      // After successful login, go to the bottom navigation shell.
-      Get.offAllNamed(CommonScreenRoutes.mainShell);
+      // Keep GetStorage token in sync with SharedPreferences (legacy + parent flows).
+      _storage.token = response.token;
+      final user = response.data?['user'];
+      String? role;
+      if (user is Map && user['role'] != null) {
+        role = user['role'].toString();
+        _storage.userRole = role;
+      }
+
+      AuthRouteResolver.goHomeForRole(role);
     } on DioException catch (e) {
       String msg;
       final data = e.response?.data;

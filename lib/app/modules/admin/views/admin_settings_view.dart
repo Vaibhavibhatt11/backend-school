@@ -13,7 +13,11 @@ class AdminSettingsView extends GetView<AdminSettingsController> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final content = SafeArea(
-      child: ListView(
+      child: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return ListView(
           padding: const EdgeInsets.all(16),
           children: [
             // Header
@@ -59,17 +63,20 @@ class AdminSettingsView extends GetView<AdminSettingsController> {
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children: [
                           Text(
-                            'Dr. Sarah Jenkins',
-                            style: TextStyle(
+                            controller.adminName.value,
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                             ),
                           ),
                           Text(
-                            'Head of Administration • ID: SCH-2024-01',
-                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                            controller.adminSubtitle.value,
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 12,
+                            ),
                           ),
                         ],
                       ),
@@ -216,7 +223,8 @@ class AdminSettingsView extends GetView<AdminSettingsController> {
               ),
             ),
           ],
-      ),
+        );
+      }),
     );
     if (embedded) return content;
     return Scaffold(

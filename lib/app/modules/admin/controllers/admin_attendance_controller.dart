@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:erp_frontend/common/services/admin/admin_service.dart';
+import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
 
 class ClassAttendance {
@@ -19,43 +21,91 @@ class ClassAttendance {
 }
 
 class AdminAttendanceController extends GetxController {
-  final studentPercent = 94;
-  final studentPresent = 850;
-  final studentTotal = 904;
-  final staffPercent = 98;
-  final staffPresent = 48;
-  final staffTotal = 50;
+  AdminAttendanceController(this._adminService);
 
-  final classes = [
-    ClassAttendance(
-      grade: '12A',
-      teacher: 'Mr. Henderson',
-      percent: 100,
-      perfect: true,
-    ),
-    ClassAttendance(grade: '11B', teacher: 'Ms. Ortiz', percent: 88, absent: 3),
-    ClassAttendance(
-      grade: '10C',
-      teacher: 'Mrs. Chang',
-      percent: 92,
-      absent: 2,
-    ),
-    ClassAttendance(grade: '09A', teacher: '', percent: 0, notSubmitted: true),
-  ];
+  final AdminService _adminService;
+  final isLoading = false.obs;
+  final studentPercent = 0.obs;
+  final studentPresent = 0.obs;
+  final studentTotal = 0.obs;
+  final staffPercent = 0.obs;
+  final staffPresent = 0.obs;
+  final staffTotal = 0.obs;
+
+  final classes = <ClassAttendance>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadAttendance();
+  }
+
+  Future<void> loadAttendance() async {
+    isLoading.value = true;
+    try {
+      final overview = await _adminService.getAttendanceOverview();
+      final student = overview['students'] as Map<String, dynamic>? ?? const {};
+      final staff = overview['staff'] as Map<String, dynamic>? ?? const {};
+
+      final studentSummary = student['summary'] as Map<String, dynamic>? ?? const {};
+      final staffSummary = staff['summary'] as Map<String, dynamic>? ?? const {};
+      studentPresent.value =
+          (studentSummary['PRESENT'] as num?)?.toInt() ??
+          (studentSummary['LATE'] as num?)?.toInt() ??
+          0;
+      studentTotal.value = (student['total'] as num?)?.toInt() ?? 0;
+      staffPresent.value =
+          (staffSummary['PRESENT'] as num?)?.toInt() ??
+          (staffSummary['LATE'] as num?)?.toInt() ??
+          0;
+      staffTotal.value = (staff['total'] as num?)?.toInt() ?? 0;
+
+      studentPercent.value = studentTotal.value > 0
+          ? ((studentPresent.value / studentTotal.value) * 100).round()
+          : 0;
+      staffPercent.value = staffTotal.value > 0
+          ? ((staffPresent.value / staffTotal.value) * 100).round()
+          : 0;
+
+      final trend = await _adminService.getAttendanceTrend(days: 7, type: 'student');
+      final rows =
+          (trend['days'] as List<dynamic>? ?? const <dynamic>[])
+              .cast<Map<String, dynamic>>();
+      final mapped = <ClassAttendance>[];
+      for (var i = 0; i < rows.length; i++) {
+        final row = rows[i];
+        final percent = ((row['presentPct'] as num?)?.toDouble() ?? 0).round();
+        mapped.add(
+          ClassAttendance(
+            grade: row['date']?.toString().substring(5, 10) ?? 'Day ${i + 1}',
+            teacher: 'Attendance',
+            percent: percent,
+            absent: (row['summary'] as Map<String, dynamic>?)?['ABSENT'] as int?,
+            perfect: percent >= 99,
+          ),
+        );
+      }
+      classes.assignAll(mapped);
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   void onViewAll() {
-    AppToast.show('Show all classes');
+    AppToast.show('Full class list: use the admin web portal.');
   }
 
   void onRemind(ClassAttendance cls) {
-    AppToast.show('Reminder sent to ${cls.grade}');
+    AppToast.show('Bulk reminders: use the admin web portal.');
   }
 
   void onMarkManual() {
-    AppToast.show('Mark attendance manually');
+    AppToast.show('Manual attendance: use the admin web portal.');
   }
 
   void onExportPDF() {
-    AppToast.show('PDF exported');
+    AppToast.show('PDF export: use the admin web portal.');
   }
 }

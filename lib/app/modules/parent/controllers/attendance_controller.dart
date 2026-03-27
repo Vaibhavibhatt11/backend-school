@@ -9,6 +9,7 @@ class AttendanceController extends GetxController {
   final isLoading = false.obs;
   final studentName = ''.obs;
   final studentClass = ''.obs;
+  final studentPhotoUrl = ''.obs;
   final month = ''.obs;
   final currentMonthOffset = 0.obs;
 
@@ -48,6 +49,9 @@ class AttendanceController extends GetxController {
       if (data['studentClass'] != null) {
         studentClass.value = data['studentClass'].toString();
       }
+      studentPhotoUrl.value =
+          (data['photoUrl'] ?? data['avatarUrl'] ?? data['studentPhotoUrl'] ?? studentPhotoUrl.value)
+              .toString();
       final stats = data['attendanceStats'];
       if (stats is Map) {
         attendanceStats.assignAll(

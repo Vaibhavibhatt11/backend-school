@@ -1,3 +1,4 @@
+import 'package:erp_frontend/common/widgets/app_user_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
@@ -67,11 +68,9 @@ class ChildSwitcherView extends GetView<ChildSwitcherController> {
                           ),
                           child: Row(
                             children: [
-                              CircleAvatar(
+                              AppUserAvatar(
                                 radius: 30,
-                                backgroundImage: NetworkImage(
-                                  'https://via.placeholder.com/60',
-                                ),
+                                photoUrl: (child['photoUrl'] ?? child['avatarUrl'])?.toString(),
                               ),
                               const SizedBox(width: 16),
                               Expanded(

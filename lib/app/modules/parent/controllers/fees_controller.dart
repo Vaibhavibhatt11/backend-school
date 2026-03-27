@@ -96,7 +96,7 @@ class FeesController extends GetxController {
     Get.dialog(
       AlertDialog(
         title: const Text('Quick Pay'),
-        content: const Text('Bulk payment feature coming soon.'),
+        content: const Text('Bulk payment is not available from this API yet.'),
         actions: [
           TextButton(onPressed: () => Get.back(), child: const Text('OK')),
         ],

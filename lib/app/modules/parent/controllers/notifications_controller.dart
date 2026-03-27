@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
 import '../../../../common/services/parent/parent_communication_service.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
+import '../../../../common/services/parent/parent_api_utils.dart';
 
 class NotificationsController extends GetxController {
   final ParentCommunicationService _communicationService = Get.find<ParentCommunicationService>();
@@ -29,34 +30,41 @@ class NotificationsController extends GetxController {
       final data = await _communicationService.getNotifications(
         childId: _parentContext.selectedChildId.value,
       );
-      final items = data['notifications'];
-      if (items is List) {
+      final grouped = data['notifications'];
+      if (grouped is List) {
         notifications.assignAll(
-          items.whereType<Map>().map((e) {
+          grouped.whereType<Map>().map((e) {
             final section = Map<String, dynamic>.from(e);
             final rawItems = section['items'];
             return {
               'section': (section['section'] ?? '').toString(),
               'items': rawItems is List
-                  ? rawItems.whereType<Map>().map((item) {
-                      final m = Map<String, dynamic>.from(item);
-                      return {
-                        'type': (m['type'] ?? 'general').toString(),
-                        'title': (m['title'] ?? '').toString(),
-                        'description': (m['description'] ?? '').toString(),
-                        'time': (m['time'] ?? '').toString(),
-                        'unread': m['unread'] == true,
-                        'action': m['action']?.toString(),
-                      };
-                    }).toList()
+                  ? rawItems.whereType<Map>().map(_mapNotificationItem).toList()
                   : <Map<String, dynamic>>[],
             };
           }),
         );
+        return;
       }
+      notifications.clear();
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+      notifications.clear();
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Map<String, dynamic> _mapNotificationItem(Map<dynamic, dynamic> raw) {
+    final m = Map<String, dynamic>.from(raw);
+    return {
+      'type': (m['type'] ?? 'general').toString(),
+      'title': (m['title'] ?? m['subject'] ?? '').toString(),
+      'description': (m['description'] ?? m['body'] ?? m['message'] ?? '').toString(),
+      'time': (m['time'] ?? m['createdAt'] ?? '').toString(),
+      'unread': m['unread'] == true,
+      'action': m['action']?.toString(),
+    };
   }
 
   void setFilter(String filter) => selectedFilter.value = filter;

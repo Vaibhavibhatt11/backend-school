@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
+import '../../../../common/services/parent/parent_api_utils.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
 import '../../../../common/services/parent/parent_profile_service.dart';
 
@@ -45,6 +46,10 @@ class LibraryController extends GetxController {
           loans.whereType<Map>().map((e) => Map<String, dynamic>.from(e)),
         );
       }
+    } catch (e) {
+      recommendedBooks.clear();
+      activeLoans.clear();
+      AppToast.show(dioOrApiErrorMessage(e));
     } finally {
       isLoading.value = false;
     }

@@ -12,7 +12,11 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: SafeArea(
-        child: ListView(
+        child: Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return ListView(
           padding: const EdgeInsets.all(16),
           children: [
             // Header
@@ -31,7 +35,7 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
                           'Fee Snapshot',
                           style: TextStyle(
@@ -40,8 +44,8 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
                           ),
                         ),
                         Text(
-                          'Academic Year 2023-24',
-                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                          'Live Finance Overview',
+                          style: const TextStyle(color: Colors.grey, fontSize: 12),
                         ),
                       ],
                     ),
@@ -89,7 +93,7 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '\$${(controller.totalDues / 1000000).toStringAsFixed(1)}M',
+                          '\$${(controller.totalDues.value / 1000000).toStringAsFixed(1)}M',
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -107,18 +111,24 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
-                            children: const [
+                            children: [
                               Icon(
-                                Icons.trending_up,
+                                controller.weekVsLastWeekPct.value >= 0
+                                    ? Icons.trending_up
+                                    : Icons.trending_down,
                                 size: 12,
-                                color: Colors.red,
+                                color: controller.weekVsLastWeekPct.value >= 0
+                                    ? Colors.red
+                                    : Colors.green,
                               ),
-                              SizedBox(width: 2),
+                              const SizedBox(width: 2),
                               Text(
-                                '12% High',
+                                '${controller.weekVsLastWeekPct.value >= 0 ? '+' : ''}${controller.weekVsLastWeekPct.value.toStringAsFixed(1)}% vs last week',
                                 style: TextStyle(
                                   fontSize: 10,
-                                  color: Colors.red,
+                                  color: controller.weekVsLastWeekPct.value >= 0
+                                      ? Colors.red
+                                      : Colors.green,
                                 ),
                               ),
                             ],
@@ -151,7 +161,7 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '\$${(controller.collected / 1000).toStringAsFixed(0)}K',
+                          '\$${(controller.collected.value / 1000).toStringAsFixed(0)}K',
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -169,7 +179,7 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            '${controller.overallPercent.toInt()}% Done',
+                            '${controller.overallPercent.value.toInt()}% Done',
                             style: const TextStyle(
                               fontSize: 10,
                               color: Colors.white,
@@ -219,7 +229,7 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
                           width: 160,
                           height: 160,
                           child: CircularProgressIndicator(
-                            value: controller.overallPercent / 100,
+                            value: controller.overallPercent.value / 100,
                             strokeWidth: 12,
                             backgroundColor: Colors.grey.shade200,
                             valueColor: const AlwaysStoppedAnimation<Color>(
@@ -230,7 +240,7 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
                         Column(
                           children: [
                             Text(
-                              '${controller.overallPercent.toInt()}%',
+                              '${controller.overallPercent.value.toInt()}%',
                               style: const TextStyle(
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
@@ -274,7 +284,7 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
                                 ),
                               ),
                               Text(
-                                '\$${(controller.collected / 1000).toStringAsFixed(0)}K',
+                                '\$${(controller.collected.value / 1000).toStringAsFixed(0)}K',
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -305,7 +315,7 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
                                 ),
                               ),
                               Text(
-                                '\$${(controller.pending / 1000).toStringAsFixed(0)}K',
+                                '\$${(controller.pending.value / 1000).toStringAsFixed(0)}K',
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -335,9 +345,25 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
               ],
             ),
             const SizedBox(height: 8),
-            ...controller.categories.map(
-              (category) => _buildCategoryItem(category, isDark),
-            ),
+            Obx(() {
+              if (controller.categories.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Center(
+                    child: Text(
+                      'No category breakdown from API (summary may be empty).',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                    ),
+                  ),
+                );
+              }
+              return Column(
+                children: controller.categories
+                    .map((c) => _buildCategoryItem(c, isDark))
+                    .toList(),
+              );
+            }),
             const SizedBox(height: 16),
             // Send Reminders button
             ElevatedButton(
@@ -362,13 +388,15 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
               ),
             ),
           ],
-        ),
+          );
+        }),
       ),
     );
   }
 
   Widget _buildCategoryItem(FeeCategory category, bool isDark) {
-    final percent = (category.collected / category.due * 100).toInt();
+    final due = category.due <= 0 ? 1.0 : category.due;
+    final percent = (category.collected / due * 100).clamp(0, 100).toInt();
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -433,7 +461,7 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
           ),
           const SizedBox(height: 8),
           LinearProgressIndicator(
-            value: category.collected / category.due,
+            value: category.due > 0 ? (category.collected / category.due).clamp(0, 1) : 0,
             backgroundColor: Colors.grey.shade200,
             valueColor: AlwaysStoppedAnimation<Color>(category.color),
           ),

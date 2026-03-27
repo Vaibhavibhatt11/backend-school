@@ -13,6 +13,8 @@ class DocumentViewerController extends GetxController {
   final studentClass = ''.obs;
   final currentPage = 1.obs;
   final totalPages = 1.obs;
+  /// HTTPS URL from document list when backend provides `url` / `fileUrl` / `previewUrl`.
+  final previewUrl = ''.obs;
 
   @override
   void onInit() {
@@ -38,10 +40,15 @@ class DocumentViewerController extends GetxController {
         totalPages.value = int.tryParse(map['totalPages']?.toString() ?? '') ?? totalPages.value;
       }
       final docs = data['documents'];
-      if (docs is List && docs.isNotEmpty && documentTitle.value.isEmpty) {
+      if (docs is List && docs.isNotEmpty) {
         final first = docs.first;
-        if (first is Map && first['name'] != null) {
-          documentTitle.value = first['name'].toString();
+        if (first is Map) {
+          final m = Map<String, dynamic>.from(first);
+          if (documentTitle.value.isEmpty && m['name'] != null) {
+            documentTitle.value = m['name'].toString();
+          }
+          previewUrl.value =
+              (m['url'] ?? m['fileUrl'] ?? m['previewUrl'] ?? '').toString().trim();
         }
       }
     } finally {

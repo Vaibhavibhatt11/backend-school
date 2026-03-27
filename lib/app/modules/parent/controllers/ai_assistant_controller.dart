@@ -6,29 +6,62 @@ class AIAssistantController extends GetxController {
   final ParentAiService _aiService = Get.find<ParentAiService>();
   final ParentContextService _parentContext = Get.find<ParentContextService>();
 
-  final messages =
-      [
-        {
-          'sender': 'ai',
-          'text':
-              'Hello! I\'m your AI School Assistant. I can help you with fee details, attendance, the school calendar, and more. What\'s on your mind today?',
-          'time': '09:12 AM',
-        },
-        {
-          'sender': 'user',
-          'text': 'What is the fee policy for this term?',
-          'time': '09:13 AM',
-        },
-        {
-          'sender': 'ai',
-          'text':
-              'For Term 2, fees should be settled by Oct 15th. We have an early payment discount of 5% valid until Sept 30th. You can view the full policy document below.',
-          'time': '09:13 AM',
-          'attachment': 'Fee_Policy_2024.pdf',
-        },
-      ].obs;
+  /// Chat history comes only from user sends + `POST /parent/ai/ask` responses (no demo thread).
+  final messages = <Map<String, dynamic>>[].obs;
   final inputText = ''.obs;
   final isTyping = false.obs;
+
+  /// Quick prompts from `GET /parent/ai/career` when backend returns a list (see handoff).
+  final suggestionPrompts = <String>[].obs;
+  Worker? _childWorker;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _childWorker = ever<String?>(
+      _parentContext.selectedChildId,
+      (_) => loadSuggestionPrompts(),
+    );
+    loadSuggestionPrompts();
+  }
+
+  @override
+  void onClose() {
+    _childWorker?.dispose();
+    super.onClose();
+  }
+
+  Future<void> loadSuggestionPrompts() async {
+    try {
+      final data = await _aiService.getCareerSuggestions(
+        childId: _parentContext.selectedChildId.value,
+      );
+      final raw =
+          data['suggestions'] ??
+          data['prompts'] ??
+          data['chips'] ??
+          data['quickPrompts'] ??
+          data['items'];
+      if (raw is List) {
+        final labels = raw
+            .map((e) {
+              if (e is String) return e.trim();
+              if (e is Map) {
+                return (e['label'] ?? e['text'] ?? e['title'] ?? '').toString().trim();
+              }
+              return e.toString().trim();
+            })
+            .where((s) => s.isNotEmpty)
+            .take(8)
+            .toList();
+        suggestionPrompts.assignAll(labels);
+        return;
+      }
+      suggestionPrompts.clear();
+    } catch (_) {
+      suggestionPrompts.clear();
+    }
+  }
 
   void sendMessage() {
     if (inputText.trim().isEmpty) return;
@@ -46,10 +79,14 @@ class AIAssistantController extends GetxController {
           childId: _parentContext.selectedChildId.value,
         )
         .then((data) {
-          final answer = data['answer']?.toString() ?? 'No response received.';
+          final answer = data['answer'] ??
+              data['reply'] ??
+              data['message'] ??
+              data['text'];
+          final text = answer?.toString().trim();
           messages.add({
             'sender': 'ai',
-            'text': answer,
+            'text': (text != null && text.isNotEmpty) ? text : 'No response received.',
             'time': 'Just now',
           });
         })

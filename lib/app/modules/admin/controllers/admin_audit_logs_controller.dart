@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:erp_frontend/common/services/admin/admin_service.dart';
+import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
 
 class AuditLog {
@@ -21,45 +23,70 @@ class AuditLog {
 }
 
 class AdminAuditLogsController extends GetxController {
+  AdminAuditLogsController(this._adminService);
+
+  final AdminService _adminService;
   final searchQuery = ''.obs;
   final selectedFilter = 'All Logs'.obs;
+  final isLoading = false.obs;
 
-  final logsToday = <AuditLog>[
-    AuditLog(
-      action: 'Successful Login',
-      admin: 'Sarah Jenkins',
-      time: '10:45 AM',
-      ip: '192.168.1.45',
-      details: 'iOS App',
-    ),
-    AuditLog(
-      action: 'Fee Structure Modified',
-      admin: 'Robert Chen',
-      time: '09:12 AM',
-      details: 'Changed "Lab Fees" from \$120.00 to \$150.00 for Grade 10-B.',
-    ),
-    AuditLog(
-      action: 'System Permission Update',
-      admin: 'Principal Office',
-      time: '08:30 AM',
-      isCritical: true,
-    ),
-  ];
+  final logsToday = <AuditLog>[].obs;
+  final logsYesterday = <AuditLog>[].obs;
 
-  final logsYesterday = <AuditLog>[
-    AuditLog(
-      action: 'Failed Login Attempt',
-      admin: 'm_wilson_admin',
-      time: '11:20 PM',
-      details: 'Invalid password entered 3 times. Account temporarily locked.',
-    ),
-    AuditLog(
-      action: 'New Announcement Published',
-      admin: 'Sarah Jenkins',
-      time: '04:15 PM',
-      details: 'Subject: "Annual Sports Day Schedule Update"',
-    ),
-  ];
+  @override
+  void onInit() {
+    super.onInit();
+    loadLogs();
+  }
+
+  Future<void> loadLogs() async {
+    isLoading.value = true;
+    try {
+      final data = await _adminService.getAuditLogs(page: 1, limit: 100);
+      final rawItems = data['items'] ?? data['logs'] ?? data['records'];
+      final items = rawItems is List
+          ? rawItems.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList()
+          : <Map<String, dynamic>>[];
+
+      final today = <AuditLog>[];
+      final yesterday = <AuditLog>[];
+      final now = DateTime.now();
+      final todayDate = DateTime(now.year, now.month, now.day);
+      final yesterdayDate = todayDate.subtract(const Duration(days: 1));
+
+      for (final item in items) {
+        final createdAtRaw = item['createdAt']?.toString();
+        final createdAt = DateTime.tryParse(createdAtRaw ?? '');
+        final bucketDate = createdAt == null
+            ? null
+            : DateTime(createdAt.year, createdAt.month, createdAt.day);
+        final log = AuditLog(
+          action: item['action']?.toString() ?? 'Audit Event',
+          admin: item['actorName']?.toString() ?? item['actorId']?.toString() ?? 'System',
+          time: createdAtRaw ?? '-',
+          ip: item['ip']?.toString(),
+          details: item['details']?.toString(),
+          type: item['type']?.toString(),
+          isCritical: (item['severity']?.toString().toUpperCase() == 'CRITICAL'),
+        );
+
+        if (bucketDate == todayDate) {
+          today.add(log);
+        } else if (bucketDate == yesterdayDate) {
+          yesterday.add(log);
+        }
+      }
+
+      logsToday.assignAll(today);
+      logsYesterday.assignAll(yesterday);
+    } catch (e) {
+      logsToday.clear();
+      logsYesterday.clear();
+      AppToast.show(dioOrApiErrorMessage(e));
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   void onSearch(String value) => searchQuery.value = value;
 

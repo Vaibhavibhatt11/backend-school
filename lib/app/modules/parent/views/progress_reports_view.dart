@@ -1,4 +1,5 @@
 import 'package:erp_frontend/app/modules/parent/controllers/progress_reposrts_controller.dart';
+import 'package:erp_frontend/common/widgets/app_user_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
@@ -34,10 +35,12 @@ class ProgressReportsView extends GetView<ProgressReportsController> {
               ),
               child: Row(
                 children: [
-                  const CircleAvatar(
-                    radius: 30,
-                    backgroundImage: NetworkImage(
-                      'https://i.pravatar.cc/60?u=1',
+                  Obx(
+                    () => AppUserAvatar(
+                      radius: 30,
+                      photoUrl: controller.studentPhotoUrl.value.isEmpty
+                          ? null
+                          : controller.studentPhotoUrl.value,
                     ),
                   ),
                   const SizedBox(width: 16),

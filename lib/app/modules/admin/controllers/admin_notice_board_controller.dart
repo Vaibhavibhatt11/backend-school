@@ -1,4 +1,6 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/services/admin/admin_service.dart';
+import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:get/get.dart';
 
@@ -20,43 +22,50 @@ class Notice {
 }
 
 class AdminNoticeBoardController extends GetxController {
-  final selectedTab = 0.obs; // 0: All, 1: Recent, 2: Drafts
+  AdminNoticeBoardController(this._adminService);
 
-  final notices = <Notice>[
-    Notice(
-      title: 'Parent-Teacher Meeting - Term 1',
-      description:
-          'Please be informed that the meeting scheduled for Friday has been moved to the main auditorium...',
-      status: 'PUBLISHED',
-      time: '2 hours ago',
-      audiences: ['All Parents', 'Grade 10-12'],
-    ),
-    Notice(
-      title: 'Annual Sports Day Registration',
-      description:
-          'Registration for the upcoming annual sports day opens tomorrow. Students can sign up for...',
-      status: 'SCHEDULED',
-      time: 'Tomorrow, 08:00 AM',
-      audiences: ['All Students'],
-    ),
-    Notice(
-      title: 'Staff Workshop: Digital Tools',
-      description:
-          'Draft agenda for the upcoming professional development workshop focusing on AI...',
-      status: 'DRAFT',
-      time: 'Modified 3d ago',
-      audiences: ['All Staff'],
-    ),
-    Notice(
-      title: 'Library New Arrivals',
-      description:
-          'Over 200 new titles have been added to the science section this week...',
-      status: 'PUBLISHED',
-      time: 'Published',
-      audiences: ['Grades 6-12'],
-      // imageUrl: 'https://...', // dummy
-    ),
-  ];
+  final AdminService _adminService;
+  final selectedTab = 0.obs; // 0: All, 1: Recent, 2: Drafts
+  final isLoading = false.obs;
+
+  final notices = <Notice>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadAnnouncements();
+  }
+
+  Future<void> loadAnnouncements() async {
+    isLoading.value = true;
+    try {
+      final data = await _adminService.getAnnouncements(page: 1, limit: 50);
+      final items = (data['items'] as List<dynamic>? ?? const <dynamic>[])
+          .cast<Map<String, dynamic>>();
+      final mapped = items
+          .map(
+            (item) => Notice(
+              title: item['title']?.toString() ?? '',
+              description: item['content']?.toString() ?? '',
+              status: item['status']?.toString() ?? 'DRAFT',
+              time: item['updatedAt']?.toString() ?? item['createdAt']?.toString() ?? '',
+              audiences:
+                  (item['audience']?.toString() ?? '')
+                      .split(',')
+                      .map((e) => e.trim())
+                      .where((e) => e.isNotEmpty)
+                      .toList(),
+            ),
+          )
+          .toList();
+      notices.assignAll(mapped);
+    } catch (e) {
+      notices.clear();
+      AppToast.show(dioOrApiErrorMessage(e));
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   void onTabChanged(int index) {
     selectedTab.value = index;

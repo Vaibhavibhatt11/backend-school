@@ -1,4 +1,5 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/widgets/app_user_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
@@ -73,10 +74,12 @@ class ParentHomeView extends GetView<ParentHomeController> {
                       ),
                       child: Row(
                         children: [
-                          const CircleAvatar(
-                            radius: 16,
-                            backgroundImage: NetworkImage(
-                              'https://via.placeholder.com/32',
+                          Obx(
+                            () => AppUserAvatar(
+                              photoUrl: controller.childPhotoUrl.value.isEmpty
+                                  ? null
+                                  : controller.childPhotoUrl.value,
+                              radius: 16,
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -283,11 +286,10 @@ class ParentHomeView extends GetView<ParentHomeController> {
                           const Spacer(),
                           Row(
                             children: [
-                              const CircleAvatar(
+                              AppUserAvatar(
+                                photoUrl: (notice['authorPhotoUrl'] ?? notice['photoUrl'])
+                                    ?.toString(),
                                 radius: 12,
-                                backgroundImage: NetworkImage(
-                                  'https://via.placeholder.com/24',
-                                ),
                               ),
                               const SizedBox(width: 8),
                               Text(

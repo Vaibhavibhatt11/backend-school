@@ -1,5 +1,6 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:get/get.dart';
+import '../../../../common/services/parent/parent_api_utils.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
 import '../../../../common/services/parent/parent_dashboard_service.dart';
 
@@ -11,6 +12,8 @@ class ParentHomeController extends GetxController {
   final errorMessage = ''.obs;
   final childName = ''.obs;
   final childGrade = ''.obs;
+  /// From home API when provided (`childPhotoUrl` / `photoUrl` / `avatarUrl`).
+  final childPhotoUrl = ''.obs;
   final attendance = 0.obs;
   final feesDue = 0.obs;
   final feesDueDate = ''.obs;
@@ -48,6 +51,9 @@ class ParentHomeController extends GetxController {
       );
       childName.value = (data['childName'] ?? childName.value).toString();
       childGrade.value = (data['childGrade'] ?? childGrade.value).toString();
+      childPhotoUrl.value =
+          (data['childPhotoUrl'] ?? data['photoUrl'] ?? data['avatarUrl'] ?? childPhotoUrl.value)
+              .toString();
       attendance.value = _asInt(data['attendance'], attendance.value);
       feesDue.value = _asInt(data['feesDue'], feesDue.value);
       feesDueDate.value = (data['feesDueDate'] ?? feesDueDate.value).toString();
@@ -65,7 +71,7 @@ class ParentHomeController extends GetxController {
         );
       }
     } catch (e) {
-      errorMessage.value = e.toString();
+      errorMessage.value = dioOrApiErrorMessage(e);
     } finally {
       isLoading.value = false;
     }

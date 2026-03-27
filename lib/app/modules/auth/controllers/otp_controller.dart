@@ -92,6 +92,7 @@
 import 'package:erp_frontend/app/data/repositories/user_repository.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
+import 'package:erp_frontend/common/utils/auth_route_resolver.dart';
 import 'package:get/get.dart';
 import '../../../services/app_storage.dart';
 
@@ -144,7 +145,8 @@ class OtpController extends GetxController {
           // Keep storage clear so API-backed screens don't use fake tokens.
           _storage.token = null;
           _storage.user = user;
-          Get.offNamed(AppRoutes.ROLE_SELECTION);
+          final roleStr = user.role.toString().split('.').last;
+          AuthRouteResolver.goHomeForRole(roleStr);
         } else {
           AppToast.show('OTP verification failed');
         }

@@ -11,7 +11,11 @@ class AdminProfileView extends GetView<AdminProfileController> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: SafeArea(
-        child: ListView(
+        child: Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return ListView(
           padding: const EdgeInsets.all(16),
           children: [
             // Profile header
@@ -56,14 +60,14 @@ class AdminProfileView extends GetView<AdminProfileController> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    controller.name,
+                    controller.name.value,
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    'Senior Administrator • ID: ${controller.id}',
+                    'Senior Administrator • ID: ${controller.id.value}',
                     style: const TextStyle(color: Colors.grey, fontSize: 14),
                   ),
                   const SizedBox(height: 8),
@@ -91,7 +95,7 @@ class AdminProfileView extends GetView<AdminProfileController> {
                 Expanded(
                   child: _buildStatCard(
                     'Years Service',
-                    '${controller.yearsService}',
+                    '${controller.yearsService.value}',
                     isDark,
                   ),
                 ),
@@ -99,7 +103,7 @@ class AdminProfileView extends GetView<AdminProfileController> {
                 Expanded(
                   child: _buildStatCard(
                     'Pending Approvals',
-                    '${controller.pendingApprovals}',
+                    '${controller.pendingApprovals.value}',
                     isDark,
                     borderColor: AppColors.primary,
                   ),
@@ -128,17 +132,17 @@ class AdminProfileView extends GetView<AdminProfileController> {
                   _buildDetailRow(
                     Icons.account_balance,
                     'Branch Name',
-                    controller.branchName,
+                    controller.branchName.value,
                   ),
                   _buildDetailRow(
                     Icons.qr_code_2,
                     'Branch Code',
-                    controller.branchCode,
+                    controller.branchCode.value,
                   ),
                   _buildDetailRow(
                     Icons.location_on,
                     'Location',
-                    controller.location,
+                    controller.location.value,
                     isLast: true,
                   ),
                 ],
@@ -192,8 +196,7 @@ class AdminProfileView extends GetView<AdminProfileController> {
                       ),
                       title: const Text('Email Notifications'),
                       value: controller.emailNotificationsEnabled.value,
-                      onChanged: (val) =>
-                          controller.onEmailNotificationsToggle(),
+                      onChanged: controller.onEmailNotificationsToggle,
                       activeColor: AppColors.primary,
                     ),
                   ),
@@ -229,7 +232,8 @@ class AdminProfileView extends GetView<AdminProfileController> {
               ),
             ),
           ],
-        ),
+          );
+        }),
       ),
     );
   }

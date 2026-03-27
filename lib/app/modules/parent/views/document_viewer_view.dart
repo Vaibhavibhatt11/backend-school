@@ -57,12 +57,20 @@ class DocumentViewerView extends GetView<DocumentViewerController> {
           Expanded(
             child: Container(
               color: Colors.grey[300],
-              child: Center(
-                child: Image.network(
-                  'https://via.placeholder.com/400x500',
-                  fit: BoxFit.contain,
-                ),
-              ),
+              child: Obx(() {
+                final url = controller.previewUrl.value.trim();
+                if (url.isNotEmpty &&
+                    (url.startsWith('https://') || url.startsWith('http://'))) {
+                  return Center(
+                    child: Image.network(
+                      url,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => _docPlaceholder(),
+                    ),
+                  );
+                }
+                return _docPlaceholder();
+              }),
             ),
           ),
           // Page controls
@@ -99,6 +107,26 @@ class DocumentViewerView extends GetView<DocumentViewerController> {
         ],
       ),
       bottomNavigationBar: const ParentBottomNavBar(currentIndex: 4), // Profile
+    );
+  }
+
+  Widget _docPlaceholder() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.insert_drive_file, size: 80, color: Colors.grey.shade600),
+            const SizedBox(height: 12),
+            Text(
+              'Preview appears when the API includes a document URL (url / fileUrl / previewUrl).',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:erp_frontend/common/services/admin/admin_service.dart';
+import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
 
 class ApprovalRequest {
+  final String id;
   final String name;
   final String type;
   final String description;
@@ -13,6 +16,7 @@ class ApprovalRequest {
   final double? amount;
   final String? waiverCategory;
   ApprovalRequest({
+    required this.id,
     required this.name,
     required this.type,
     required this.description,
@@ -26,35 +30,46 @@ class ApprovalRequest {
 }
 
 class AdminApprovalsController extends GetxController {
-  final requests = <ApprovalRequest>[
-    ApprovalRequest(
-      name: 'Marcus Thompson',
-      type: 'Leave',
-      description: 'Family emergency trip to visit grandparents.',
-      dateRange: 'Oct 24 - 26',
-      grade: 'Grade 10-B',
-    ),
-    ApprovalRequest(
-      name: 'Elena Rodriguez',
-      type: 'Fee Waiver',
-      description: 'Requested Waiver Category',
-      amount: 450.00,
-      waiverCategory: 'Academic Excellence',
-    ),
-    ApprovalRequest(
-      name: 'Sarah Jenkins',
-      type: 'Profile Edit',
-      description: 'Requesting change of address',
-      oldAddress: '124 Oak Street, Apt 4B...',
-      newAddress: '889 Maple Ave, Suite 210',
-    ),
-    ApprovalRequest(
-      name: 'Leo G. Vance',
-      type: 'Leave',
-      description: 'Medical checkup & dentist appointment.',
-      dateRange: 'Today, 1:00 PM',
-    ),
-  ];
+  AdminApprovalsController(this._adminService);
+
+  final AdminService _adminService;
+  final isLoading = false.obs;
+  final requests = <ApprovalRequest>[].obs;
+  final loadError = RxnString();
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadPendingApprovals();
+  }
+
+  Future<void> loadPendingApprovals() async {
+    isLoading.value = true;
+    loadError.value = null;
+    try {
+      final data = await _adminService.getPendingApprovalsSummary();
+      final topItems =
+          (data['topItems'] as List<dynamic>? ?? const <dynamic>[])
+              .cast<Map<String, dynamic>>();
+      final mapped = topItems
+          .map(
+            (item) => ApprovalRequest(
+              id: item['id']?.toString() ?? '',
+              name: item['title']?.toString() ?? 'Pending Request',
+              type: item['type']?.toString() ?? 'REQUEST',
+              description: 'Submitted ${item['submittedAt'] ?? ''}',
+            ),
+          )
+          .toList();
+      requests.assignAll(mapped);
+    } catch (e) {
+      loadError.value = dioOrApiErrorMessage(e);
+      requests.clear();
+      AppToast.show(loadError.value ?? 'Approvals unavailable.');
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   void onReject(ApprovalRequest request) {
     Get.dialog(
@@ -67,7 +82,7 @@ class AdminApprovalsController extends GetxController {
           TextButton(onPressed: () => Get.back(), child: Text('Cancel')),
           TextButton(
             onPressed: () {
-              requests.remove(request);
+              requests.removeWhere((r) => r.id == request.id);
               Get.back();
               AppToast.show('Request rejected');
             },
@@ -87,7 +102,7 @@ class AdminApprovalsController extends GetxController {
           TextButton(onPressed: () => Get.back(), child: Text('Cancel')),
           TextButton(
             onPressed: () {
-              requests.remove(request);
+              requests.removeWhere((r) => r.id == request.id);
               Get.back();
               AppToast.show('Request approved');
             },
@@ -99,6 +114,6 @@ class AdminApprovalsController extends GetxController {
   }
 
   void onFloatingAction() {
-    AppToast.show('Quick approval filters');
+    AppToast.show('Advanced filters: use the admin web portal.');
   }
 }

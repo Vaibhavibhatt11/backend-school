@@ -40,12 +40,46 @@ class AuthService {
   }
 
   Future<Map<String, dynamic>> refresh() async {
-    final Response<dynamic> response = await _apiClient.post(ApiEndpoints.authRefresh);
+    final refreshToken = await _sessionStorage.getRefreshToken();
+    if (refreshToken == null || refreshToken.isEmpty) {
+      throw Exception('No refresh token available.');
+    }
+    final Response<dynamic> response = await _apiClient.post(
+      ApiEndpoints.authRefresh,
+      data: {'refreshToken': refreshToken},
+    );
     final dynamic body = response.data;
     if (body is! Map<String, dynamic>) {
       throw Exception('Invalid refresh response format.');
     }
+    final success = body['success'];
+    if (success == false) {
+      final err = body['error'];
+      if (err is Map && err['message'] != null) {
+        throw Exception(err['message'].toString());
+      }
+      throw Exception('Refresh failed.');
+    }
+    await _sessionStorage.saveLoginResponse(body);
+    final parsed = LoginResponseModel.fromJson(body);
+    if (parsed.token.isNotEmpty) {
+      await _sessionStorage.saveToken(parsed.token);
+    }
     return body;
+  }
+
+  /// Revokes refresh token on server (best-effort) and clears local session.
+  Future<void> logout() async {
+    final rt = await _sessionStorage.getRefreshToken();
+    try {
+      await _apiClient.post(
+        ApiEndpoints.authLogout,
+        data: (rt != null && rt.isNotEmpty) ? {'refreshToken': rt} : null,
+      );
+    } catch (_) {
+      // Still clear local session if network fails.
+    }
+    await _sessionStorage.clearSession();
   }
 
   Future<Map<String, dynamic>> me() async {

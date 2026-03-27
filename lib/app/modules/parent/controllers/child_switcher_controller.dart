@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
@@ -54,14 +53,6 @@ class ChildSwitcherController extends GetxController {
   }
 
   void linkAnotherChild() {
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Link Another Child'),
-        content: const Text('Feature coming soon.'),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('OK')),
-        ],
-      ),
-    );
+    AppToast.show('Link-child endpoint is not configured yet.');
   }
 }

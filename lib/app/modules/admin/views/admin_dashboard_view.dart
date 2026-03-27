@@ -12,16 +12,60 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final content = SafeArea(
-      child: ListView(
+      child: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            if (controller.dashboardError.value != null) ...[
+              Material(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.error_outline, color: Colors.red.shade800, size: 22),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          controller.dashboardError.value!,
+                          style: TextStyle(color: Colors.red.shade900, fontSize: 13),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: controller.loadDashboard,
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
             // Header with profile
             Row(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 24,
                   backgroundColor: AppColors.primary,
-                  child: Text('AT', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    controller.adminName.value.isNotEmpty
+                        ? controller.adminName.value
+                            .trim()
+                            .split(RegExp(r'\s+'))
+                            .take(2)
+                            .map((p) => p.isEmpty ? '' : p[0].toUpperCase())
+                            .join()
+                        : 'AD',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -33,7 +77,7 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
                         style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                       Text(
-                        'Dr. Aris Thorne',
+                        controller.adminName.value,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -125,16 +169,16 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
                 Expanded(
                   child: _buildStatCard(
                     'Total Students',
-                    '${controller.totalStudents}',
-                    '+24',
+                    '${controller.totalStudents.value}',
+                    controller.dashboardError.value != null ? '—' : 'Live',
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildStatCard(
                     'Teacher Presence',
-                    '${controller.teacherPresence}%',
-                    '${controller.teacherPresent}/${controller.teacherTotal}',
+                    '${controller.teacherPresence.value.toStringAsFixed(1)}%',
+                    '${controller.teacherPresent.value}/${controller.teacherTotal.value}',
                   ),
                 ),
               ],
@@ -173,7 +217,7 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
                             ),
                           ),
                           Text(
-                            '${controller.pendingApprovals} items require your attention',
+                            '${controller.pendingApprovals.value} items require your attention',
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.yellow.shade700,
@@ -248,7 +292,8 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
                       .toList(),
             ),
           ],
-      ),
+        );
+      }),
     );
     if (embedded) return content;
     return Scaffold(body: content, bottomNavigationBar: AdminBottomNavBar(currentIndex: 0));
@@ -287,20 +332,20 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text(
-                  '+12% vs LW',
+                child: Text(
+                  '${controller.feeVsLastWeekPct.value >= 0 ? '+' : ''}${controller.feeVsLastWeekPct.value.toStringAsFixed(1)}% vs LW',
                   style: TextStyle(fontSize: 10, color: Colors.white),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Fee Collected Today',
             style: TextStyle(color: Colors.white70, fontSize: 12),
           ),
-          const Text(
-            '\$14,280.00',
+          Text(
+            '\$${controller.feeToday.value.toStringAsFixed(2)}',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -311,8 +356,8 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Pending: \$3,450',
+              Text(
+                'Pending: \$${controller.feePending.value.toStringAsFixed(0)}',
                 style: TextStyle(fontSize: 11, color: Colors.white70),
               ),
               const Icon(
@@ -353,18 +398,18 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
           ),
           Row(
             children: [
-              const Text(
-                '94.2%',
-                style: TextStyle(
+              Text(
+                '${controller.studentAttendancePct.value.toStringAsFixed(1)}%',
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
               const SizedBox(width: 8),
-              const Text(
-                'Goal: 95%',
-                style: TextStyle(fontSize: 10, color: Colors.white70),
+              Text(
+                'of ${controller.totalStudents.value} students',
+                style: const TextStyle(fontSize: 10, color: Colors.white70),
               ),
             ],
           ),

@@ -1,3 +1,4 @@
+import 'package:erp_frontend/common/widgets/app_user_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
@@ -147,9 +148,9 @@ class SchoolAnnouncementsView extends GetView<AnnouncementsController> {
         children: [
           Row(
             children: [
-              const CircleAvatar(
+              AppUserAvatar(
                 radius: 20,
-                backgroundImage: NetworkImage('https://via.placeholder.com/40'),
+                photoUrl: (ann['teacherPhotoUrl'] ?? ann['photoUrl'])?.toString(),
               ),
               const SizedBox(width: 12),
               Expanded(

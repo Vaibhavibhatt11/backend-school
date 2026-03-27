@@ -303,7 +303,7 @@ class AnnouncementsView extends GetView<AnnouncementsController> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                initialValue: target,
+                value: target,
                 items: ['All', 'Grade 10-A', 'Grade 10-B', 'Grade 11-C']
                     .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                     .toList(),

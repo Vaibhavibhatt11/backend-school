@@ -1,11 +1,43 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/services/admin/admin_service.dart';
+import 'package:erp_frontend/common/services/auth_service.dart';
+import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../services/app_storage.dart';
 
 class AdminSettingsController extends GetxController {
+  AdminSettingsController(this._adminService);
+
+  final AdminService _adminService;
   final AppStorage _storage = AppStorage();
+  final isLoading = false.obs;
+  final adminName = 'Admin'.obs;
+  final adminSubtitle = ''.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadSettings();
+  }
+
+  Future<void> loadSettings() async {
+    isLoading.value = true;
+    try {
+      final profileData = await _adminService.getProfileMe();
+      final settingsData = await _adminService.getSchoolSettings();
+      final profile = profileData['profile'] as Map<String, dynamic>? ?? const {};
+      final settings = settingsData['settings'] as Map<String, dynamic>? ?? const {};
+      adminName.value = profile['fullName']?.toString() ?? 'Admin';
+      adminSubtitle.value =
+          '${settings['name'] ?? 'School'} • ${profile['role'] ?? 'SCHOOLADMIN'}';
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   void goToAdminProfile() {
     Get.toNamed(AppRoutes.ADMIN_PROFILE);
@@ -35,8 +67,9 @@ class AdminSettingsController extends GetxController {
         actions: [
           TextButton(onPressed: () => Get.back(), child: Text('Cancel')),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Get.back();
+              await Get.find<AuthService>().logout();
               _storage.clearAll();
               Get.offAllNamed(AppRoutes.LOGIN);
             },
@@ -57,8 +90,9 @@ class AdminSettingsController extends GetxController {
         actions: [
           TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Get.back();
+              await Get.find<AuthService>().logout();
               _storage.clearAll();
               Get.offAllNamed(AppRoutes.LOGIN);
               AppToast.show('Account removed from this device.');

@@ -32,10 +32,24 @@ class SettingsView extends GetView<SettingsController> {
                 children: [
                   Stack(
                     children: [
-                      const CircleAvatar(
-                        radius: 30,
-                        backgroundImage: NetworkImage(
-                          'https://via.placeholder.com/60',
+                      Obx(
+                        () => CircleAvatar(
+                          radius: 30,
+                          backgroundColor: AppColors.primary,
+                          child: Text(
+                            controller.userName.value.isNotEmpty
+                                ? controller.userName.value
+                                    .trim()
+                                    .split(RegExp(r'\s+'))
+                                    .take(2)
+                                    .map((p) => p.isEmpty ? '' : p[0].toUpperCase())
+                                    .join()
+                                : 'PU',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                       Positioned(
@@ -180,15 +194,15 @@ class SettingsView extends GetView<SettingsController> {
             const SizedBox(height: 16),
             Center(
               child: Column(
-                children: const [
+                children: [
                   Text(
-                    'EduConnect Pro v2.4.0',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    'Parent Module',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                   SizedBox(height: 4),
                   Text(
-                    'Made with care for Education',
-                    style: TextStyle(fontSize: 10, color: Colors.grey),
+                    'Live API Connected',
+                    style: const TextStyle(fontSize: 10, color: Colors.grey),
                   ),
                 ],
               ),

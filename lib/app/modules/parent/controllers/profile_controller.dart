@@ -11,6 +11,7 @@ class ProfileController extends GetxController {
   final isLoading = false.obs;
   final studentName = ''.obs;
   final studentClass = ''.obs;
+  final studentPhotoUrl = ''.obs;
   final academicYear = ''.obs;
   final dob = ''.obs;
   final bloodGroup = ''.obs;
@@ -41,6 +42,9 @@ class ProfileController extends GetxController {
       );
       studentName.value = data['studentName']?.toString() ?? studentName.value;
       studentClass.value = data['studentClass']?.toString() ?? studentClass.value;
+      studentPhotoUrl.value =
+          (data['photoUrl'] ?? data['avatarUrl'] ?? data['studentPhotoUrl'] ?? studentPhotoUrl.value)
+              .toString();
       academicYear.value = data['academicYear']?.toString() ?? academicYear.value;
       dob.value = data['dob']?.toString() ?? dob.value;
       bloodGroup.value = data['bloodGroup']?.toString() ?? bloodGroup.value;

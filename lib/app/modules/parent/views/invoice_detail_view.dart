@@ -1,3 +1,4 @@
+import 'package:erp_frontend/common/widgets/app_user_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
@@ -76,10 +77,12 @@ class InvoiceDetailView extends GetView<InvoiceDetailController> {
               ),
               child: Row(
                 children: [
-                  const CircleAvatar(
-                    radius: 30,
-                    backgroundImage: NetworkImage(
-                      'https://via.placeholder.com/60',
+                  Obx(
+                    () => AppUserAvatar(
+                      radius: 30,
+                      photoUrl: controller.studentPhotoUrl.value.isEmpty
+                          ? null
+                          : controller.studentPhotoUrl.value,
                     ),
                   ),
                   const SizedBox(width: 16),

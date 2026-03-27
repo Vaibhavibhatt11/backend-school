@@ -10,6 +10,7 @@ class ProgressReportsController extends GetxController {
   final isLoading = false.obs;
   final studentName = ''.obs;
   final studentClass = ''.obs;
+  final studentPhotoUrl = ''.obs;
   final academicYear = ''.obs;
   final selectedTerm = 0.obs; // 0: Term 2, 1: Term 1, etc.
   final gpa = 0.0.obs;
@@ -42,6 +43,9 @@ class ProgressReportsController extends GetxController {
       );
       studentName.value = data['studentName']?.toString() ?? studentName.value;
       studentClass.value = data['studentClass']?.toString() ?? studentClass.value;
+      studentPhotoUrl.value =
+          (data['photoUrl'] ?? data['avatarUrl'] ?? data['studentPhotoUrl'] ?? studentPhotoUrl.value)
+              .toString();
       academicYear.value = data['academicYear']?.toString() ?? academicYear.value;
       if (data['selectedTerm'] != null) {
         selectedTerm.value = int.tryParse(data['selectedTerm'].toString()) ?? selectedTerm.value;

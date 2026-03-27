@@ -1,3 +1,4 @@
+import 'package:erp_frontend/common/widgets/app_user_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
@@ -16,10 +17,7 @@ class LiveClassroomPortalView extends GetView<LiveClassController> {
         title: 'Live Classes',
         actions: [
           IconButton(icon: const Icon(Icons.calendar_today), onPressed: () {}),
-          CircleAvatar(
-            radius: 16,
-            backgroundImage: NetworkImage('https://via.placeholder.com/32'),
-          ),
+          const AppUserAvatar(radius: 16),
         ],
       ),
       body: SingleChildScrollView(
@@ -121,18 +119,9 @@ class LiveClassroomPortalView extends GetView<LiveClassController> {
                 ),
                 Row(
                   children: [
-                    CircleAvatar(
-                      radius: 12,
-                      backgroundImage: NetworkImage(
-                        'https://via.placeholder.com/24',
-                      ),
-                    ),
-                    CircleAvatar(
-                      radius: 12,
-                      backgroundImage: NetworkImage(
-                        'https://via.placeholder.com/24',
-                      ),
-                    ),
+                    const AppUserAvatar(radius: 12),
+                    const SizedBox(width: 4),
+                    const AppUserAvatar(radius: 12),
                     Container(
                       width: 24,
                       height: 24,
@@ -215,10 +204,10 @@ class LiveClassroomPortalView extends GetView<LiveClassController> {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      const CircleAvatar(
-                        radius: 20,
-                        backgroundImage: NetworkImage(
-                          'https://via.placeholder.com/40',
+                      Obx(
+                        () => AppUserAvatar(
+                          radius: 20,
+                          photoUrl: controller.liveClass['teacherPhotoUrl']?.toString(),
                         ),
                       ),
                       const SizedBox(width: 12),

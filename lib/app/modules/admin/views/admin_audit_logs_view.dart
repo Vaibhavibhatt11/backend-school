@@ -91,56 +91,48 @@ class AdminAuditLogsView extends GetView<AdminAuditLogsController> {
             const SizedBox(height: 16),
             // Logs list
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                children: [
-                  if (controller.logsToday.isNotEmpty) ...[
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8),
-                      child: Text(
-                        'Today',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey,
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                return ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  children: [
+                    if (controller.logsToday.isNotEmpty) ...[
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          'Today',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
-                    ),
-                    ...controller.logsToday.map(
-                      (log) => _buildLogItem(log, isDark),
-                    ),
-                  ],
-                  if (controller.logsYesterday.isNotEmpty) ...[
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8),
-                      child: Text(
-                        'Yesterday - Oct 23',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey,
+                      ...controller.logsToday.map(
+                        (log) => _buildLogItem(log, isDark),
+                      ),
+                    ],
+                    if (controller.logsYesterday.isNotEmpty) ...[
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          'Yesterday',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
-                    ),
-                    ...controller.logsYesterday.map(
-                      (log) => _buildLogItem(log, isDark),
-                    ),
+                      ...controller.logsYesterday.map(
+                        (log) => _buildLogItem(log, isDark),
+                      ),
+                    ],
                   ],
-                  const SizedBox(height: 16),
-                  Center(
-                    child: Column(
-                      children: [
-                        const CircularProgressIndicator(strokeWidth: 2),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Loading historical logs...',
-                          style: TextStyle(fontSize: 10, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                );
+              }),
             ),
           ],
         ),

@@ -1,3 +1,4 @@
+import 'package:erp_frontend/common/widgets/app_user_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
@@ -21,18 +22,34 @@ class AIAssistantView extends GetView<AIAssistantController> {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: controller.messages.length,
-              itemBuilder: (context, index) {
-                final msg = controller.messages[index];
-                if (msg['sender'] == 'ai') {
-                  return _buildAIMessage(msg);
-                } else {
-                  return _buildUserMessage(msg);
-                }
-              },
-            ),
+            child: Obx(() {
+              if (controller.messages.isEmpty) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Text(
+                      'Ask a question below. Replies come from the school assistant service.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: isDark ? Colors.grey[400] : Colors.grey[700],
+                      ),
+                    ),
+                  ),
+                );
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: controller.messages.length,
+                itemBuilder: (context, index) {
+                  final msg = controller.messages[index];
+                  if (msg['sender'] == 'ai') {
+                    return _buildAIMessage(msg);
+                  } else {
+                    return _buildUserMessage(msg);
+                  }
+                },
+              );
+            }),
           ),
           // Typing indicator
           Obx(
@@ -42,12 +59,7 @@ class AIAssistantView extends GetView<AIAssistantController> {
                       padding: const EdgeInsets.all(16),
                       child: Row(
                         children: [
-                          const CircleAvatar(
-                            radius: 16,
-                            backgroundImage: NetworkImage(
-                              'https://via.placeholder.com/32',
-                            ),
-                          ),
+                          const AppUserAvatar(radius: 16),
                           const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(
@@ -81,20 +93,23 @@ class AIAssistantView extends GetView<AIAssistantController> {
                     )
                     : const SizedBox(),
           ),
-          // Suggestion chips
-          SizedBox(
-            height: 50,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                _buildSuggestionChip('Next Holiday?'),
-                _buildSuggestionChip('Attendance Report'),
-                _buildSuggestionChip('Exam Schedule'),
-                _buildSuggestionChip('Uniform Policy'),
-              ],
-            ),
-          ),
+          // Suggestion chips (filled from GET /parent/ai/career when backend sends prompts)
+          Obx(() {
+            if (controller.suggestionPrompts.isEmpty) {
+              return const SizedBox(height: 8);
+            }
+            return SizedBox(
+              height: 50,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  for (final label in controller.suggestionPrompts)
+                    _buildSuggestionChip(label),
+                ],
+              ),
+            );
+          }),
           // Input field
           Container(
             padding: const EdgeInsets.all(16),
@@ -153,10 +168,7 @@ class AIAssistantView extends GetView<AIAssistantController> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const CircleAvatar(
-            radius: 16,
-            backgroundImage: NetworkImage('https://via.placeholder.com/32'),
-          ),
+          const AppUserAvatar(radius: 16),
           const SizedBox(width: 8),
           Flexible(
             child: Container(
@@ -173,7 +185,7 @@ class AIAssistantView extends GetView<AIAssistantController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(msg['text']!),
+                  Text(msg['text']?.toString() ?? ''),
                   if (msg['attachment'] != null) ...[
                     const SizedBox(height: 8),
                     Container(
@@ -204,7 +216,7 @@ class AIAssistantView extends GetView<AIAssistantController> {
                   ],
                   const SizedBox(height: 4),
                   Text(
-                    msg['time']!,
+                    msg['time']?.toString() ?? '',
                     style: const TextStyle(fontSize: 10, color: Colors.grey),
                   ),
                 ],
@@ -238,12 +250,12 @@ class AIAssistantView extends GetView<AIAssistantController> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    msg['text']!,
+                    msg['text']?.toString() ?? '',
                     style: const TextStyle(color: Colors.white),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    msg['time']!,
+                    msg['time']?.toString() ?? '',
                     style: const TextStyle(fontSize: 10, color: Colors.white70),
                   ),
                 ],
@@ -251,10 +263,7 @@ class AIAssistantView extends GetView<AIAssistantController> {
             ),
           ),
           const SizedBox(width: 8),
-          const CircleAvatar(
-            radius: 16,
-            backgroundImage: NetworkImage('https://via.placeholder.com/32'),
-          ),
+          const AppUserAvatar(radius: 16),
         ],
       ),
     );

@@ -22,9 +22,16 @@ class ParentCommunicationService {
     return extractApiData(res.data, context: 'announcements');
   }
 
-  Future<Map<String, dynamic>> getNotifications({String? childId}) async {
+  /// Sectioned `data.notifications` per handoff; `page`/`limit` only if backend documents offset pagination.
+  Future<Map<String, dynamic>> getNotifications({
+    String? childId,
+    int? page,
+    int? limit,
+  }) async {
     final query = <String, dynamic>{
       if (childId != null && childId.isNotEmpty) 'childId': childId,
+      if (page != null) 'page': page,
+      if (limit != null) 'limit': limit,
     };
     final res = await _apiClient.get(
       ApiEndpoints.parentNotifications,

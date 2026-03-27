@@ -12,7 +12,11 @@ class AdminAttendanceView extends GetView<AdminAttendanceController> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: SafeArea(
-        child: ListView(
+        child: Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return ListView(
           padding: const EdgeInsets.all(16),
           children: [
             // Header
@@ -154,9 +158,9 @@ class AdminAttendanceView extends GetView<AdminAttendanceController> {
                 Expanded(
                   child: _buildSummaryCard(
                     title: 'STUDENTS',
-                    percent: controller.studentPercent,
+                    percent: controller.studentPercent.value,
                     value:
-                        '${controller.studentPresent}/${controller.studentTotal}',
+                        '${controller.studentPresent.value}/${controller.studentTotal.value}',
                     change: '+2%',
                     color: AppColors.primary,
                     isDark: isDark,
@@ -166,9 +170,9 @@ class AdminAttendanceView extends GetView<AdminAttendanceController> {
                 Expanded(
                   child: _buildSummaryCard(
                     title: 'STAFF',
-                    percent: controller.staffPercent,
+                    percent: controller.staffPercent.value,
                     value:
-                        '${controller.staffPresent}/${controller.staffTotal}',
+                        '${controller.staffPresent.value}/${controller.staffTotal.value}',
                     change: '0%',
                     color: AppColors.primary,
                     isDark: isDark,
@@ -251,7 +255,8 @@ class AdminAttendanceView extends GetView<AdminAttendanceController> {
               ],
             ),
           ],
-        ),
+          );
+        }),
       ),
     );
   }

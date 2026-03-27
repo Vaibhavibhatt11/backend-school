@@ -1,18 +1,21 @@
-import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:get/get.dart';
+import '../../../../common/routes/common_routes_screens.dart';
 import '../../../services/app_storage.dart';
+import '../../../../common/services/auth_service.dart';
+import '../../../../common/services/session_storage_service.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
 import '../../../../common/services/parent/parent_settings_service.dart';
 
 class SettingsController extends GetxController {
   final _storage = AppStorage();
+  final SessionStorageService _sessionStorage = Get.find<SessionStorageService>();
   final ParentSettingsService _settingsService = Get.find<ParentSettingsService>();
   final ParentContextService _parentContext = Get.find<ParentContextService>();
 
   final isLoading = false.obs;
-  final userName = 'Sarah Jenkins'.obs;
+  final userName = 'Parent User'.obs;
   final userRole = 'Parent'.obs;
-  final userId = '8829-XJ'.obs;
+  final userId = '-'.obs;
   final faceIdEnabled = true.obs;
   final pushNotificationsEnabled = true.obs;
   final selectedLanguage = 'English (US)'.obs;
@@ -26,6 +29,17 @@ class SettingsController extends GetxController {
   Future<void> loadSettings() async {
     isLoading.value = true;
     try {
+      final loginResponse = await _sessionStorage.getLoginResponse();
+      final dataRoot = loginResponse?['data'];
+      if (dataRoot is Map<String, dynamic>) {
+        final user = dataRoot['user'];
+        if (user is Map<String, dynamic>) {
+          userName.value = user['fullName']?.toString() ?? userName.value;
+          userRole.value = user['role']?.toString() ?? userRole.value;
+          userId.value = user['id']?.toString() ?? userId.value;
+        }
+      }
+
       final data = await _settingsService.getSettings(
         childId: _parentContext.selectedChildId.value,
       );
@@ -65,15 +79,16 @@ class SettingsController extends GetxController {
     }
   }
 
-  void logout() {
+  Future<void> logout() async {
+    await Get.find<AuthService>().logout();
     _storage.clearAll();
-    Get.offAllNamed(AppRoutes.LOGIN);
+    Get.offAllNamed(CommonScreenRoutes.loginScreen);
   }
 
-  void deleteAccount() {
-    // Placeholder until backend delete-account endpoint is integrated.
+  Future<void> deleteAccount() async {
+    await Get.find<AuthService>().logout();
     _storage.clearAll();
-    Get.offAllNamed(AppRoutes.LOGIN);
+    Get.offAllNamed(CommonScreenRoutes.loginScreen);
   }
 
   void goToPersonalInfo() {}

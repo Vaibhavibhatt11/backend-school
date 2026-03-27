@@ -24,8 +24,14 @@ class ParentAiService {
     return extractApiData(res.data, context: 'ai ask');
   }
 
-  Future<Map<String, dynamic>> getCareerSuggestions() async {
-    final res = await _apiClient.get(ApiEndpoints.parentAiCareer);
+  Future<Map<String, dynamic>> getCareerSuggestions({String? childId}) async {
+    final query = <String, dynamic>{
+      if (childId != null && childId.isNotEmpty) 'childId': childId,
+    };
+    final res = await _apiClient.get(
+      ApiEndpoints.parentAiCareer,
+      query: query.isEmpty ? null : query,
+    );
     return extractApiData(res.data, context: 'ai career');
   }
 }
