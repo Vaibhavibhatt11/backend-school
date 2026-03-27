@@ -1,17 +1,22 @@
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 
+import '../../../app/routes/app_pages.dart';
 import '../../../common/services/auth_service.dart';
 import '../../../common/routes/common_routes_screens.dart';
+import '../../../common/utils/app_toast.dart';
 
 class LoginController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
+  static const String _adminEmail = 'admin@gmail.com';
+  static const String _adminPassword = 'Admin@111';
 
   final RxString email = ''.obs;
   final RxString password = ''.obs;
 
   final RxBool obscurePassword = true.obs;
   final RxBool isLoading = false.obs;
+  final RxString warningText = ''.obs;
 
   void toggleObscure() {
     obscurePassword.value = !obscurePassword.value;
@@ -22,20 +27,32 @@ class LoginController extends GetxController {
     return s.isNotEmpty && s.contains('@') && s.contains('.');
   }
 
+  void _setWarning(String message) {
+    warningText.value = message;
+    AppToast.show(message);
+  }
+
   Future<void> login() async {
     final e = email.value.trim();
     final p = password.value;
+    warningText.value = '';
 
     if (!_isValidEmail(e)) {
-      Get.snackbar('Login', 'Please enter a valid email address.');
+      _setWarning('Please enter a valid email address.');
       return;
     }
     if (p.trim().isEmpty) {
-      Get.snackbar('Login', 'Please enter your password.');
+      _setWarning('Please enter your password.');
       return;
     }
     if (p.length < 6) {
-      Get.snackbar('Login', 'Password must be at least 6 characters.');
+      _setWarning('Password must be at least 6 characters.');
+      return;
+    }
+
+    // Admin credential shortcut: keep student/parent API login unchanged.
+    if (e.toLowerCase() == _adminEmail && p == _adminPassword) {
+      Get.offAllNamed(AppRoutes.ADMIN_HOME);
       return;
     }
 
@@ -59,9 +76,9 @@ class LoginController extends GetxController {
       } else {
         msg = 'Unable to login. Please try again.';
       }
-      Get.snackbar('Login', msg);
+      _setWarning(msg);
     } catch (e) {
-      Get.snackbar('Login', e.toString().replaceFirst('Exception: ', ''));
+      _setWarning(e.toString().replaceFirst('Exception: ', ''));
     } finally {
       isLoading.value = false;
     }

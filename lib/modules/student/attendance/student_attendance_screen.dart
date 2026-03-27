@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../common/theme/app_color.dart';
 import '../../../common/fonts/common_textstyle.dart';
+import '../../../common/utils/app_toast.dart';
 import '../../../common/utils/responsive.dart';
 import '../../../widgets/app_scaffold.dart';
 import '../../../widgets/app_card.dart';
@@ -422,7 +423,7 @@ void _showApplyLeaveSheet(BuildContext context, StudentAttendanceController cont
                         toDate: toDate,
                       );
                       if (error != null) {
-                        Get.snackbar('Leave', error);
+                        AppToast.show(error);
                         return;
                       }
                       controller.applyLeave(
@@ -432,7 +433,7 @@ void _showApplyLeaveSheet(BuildContext context, StudentAttendanceController cont
                         toDate: toDate!,
                       );
                       Navigator.of(ctx).pop();
-                      Get.snackbar('Leave', 'Leave application submitted.');
+                      AppToast.show('Leave application submitted.');
                     },
                     child: const Text('Submit application'),
                   ),

@@ -1,5 +1,5 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
-import 'package:erp_frontend/app/navbar/admin_bottom_nav_bar.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/admin_attendance_controller.dart';
@@ -19,29 +19,40 @@ class AdminAttendanceView extends GetView<AdminAttendanceController> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
                   children: [
-                    const Text(
-                      'Daily Snapshot',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    IconButton(
+                      onPressed: () {
+                        if (Get.key.currentState?.canPop() ?? false) {
+                          Get.back();
+                        }
+                      },
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded),
                     ),
-                    Text(
-                      'Monday, Oct 23, 2023',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Daily Snapshot',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'Monday, Oct 23, 2023',
+                          style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                        ),
+                      ],
                     ),
                   ],
                 ),
                 Stack(
                   children: [
-                    CircleAvatar(
-                      backgroundImage: const NetworkImage(
-                        'https://via.placeholder.com/150',
-                      ),
+                    const CircleAvatar(
                       radius: 20,
+                      backgroundColor: AppColors.primary,
+                      child: Text('SJ', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
                     ),
                     Positioned(
                       bottom: 0,
@@ -131,7 +142,7 @@ class AdminAttendanceView extends GetView<AdminAttendanceController> {
                   child: IconButton(
                     icon: const Icon(Icons.tune, size: 20),
                     onPressed:
-                        () => Get.snackbar('Filter', 'Filter attendance'),
+                        () => AppToast.show('Filter attendance'),
                   ),
                 ),
               ],
@@ -242,9 +253,6 @@ class AdminAttendanceView extends GetView<AdminAttendanceController> {
           ],
         ),
       ),
-      bottomNavigationBar: AdminBottomNavBar(
-        currentIndex: 0,
-      ), // Home is index 0, but attendance is separate? We'll keep as is; adjust if needed.
     );
   }
 

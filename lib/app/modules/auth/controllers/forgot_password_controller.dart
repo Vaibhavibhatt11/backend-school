@@ -1,5 +1,6 @@
 import 'package:erp_frontend/app/data/repositories/user_repository.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:get/get.dart';
 
 class ForgotPasswordController extends GetxController {
@@ -10,7 +11,7 @@ class ForgotPasswordController extends GetxController {
 
   Future<void> sendRecovery() async {
     if (recoveryInfo.isEmpty) {
-      Get.snackbar('Error', 'Enter email or phone');
+      AppToast.show('Enter email or phone');
       return;
     }
     isLoading.value = true;

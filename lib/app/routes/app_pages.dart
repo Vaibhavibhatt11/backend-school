@@ -1,12 +1,10 @@
-import 'package:erp_frontend/app/modules/admin/views/admin_approvals_view.dart';
 import 'package:erp_frontend/app/modules/admin/views/admin_attendance_view.dart';
 import 'package:erp_frontend/app/modules/admin/views/admin_audit_logs_view.dart';
-import 'package:erp_frontend/app/modules/admin/views/admin_dashboard_view.dart';
+import 'package:erp_frontend/app/modules/admin/views/admin_shell_view.dart';
 import 'package:erp_frontend/app/modules/admin/views/admin_fee_snapshot_view.dart';
-import 'package:erp_frontend/app/modules/admin/views/admin_notice_board_view.dart';
 import 'package:erp_frontend/app/modules/admin/views/admin_profile_view.dart';
-import 'package:erp_frontend/app/modules/admin/views/admin_reports_view.dart';
-import 'package:erp_frontend/app/modules/admin/views/admin_settings_view.dart';
+import 'package:erp_frontend/app/modules/admin/views/admin_module_detail_view.dart';
+import 'package:erp_frontend/app/modules/admin/views/admin_modules_view.dart';
 import 'package:erp_frontend/app/modules/auth/bindings/auth_binding.dart';
 import 'package:erp_frontend/app/modules/auth/views/branch_selection_view.dart';
 import 'package:erp_frontend/app/modules/auth/views/forgot_password_view.dart';
@@ -225,12 +223,12 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.ADMIN_HOME,
-      page: () => const AdminDashboardView(),
+      page: () => const AdminShellView(),
       binding: AdminBinding(),
     ),
     GetPage(
       name: AppRoutes.ADMIN_APPROVALS,
-      page: () => const AdminApprovalsView(),
+      page: () => const AdminShellView(),
       binding: AdminBinding(),
     ),
     GetPage(
@@ -245,12 +243,12 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.ADMIN_REPORTS,
-      page: () => const AdminReportsView(),
+      page: () => const AdminShellView(),
       binding: AdminBinding(),
     ),
     GetPage(
       name: AppRoutes.ADMIN_NOTICE_BOARD,
-      page: () => const AdminNoticeBoardView(),
+      page: () => const AdminShellView(),
       binding: AdminBinding(),
     ),
     GetPage(
@@ -265,7 +263,22 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.ADMIN_SETTINGS,
-      page: () => const AdminSettingsView(),
+      page: () => const AdminShellView(),
+      binding: AdminBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ADMIN_MODULES,
+      page: () => const AdminModulesView(),
+      binding: AdminBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ADMIN_MODULE_DETAIL,
+      page: () => const AdminModuleDetailView(),
+      binding: AdminBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ADMIN_FEATURE_DETAIL,
+      page: () => const AdminFeatureDetailView(),
       binding: AdminBinding(),
     ),
   ];

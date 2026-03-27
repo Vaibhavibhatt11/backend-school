@@ -1,4 +1,5 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:get/get.dart';
 
 class AdminDashboardController extends GetxController {
@@ -14,20 +15,63 @@ class AdminDashboardController extends GetxController {
   final teacherTotal = 80;
   final pendingApprovals = 12;
   final attendanceTrend = [88, 75, 82, 55, 92, 98, 88]; // Mon-Sun
+  bool _isNavigating = false;
+
+  Future<void> _safeToNamed(String route, {dynamic arguments}) async {
+    if (_isNavigating) return;
+    _isNavigating = true;
+    try {
+      await Get.toNamed(route, arguments: arguments);
+    } finally {
+      _isNavigating = false;
+    }
+  }
 
   void onQuickActionTap(String action) {
-    Get.snackbar('Quick Action', 'You tapped $action');
+    if (action == 'New Admission') {
+      _safeToNamed(
+        AppRoutes.ADMIN_MODULE_DETAIL,
+        arguments: {'moduleId': 'admissions'},
+      );
+      return;
+    }
+    if (action == 'Broadcast') {
+      _safeToNamed(
+        AppRoutes.ADMIN_MODULE_DETAIL,
+        arguments: {'moduleId': 'communication'},
+      );
+      return;
+    }
+    if (action == 'Mark Leave') {
+      _safeToNamed(
+        AppRoutes.ADMIN_MODULE_DETAIL,
+        arguments: {'moduleId': 'attendance'},
+      );
+      return;
+    }
+    if (action == 'Collect Fee') {
+      _safeToNamed(
+        AppRoutes.ADMIN_MODULE_DETAIL,
+        arguments: {'moduleId': 'fees'},
+      );
+      return;
+    }
+    AppToast.show('Module not mapped');
   }
 
   void onPendingApprovalsTap() {
-    Get.toNamed(AppRoutes.ADMIN_APPROVALS);
+    _safeToNamed(AppRoutes.ADMIN_APPROVALS, arguments: {'tabIndex': 1});
   }
 
   void goToAttendance() {
-    Get.toNamed(AppRoutes.ADMIN_ATTENDANCE);
+    _safeToNamed(AppRoutes.ADMIN_ATTENDANCE);
   }
 
   void goToFeeSnapshot() {
-    Get.toNamed(AppRoutes.ADMIN_FEE_SNAPSHOT);
+    _safeToNamed(AppRoutes.ADMIN_FEE_SNAPSHOT);
+  }
+
+  void goToAllModules() {
+    _safeToNamed(AppRoutes.ADMIN_MODULES);
   }
 }

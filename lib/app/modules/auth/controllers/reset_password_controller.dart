@@ -1,5 +1,6 @@
 import 'package:erp_frontend/app/data/repositories/user_repository.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:get/get.dart';
 
 class ResetPasswordController extends GetxController {
@@ -41,18 +42,18 @@ class ResetPasswordController extends GetxController {
 
   Future<void> updatePassword() async {
     if (newPassword.value.isEmpty || confirmPassword.value.isEmpty) {
-      Get.snackbar('Error', 'Fill all fields');
+      AppToast.show('Fill all fields');
       return;
     }
     if (newPassword.value != confirmPassword.value) {
-      Get.snackbar('Error', 'Passwords do not match');
+      AppToast.show('Passwords do not match');
       return;
     }
     isLoading.value = true;
     try {
       // Dummy: assume we pass the email/phone from previous screen
       await _userRepository.resetPassword('dummy@email.com', newPassword.value);
-      Get.snackbar('Success', 'Password updated');
+      AppToast.show('Password updated');
       Get.offAllNamed(AppRoutes.LOGIN);
     } finally {
       isLoading.value = false;

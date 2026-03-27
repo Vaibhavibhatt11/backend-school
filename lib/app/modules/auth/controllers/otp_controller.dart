@@ -91,6 +91,7 @@
 
 import 'package:erp_frontend/app/data/repositories/user_repository.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:get/get.dart';
 import '../../../services/app_storage.dart';
 
@@ -128,7 +129,7 @@ class OtpController extends GetxController {
 
   Future<void> verifyOtp() async {
     if (otpCode.value.length != 6) {
-      Get.snackbar('Error', 'Enter 6-digit code');
+      AppToast.show('Enter 6-digit code');
       return;
     }
     isLoading.value = true;
@@ -145,7 +146,7 @@ class OtpController extends GetxController {
           _storage.user = user;
           Get.offNamed(AppRoutes.ROLE_SELECTION);
         } else {
-          Get.snackbar('Error', 'OTP verification failed');
+          AppToast.show('OTP verification failed');
         }
       } else {
         Get.offNamed(
@@ -162,6 +163,6 @@ class OtpController extends GetxController {
     resendSeconds.value = 45;
     startResendTimer();
     await _userRepository.sendOtp(identifier);
-    Get.snackbar('Success', 'OTP resent');
+    AppToast.show('OTP resent');
   }
 }

@@ -1,47 +1,63 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
+import 'package:erp_frontend/app/modules/admin/controllers/admin_shell_controller.dart';
 import 'package:erp_frontend/app/navbar/admin_bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/admin_reports_controller.dart';
 
 class AdminReportsView extends GetView<AdminReportsController> {
-  const AdminReportsView({super.key});
+  final bool embedded;
+  const AdminReportsView({super.key, this.embedded = false});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Scaffold(
-      body: SafeArea(
-        child: ListView(
+    final content = SafeArea(
+      child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
             // Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      'Reports',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        if (embedded && Get.isRegistered<AdminShellController>()) {
+                          Get.find<AdminShellController>().setTab(0);
+                          return;
+                        }
+                        if (Get.key.currentState?.canPop() ?? false) {
+                          Get.back();
+                        }
+                      },
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded),
                     ),
-                    Text(
-                      'School Admin Portal',
-                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Reports',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'School Admin Portal',
+                          style: TextStyle(color: Colors.grey, fontSize: 14),
+                        ),
+                      ],
                     ),
                   ],
                 ),
                 Stack(
                   children: [
-                    CircleAvatar(
-                      backgroundImage: const NetworkImage(
-                        'https://via.placeholder.com/150',
-                      ),
+                    const CircleAvatar(
                       radius: 20,
+                      backgroundColor: AppColors.primary,
+                      child: Text('AD', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
                     ),
                     Positioned(
                       bottom: 0,
@@ -191,8 +207,11 @@ class AdminReportsView extends GetView<AdminReportsController> {
               ),
             ),
           ],
-        ),
       ),
+    );
+    if (embedded) return content;
+    return Scaffold(
+      body: content,
       bottomNavigationBar: AdminBottomNavBar(currentIndex: 2), // Reports tab
     );
   }

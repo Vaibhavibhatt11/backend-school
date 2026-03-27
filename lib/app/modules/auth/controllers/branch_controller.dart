@@ -1,5 +1,6 @@
 import 'package:erp_frontend/app/data/models/branch_model.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:get/get.dart';
 
 class BranchController extends GetxController {
@@ -62,7 +63,7 @@ class BranchController extends GetxController {
     if (selectedBranchId.value != null) {
       Get.toNamed(AppRoutes.LOGIN);
     } else {
-      Get.snackbar('Error', 'Please select a branch');
+      AppToast.show('Please select a branch');
     }
   }
 

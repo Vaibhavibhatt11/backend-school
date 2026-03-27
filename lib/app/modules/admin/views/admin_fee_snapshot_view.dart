@@ -1,5 +1,5 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
-import 'package:erp_frontend/app/navbar/admin_bottom_nav_bar.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/admin_fee_snapshot_controller.dart';
@@ -19,19 +19,31 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      'Fee Snapshot',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        if (Get.key.currentState?.canPop() ?? false) {
+                          Get.back();
+                        }
+                      },
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded),
                     ),
-                    Text(
-                      'Academic Year 2023-24',
-                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Fee Snapshot',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'Academic Year 2023-24',
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -47,8 +59,7 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
                       Icons.calendar_today,
                       color: AppColors.primary,
                     ),
-                    onPressed:
-                        () => Get.snackbar('Calendar', 'Select date range'),
+                    onPressed: () => AppToast.show('Select date range'),
                   ),
                 ),
               ],
@@ -353,7 +364,6 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
           ],
         ),
       ),
-      bottomNavigationBar: AdminBottomNavBar(currentIndex: 2),
     );
   }
 

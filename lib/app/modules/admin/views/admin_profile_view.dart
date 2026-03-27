@@ -1,5 +1,4 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
-import 'package:erp_frontend/app/navbar/admin_bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/admin_profile_controller.dart';
@@ -16,16 +15,27 @@ class AdminProfileView extends GetView<AdminProfileController> {
           padding: const EdgeInsets.all(16),
           children: [
             // Profile header
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    if (Get.key.currentState?.canPop() ?? false) {
+                      Get.back();
+                    }
+                  },
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                ),
+              ],
+            ),
             Center(
               child: Column(
                 children: [
                   Stack(
                     children: [
-                      CircleAvatar(
+                      const CircleAvatar(
                         radius: 56,
-                        backgroundImage: const NetworkImage(
-                          'https://via.placeholder.com/150',
-                        ),
+                        backgroundColor: AppColors.primary,
+                        child: Text('JV', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22)),
                       ),
                       Positioned(
                         bottom: 0,
@@ -221,9 +231,6 @@ class AdminProfileView extends GetView<AdminProfileController> {
           ],
         ),
       ),
-      bottomNavigationBar: AdminBottomNavBar(
-        currentIndex: 4,
-      ), // Settings tab, but profile is under settings? We'll use 4.
     );
   }
 

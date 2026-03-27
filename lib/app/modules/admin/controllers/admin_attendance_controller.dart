@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 
 class ClassAttendance {
   final String grade;
@@ -43,18 +44,18 @@ class AdminAttendanceController extends GetxController {
   ];
 
   void onViewAll() {
-    Get.snackbar('Classes', 'Show all classes');
+    AppToast.show('Show all classes');
   }
 
   void onRemind(ClassAttendance cls) {
-    Get.snackbar('Reminder', 'Reminder sent to ${cls.grade}');
+    AppToast.show('Reminder sent to ${cls.grade}');
   }
 
   void onMarkManual() {
-    Get.snackbar('Manual', 'Mark attendance manually');
+    AppToast.show('Mark attendance manually');
   }
 
   void onExportPDF() {
-    Get.snackbar('Export', 'PDF exported');
+    AppToast.show('PDF exported');
   }
 }

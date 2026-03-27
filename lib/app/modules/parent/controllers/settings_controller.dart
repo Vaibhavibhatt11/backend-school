@@ -1,13 +1,11 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:get/get.dart';
 import '../../../services/app_storage.dart';
-import '../../../services/theme_service.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
 import '../../../../common/services/parent/parent_settings_service.dart';
 
 class SettingsController extends GetxController {
   final _storage = AppStorage();
-  final _themeService = Get.find<ThemeService>();
   final ParentSettingsService _settingsService = Get.find<ParentSettingsService>();
   final ParentContextService _parentContext = Get.find<ParentContextService>();
 
@@ -18,7 +16,6 @@ class SettingsController extends GetxController {
   final faceIdEnabled = true.obs;
   final pushNotificationsEnabled = true.obs;
   final selectedLanguage = 'English (US)'.obs;
-  final darkModeOption = 'Auto'.obs; // 'Auto', 'On', 'Off'
 
   @override
   void onInit() {
@@ -41,10 +38,6 @@ class SettingsController extends GetxController {
       if (data['selectedLanguage'] != null) {
         selectedLanguage.value = data['selectedLanguage'].toString();
       }
-      if (data['darkModeOption'] != null) {
-        darkModeOption.value = data['darkModeOption'].toString();
-        setDarkMode(darkModeOption.value);
-      }
     } finally {
       isLoading.value = false;
     }
@@ -60,26 +53,12 @@ class SettingsController extends GetxController {
     _saveSettings();
   }
 
-  void setDarkMode(String option) {
-    darkModeOption.value = option;
-    if (option == 'On') {
-      _themeService.isDarkMode.value = true;
-    } else if (option == 'Off') {
-      _themeService.isDarkMode.value = false;
-    } else {
-      // Auto: follow system? For now, just toggle based on current
-      // We'll keep as is
-    }
-    _saveSettings();
-  }
-
   Future<void> _saveSettings() async {
     try {
       await _settingsService.updateSettings({
         'pushNotificationsEnabled': pushNotificationsEnabled.value,
         'faceIdEnabled': faceIdEnabled.value,
         'selectedLanguage': selectedLanguage.value,
-        'darkModeOption': darkModeOption.value,
       }, childId: _parentContext.selectedChildId.value);
     } catch (_) {
       // Keep local state even if backend update fails.
@@ -87,6 +66,12 @@ class SettingsController extends GetxController {
   }
 
   void logout() {
+    _storage.clearAll();
+    Get.offAllNamed(AppRoutes.LOGIN);
+  }
+
+  void deleteAccount() {
+    // Placeholder until backend delete-account endpoint is integrated.
     _storage.clearAll();
     Get.offAllNamed(AppRoutes.LOGIN);
   }

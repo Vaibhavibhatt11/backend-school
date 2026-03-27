@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 
 import '../../../common/routes/common_routes_screens.dart';
+import '../../../common/utils/app_toast.dart';
 
 class ForgotPasswordController extends GetxController {
   final RxString email = ''.obs;
@@ -14,7 +15,7 @@ class ForgotPasswordController extends GetxController {
   Future<void> sendResetLink() async {
     final e = email.value.trim();
     if (!_isValidEmail(e)) {
-      Get.snackbar('Reset password', 'Please enter a valid email address.');
+      AppToast.show('Please enter a valid email address.');
       return;
     }
 
@@ -22,7 +23,7 @@ class ForgotPasswordController extends GetxController {
     await Future.delayed(const Duration(seconds: 1));
     isLoading.value = false;
 
-    Get.snackbar('Reset password', 'Reset link would be sent to your email (demo).');
+    AppToast.show('Reset link would be sent to your email (demo).');
     Get.offAllNamed(CommonScreenRoutes.loginScreen);
   }
 }

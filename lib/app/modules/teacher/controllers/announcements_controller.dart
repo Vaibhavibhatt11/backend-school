@@ -1,5 +1,6 @@
 import 'package:erp_frontend/app/modules/teacher/models/teacher_models.dart';
 import 'package:get/get.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 
 class AnnouncementsController extends GetxController {
   final selectedTab = 0.obs; // 0: All Notices, 1: My Classes, 2: Important
@@ -101,6 +102,6 @@ class AnnouncementsController extends GetxController {
     announcements.insert(0, newAnnouncement);
     filteredAnnouncements.insert(0, newAnnouncement);
     Get.back(); // close dialog
-    Get.snackbar('Success', 'Announcement created');
+    AppToast.show('Announcement created');
   }
 }

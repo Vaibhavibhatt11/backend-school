@@ -1,18 +1,20 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
+import 'package:erp_frontend/app/modules/admin/controllers/admin_shell_controller.dart';
 import 'package:erp_frontend/app/navbar/admin_bottom_nav_bar.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/admin_notice_board_controller.dart';
 
 class AdminNoticeBoardView extends GetView<AdminNoticeBoardController> {
-  const AdminNoticeBoardView({super.key});
+  final bool embedded;
+  const AdminNoticeBoardView({super.key, this.embedded = false});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
+    final content = SafeArea(
+      child: Column(
           children: [
             // Header with search/tune
             Padding(
@@ -20,19 +22,35 @@ class AdminNoticeBoardView extends GetView<AdminNoticeBoardController> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'Notice Board',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          if (embedded && Get.isRegistered<AdminShellController>()) {
+                            Get.find<AdminShellController>().setTab(0);
+                            return;
+                          }
+                          if (Get.key.currentState?.canPop() ?? false) {
+                            Get.back();
+                          }
+                        },
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
                       ),
-                      Text(
-                        'Manage school communications',
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            'Notice Board',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            'Manage school communications',
+                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -51,7 +69,7 @@ class AdminNoticeBoardView extends GetView<AdminNoticeBoardController> {
                             color: AppColors.primary,
                           ),
                           onPressed:
-                              () => Get.snackbar('Search', 'Search notices'),
+                              () => AppToast.show('Search notices'),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -75,7 +93,7 @@ class AdminNoticeBoardView extends GetView<AdminNoticeBoardController> {
                             color: AppColors.primary,
                           ),
                           onPressed:
-                              () => Get.snackbar('Filter', 'Filter notices'),
+                              () => AppToast.show('Filter notices'),
                         ),
                       ),
                     ],
@@ -244,9 +262,24 @@ class AdminNoticeBoardView extends GetView<AdminNoticeBoardController> {
               }),
             ),
           ],
-        ),
       ),
+    );
+    if (embedded) {
+      return Scaffold(
+        body: content,
+        floatingActionButton: FloatingActionButton(
+          heroTag: 'admin_notices_fab_embedded',
+          onPressed: controller.onAddNotice,
+          backgroundColor: AppColors.primary,
+          child: const Icon(Icons.add),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      );
+    }
+    return Scaffold(
+      body: content,
       floatingActionButton: FloatingActionButton(
+        heroTag: 'admin_notices_fab',
         onPressed: controller.onAddNotice,
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add),

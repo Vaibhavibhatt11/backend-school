@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../../common/utils/app_toast.dart';
 import 'models/study_material_models.dart';
 
 class StudentStudyMaterialsController extends GetxController {
@@ -73,9 +74,6 @@ class StudentStudyMaterialsController extends GetxController {
 
   void openMaterial(StudyMaterialItem item) {
     // Placeholder: in real app would open PDF/PPT/image viewer (e.g. webview or native viewer)
-    Get.snackbar(
-      'Open',
-      '${item.title} (${item.type.name.toUpperCase()}) – viewer would open here',
-    );
+    AppToast.show('${item.title} (${item.type.name.toUpperCase()}) - viewer would open here');
   }
 }

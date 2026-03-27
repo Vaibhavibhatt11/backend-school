@@ -5,24 +5,30 @@ import 'package:get/get.dart';
 
 class AdminBottomNavBar extends StatelessWidget {
   final int currentIndex;
-  const AdminBottomNavBar({super.key, required this.currentIndex});
+  final ValueChanged<int>? onTap;
+  const AdminBottomNavBar({super.key, required this.currentIndex, this.onTap});
 
   void _onTap(int index) {
+    if (onTap != null) {
+      onTap!(index);
+      return;
+    }
+    if (index == currentIndex) return;
     switch (index) {
       case 0:
-        Get.offNamed(AppRoutes.ADMIN_HOME);
+        Get.toNamed(AppRoutes.ADMIN_HOME, arguments: {'tabIndex': 0});
         break;
       case 1:
-        Get.offNamed(AppRoutes.ADMIN_APPROVALS);
+        Get.toNamed(AppRoutes.ADMIN_APPROVALS, arguments: {'tabIndex': 1});
         break;
       case 2:
-        Get.offNamed(AppRoutes.ADMIN_REPORTS);
+        Get.toNamed(AppRoutes.ADMIN_REPORTS, arguments: {'tabIndex': 2});
         break;
       case 3:
-        Get.offNamed(AppRoutes.ADMIN_NOTICE_BOARD);
+        Get.toNamed(AppRoutes.ADMIN_NOTICE_BOARD, arguments: {'tabIndex': 3});
         break;
       case 4:
-        Get.offNamed(AppRoutes.ADMIN_SETTINGS);
+        Get.toNamed(AppRoutes.ADMIN_SETTINGS, arguments: {'tabIndex': 4});
         break;
     }
   }

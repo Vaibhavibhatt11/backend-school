@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/custom_app_bar.dart';
-import '../../../services/theme_service.dart';
 import '../controllers/role_controller.dart';
 
 class RoleSelectionView extends GetView<RoleController> {
@@ -11,23 +10,10 @@ class RoleSelectionView extends GetView<RoleController> {
 
   @override
   Widget build(BuildContext context) {
-    final themeService = Get.find<ThemeService>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Select Role',
-        actions: [
-          Obx(
-            () => IconButton(
-              icon: Icon(
-                themeService.isDarkMode.value
-                    ? Icons.light_mode
-                    : Icons.dark_mode,
-              ),
-              onPressed: themeService.toggleTheme,
-            ),
-          ),
-        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(

@@ -130,7 +130,6 @@ class SettingsView extends GetView<SettingsController> {
               trailing: Obx(() => Text(controller.selectedLanguage.value)),
               onTap: () {},
             ),
-            _buildDarkModeItem(),
             const SizedBox(height: 24),
             // Help & Support
             const Text(
@@ -155,12 +154,27 @@ class SettingsView extends GetView<SettingsController> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: controller.logout,
+                onPressed: _confirmLogout,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   foregroundColor: Colors.white,
                 ),
                 child: const Text('Log Out'),
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _confirmDeleteAccount,
+                icon: const Icon(Icons.delete_forever_rounded, color: Colors.red),
+                label: const Text(
+                  'Delete Account',
+                  style: TextStyle(color: Colors.red),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.red),
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -184,6 +198,49 @@ class SettingsView extends GetView<SettingsController> {
         ),
       ),
       bottomNavigationBar: const ParentBottomNavBar(currentIndex: 4), // Profile
+    );
+  }
+
+  void _confirmLogout() {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              controller.logout();
+            },
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDeleteAccount() {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Delete Account'),
+        content: const Text(
+          'This will remove your account session from this device. Continue?',
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              controller.deleteAccount();
+            },
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -262,62 +319,4 @@ class SettingsView extends GetView<SettingsController> {
     );
   }
 
-  Widget _buildDarkModeItem() {
-    final isDark = Theme.of(Get.context!).brightness == Brightness.dark;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.cyan.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(Icons.dark_mode, color: Colors.cyan),
-          ),
-          const SizedBox(width: 16),
-          const Expanded(child: Text('Dark Mode')),
-          Obx(
-            () => Row(
-              children: [
-                ChoiceChip(
-                  label: const Text('Auto'),
-                  selected: controller.darkModeOption.value == 'Auto',
-                  onSelected: (sel) {
-                    if (sel) controller.setDarkMode('Auto');
-                  },
-                ),
-                const SizedBox(width: 4),
-                ChoiceChip(
-                  label: const Text('On'),
-                  selected: controller.darkModeOption.value == 'On',
-                  onSelected: (sel) {
-                    if (sel) controller.setDarkMode('On');
-                  },
-                ),
-                const SizedBox(width: 4),
-                ChoiceChip(
-                  label: const Text('Off'),
-                  selected: controller.darkModeOption.value == 'Off',
-                  onSelected: (sel) {
-                    if (sel) controller.setDarkMode('Off');
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

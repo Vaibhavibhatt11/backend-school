@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 
 class AuditLog {
   final String action;
@@ -65,6 +66,6 @@ class AdminAuditLogsController extends GetxController {
   void onFilter(String filter) => selectedFilter.value = filter;
 
   void onLogTap(AuditLog log) {
-    Get.snackbar('Audit Log', '${log.action} by ${log.admin}');
+    AppToast.show('${log.action} by ${log.admin}');
   }
 }

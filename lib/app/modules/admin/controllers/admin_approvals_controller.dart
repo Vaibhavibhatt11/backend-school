@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 
 class ApprovalRequest {
   final String name;
@@ -68,11 +69,7 @@ class AdminApprovalsController extends GetxController {
             onPressed: () {
               requests.remove(request);
               Get.back();
-              Get.snackbar(
-                'Rejected',
-                'Request rejected',
-                snackPosition: SnackPosition.BOTTOM,
-              );
+              AppToast.show('Request rejected');
             },
             child: Text('Reject', style: TextStyle(color: Colors.red)),
           ),
@@ -92,11 +89,7 @@ class AdminApprovalsController extends GetxController {
             onPressed: () {
               requests.remove(request);
               Get.back();
-              Get.snackbar(
-                'Approved',
-                'Request approved',
-                snackPosition: SnackPosition.BOTTOM,
-              );
+              AppToast.show('Request approved');
             },
             child: Text('Approve'),
           ),
@@ -106,6 +99,6 @@ class AdminApprovalsController extends GetxController {
   }
 
   void onFloatingAction() {
-    Get.snackbar('FAB', 'Quick approval filters');
+    AppToast.show('Quick approval filters');
   }
 }

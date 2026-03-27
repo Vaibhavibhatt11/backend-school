@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
 import '../../../../common/services/parent/parent_dashboard_service.dart';
 
@@ -49,7 +50,7 @@ class ChildSwitcherController extends GetxController {
     children.refresh();
     _parentContext.setSelectedChildId(children[index]['id']?.toString());
     Get.back();
-    Get.snackbar('Child Switched', 'Now viewing ${children[index]['name']}');
+    AppToast.show('Now viewing ${children[index]['name']}');
   }
 
   void linkAnotherChild() {

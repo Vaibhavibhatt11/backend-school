@@ -1,4 +1,5 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -13,15 +14,12 @@ class AdminProfileController extends GetxController {
   final emailNotificationsEnabled = true.obs;
 
   void onUpdatePassword() {
-    Get.snackbar('Password', 'Update password screen');
+    AppToast.show('Update password screen');
   }
 
   void onEmailNotificationsToggle() {
     emailNotificationsEnabled.toggle();
-    Get.snackbar(
-      'Notifications',
-      emailNotificationsEnabled.value ? 'Enabled' : 'Disabled',
-    );
+    AppToast.show(emailNotificationsEnabled.value ? 'Notifications enabled' : 'Notifications disabled');
   }
 
   void onLogout() {

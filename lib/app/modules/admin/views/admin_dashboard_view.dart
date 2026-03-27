@@ -5,24 +5,23 @@ import 'package:get/get.dart';
 import '../controllers/admin_dashboard_controller.dart';
 
 class AdminDashboardView extends GetView<AdminDashboardController> {
-  const AdminDashboardView({super.key});
+  final bool embedded;
+  const AdminDashboardView({super.key, this.embedded = false});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Scaffold(
-      body: SafeArea(
-        child: ListView(
+    final content = SafeArea(
+      child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
             // Header with profile
             Row(
               children: [
-                CircleAvatar(
-                  backgroundImage: NetworkImage(
-                    'https://via.placeholder.com/150',
-                  ), // replace with real image
+                const CircleAvatar(
                   radius: 24,
+                  backgroundColor: AppColors.primary,
+                  child: Text('AT', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -89,13 +88,22 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
             ),
             const SizedBox(height: 24),
             // Quick actions
-            Text(
-              'QUICK ACTIONS',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[600],
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'QUICK ACTIONS',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                TextButton(
+                  onPressed: controller.goToAllModules,
+                  child: const Text('View all modules'),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             GridView.count(
@@ -240,10 +248,10 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
                       .toList(),
             ),
           ],
-        ),
       ),
-      bottomNavigationBar: AdminBottomNavBar(currentIndex: 0),
     );
+    if (embedded) return content;
+    return Scaffold(body: content, bottomNavigationBar: AdminBottomNavBar(currentIndex: 0));
   }
 
   Widget _buildFeeCard() {

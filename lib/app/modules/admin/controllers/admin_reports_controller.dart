@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 
 class AdminReportsController extends GetxController {
   final selectedRange = 'This Month'.obs;
@@ -15,7 +16,7 @@ class AdminReportsController extends GetxController {
   // }
 
   void onViewDetailedLog() {
-    Get.snackbar('Attendance', 'View detailed log');
+    AppToast.show('View detailed log');
   }
 
   // void onPDFExport(String type) {
@@ -114,15 +115,15 @@ class AdminReportsController extends GetxController {
     );
     Future.delayed(Duration(seconds: 2), () {
       Get.back();
-      Get.snackbar('Export Complete', '$type PDF saved to downloads');
+      AppToast.show('$type PDF saved to downloads');
     });
   }
 
   void onExcelExport(String type) {
-    Get.snackbar('Export', '$type Excel');
+    AppToast.show('$type Excel');
   }
 
   void onCollectionAnalysis() {
-    Get.snackbar('Analysis', 'Collection analysis');
+    AppToast.show('Collection analysis');
   }
 }

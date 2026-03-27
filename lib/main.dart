@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 import 'app/services/theme_service.dart';
+import 'app/routes/app_pages.dart';
 import 'common/bindings/controller_bindings.dart';
 import 'common/bindings/routes_binding.dart';
 import 'common/routes/common_routes_screens.dart';
@@ -27,37 +28,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Widget tests may pump `MyApp` directly (without running `main()`),
-    // so ensure ThemeService is registered before we read it.
-    final themeService = Get.isRegistered<ThemeService>()
-        ? Get.find<ThemeService>()
-        : Get.put<ThemeService>(ThemeService(), permanent: true);
-    return Obx(
-      () => GetMaterialApp(
-        initialBinding: ControllerBinding(),
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          useMaterial3: true,
-          scaffoldBackgroundColor: AppColor.scaffoldBackground,
-          colorScheme: ColorScheme.fromSeed(seedColor: AppColor.primary),
-        ),
-        darkTheme: ThemeData(
-          useMaterial3: true,
-          brightness: Brightness.dark,
-          scaffoldBackgroundColor: const Color(0xFF0B0F14),
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: AppColor.primary,
-            brightness: Brightness.dark,
-          ),
-        ),
-        themeMode: themeService.themeMode,
-        initialRoute: CommonScreenRoutes.splashScreen,
-        getPages: RoutesBinding.routes,
-        unknownRoute: GetPage(
-          name: '/unknown',
-          page: () => const MainShellScreen(),
-          binding: MainShellBinding(),
-        ),
+    return GetMaterialApp(
+      initialBinding: ControllerBinding(),
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        useMaterial3: true,
+        scaffoldBackgroundColor: AppColor.scaffoldBackground,
+        colorScheme: ColorScheme.fromSeed(seedColor: AppColor.primary),
+      ),
+      themeMode: ThemeMode.light,
+      initialRoute: CommonScreenRoutes.splashScreen,
+      getPages: [
+        ...RoutesBinding.routes,
+        ...AppPages.routes,
+      ],
+      unknownRoute: GetPage(
+        name: '/unknown',
+        page: () => const MainShellScreen(),
+        binding: MainShellBinding(),
       ),
     );
   }

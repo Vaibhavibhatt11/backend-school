@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 
 class Students {
   final String name;
@@ -74,6 +75,6 @@ class MarkAttendanceController extends GetxController {
   void submitAttendance() {
     // Process and save attendance
     Get.back();
-    Get.snackbar('Success', 'Attendance submitted');
+    AppToast.show('Attendance submitted');
   }
 }

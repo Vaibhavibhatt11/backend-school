@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
 import '../../../../common/services/parent/parent_profile_service.dart';
 
@@ -53,7 +54,7 @@ class LibraryController extends GetxController {
     searchQuery.value = query;
     loadLibrary();
   }
-  void scanQR() => Get.snackbar('Scan', 'QR scanner opened');
+  void scanQR() => AppToast.show('QR scanner opened');
   void viewBookDetails(String title) {
     Get.dialog(
       AlertDialog(

@@ -1,53 +1,30 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../services/theme_service.dart';
+import '../../../services/app_storage.dart';
 
 class AdminSettingsController extends GetxController {
-  final ThemeService _themeService = Get.find();
-  final mfaEnabled = true.obs;
-  final biometricEnabled = true.obs;
-  final darkMode = false.obs;
-
-  @override
-  void onInit() {
-    super.onInit();
-    darkMode.value = _themeService.isDarkMode.value;
-    ever(darkMode, (bool val) => _themeService.toggleTheme());
-  }
+  final AppStorage _storage = AppStorage();
 
   void goToAdminProfile() {
     Get.toNamed(AppRoutes.ADMIN_PROFILE);
   }
 
-  void onMfaToggle(bool? value) {
-    if (value != null) mfaEnabled.value = value;
-    Get.snackbar('MFA', mfaEnabled.value ? 'Enabled' : 'Disabled');
-  }
-
-  void onBiometricToggle(bool? value) {
-    if (value != null) biometricEnabled.value = value;
-    Get.snackbar('Biometric', biometricEnabled.value ? 'Enabled' : 'Disabled');
-  }
-
-  void onOtpPreferences() {
-    Get.snackbar('OTP', 'Change OTP preferences');
-  }
-
   void onPushNotifications() {
-    Get.snackbar('Notifications', 'Push notification settings');
+    AppToast.show('Push notification settings');
   }
 
   void onLanguage() {
-    Get.snackbar('Language', 'Change language');
+    AppToast.show('Change language');
   }
 
   void onPrivacyPolicy() {
-    Get.snackbar('Privacy', 'Privacy policy');
+    AppToast.show('Privacy policy');
   }
 
   void onTerms() {
-    Get.snackbar('Terms', 'Terms of service');
+    AppToast.show('Terms of service');
   }
 
   void onLogout() {
@@ -60,9 +37,36 @@ class AdminSettingsController extends GetxController {
           TextButton(
             onPressed: () {
               Get.back();
-              Get.offAllNamed(AppRoutes.SPLASH);
+              _storage.clearAll();
+              Get.offAllNamed(AppRoutes.LOGIN);
             },
             child: Text('Logout'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void onDeleteAccount() {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Delete Account'),
+        content: const Text(
+          'This action will remove your local session and sign you out. Are you sure?',
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              _storage.clearAll();
+              Get.offAllNamed(AppRoutes.LOGIN);
+              AppToast.show('Account removed from this device.');
+            },
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),

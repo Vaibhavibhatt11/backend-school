@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../../common/utils/app_toast.dart';
 import 'models/fee_models.dart';
 
 class StudentFeesController extends GetxController {
@@ -65,11 +66,11 @@ class StudentFeesController extends GetxController {
 
   void payFee(String feeId) {
     // Placeholder: in real app would open payment gateway
-    Get.snackbar('Pay fee', 'Payment flow would open for $feeId');
+    AppToast.show('Payment flow would open for $feeId');
   }
 
   void downloadReceipt(String feeId) {
     // Placeholder: in real app would generate/download PDF
-    Get.snackbar('Download receipt', 'Receipt download would start for $feeId');
+    AppToast.show('Receipt download would start for $feeId');
   }
 }

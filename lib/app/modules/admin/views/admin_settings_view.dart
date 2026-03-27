@@ -1,24 +1,41 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
+import 'package:erp_frontend/app/modules/admin/controllers/admin_shell_controller.dart';
 import 'package:erp_frontend/app/navbar/admin_bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/admin_settings_controller.dart';
 
 class AdminSettingsView extends GetView<AdminSettingsController> {
-  const AdminSettingsView({super.key});
+  final bool embedded;
+  const AdminSettingsView({super.key, this.embedded = false});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Scaffold(
-      body: SafeArea(
-        child: ListView(
+    final content = SafeArea(
+      child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
             // Header
-            const Text(
-              'Settings',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    if (embedded && Get.isRegistered<AdminShellController>()) {
+                      Get.find<AdminShellController>().setTab(0);
+                      return;
+                    }
+                    if (Get.key.currentState?.canPop() ?? false) {
+                      Get.back();
+                    }
+                  },
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                ),
+                const Text(
+                  'Settings',
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             // Profile quick card
@@ -35,9 +52,8 @@ class AdminSettingsView extends GetView<AdminSettingsController> {
                   children: [
                     const CircleAvatar(
                       radius: 32,
-                      backgroundImage: NetworkImage(
-                        'https://via.placeholder.com/150',
-                      ),
+                      backgroundColor: AppColors.primary,
+                      child: Text('SJ', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -65,95 +81,7 @@ class AdminSettingsView extends GetView<AdminSettingsController> {
             ),
             const SizedBox(height: 24),
             // Security & Privacy
-            const Text(
-              'SECURITY & PRIVACY',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey,
-              ),
-            ),
             const SizedBox(height: 8),
-            Container(
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.surfaceDark : Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              child: Column(
-                children: [
-                  Obx(
-                    () => SwitchListTile(
-                      secondary: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(
-                          Icons.verified_user,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      title: const Text('Multi-Factor Auth'),
-                      subtitle: const Text('Enhanced account protection'),
-                      value: controller.mfaEnabled.value,
-                      onChanged: controller.onMfaToggle,
-                      activeColor: AppColors.primary,
-                    ),
-                  ),
-                  const Divider(height: 1, indent: 56),
-                  ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.orange.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.vibration, color: Colors.orange),
-                    ),
-                    title: const Text('OTP Preferences'),
-                    subtitle: const Text('SMS and Email verification'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Text(
-                          'SMS + Email',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        Icon(Icons.chevron_right, color: Colors.grey),
-                      ],
-                    ),
-                    onTap: controller.onOtpPreferences,
-                  ),
-                  const Divider(height: 1, indent: 56),
-                  Obx(
-                    () => SwitchListTile(
-                      secondary: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(
-                          Icons.fingerprint,
-                          color: Colors.green,
-                        ),
-                      ),
-                      title: const Text('Biometric Access'),
-                      subtitle: const Text('Face ID or Touch ID'),
-                      value: controller.biometricEnabled.value,
-                      onChanged: controller.onBiometricToggle,
-                      activeColor: AppColors.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
             // App Preferences
             const Text(
               'APP PREFERENCES',
@@ -207,26 +135,6 @@ class AdminSettingsView extends GetView<AdminSettingsController> {
                       ],
                     ),
                     onTap: controller.onLanguage,
-                  ),
-                  const Divider(height: 1, indent: 56),
-                  Obx(
-                    () => SwitchListTile(
-                      secondary: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          Icons.dark_mode,
-                          color: isDark ? Colors.white : Colors.grey,
-                        ),
-                      ),
-                      title: const Text('Dark Mode'),
-                      value: controller.darkMode.value,
-                      onChanged: (val) => controller.darkMode.value = val,
-                      activeColor: AppColors.primary,
-                    ),
                   ),
                 ],
               ),
@@ -286,6 +194,19 @@ class AdminSettingsView extends GetView<AdminSettingsController> {
                 ),
               ),
             ),
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: controller.onDeleteAccount,
+              icon: const Icon(Icons.delete_forever_rounded, color: Colors.red),
+              label: const Text(
+                'Delete Account',
+                style: TextStyle(color: Colors.red),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.red),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+            ),
             const SizedBox(height: 16),
             const Center(
               child: Text(
@@ -295,8 +216,11 @@ class AdminSettingsView extends GetView<AdminSettingsController> {
               ),
             ),
           ],
-        ),
       ),
+    );
+    if (embedded) return content;
+    return Scaffold(
+      body: content,
       bottomNavigationBar: AdminBottomNavBar(currentIndex: 4), // Settings tab
     );
   }

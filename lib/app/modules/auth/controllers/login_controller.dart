@@ -1,4 +1,5 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:get/get.dart';
 import '../../../../common/services/auth_service.dart';
 import '../../../services/app_storage.dart';
@@ -16,7 +17,7 @@ class LoginController extends GetxController {
 
   Future<void> signIn() async {
     if (emailOrPhone.isEmpty || password.isEmpty) {
-      Get.snackbar('Error', 'Please fill all fields');
+      AppToast.show('Please fill all fields');
       return;
     }
     isLoading.value = true;
@@ -36,7 +37,7 @@ class LoginController extends GetxController {
 
       Get.offNamed(AppRoutes.ROLE_SELECTION);
     } catch (e) {
-      Get.snackbar('Login Failed', e.toString().replaceFirst('Exception: ', ''));
+      AppToast.show(e.toString().replaceFirst('Exception: ', ''));
     } finally {
       isLoading.value = false;
     }

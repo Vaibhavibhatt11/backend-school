@@ -1,4 +1,5 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:get/get.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
 import '../../../../common/services/parent/parent_profile_service.dart';
@@ -58,11 +59,10 @@ class ProfileController extends GetxController {
     }
   }
 
-  void editPersonal() => Get.snackbar('Edit', 'Edit personal info');
-  void editGuardian() => Get.snackbar('Edit', 'Edit guardian info');
-  void viewAllDocuments() => Get.snackbar('Documents', 'All documents list');
-  void downloadDocument(String docName) =>
-      Get.snackbar('Download', 'Downloading $docName');
+  void editPersonal() => AppToast.show('Edit personal info');
+  void editGuardian() => AppToast.show('Edit guardian info');
+  void viewAllDocuments() => AppToast.show('All documents list');
+  void downloadDocument(String docName) => AppToast.show('Downloading $docName');
   void openSettings() => Get.toNamed(AppRoutes.PARENT_SETTINGS);
   void goToLibrary() => Get.toNamed(AppRoutes.PARENT_LIBRARY);
 

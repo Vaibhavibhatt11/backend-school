@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
 import '../../../../common/services/parent/parent_profile_service.dart';
 
@@ -62,7 +63,7 @@ class DocumentViewerController extends GetxController {
     }
   }
 
-  void download() => Get.snackbar('Download', 'Downloading document...');
-  void share() => Get.snackbar('Share', 'Sharing document...');
-  void print() => Get.snackbar('Print', 'Printing document...');
+  void download() => AppToast.show('Downloading document...');
+  void share() => AppToast.show('Sharing document...');
+  void print() => AppToast.show('Printing document...');
 }

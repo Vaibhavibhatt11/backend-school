@@ -1,28 +1,27 @@
 import 'package:get/get.dart';
-import '../../../app/services/theme_service.dart';
+import '../../../app/services/app_storage.dart';
+import '../../../common/routes/common_routes_screens.dart';
+import '../../../common/services/session_storage_service.dart';
 
 class StudentSettingsController extends GetxController {
-  final ThemeService _themeService = Get.find<ThemeService>();
+  final SessionStorageService _sessionStorage = Get.find<SessionStorageService>();
+  final AppStorage _appStorage = AppStorage();
   final RxBool notificationsEnabled = true.obs;
-  final RxBool darkModeEnabled = false.obs;
   final RxBool biometricEnabled = false.obs;
   final RxBool examReminderEnabled = true.obs;
   final RxBool homeworkReminderEnabled = true.obs;
   final RxString language = 'English'.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    darkModeEnabled.value = _themeService.isDarkMode.value;
-    ever(_themeService.isDarkMode, (bool value) {
-      darkModeEnabled.value = value;
-    });
+  Future<void> logout() async {
+    await _sessionStorage.clearSession();
+    _appStorage.clearAll();
+    Get.offAllNamed(CommonScreenRoutes.loginScreen);
   }
 
-  void toggleDarkMode(bool value) {
-    if (_themeService.isDarkMode.value != value) {
-      _themeService.toggleTheme();
-    }
-    darkModeEnabled.value = _themeService.isDarkMode.value;
+  Future<void> deleteAccount() async {
+    // Placeholder until delete-account API is available.
+    await _sessionStorage.clearSession();
+    _appStorage.clearAll();
+    Get.offAllNamed(CommonScreenRoutes.loginScreen);
   }
 }

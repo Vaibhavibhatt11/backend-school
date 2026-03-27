@@ -1,5 +1,6 @@
 // lib/app/modules/teacher/controllers/live_class_controller.dart
 import 'package:erp_frontend/app/modules/teacher/models/teacher_models.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:get/get.dart';
 
 class LiveClassController extends GetxController {
@@ -74,12 +75,10 @@ class LiveClassController extends GetxController {
   }
 
   void createLiveSession() {
-    // Navigate to create session screen (not implemented, just snackbar)
-    Get.snackbar('Create Session', 'Feature coming soon!');
+    AppToast.show('Feature coming soon!');
   }
 
   void joinSession(String sessionId) {
-    // Open meeting link – for demo, show snackbar
-    Get.snackbar('Join Session', 'Joining session $sessionId');
+    AppToast.show('Joining session $sessionId');
   }
 }

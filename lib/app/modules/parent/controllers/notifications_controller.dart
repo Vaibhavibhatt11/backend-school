@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import '../../../../common/services/parent/parent_communication_service.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
 
@@ -60,7 +61,7 @@ class NotificationsController extends GetxController {
 
   void setFilter(String filter) => selectedFilter.value = filter;
   void markAllRead() =>
-      Get.snackbar('Mark Read', 'All notifications marked as read');
+      AppToast.show('All notifications marked as read');
 
   @override
   void onClose() {

@@ -1,5 +1,4 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
-import 'package:erp_frontend/app/services/theme_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
@@ -17,17 +16,6 @@ class ParentHomeView extends GetView<ParentHomeController> {
         title: '',
         showBack: false,
         actions: [
-          Obx(() {
-            final themeService = Get.find<ThemeService>();
-            return IconButton(
-              icon: Icon(
-                themeService.isDarkMode.value
-                    ? Icons.light_mode
-                    : Icons.dark_mode,
-              ),
-              onPressed: themeService.toggleTheme,
-            );
-          }),
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
             onPressed: controller.goToNotifications,

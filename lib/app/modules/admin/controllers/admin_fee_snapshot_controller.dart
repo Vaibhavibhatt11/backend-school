@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 
 class FeeCategory {
   final String name;
@@ -21,10 +22,10 @@ class AdminFeeSnapshotController extends GetxController {
   ];
 
   void onViewDetails() {
-    Get.snackbar('Category', 'View all categories');
+    AppToast.show('View all categories');
   }
 
   void onSendReminders() {
-    Get.snackbar('Reminders', 'Sent to defaulters');
+    AppToast.show('Sent to defaulters');
   }
 }

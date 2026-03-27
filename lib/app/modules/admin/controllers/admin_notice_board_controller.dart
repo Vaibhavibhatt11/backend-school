@@ -1,4 +1,5 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:get/get.dart';
 
 class Notice {
@@ -62,11 +63,11 @@ class AdminNoticeBoardController extends GetxController {
   }
 
   void onAddNotice() {
-    Get.snackbar('Create', 'Create new notice');
+    AppToast.show('Create new notice');
   }
 
   void onNoticeTap(Notice notice) {
-    Get.snackbar('Notice', notice.title);
+    AppToast.show(notice.title);
   }
 
   void goToSystemAuditLogs() {

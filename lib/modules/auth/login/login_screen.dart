@@ -140,6 +140,20 @@ class LoginScreen extends GetView<LoginController> {
                             ),
                           ),
                         ),
+                        Obx(() {
+                          final msg = controller.warningText.value;
+                          if (msg.isEmpty) return const SizedBox.shrink();
+                          return Padding(
+                            padding: EdgeInsets.only(top: Responsive.h(context, 8)),
+                            child: Text(
+                              msg,
+                              style: AppTextStyle.bodySmall(context).copyWith(
+                                color: AppColor.error,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          );
+                        }),
                         SizedBox(height: Responsive.h(context, 6)),
                         Align(
                           alignment: Alignment.centerRight,

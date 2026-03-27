@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../common/fonts/common_textstyle.dart';
 import '../../../common/theme/app_color.dart';
+import '../../../common/utils/app_toast.dart';
 import '../../../common/utils/responsive.dart';
 import '../../../widgets/app_scaffold.dart';
 import 'student_communication_controller.dart';
@@ -123,15 +124,15 @@ class _ScheduleMeetingScreenState extends State<ScheduleMeetingScreen> {
     final validForm = _formKey.currentState?.validate() ?? false;
     if (!validForm) return;
     if (_selectedDate == null) {
-      Get.snackbar('Schedule meeting', 'Please select a date.');
+      AppToast.show('Please select a date.');
       return;
     }
     if (_dayLabel.isEmpty) {
-      Get.snackbar('Schedule meeting', 'Please select a valid day.');
+      AppToast.show('Please select a valid day.');
       return;
     }
     if (_timeCtrl.text.trim().isEmpty) {
-      Get.snackbar('Schedule meeting', 'Please select time.');
+      AppToast.show('Please select time.');
       return;
     }
 
@@ -145,11 +146,7 @@ class _ScheduleMeetingScreenState extends State<ScheduleMeetingScreen> {
       time: _timeCtrl.text,
     );
 
-    Get.snackbar(
-      'Meeting scheduled',
-      'Your meeting has been added.',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    AppToast.show('Your meeting has been added.');
     Get.back();
   }
 

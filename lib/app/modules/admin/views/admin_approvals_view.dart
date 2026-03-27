@@ -1,18 +1,20 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/modules/admin/controllers/admin_approvals_controller.dart';
+import 'package:erp_frontend/app/modules/admin/controllers/admin_shell_controller.dart';
 import 'package:erp_frontend/app/navbar/admin_bottom_nav_bar.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class AdminApprovalsView extends GetView<AdminApprovalsController> {
-  const AdminApprovalsView({super.key});
+  final bool embedded;
+  const AdminApprovalsView({super.key, this.embedded = false});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
+    final content = SafeArea(
+      child: Column(
           children: [
             // Header
             Padding(
@@ -20,22 +22,38 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
                     children: [
-                      const Text(
-                        'Approvals',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      IconButton(
+                        onPressed: () {
+                          if (embedded && Get.isRegistered<AdminShellController>()) {
+                            Get.find<AdminShellController>().setTab(0);
+                            return;
+                          }
+                          if (Get.key.currentState?.canPop() ?? false) {
+                            Get.back();
+                          }
+                        },
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
                       ),
-                      Text(
-                        '${controller.requests.length} pending requests',
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 14,
-                        ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Approvals',
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            '${controller.requests.length} pending requests',
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -51,8 +69,7 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                         ),
                         child: IconButton(
                           icon: const Icon(Icons.tune, size: 20),
-                          onPressed:
-                              () => Get.snackbar('Filter', 'Filter options'),
+                          onPressed: () => AppToast.show('Filter options'),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -72,11 +89,7 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                                 Icons.notifications_none,
                                 size: 20,
                               ),
-                              onPressed:
-                                  () => Get.snackbar(
-                                    'Notifications',
-                                    'No new notifications',
-                                  ),
+                              onPressed: () => AppToast.show('No new notifications'),
                             ),
                           ),
                           Positioned(
@@ -131,11 +144,7 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                   ),
                   Expanded(
                     child: GestureDetector(
-                      onTap:
-                          () => Get.snackbar(
-                            'Approved',
-                            'Show approved requests',
-                          ),
+                      onTap: () => AppToast.show('Show approved requests'),
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: const Center(
@@ -152,11 +161,7 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                   ),
                   Expanded(
                     child: GestureDetector(
-                      onTap:
-                          () => Get.snackbar(
-                            'Rejected',
-                            'Show rejected requests',
-                          ),
+                      onTap: () => AppToast.show('Show rejected requests'),
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: const Center(
@@ -479,9 +484,24 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
               ),
             ),
           ],
-        ),
       ),
+    );
+    if (embedded) {
+      return Scaffold(
+        body: content,
+        floatingActionButton: FloatingActionButton(
+          heroTag: 'admin_approvals_fab_embedded',
+          onPressed: controller.onFloatingAction,
+          backgroundColor: AppColors.primary,
+          child: const Icon(Icons.checklist_rtl),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      );
+    }
+    return Scaffold(
+      body: content,
       floatingActionButton: FloatingActionButton(
+        heroTag: 'admin_approvals_fab',
         onPressed: controller.onFloatingAction,
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.checklist_rtl),

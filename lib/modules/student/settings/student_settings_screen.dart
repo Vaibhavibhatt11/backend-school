@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../common/theme/app_color.dart';
 import '../../../common/fonts/common_textstyle.dart';
+import '../../../common/utils/app_toast.dart';
 import '../../../common/utils/responsive.dart';
 import '../../../widgets/app_scaffold.dart';
 import 'student_settings_controller.dart';
@@ -20,18 +21,6 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
           children: [
             _headerCard(context),
             SizedBox(height: Responsive.h(context, 16)),
-            _sectionTitle(context, 'Appearance'),
-            Obx(
-              () => _switchTile(
-                context,
-                title: 'Dark mode',
-                subtitle: 'Use dark theme for better night viewing',
-                icon: Icons.dark_mode_rounded,
-                value: controller.darkModeEnabled.value,
-                onChanged: controller.toggleDarkMode,
-              ),
-            ),
-            SizedBox(height: Responsive.h(context, 14)),
             _sectionTitle(context, 'Notifications'),
             Obx(
               () => Column(
@@ -122,11 +111,24 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
               title: 'Help & Support',
               subtitle: 'Contact school support team',
               icon: Icons.support_agent_rounded,
-              onTap: () => Get.snackbar(
-                'Support',
-                'Please contact: support@schoolapp.com',
-                snackPosition: SnackPosition.BOTTOM,
-              ),
+              onTap: () => AppToast.show('Please contact: support@schoolapp.com'),
+            ),
+            SizedBox(height: Responsive.h(context, 14)),
+            _sectionTitle(context, 'Account'),
+            _dangerActionTile(
+              context,
+              title: 'Logout',
+              subtitle: 'Sign out from this device',
+              icon: Icons.logout_rounded,
+              onTap: () => _confirmLogout(context),
+            ),
+            SizedBox(height: Responsive.h(context, 8)),
+            _dangerActionTile(
+              context,
+              title: 'Delete account',
+              subtitle: 'Remove account access from this device',
+              icon: Icons.delete_forever_rounded,
+              onTap: () => _confirmDeleteAccount(context),
             ),
             SizedBox(height: Responsive.h(context, 24)),
           ],
@@ -178,7 +180,7 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
                 ),
                 SizedBox(height: Responsive.h(context, 4)),
                 Text(
-                  'Manage theme, privacy and preferences',
+                  'Manage privacy and preferences',
                   style: AppTextStyle.bodySmall(context).copyWith(
                     color: AppColor.base.withValues(alpha: 0.9),
                   ),
@@ -311,6 +313,65 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
     );
   }
 
+  Widget _dangerActionTile(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(Responsive.w(context, 14)),
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: Responsive.w(context, 12),
+            vertical: Responsive.h(context, 12),
+          ),
+          decoration: BoxDecoration(
+            color: AppColor.base,
+            borderRadius: BorderRadius.circular(Responsive.w(context, 14)),
+            border: Border.all(color: AppColor.error.withValues(alpha: 0.35)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(Responsive.w(context, 8)),
+                decoration: BoxDecoration(
+                  color: AppColor.error.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: AppColor.error, size: Responsive.w(context, 20)),
+              ),
+              SizedBox(width: Responsive.w(context, 10)),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: AppTextStyle.bodyMedium(context).copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColor.error,
+                      ),
+                    ),
+                    SizedBox(height: Responsive.h(context, 2)),
+                    Text(
+                      subtitle,
+                      style: AppTextStyle.caption(context).copyWith(color: AppColor.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showLanguageSelector(BuildContext context) {
     final options = ['English', 'Hindi', 'Gujarati'];
     showModalBottomSheet(
@@ -384,6 +445,49 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _confirmLogout(BuildContext context) {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () async {
+              Get.back();
+              await controller.logout();
+            },
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDeleteAccount(BuildContext context) {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Delete account'),
+        content: const Text(
+          'This will remove your account session from this device. Continue?',
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () async {
+              Get.back();
+              await controller.deleteAccount();
+            },
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,5 +1,5 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
-import 'package:erp_frontend/app/navbar/admin_bottom_nav_bar.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/admin_audit_logs_controller.dart';
@@ -20,9 +20,21 @@ class AdminAuditLogsView extends GetView<AdminAuditLogsController> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Audit Logs',
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          if (Get.key.currentState?.canPop() ?? false) {
+                            Get.back();
+                          }
+                        },
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                      ),
+                      const Text(
+                        'Audit Logs',
+                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
                   Container(
                     width: 40,
@@ -36,7 +48,7 @@ class AdminAuditLogsView extends GetView<AdminAuditLogsController> {
                         Icons.filter_list,
                         color: AppColors.primary,
                       ),
-                      onPressed: () => Get.snackbar('Filter', 'Filter logs'),
+                      onPressed: () => AppToast.show('Filter logs'),
                     ),
                   ),
                 ],
@@ -133,9 +145,6 @@ class AdminAuditLogsView extends GetView<AdminAuditLogsController> {
           ],
         ),
       ),
-      bottomNavigationBar: AdminBottomNavBar(
-        currentIndex: 2,
-      ), // Reports tab but audit logs is under reports? We'll keep as is.
     );
   }
 

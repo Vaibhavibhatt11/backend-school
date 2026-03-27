@@ -1,5 +1,6 @@
 import 'package:erp_frontend/app/modules/teacher/models/teacher_models.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
@@ -134,11 +135,7 @@ class LiveClassView extends GetView<LiveClassController> {
                         ),
                       ),
                       TextButton(
-                        onPressed:
-                            () => Get.snackbar(
-                              'Upcoming',
-                              'All upcoming sessions',
-                            ),
+                        onPressed: () => AppToast.show('All upcoming sessions'),
                         child: const Text('See all'),
                       ),
                     ],
