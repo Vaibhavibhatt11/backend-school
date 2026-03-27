@@ -250,6 +250,99 @@ async function attendanceOverview(req, res, next) {
   }
 }
 
+async function attendanceTrend(req, res, next) {
+  try {
+    const query = z
+      .object({
+        schoolId: z.string().trim().min(1).optional(),
+        days: z.coerce.number().int().min(1).max(31).default(7),
+        type: z.enum(["student", "staff"]).default("student"),
+      })
+      .parse(req.query);
+    const schoolId = scopedSchoolId(req, query.schoolId, true);
+
+    const today = dayStart(new Date());
+    const start = dayStart(new Date(today));
+    start.setDate(start.getDate() - (query.days - 1));
+    const endExclusive = dayStart(new Date(today));
+    endExclusive.setDate(endExclusive.getDate() + 1);
+
+    if (query.type === "student") {
+      const [grouped, totalStudents] = await Promise.all([
+        prisma.studentAttendance.groupBy({
+          by: ["date", "status"],
+          where: { schoolId, date: { gte: start, lt: endExclusive } },
+          _count: { _all: true },
+        }),
+        prisma.student.count({ where: { schoolId } }),
+      ]);
+
+      const byDate = new Map();
+      for (const item of grouped) {
+        const key = item.date.toISOString().slice(0, 10);
+        if (!byDate.has(key)) byDate.set(key, { PRESENT: 0, ABSENT: 0, LATE: 0, LEAVE: 0 });
+        byDate.get(key)[item.status] = item._count._all;
+      }
+
+      const days = [];
+      for (let i = 0; i < query.days; i += 1) {
+        const date = dayStart(new Date(start));
+        date.setDate(start.getDate() + i);
+        const key = date.toISOString().slice(0, 10);
+        const summary = byDate.get(key) || { PRESENT: 0, ABSENT: 0, LATE: 0, LEAVE: 0 };
+        const present = summary.PRESENT + summary.LATE;
+        const presentPct = totalStudents > 0 ? Number(((present / totalStudents) * 100).toFixed(2)) : 0;
+        days.push({
+          date: key,
+          summary,
+          present,
+          total: totalStudents,
+          presentPct,
+        });
+      }
+
+      return res.status(200).json({ success: true, data: { type: "student", days } });
+    }
+
+    const [grouped, totalStaff] = await Promise.all([
+      prisma.staffAttendance.groupBy({
+        by: ["date", "status"],
+        where: { schoolId, date: { gte: start, lt: endExclusive } },
+        _count: { _all: true },
+      }),
+      prisma.staff.count({ where: { schoolId } }),
+    ]);
+
+    const byDate = new Map();
+    for (const item of grouped) {
+      const key = item.date.toISOString().slice(0, 10);
+      if (!byDate.has(key)) byDate.set(key, { PRESENT: 0, ABSENT: 0, LATE: 0, LEAVE: 0 });
+      byDate.get(key)[item.status] = item._count._all;
+    }
+
+    const days = [];
+    for (let i = 0; i < query.days; i += 1) {
+      const date = dayStart(new Date(start));
+      date.setDate(start.getDate() + i);
+      const key = date.toISOString().slice(0, 10);
+      const summary = byDate.get(key) || { PRESENT: 0, ABSENT: 0, LATE: 0, LEAVE: 0 };
+      const present = summary.PRESENT + summary.LATE;
+      const presentPct = totalStaff > 0 ? Number(((present / totalStaff) * 100).toFixed(2)) : 0;
+      days.push({
+        date: key,
+        summary,
+        present,
+        total: totalStaff,
+        presentPct,
+      });
+    }
+
+    return res.status(200).json({ success: true, data: { type: "staff", days } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 async function markAttendance(req, res, next) {
   try {
     const payload = markAttendanceSchema.parse(req.body);
@@ -577,6 +670,7 @@ module.exports = {
   updateSubject,
   deleteSubject,
   attendanceOverview,
+  attendanceTrend,
   markAttendance,
   bulkMarkAttendance,
   listAttendanceRecords,

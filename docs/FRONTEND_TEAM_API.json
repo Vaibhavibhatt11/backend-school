@@ -1,0 +1,4319 @@
+{
+  "meta": {
+    "title": "School ERP API — Frontend handoff",
+    "apiVersion": "v1",
+    "baseUrlProduction": "https://backend-school-app.onrender.com",
+    "baseUrlLocal": "http://localhost:3000",
+    "apiPrefix": "/api/v1",
+    "fullBaseUrlProduction": "https://backend-school-app.onrender.com/api/v1",
+    "swaggerUi": "https://backend-school-app.onrender.com/api/docs",
+    "openApiJson": "https://backend-school-app.onrender.com/api/docs.json",
+    "generatedAt": "2026-03-21",
+    "authentication": {
+      "header": "Authorization: Bearer <access_token>",
+      "loginPath": "/api/v1/auth/login",
+      "refreshPath": "/api/v1/auth/refresh",
+      "note": "Most routes require JWT. Role is enforced server-side (see roles on each endpoint). Cookie-based auth may be used where configured."
+    },
+    "cors": "Server must allow your web origin via CORS_ORIGIN (comma-separated).",
+    "parentPortal": "Parent endpoints require valid childId for child-specific resources when documented in handler — never trust client-only IDs without server checks."
+  },
+  "endpointCount": 360,
+  "endpoints": [
+    {
+      "module": "health",
+      "method": "GET",
+      "path": "/api/v1/health",
+      "authRequired": false,
+      "roles": null,
+      "description": "Liveness"
+    },
+    {
+      "module": "health",
+      "method": "GET",
+      "path": "/api/v1/ready",
+      "authRequired": false,
+      "roles": null,
+      "description": "Readiness (DB/Redis checks)"
+    },
+    {
+      "module": "auth",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "authRequired": false,
+      "roles": null,
+      "description": "Login — returns access + refresh tokens"
+    },
+    {
+      "module": "auth",
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "authRequired": false,
+      "roles": null,
+      "description": "Refresh access token"
+    },
+    {
+      "module": "auth",
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "authRequired": false,
+      "roles": null,
+      "description": "Logout"
+    },
+    {
+      "module": "auth",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "authRequired": true,
+      "roles": null,
+      "description": "Current user profile"
+    },
+    {
+      "module": "auth",
+      "method": "POST",
+      "path": "/api/v1/auth/forgot-password",
+      "authRequired": false,
+      "roles": null,
+      "description": "Request reset"
+    },
+    {
+      "module": "auth",
+      "method": "POST",
+      "path": "/api/v1/auth/verify-otp",
+      "authRequired": false,
+      "roles": null,
+      "description": "Verify OTP"
+    },
+    {
+      "module": "auth",
+      "method": "POST",
+      "path": "/api/v1/auth/reset-password",
+      "authRequired": false,
+      "roles": null,
+      "description": "Reset password"
+    },
+    {
+      "module": "auth",
+      "method": "POST",
+      "path": "/api/v1/auth/change-password",
+      "authRequired": true,
+      "roles": null,
+      "description": "Change password (authenticated)"
+    },
+    {
+      "module": "dashboard",
+      "method": "GET",
+      "path": "/api/v1/dashboard/school-admin",
+      "authRequired": true,
+      "roles": [
+        "SCHOOLADMIN",
+        "SUPERADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": "School admin dashboard stats"
+    },
+    {
+      "module": "dashboard",
+      "method": "GET",
+      "path": "/api/v1/dashboard/hr",
+      "authRequired": true,
+      "roles": [
+        "HR",
+        "SCHOOLADMIN",
+        "SUPERADMIN"
+      ],
+      "description": "HR dashboard"
+    },
+    {
+      "module": "dashboard",
+      "method": "GET",
+      "path": "/api/v1/dashboard/accountant",
+      "authRequired": true,
+      "roles": [
+        "ACCOUNTANT",
+        "SCHOOLADMIN",
+        "SUPERADMIN"
+      ],
+      "description": "Accountant dashboard"
+    },
+    {
+      "module": "superadmin",
+      "method": "GET",
+      "path": "/api/v1/superadmin/dashboard/overview",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "GET",
+      "path": "/api/v1/superadmin/schools",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "POST",
+      "path": "/api/v1/superadmin/schools",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "GET",
+      "path": "/api/v1/superadmin/schools/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "PUT",
+      "path": "/api/v1/superadmin/schools/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "PATCH",
+      "path": "/api/v1/superadmin/schools/:id/status",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "DELETE",
+      "path": "/api/v1/superadmin/schools/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "GET",
+      "path": "/api/v1/superadmin/subscriptions",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "PATCH",
+      "path": "/api/v1/superadmin/subscriptions/:schoolId/plan",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "PATCH",
+      "path": "/api/v1/superadmin/subscriptions/:schoolId/auto-renew",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "GET",
+      "path": "/api/v1/superadmin/plans",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "PUT",
+      "path": "/api/v1/superadmin/plans/:planCode",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "GET",
+      "path": "/api/v1/superadmin/configuration",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "PUT",
+      "path": "/api/v1/superadmin/configuration",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "GET",
+      "path": "/api/v1/superadmin/support/tickets",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "GET",
+      "path": "/api/v1/superadmin/support/tickets/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "POST",
+      "path": "/api/v1/superadmin/support/tickets/:id/replies",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "PATCH",
+      "path": "/api/v1/superadmin/support/tickets/:id/status",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "GET",
+      "path": "/api/v1/superadmin/analytics/overview",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "GET",
+      "path": "/api/v1/superadmin/accountants",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "POST",
+      "path": "/api/v1/superadmin/accountants",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "GET",
+      "path": "/api/v1/superadmin/accountants/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "PUT",
+      "path": "/api/v1/superadmin/accountants/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "PATCH",
+      "path": "/api/v1/superadmin/accountants/:id/status",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "DELETE",
+      "path": "/api/v1/superadmin/accountants/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "GET",
+      "path": "/api/v1/superadmin/staff",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "POST",
+      "path": "/api/v1/superadmin/staff",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "GET",
+      "path": "/api/v1/superadmin/staff/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "PUT",
+      "path": "/api/v1/superadmin/staff/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "PATCH",
+      "path": "/api/v1/superadmin/staff/:id/status",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "DELETE",
+      "path": "/api/v1/superadmin/staff/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "POST",
+      "path": "/api/v1/superadmin/invitations",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "GET",
+      "path": "/api/v1/superadmin/invitations",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "POST",
+      "path": "/api/v1/superadmin/invitations/:id/resend",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "DELETE",
+      "path": "/api/v1/superadmin/invitations/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "GET",
+      "path": "/api/v1/superadmin/security/settings",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "PUT",
+      "path": "/api/v1/superadmin/security/settings",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "GET",
+      "path": "/api/v1/superadmin/security/sessions",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "DELETE",
+      "path": "/api/v1/superadmin/security/sessions/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "POST",
+      "path": "/api/v1/superadmin/security/sessions/revoke-all",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "POST",
+      "path": "/api/v1/superadmin/security/keys/rotate",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "GET",
+      "path": "/api/v1/superadmin/security/audit-logs",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "GET",
+      "path": "/api/v1/superadmin/notifications",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "PATCH",
+      "path": "/api/v1/superadmin/notifications/:id/read",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "DELETE",
+      "path": "/api/v1/superadmin/notifications/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "superadmin",
+      "method": "POST",
+      "path": "/api/v1/superadmin/firebase/upload",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school.students",
+      "method": "GET",
+      "path": "/api/v1/school/students",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school.students",
+      "method": "GET",
+      "path": "/api/v1/school/students/export",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school.students",
+      "method": "POST",
+      "path": "/api/v1/school/students",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school.students",
+      "method": "POST",
+      "path": "/api/v1/school/students/import",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school.students",
+      "method": "GET",
+      "path": "/api/v1/school/students/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school.students",
+      "method": "PUT",
+      "path": "/api/v1/school/students/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school.students",
+      "method": "DELETE",
+      "path": "/api/v1/school/students/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school.students",
+      "method": "PATCH",
+      "path": "/api/v1/school/students/:id/status",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school.students",
+      "method": "POST",
+      "path": "/api/v1/school/students/:id/move-class",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school.students",
+      "method": "POST",
+      "path": "/api/v1/school/students/:id/documents",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school.students",
+      "method": "DELETE",
+      "path": "/api/v1/school/students/:id/documents/:docId",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/profile",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/profile",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/permissions",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/admin-users",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/admin-users",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/admin-users/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/parents",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/parents/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/parents",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/parents/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/parents/invite",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/parents/:id/resend-otp",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/staff",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/staff/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/staff",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/staff/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/staff/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/staff/:id/documents",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/staff/:id/documents",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/staff/:id/documents/:docId",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/classes",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/classes",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/classes/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/classes/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/sections",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/sections",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/sections/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/sections/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/academic-years",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/academic-years",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/academic-years/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PATCH",
+      "path": "/api/v1/school/academic-years/:id/activate",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/academic-years/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/terms",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/terms",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/terms/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/terms/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/holidays",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/holidays",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/holidays/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/holidays/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/permissions/matrix",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/permissions/matrix",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/subjects",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/subjects",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/subjects/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/subjects/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/attendance/overview",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/attendance/records",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/attendance/records/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/attendance/export",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/attendance/mark",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/attendance/bulk-mark",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/timetable",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/timetable/teacher/:staffId",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/timetable/class/:classId",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/timetable/conflicts",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/timetable/slots",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/timetable/slots/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/timetable/slots/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/timetable/publish",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/timetable/periods",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/timetable/periods",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/timetable/periods/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/timetable/periods/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/fees/summary",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/fees/structures",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/fees/structures",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/fees/structures/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/fees/structures/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/fees/discount-rules",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/fees/discount-rules",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/fees/discount-rules/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/fees/discount-rules/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/invoices",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/invoices",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/invoices/bulk-generate",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/invoices/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PATCH",
+      "path": "/api/v1/school/invoices/:id/status",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/payments",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/payments",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/payments/:id/receipt",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/payments/:id/refunds",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/payments/:id/refunds",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/fees/due-list",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/fees/reports/collection",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/fees/reports/pending-dues",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/fees/reports/student-ledger/:studentId",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/announcements",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/announcements/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/announcements",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/announcements/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/announcements/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/announcements/:id/send",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/reports/jobs",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/reports/generate",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/audit-logs",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/report-cards/templates",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/report-cards/templates",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/report-cards/templates/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/report-cards/templates/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/settings",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/settings",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/roles",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/roles",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/roles/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/roles/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/face-checkins",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PATCH",
+      "path": "/api/v1/school/face-checkins/:id/approve",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PATCH",
+      "path": "/api/v1/school/face-checkins/:id/reject",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/ai/faqs",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/ai/faqs",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/ai/faqs/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/ai/faqs/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/notifications/templates",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/notifications/templates",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/notifications/templates/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/notifications/templates/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/notifications/logs",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/document-categories",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/document-categories",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/document-categories/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/document-categories/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/backups/exports",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/backups/exports",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/library/books",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/library/books",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/library/books/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/library/books/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/library/borrows",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/library/borrows",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PATCH",
+      "path": "/api/v1/school/library/borrows/:id/return",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/inventory/items",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/inventory/items",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/inventory/items/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/inventory/items/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/inventory/transactions",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/inventory/transactions",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/offline-sync/records",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/offline-sync/records",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PATCH",
+      "path": "/api/v1/school/offline-sync/records/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/live-classes/sessions",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/live-classes/sessions",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/live-classes/sessions/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/live-classes/sessions/:id/end",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/exams",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/exams",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/exams/:id/marks-status",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/exams/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/exams/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/exams/:id/marks",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/exams/:id/publish",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/reports/students",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/reports/attendance",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/reports/fees",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/reports/exam-performance",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/admissions/applications",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/admissions/applications/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/admissions/applications",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PATCH",
+      "path": "/api/v1/school/admissions/applications/:id/status",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/admissions/applications/:id/documents",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/admissions/applications/:id/onboard",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/transport/routes",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/transport/routes",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/transport/routes/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/transport/routes/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/transport/drivers",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/transport/drivers",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/transport/allocations",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/transport/allocations",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/transport/allocations/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/transport/allocations/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/hostel/rooms",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/hostel/rooms",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/hostel/rooms/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/hostel/rooms/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/hostel/allocations",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/hostel/allocations",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/hostel/attendance",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/hostel/attendance",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/hostel/visitors",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/hostel/visitors",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/events",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/events/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/events",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/events/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/events/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/events/:id/registrations",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/events/:id/registrations",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/events/:id/gallery",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/events/:id/gallery/:imageId",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/homework",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/homework/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/homework",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/homework/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/homework/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/homework/:id/submit",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/study-materials",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/study-materials",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "PUT",
+      "path": "/api/v1/school/study-materials/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/study-materials/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "GET",
+      "path": "/api/v1/school/achievements",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "POST",
+      "path": "/api/v1/school/achievements",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "school",
+      "method": "DELETE",
+      "path": "/api/v1/school/achievements/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "hr",
+      "method": "GET",
+      "path": "/api/v1/hr/dashboard/overview",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR"
+      ],
+      "description": ""
+    },
+    {
+      "module": "hr",
+      "method": "GET",
+      "path": "/api/v1/hr/staff",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR"
+      ],
+      "description": ""
+    },
+    {
+      "module": "hr",
+      "method": "GET",
+      "path": "/api/v1/hr/staff/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR"
+      ],
+      "description": ""
+    },
+    {
+      "module": "hr",
+      "method": "GET",
+      "path": "/api/v1/hr/leave-requests",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR"
+      ],
+      "description": ""
+    },
+    {
+      "module": "hr",
+      "method": "GET",
+      "path": "/api/v1/hr/leave-requests/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR"
+      ],
+      "description": ""
+    },
+    {
+      "module": "hr",
+      "method": "PATCH",
+      "path": "/api/v1/hr/leave-requests/:id/status",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR"
+      ],
+      "description": ""
+    },
+    {
+      "module": "hr",
+      "method": "POST",
+      "path": "/api/v1/hr/leave-requests/:id/comment",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR"
+      ],
+      "description": ""
+    },
+    {
+      "module": "hr",
+      "method": "GET",
+      "path": "/api/v1/hr/attendance/performance",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR"
+      ],
+      "description": ""
+    },
+    {
+      "module": "hr",
+      "method": "GET",
+      "path": "/api/v1/hr/attendance/performance/:staffId",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR"
+      ],
+      "description": ""
+    },
+    {
+      "module": "hr",
+      "method": "GET",
+      "path": "/api/v1/hr/settings",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR"
+      ],
+      "description": ""
+    },
+    {
+      "module": "hr",
+      "method": "PUT",
+      "path": "/api/v1/hr/settings",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR"
+      ],
+      "description": ""
+    },
+    {
+      "module": "hr",
+      "method": "GET",
+      "path": "/api/v1/hr/roles",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR"
+      ],
+      "description": ""
+    },
+    {
+      "module": "hr",
+      "method": "PUT",
+      "path": "/api/v1/hr/roles/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "HR"
+      ],
+      "description": ""
+    },
+    {
+      "module": "accountant",
+      "method": "GET",
+      "path": "/api/v1/accountant/dashboard/overview",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "accountant",
+      "method": "GET",
+      "path": "/api/v1/accountant/fees/structures",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "accountant",
+      "method": "POST",
+      "path": "/api/v1/accountant/fees/structures",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "accountant",
+      "method": "PUT",
+      "path": "/api/v1/accountant/fees/structures/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "accountant",
+      "method": "DELETE",
+      "path": "/api/v1/accountant/fees/structures/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "accountant",
+      "method": "GET",
+      "path": "/api/v1/accountant/invoices",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "accountant",
+      "method": "POST",
+      "path": "/api/v1/accountant/invoices",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "accountant",
+      "method": "GET",
+      "path": "/api/v1/accountant/invoices/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "accountant",
+      "method": "PATCH",
+      "path": "/api/v1/accountant/invoices/:id/status",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "accountant",
+      "method": "GET",
+      "path": "/api/v1/accountant/payments",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "accountant",
+      "method": "POST",
+      "path": "/api/v1/accountant/payments",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "accountant",
+      "method": "GET",
+      "path": "/api/v1/accountant/payments/:id",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "accountant",
+      "method": "GET",
+      "path": "/api/v1/accountant/payments/:id/receipt",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "accountant",
+      "method": "GET",
+      "path": "/api/v1/accountant/students/balances",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "accountant",
+      "method": "GET",
+      "path": "/api/v1/accountant/reports/jobs",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "accountant",
+      "method": "POST",
+      "path": "/api/v1/accountant/reports/generate",
+      "authRequired": true,
+      "roles": [
+        "SUPERADMIN",
+        "SCHOOLADMIN",
+        "ACCOUNTANT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/dashboard",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/profile",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "PUT",
+      "path": "/api/v1/student/profile",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/timetable",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/attendance",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/homework",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/homework/:id",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "POST",
+      "path": "/api/v1/student/homework/:id/submit",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/study-materials",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/exams",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/exams/:id/result",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/exam-timetable",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/fees",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/fees/receipts",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/payments/:id/receipt",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/announcements",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/events",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "POST",
+      "path": "/api/v1/student/events/:id/register",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/transport",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/library",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/library/books",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/achievements",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/notifications",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/circulars",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/health",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/settings",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "PUT",
+      "path": "/api/v1/student/settings",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/leave-requests",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "POST",
+      "path": "/api/v1/student/leave-requests",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/subject-teachers",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "POST",
+      "path": "/api/v1/student/meetings/request",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "POST",
+      "path": "/api/v1/student/ai/ask",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/ai/career",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/report-cards",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "student",
+      "method": "GET",
+      "path": "/api/v1/student/documents",
+      "authRequired": true,
+      "roles": [
+        "STUDENT"
+      ],
+      "description": ""
+    },
+    {
+      "module": "parent",
+      "method": "GET",
+      "path": "/api/v1/parent/children",
+      "authRequired": true,
+      "roles": [
+        "PARENT"
+      ],
+      "description": "Use childId query/body where required for child-scoped data"
+    },
+    {
+      "module": "parent",
+      "method": "GET",
+      "path": "/api/v1/parent/home",
+      "authRequired": true,
+      "roles": [
+        "PARENT"
+      ],
+      "description": "Use childId query/body where required for child-scoped data"
+    },
+    {
+      "module": "parent",
+      "method": "GET",
+      "path": "/api/v1/parent/announcements",
+      "authRequired": true,
+      "roles": [
+        "PARENT"
+      ],
+      "description": "Use childId query/body where required for child-scoped data"
+    },
+    {
+      "module": "parent",
+      "method": "GET",
+      "path": "/api/v1/parent/notifications",
+      "authRequired": true,
+      "roles": [
+        "PARENT"
+      ],
+      "description": "Use childId query/body where required for child-scoped data"
+    },
+    {
+      "module": "parent",
+      "method": "GET",
+      "path": "/api/v1/parent/attendance",
+      "authRequired": true,
+      "roles": [
+        "PARENT"
+      ],
+      "description": "Use childId query/body where required for child-scoped data"
+    },
+    {
+      "module": "parent",
+      "method": "GET",
+      "path": "/api/v1/parent/fees",
+      "authRequired": true,
+      "roles": [
+        "PARENT"
+      ],
+      "description": "Use childId query/body where required for child-scoped data"
+    },
+    {
+      "module": "parent",
+      "method": "GET",
+      "path": "/api/v1/parent/invoices/:invoiceId",
+      "authRequired": true,
+      "roles": [
+        "PARENT"
+      ],
+      "description": "Use childId query/body where required for child-scoped data"
+    },
+    {
+      "module": "parent",
+      "method": "GET",
+      "path": "/api/v1/parent/timetable",
+      "authRequired": true,
+      "roles": [
+        "PARENT"
+      ],
+      "description": "Use childId query/body where required for child-scoped data"
+    },
+    {
+      "module": "parent",
+      "method": "GET",
+      "path": "/api/v1/parent/progress-reports",
+      "authRequired": true,
+      "roles": [
+        "PARENT"
+      ],
+      "description": "Use childId query/body where required for child-scoped data"
+    },
+    {
+      "module": "parent",
+      "method": "GET",
+      "path": "/api/v1/parent/live-classes",
+      "authRequired": true,
+      "roles": [
+        "PARENT"
+      ],
+      "description": "Use childId query/body where required for child-scoped data"
+    },
+    {
+      "module": "parent",
+      "method": "GET",
+      "path": "/api/v1/parent/profile-hub",
+      "authRequired": true,
+      "roles": [
+        "PARENT"
+      ],
+      "description": "Use childId query/body where required for child-scoped data"
+    },
+    {
+      "module": "parent",
+      "method": "GET",
+      "path": "/api/v1/parent/library",
+      "authRequired": true,
+      "roles": [
+        "PARENT"
+      ],
+      "description": "Use childId query/body where required for child-scoped data"
+    },
+    {
+      "module": "parent",
+      "method": "GET",
+      "path": "/api/v1/parent/documents",
+      "authRequired": true,
+      "roles": [
+        "PARENT"
+      ],
+      "description": "Use childId query/body where required for child-scoped data"
+    },
+    {
+      "module": "parent",
+      "method": "POST",
+      "path": "/api/v1/parent/ai/ask",
+      "authRequired": true,
+      "roles": [
+        "PARENT"
+      ],
+      "description": "Use childId query/body where required for child-scoped data"
+    },
+    {
+      "module": "parent",
+      "method": "GET",
+      "path": "/api/v1/parent/ai/career",
+      "authRequired": true,
+      "roles": [
+        "PARENT"
+      ],
+      "description": "Use childId query/body where required for child-scoped data"
+    },
+    {
+      "module": "parent",
+      "method": "GET",
+      "path": "/api/v1/parent/settings",
+      "authRequired": true,
+      "roles": [
+        "PARENT"
+      ],
+      "description": "Use childId query/body where required for child-scoped data"
+    },
+    {
+      "module": "parent",
+      "method": "PUT",
+      "path": "/api/v1/parent/settings",
+      "authRequired": true,
+      "roles": [
+        "PARENT"
+      ],
+      "description": "Use childId query/body where required for child-scoped data"
+    },
+    {
+      "module": "app",
+      "method": "GET",
+      "path": "/api/v1/app/children",
+      "authRequired": true,
+      "roles": [
+        "STUDENT",
+        "PARENT"
+      ],
+      "description": "Unified portal — effective role from JWT"
+    },
+    {
+      "module": "app",
+      "method": "GET",
+      "path": "/api/v1/app/dashboard",
+      "authRequired": true,
+      "roles": [
+        "STUDENT",
+        "PARENT"
+      ],
+      "description": "Unified portal — effective role from JWT"
+    },
+    {
+      "module": "app",
+      "method": "GET",
+      "path": "/api/v1/app/attendance",
+      "authRequired": true,
+      "roles": [
+        "STUDENT",
+        "PARENT"
+      ],
+      "description": "Unified portal — effective role from JWT"
+    },
+    {
+      "module": "app",
+      "method": "GET",
+      "path": "/api/v1/app/fees",
+      "authRequired": true,
+      "roles": [
+        "STUDENT",
+        "PARENT"
+      ],
+      "description": "Unified portal — effective role from JWT"
+    },
+    {
+      "module": "app",
+      "method": "GET",
+      "path": "/api/v1/app/announcements",
+      "authRequired": true,
+      "roles": [
+        "STUDENT",
+        "PARENT"
+      ],
+      "description": "Unified portal — effective role from JWT"
+    }
+  ]
+}

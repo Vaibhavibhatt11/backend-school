@@ -48,7 +48,21 @@ async function cleanup(signal) {
 process.on("SIGINT", () => cleanup("SIGINT"));
 process.on("SIGTERM", () => cleanup("SIGTERM"));
 
+function isOperationalRedisError(reason) {
+  const msg = reason?.message || String(reason || "");
+  return (
+    msg.includes("Command timed out") ||
+    msg.includes("ECONNREFUSED") ||
+    msg.includes("ENOTFOUND") ||
+    msg.includes("Connection is closed")
+  );
+}
+
 process.on("unhandledRejection", (reason) => {
+  if (isOperationalRedisError(reason)) {
+    console.warn("[server] non-fatal redis rejection:", reason?.message || reason);
+    return;
+  }
   console.error("[server] unhandled rejection:", reason);
   cleanup("unhandledRejection");
 });

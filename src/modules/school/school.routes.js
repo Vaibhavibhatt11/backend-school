@@ -30,6 +30,7 @@ const {
   updateSubject,
   deleteSubject,
   attendanceOverview,
+  attendanceTrend,
   markAttendance,
   bulkMarkAttendance,
   listAttendanceRecords,
@@ -52,6 +53,7 @@ const {
 } = require("./school.schedule.handlers");
 const {
   getFeesSummary,
+  getFeesSnapshot,
   listFeeStructures,
   createFeeStructure,
   updateFeeStructure,
@@ -79,8 +81,11 @@ const {
   sendAnnouncement,
   getAnnouncementById,
   listAuditLogs,
+  listNotifications,
+  getPendingApprovalsSummary,
   getSettings,
   updateSettings,
+  getAdminProfile,
   getSchoolProfile,
   updateSchoolProfile,
   listFaceCheckins,
@@ -227,6 +232,7 @@ const {
 
 router.get("/profile", getSchoolProfile);
 router.put("/profile", updateSchoolProfile);
+router.get("/profile/me", getAdminProfile);
 
 router.get("/permissions", getPermissionsList);
 router.get("/admin-users", listAdminUsers);
@@ -284,6 +290,7 @@ router.put("/subjects/:id", updateSubject);
 router.delete("/subjects/:id", deleteSubject);
 
 router.get("/attendance/overview", attendanceOverview);
+router.get("/attendance/trend", attendanceTrend);
 router.get("/attendance/records", listAttendanceRecords);
 router.put("/attendance/records/:id", updateAttendanceRecord);
 router.get("/attendance/export", exportAttendance);
@@ -304,6 +311,7 @@ router.put("/timetable/periods/:id", updateTimetablePeriod);
 router.delete("/timetable/periods/:id", deleteTimetablePeriod);
 
 router.get("/fees/summary", getFeesSummary);
+router.get("/fees/snapshot", getFeesSnapshot);
 router.get("/fees/structures", listFeeStructures);
 router.post("/fees/structures", createFeeStructure);
 router.put("/fees/structures/:id", updateFeeStructure);
@@ -345,6 +353,7 @@ router.delete("/report-cards/templates/:id", deleteReportCardTemplate);
 
 router.get("/settings", getSettings);
 router.put("/settings", updateSettings);
+router.patch("/settings", updateSettings);
 router.get("/roles", listRoles);
 router.post("/roles", createRole);
 router.put("/roles/:id", updateRole);
@@ -364,6 +373,8 @@ router.post("/notifications/templates", createNotificationTemplate);
 router.put("/notifications/templates/:id", updateNotificationTemplate);
 router.delete("/notifications/templates/:id", deleteNotificationTemplate);
 router.get("/notifications/logs", listNotificationLogs);
+router.get("/notifications", listNotifications);
+router.get("/approvals/pending-summary", getPendingApprovalsSummary);
 
 router.get("/document-categories", listDocumentCategories);
 router.post("/document-categories", createDocumentCategory);

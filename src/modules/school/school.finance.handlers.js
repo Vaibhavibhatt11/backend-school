@@ -90,6 +90,70 @@ async function getFeesSummary(req, res, next) {
   }
 }
 
+function dayBounds(baseDate = new Date()) {
+  const start = new Date(baseDate);
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 1);
+  return { start, end };
+}
+
+async function getFeesSnapshot(req, res, next) {
+  try {
+    const query = z
+      .object({
+        schoolId: z.string().trim().min(1).optional(),
+      })
+      .parse(req.query);
+    const schoolId = scopedSchoolId(req, query.schoolId, true);
+
+    const now = new Date();
+    const { start: todayStart, end: todayEnd } = dayBounds(now);
+    const thisWeekStart = new Date(todayStart);
+    thisWeekStart.setDate(thisWeekStart.getDate() - 7);
+    const lastWeekStart = new Date(todayStart);
+    lastWeekStart.setDate(lastWeekStart.getDate() - 14);
+
+    const [todayCollection, pendingTotals, thisWeekCollection, lastWeekCollection] = await Promise.all([
+      prisma.payment.aggregate({
+        where: { schoolId, paidAt: { gte: todayStart, lt: todayEnd } },
+        _sum: { amount: true },
+      }),
+      prisma.invoice.aggregate({
+        where: { schoolId, status: { in: ["ISSUED", "PARTIAL", "OVERDUE"] } },
+        _sum: { amountDue: true, amountPaid: true },
+      }),
+      prisma.payment.aggregate({
+        where: { schoolId, paidAt: { gte: thisWeekStart, lt: todayEnd } },
+        _sum: { amount: true },
+      }),
+      prisma.payment.aggregate({
+        where: { schoolId, paidAt: { gte: lastWeekStart, lt: thisWeekStart } },
+        _sum: { amount: true },
+      }),
+    ]);
+
+    const thisWeek = thisWeekCollection._sum.amount || 0;
+    const lastWeek = lastWeekCollection._sum.amount || 0;
+    const vsLastWeekPct =
+      lastWeek > 0 ? Number((((thisWeek - lastWeek) / lastWeek) * 100).toFixed(2)) : thisWeek > 0 ? 100 : 0;
+    const pendingAmount = (pendingTotals._sum.amountDue || 0) - (pendingTotals._sum.amountPaid || 0);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        todayCollected: todayCollection._sum.amount || 0,
+        pendingAmount,
+        thisWeekCollected: thisWeek,
+        lastWeekCollected: lastWeek,
+        vsLastWeekPct,
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 async function listFeeStructures(req, res, next) {
   try {
     const query = z.object({
@@ -597,6 +661,7 @@ async function getStudentLedger(req, res, next) {
 
 module.exports = {
   getFeesSummary,
+  getFeesSnapshot,
   listFeeStructures,
   createFeeStructure,
   updateFeeStructure,

@@ -189,6 +189,45 @@ async function getSettings(req, res, next) {
   }
 }
 
+async function getAdminProfile(req, res, next) {
+  try {
+    const userId = req.user?.sub;
+    if (!userId) throw badRequest("User context not found", "UNAUTHORIZED");
+    const schoolId = scopedSchoolId(req, undefined, true);
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        role: true,
+        schoolId: true,
+        branchId: true,
+        isActive: true,
+      },
+    });
+    if (!user || user.schoolId !== schoolId) throw notFound("Admin profile not found", "ADMIN_PROFILE_NOT_FOUND");
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        profile: {
+          id: user.id,
+          fullName: user.fullName,
+          email: user.email,
+          role: user.role,
+          schoolId: user.schoolId,
+          branchId: user.branchId,
+          isActive: user.isActive,
+        },
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 async function updateSettings(req, res, next) {
   try {
     const payload = updateSettingsSchema.parse(req.body);
@@ -211,6 +250,113 @@ async function updateSettings(req, res, next) {
           currencyCode: school.currencyCode,
           status: school.status,
         },
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function listNotifications(req, res, next) {
+  try {
+    const query = z
+      .object({
+        page: z.coerce.number().int().positive().optional(),
+        limit: z.coerce.number().int().positive().max(100).optional(),
+        schoolId: z.string().trim().min(1).optional(),
+        status: z.string().trim().min(1).optional(),
+      })
+      .parse(req.query);
+    const schoolId = scopedSchoolId(req, query.schoolId, true);
+    const { page, limit, skip } = paginationFromQuery(query);
+    const where = { schoolId };
+    if (query.status) where.status = query.status;
+
+    const [total, items] = await Promise.all([
+      prisma.notificationLog.count({ where }),
+      prisma.notificationLog.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+        include: {
+          template: { select: { id: true, code: true, title: true, channel: true } },
+          announcement: { select: { id: true, title: true, audience: true, status: true } },
+        },
+      }),
+    ]);
+    return res.status(200).json({ success: true, data: paginated(items, total, page, limit) });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function getPendingApprovalsSummary(req, res, next) {
+  try {
+    const query = z.object({ schoolId: z.string().trim().min(1).optional() }).parse(req.query);
+    const schoolId = scopedSchoolId(req, query.schoolId, true);
+
+    const [admissions, leaveRequests, faceCheckins] = await Promise.all([
+      prisma.admissionApplication.count({ where: { schoolId, status: "UNDER_REVIEW" } }),
+      prisma.leaveRequest.count({ where: { schoolId, status: "PENDING" } }),
+      prisma.faceCheckinLog.count({ where: { schoolId, status: "PENDING" } }),
+    ]);
+    const totalPending = admissions + leaveRequests + faceCheckins;
+
+    const [topAdmissions, topLeaves, topFace] = await Promise.all([
+      prisma.admissionApplication.findMany({
+        where: { schoolId, status: "UNDER_REVIEW" },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        select: { id: true, applicationNo: true, firstName: true, lastName: true, createdAt: true },
+      }),
+      prisma.leaveRequest.findMany({
+        where: { schoolId, status: "PENDING" },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        select: { id: true, date: true, createdAt: true, staff: { select: { fullName: true } } },
+      }),
+      prisma.faceCheckinLog.findMany({
+        where: { schoolId, status: "PENDING" },
+        orderBy: { capturedAt: "desc" },
+        take: 5,
+        select: { id: true, name: true, capturedAt: true, personType: true },
+      }),
+    ]);
+
+    const topItems = [
+      ...topAdmissions.map((a) => ({
+        id: a.id,
+        type: "ADMISSION",
+        title: `${a.applicationNo} - ${a.firstName} ${a.lastName}`,
+        submittedAt: a.createdAt,
+      })),
+      ...topLeaves.map((l) => ({
+        id: l.id,
+        type: "LEAVE",
+        title: l.staff.fullName,
+        submittedAt: l.createdAt,
+      })),
+      ...topFace.map((f) => ({
+        id: f.id,
+        type: "FACE_CHECKIN",
+        title: f.name,
+        submittedAt: f.capturedAt,
+      })),
+    ]
+      .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())
+      .slice(0, 10);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        totalPending,
+        buckets: {
+          admissions,
+          leaveRequests,
+          faceCheckins,
+        },
+        topItems,
       },
     });
   } catch (error) {
@@ -463,8 +609,11 @@ module.exports = {
   sendAnnouncement,
   getAnnouncementById,
   listAuditLogs,
+  listNotifications,
+  getPendingApprovalsSummary,
   getSettings,
   updateSettings,
+  getAdminProfile,
   getSchoolProfile,
   updateSchoolProfile,
   listFaceCheckins,

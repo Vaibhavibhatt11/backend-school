@@ -39,7 +39,13 @@ function errorHandler(error, req, res, next) {
     });
   }
 
-  console.error(error);
+  // Log full error for debugging (Prisma errors include .code, .meta)
+  console.error("[errorHandler]", {
+    message: error?.message,
+    code: error?.code,
+    meta: error?.meta,
+    stack: error?.stack,
+  });
   return res.status(500).json({
     success: false,
     error: { code: "INTERNAL_SERVER_ERROR", message: "Something went wrong" },

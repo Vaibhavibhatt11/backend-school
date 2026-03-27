@@ -1,0 +1,454 @@
+{
+  "$comment": "Frontend handoff: Student + Parent mobile/portal APIs only. All paths are under apiPrefix.",
+  "meta": {
+    "title": "Parent & Student module — API reference",
+    "apiVersion": "v1",
+    "baseUrlProduction": "https://backend-school-app.onrender.com",
+    "baseUrlLocal": "http://localhost:3000",
+    "apiPrefix": "/api/v1",
+    "studentBasePath": "/api/v1/student",
+    "parentBasePath": "/api/v1/parent",
+    "roles": {
+      "allowedRoles": ["STUDENT", "PARENT"],
+      "rule": "This module uses exactly two role values. No other roles apply to these routes.",
+      "mapping": {
+        "STUDENT": "Required for every /api/v1/student/* request (JWT role claim must be STUDENT only).",
+        "PARENT": "Required for every /api/v1/parent/* request (JWT role claim must be PARENT only)."
+      },
+      "notAllowed": "Tokens with any other role (e.g. SCHOOLADMIN, SUPERADMIN, HR, ACCOUNTANT) must not be used for /student or /parent — the API returns 403."
+    },
+    "authentication": {
+      "type": "JWT Bearer",
+      "header": "Authorization: Bearer <access_token>",
+      "login": "POST /api/v1/auth/login — user must have role exactly STUDENT or exactly PARENT (one role per account for this app).",
+      "refresh": "POST /api/v1/auth/refresh",
+      "note": "Every endpoint below requires a valid access token. Exactly one role per route group: /student/* accepts STUDENT only; /parent/* accepts PARENT only."
+    },
+    "responseEnvelope": {
+      "success": true,
+      "data": "{ ... }",
+      "onError": "{ success: false, error: string, errorCode?: string }"
+    },
+    "parentChildScoping": {
+      "childId": "Required query param on most Parent routes (student id). Must be one of the parent’s linked children — server validates via StudentParent (IDOR protection).",
+      "errorIfMissing": "CHILD_ID_REQUIRED (400)",
+      "listChildrenFirst": "GET /api/v1/parent/children returns { data: { children: [{ id, name, grade, active }] } } — use child id as childId."
+    },
+    "idFormat": "Path ids (homework, exam, payment, invoice) must match server validation: alphanumeric, hyphen, underscore; typically 15–50 chars (cuid/uuid)."
+  },
+  "modules": {
+    "student": {
+      "allowedRole": "STUDENT",
+      "role": "STUDENT",
+      "description": "Logged-in student only (role must be STUDENT, not PARENT or any staff role). Data scoped to the authenticated student (no childId).",
+      "endpoints": [
+        {
+          "name": "Dashboard",
+          "method": "GET",
+          "path": "/api/v1/student/dashboard",
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Profile",
+          "method": "GET",
+          "path": "/api/v1/student/profile",
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Update profile",
+          "method": "PUT",
+          "path": "/api/v1/student/profile",
+          "query": {},
+          "body": { "guardianPhone": "optional string | null" }
+        },
+        {
+          "name": "Timetable",
+          "method": "GET",
+          "path": "/api/v1/student/timetable",
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Attendance",
+          "method": "GET",
+          "path": "/api/v1/student/attendance",
+          "query": { "month": "optional YYYY-MM", "page": "optional", "limit": "optional" },
+          "body": null
+        },
+        {
+          "name": "Homework list",
+          "method": "GET",
+          "path": "/api/v1/student/homework",
+          "query": { "page": "optional", "limit": "optional" },
+          "body": null
+        },
+        {
+          "name": "Homework detail",
+          "method": "GET",
+          "path": "/api/v1/student/homework/:id",
+          "pathParams": { "id": "homework id" },
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Submit homework",
+          "method": "POST",
+          "path": "/api/v1/student/homework/:id/submit",
+          "pathParams": { "id": "homework id" },
+          "body": { "url": "optional", "fileUrls": "optional string[]", "status": "optional, default SUBMITTED" }
+        },
+        {
+          "name": "Study materials",
+          "method": "GET",
+          "path": "/api/v1/student/study-materials",
+          "query": { "page": "optional", "limit": "optional" },
+          "body": null
+        },
+        {
+          "name": "Exams list",
+          "method": "GET",
+          "path": "/api/v1/student/exams",
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Exam result",
+          "method": "GET",
+          "path": "/api/v1/student/exams/:id/result",
+          "pathParams": { "id": "exam id" },
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Exam timetable",
+          "method": "GET",
+          "path": "/api/v1/student/exam-timetable",
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Fees overview",
+          "method": "GET",
+          "path": "/api/v1/student/fees",
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Fee receipts list",
+          "method": "GET",
+          "path": "/api/v1/student/fees/receipts",
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Payment receipt",
+          "method": "GET",
+          "path": "/api/v1/student/payments/:id/receipt",
+          "pathParams": { "id": "payment id" },
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Announcements",
+          "method": "GET",
+          "path": "/api/v1/student/announcements",
+          "query": { "page": "optional", "limit": "optional", "type": "optional audience filter" },
+          "body": null
+        },
+        {
+          "name": "Events",
+          "method": "GET",
+          "path": "/api/v1/student/events",
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Register for event",
+          "method": "POST",
+          "path": "/api/v1/student/events/:id/register",
+          "pathParams": { "id": "event id" },
+          "body": {}
+        },
+        {
+          "name": "Transport",
+          "method": "GET",
+          "path": "/api/v1/student/transport",
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Library overview",
+          "method": "GET",
+          "path": "/api/v1/student/library",
+          "query": { "page": "optional", "limit": "optional", "search": "optional", "category": "optional" },
+          "body": null
+        },
+        {
+          "name": "Library books",
+          "method": "GET",
+          "path": "/api/v1/student/library/books",
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Achievements",
+          "method": "GET",
+          "path": "/api/v1/student/achievements",
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Notifications",
+          "method": "GET",
+          "path": "/api/v1/student/notifications",
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Circulars",
+          "method": "GET",
+          "path": "/api/v1/student/circulars",
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Health / wellness",
+          "method": "GET",
+          "path": "/api/v1/student/health",
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Settings",
+          "method": "GET",
+          "path": "/api/v1/student/settings",
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Update settings",
+          "method": "PUT",
+          "path": "/api/v1/student/settings",
+          "query": {},
+          "body": { "preferences": "object (size-limited JSON)" }
+        },
+        {
+          "name": "Leave requests list",
+          "method": "GET",
+          "path": "/api/v1/student/leave-requests",
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Create leave request",
+          "method": "POST",
+          "path": "/api/v1/student/leave-requests",
+          "body": { "fromDate": "ISO or YYYY-MM-DD", "toDate": "ISO or YYYY-MM-DD", "reason": "required string" }
+        },
+        {
+          "name": "Subject teachers",
+          "method": "GET",
+          "path": "/api/v1/student/subject-teachers",
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Request meeting",
+          "method": "POST",
+          "path": "/api/v1/student/meetings/request",
+          "body": { "staffId": "optional valid id", "preferredDate": "optional", "purpose": "optional" }
+        },
+        {
+          "name": "AI ask",
+          "method": "POST",
+          "path": "/api/v1/student/ai/ask",
+          "body": { "question": "required string" }
+        },
+        {
+          "name": "AI career suggestions",
+          "method": "GET",
+          "path": "/api/v1/student/ai/career",
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Report cards",
+          "method": "GET",
+          "path": "/api/v1/student/report-cards",
+          "query": { "page": "optional", "limit": "optional" },
+          "body": null
+        },
+        {
+          "name": "Documents",
+          "method": "GET",
+          "path": "/api/v1/student/documents",
+          "query": { "page": "optional", "limit": "optional" },
+          "body": null
+        }
+      ],
+      "endpointCount": 35
+    },
+    "parent": {
+      "allowedRole": "PARENT",
+      "role": "PARENT",
+      "description": "Logged-in parent only (role must be PARENT, not STUDENT or any staff role). Most child-specific routes require query param childId (linked student id). Invoice detail uses path id only — ownership verified server-side.",
+      "endpoints": [
+        {
+          "name": "List linked children",
+          "method": "GET",
+          "path": "/api/v1/parent/children",
+          "requiresChildId": false,
+          "query": {},
+          "body": null,
+          "notes": "Call first to obtain ids for childId on other routes."
+        },
+        {
+          "name": "Home / summary",
+          "method": "GET",
+          "path": "/api/v1/parent/home",
+          "requiresChildId": true,
+          "query": { "childId": "required — student id", "month": "optional" },
+          "body": null
+        },
+        {
+          "name": "Announcements",
+          "method": "GET",
+          "path": "/api/v1/parent/announcements",
+          "requiresChildId": true,
+          "query": { "childId": "required", "type": "optional — all | urgent | teacher" },
+          "body": null
+        },
+        {
+          "name": "Notifications (grouped)",
+          "method": "GET",
+          "path": "/api/v1/parent/notifications",
+          "requiresChildId": true,
+          "query": { "childId": "required" },
+          "body": null
+        },
+        {
+          "name": "Attendance calendar / stats",
+          "method": "GET",
+          "path": "/api/v1/parent/attendance",
+          "requiresChildId": true,
+          "query": { "childId": "required", "month": "optional YYYY-MM" },
+          "body": null
+        },
+        {
+          "name": "Fees summary & invoices",
+          "method": "GET",
+          "path": "/api/v1/parent/fees",
+          "requiresChildId": true,
+          "query": { "childId": "required" },
+          "body": null
+        },
+        {
+          "name": "Invoice detail",
+          "method": "GET",
+          "path": "/api/v1/parent/invoices/:invoiceId",
+          "requiresChildId": false,
+          "pathParams": { "invoiceId": "invoice id" },
+          "query": {},
+          "body": null,
+          "notes": "Server ensures invoice belongs to a student linked to this parent (no childId in query)."
+        },
+        {
+          "name": "Timetable / day schedule",
+          "method": "GET",
+          "path": "/api/v1/parent/timetable",
+          "requiresChildId": true,
+          "query": { "childId": "required", "day": "optional — YYYY-MM-DD or day-of-month 1–31" },
+          "body": null
+        },
+        {
+          "name": "Progress reports",
+          "method": "GET",
+          "path": "/api/v1/parent/progress-reports",
+          "requiresChildId": true,
+          "query": { "childId": "required", "term": "optional" },
+          "body": null
+        },
+        {
+          "name": "Live classes",
+          "method": "GET",
+          "path": "/api/v1/parent/live-classes",
+          "requiresChildId": true,
+          "query": { "childId": "required" },
+          "body": null
+        },
+        {
+          "name": "Profile hub",
+          "method": "GET",
+          "path": "/api/v1/parent/profile-hub",
+          "requiresChildId": true,
+          "query": { "childId": "required" },
+          "body": null
+        },
+        {
+          "name": "Library",
+          "method": "GET",
+          "path": "/api/v1/parent/library",
+          "requiresChildId": true,
+          "query": { "childId": "required", "page": "optional", "limit": "optional", "search": "optional" },
+          "body": null
+        },
+        {
+          "name": "Documents",
+          "method": "GET",
+          "path": "/api/v1/parent/documents",
+          "requiresChildId": true,
+          "query": { "childId": "required", "page": "optional", "limit": "optional" },
+          "body": null
+        },
+        {
+          "name": "AI ask",
+          "method": "POST",
+          "path": "/api/v1/parent/ai/ask",
+          "requiresChildId": false,
+          "body": { "question": "required string" }
+        },
+        {
+          "name": "AI career",
+          "method": "GET",
+          "path": "/api/v1/parent/ai/career",
+          "requiresChildId": false,
+          "query": {},
+          "body": null
+        },
+        {
+          "name": "Settings",
+          "method": "GET",
+          "path": "/api/v1/parent/settings",
+          "requiresChildId": true,
+          "query": { "childId": "required" },
+          "body": null,
+          "notes": "Returns preferences scoped to the selected child’s student settings record."
+        },
+        {
+          "name": "Update settings",
+          "method": "PUT",
+          "path": "/api/v1/parent/settings",
+          "requiresChildId": true,
+          "query": { "childId": "required" },
+          "body": { "preferences": "object (or whole body as preferences — see handler)" }
+        }
+      ],
+      "endpointCount": 17
+    }
+  },
+  "unifiedAppModuleNote": {
+    "path": "/api/v1/app",
+    "allowedRolesOnly": ["STUDENT", "PARENT"],
+    "description": "Same two roles only: JWT must be STUDENT or PARENT. Optional shared dashboard slice (children, dashboard, attendance, fees, announcements). Endpoints not duplicated here; see FRONTEND_TEAM_API.json if needed."
+  },
+  "checklistForFrontend": [
+    "JWT role claim must be STUDENT for /student/* and PARENT for /parent/* only — no other roles.",
+    "Store access token securely; send Authorization header on every request.",
+    "Parent: load GET /parent/children, persist selected childId for subsequent calls.",
+    "Parent: append childId as query string for all routes that require it (see requiresChildId: true).",
+    "Handle 401 (refresh or re-login), 400 CHILD_ID_REQUIRED, 403 FORBIDDEN (wrong role or access), 404 for wrong child/invoice.",
+    "Use HTTPS base URL in production."
+  ]
+}

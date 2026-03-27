@@ -35,6 +35,13 @@ async function schoolAdminDashboard(req, res, next) {
 
     const where = schoolId ? { schoolId } : {};
     const { monthStart, monthEnd } = monthWindow();
+    const { start: todayStart, end: todayEnd } = todayWindow();
+    const trendStart = new Date(todayStart);
+    trendStart.setUTCDate(trendStart.getUTCDate() - 6);
+    const weekStart = new Date(todayStart);
+    weekStart.setUTCDate(weekStart.getUTCDate() - 7);
+    const prevWeekStart = new Date(todayStart);
+    prevWeekStart.setUTCDate(prevWeekStart.getUTCDate() - 14);
 
     const [
       students,
@@ -45,6 +52,12 @@ async function schoolAdminDashboard(req, res, next) {
       invoicesTotals,
       monthCollection,
       announcements,
+      staffToday,
+      studentAttendanceTrendRows,
+      todayCollection,
+      thisWeekCollection,
+      lastWeekCollection,
+      pendingApprovals,
     ] = await Promise.all([
       prisma.student.count({ where }),
       prisma.staff.count({ where }),
@@ -71,7 +84,66 @@ async function schoolAdminDashboard(req, res, next) {
         _sum: { amount: true },
       }),
       prisma.announcement.count({ where }),
+      prisma.staffAttendance.groupBy({
+        by: ["status"],
+        where: { ...where, date: { gte: todayStart, lt: todayEnd } },
+        _count: { _all: true },
+      }),
+      prisma.studentAttendance.groupBy({
+        by: ["date", "status"],
+        where: { ...where, date: { gte: trendStart, lt: todayEnd } },
+        _count: { _all: true },
+      }),
+      prisma.payment.aggregate({
+        where: { ...where, paidAt: { gte: todayStart, lt: todayEnd } },
+        _sum: { amount: true },
+      }),
+      prisma.payment.aggregate({
+        where: { ...where, paidAt: { gte: weekStart, lt: todayEnd } },
+        _sum: { amount: true },
+      }),
+      prisma.payment.aggregate({
+        where: { ...where, paidAt: { gte: prevWeekStart, lt: weekStart } },
+        _sum: { amount: true },
+      }),
+      Promise.all([
+        prisma.admissionApplication.count({ where: { ...where, status: "UNDER_REVIEW" } }),
+        prisma.leaveRequest.count({ where: { ...where, status: "PENDING" } }),
+        prisma.faceCheckinLog.count({ where: { ...where, status: "PENDING" } }),
+      ]),
     ]);
+
+    const staffSummary = { PRESENT: 0, ABSENT: 0, LATE: 0, LEAVE: 0 };
+    for (const item of staffToday) staffSummary[item.status] = item._count._all;
+    const teacherPresent = (staffSummary.PRESENT || 0) + (staffSummary.LATE || 0);
+    const teacherTotal = staff || 0;
+    const teacherPresence = teacherTotal > 0 ? Number(((teacherPresent / teacherTotal) * 100).toFixed(2)) : 0;
+
+    const trendMap = new Map();
+    for (const row of studentAttendanceTrendRows) {
+      const key = row.date.toISOString().slice(0, 10);
+      if (!trendMap.has(key)) trendMap.set(key, { PRESENT: 0, ABSENT: 0, LATE: 0, LEAVE: 0 });
+      trendMap.get(key)[row.status] = row._count._all;
+    }
+    const attendanceTrend = [];
+    for (let i = 0; i < 7; i += 1) {
+      const date = new Date(trendStart);
+      date.setUTCDate(trendStart.getUTCDate() + i);
+      const key = date.toISOString().slice(0, 10);
+      const summary = trendMap.get(key) || { PRESENT: 0, ABSENT: 0, LATE: 0, LEAVE: 0 };
+      const present = (summary.PRESENT || 0) + (summary.LATE || 0);
+      const pct = students > 0 ? Number(((present / students) * 100).toFixed(2)) : 0;
+      attendanceTrend.push({
+        date: key,
+        presentPct: pct,
+        summary,
+      });
+    }
+
+    const thisWeek = thisWeekCollection._sum.amount || 0;
+    const lastWeek = lastWeekCollection._sum.amount || 0;
+    const feeVsLastWeekPct =
+      lastWeek > 0 ? Number((((thisWeek - lastWeek) / lastWeek) * 100).toFixed(2)) : thisWeek > 0 ? 100 : 0;
 
     const payload = {
       success: true,
@@ -89,6 +161,18 @@ async function schoolAdminDashboard(req, res, next) {
           outstandingAmount:
             (invoicesTotals._sum.amountDue || 0) - (invoicesTotals._sum.amountPaid || 0),
           monthCollection: monthCollection._sum.amount || 0,
+        },
+        ui: {
+          studentsTotal: students,
+          teacherPresence,
+          teacherPresent,
+          teacherTotal,
+          pendingApprovals: pendingApprovals[0] + pendingApprovals[1] + pendingApprovals[2],
+          attendanceTrend,
+          feeToday: todayCollection._sum.amount || 0,
+          feePending:
+            (invoicesTotals._sum.amountDue || 0) - (invoicesTotals._sum.amountPaid || 0),
+          feeVsLastWeekPct,
         },
       },
     };

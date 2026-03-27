@@ -56,3 +56,7 @@ All student paths are relative to this: e.g. `GET /student/dashboard` → `GET {
 ## One-line summary you can send
 
 > **Student APIs:** Base URL is `https://backend-school-app.onrender.com/api/v1`. All 35 endpoints are in `backend/docs/STUDENT_MODULE_APIS.json`. Use header `Authorization: Bearer <accessToken>` (token from `POST /auth/login`). Success responses are `{ success: true, data: ... }`; errors are `{ success: false, error: "..." }`. Share that JSON file with the frontend team for full request/response details.
+
+---
+
+Parent APIs use the same backend base URL and auth header, and are documented in `backend/docs/PARENT_MODULE_APIS.json`.
