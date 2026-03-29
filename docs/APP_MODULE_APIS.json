@@ -1,0 +1,140 @@
+{
+  "module": "Unified App Module (Student + Parent)",
+  "description": "Single app flow for both student and parent users with one login and one dashboard contract. Backend resolves context from JWT user and optional childId.",
+  "baseUrl": "https://backend-school-app.onrender.com/api/v1",
+  "auth": {
+    "loginEndpoint": "POST /auth/login",
+    "header": "Authorization: Bearer <accessToken>",
+    "allowedRolesForAppRoutes": ["STUDENT", "PARENT"],
+    "note": "Same login for student and parent app users."
+  },
+  "responseFormat": {
+    "success": { "success": true, "data": "object" },
+    "error": { "success": false, "error": { "code": "string", "message": "string" } }
+  },
+  "childContextRules": {
+    "childIdQueryParam": "Optional in /app/* routes",
+    "behavior": [
+      "If childId is provided, backend verifies the child belongs to logged-in user context.",
+      "If childId is not provided, backend auto-selects own student profile (if STUDENT) or first linked child (if PARENT).",
+      "If childId is invalid/not linked, backend returns 403."
+    ]
+  },
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/auth/login",
+      "description": "Common login for student and parent app users.",
+      "body": { "email": "string", "password": "string" },
+      "response": {
+        "success": true,
+        "data": {
+          "accessToken": "string",
+          "refreshToken": "string",
+          "user": {
+            "id": "string",
+            "fullName": "string",
+            "email": "string",
+            "role": "STUDENT | PARENT",
+            "schoolId": "string"
+          }
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app/children",
+      "description": "Returns child list available in current user context (for child switcher).",
+      "query": {},
+      "response": {
+        "success": true,
+        "data": {
+          "children": [
+            { "id": "string", "name": "string", "grade": "string", "active": "boolean" }
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app/dashboard",
+      "description": "Unified dashboard for both student and parent app users.",
+      "query": { "childId": "string (optional)" },
+      "response": {
+        "success": true,
+        "data": {
+          "actingStudent": {
+            "id": "string",
+            "name": "string",
+            "className": "string",
+            "section": "string | null"
+          },
+          "children": [
+            { "id": "string", "name": "string", "grade": "string", "active": "boolean" }
+          ],
+          "attendanceSummary": {
+            "PRESENT": "number",
+            "ABSENT": "number",
+            "LATE": "number",
+            "LEAVE": "number"
+          },
+          "upcomingExams": [
+            { "id": "string", "name": "string", "examDate": "string (ISO)", "subjectId": "string | null" }
+          ],
+          "pendingDues": "number",
+          "announcements": [
+            { "id": "string", "title": "string", "content": "string", "sentAt": "string (ISO) | null" }
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app/attendance",
+      "description": "Attendance list for acting student.",
+      "query": {
+        "childId": "string (optional)",
+        "month": "YYYY-MM (optional)"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "items": [
+            { "id": "string", "date": "string (ISO)", "status": "PRESENT | ABSENT | LATE | LEAVE", "remark": "string | null" }
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app/fees",
+      "description": "Fees/invoices/payments for acting student.",
+      "query": { "childId": "string (optional)" },
+      "response": {
+        "success": true,
+        "data": {
+          "invoices": "array",
+          "payments": "array"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app/announcements",
+      "description": "Announcements for acting student's school.",
+      "query": { "childId": "string (optional)" },
+      "response": {
+        "success": true,
+        "data": {
+          "items": "array"
+        }
+      }
+    }
+  ],
+  "legacyModules": {
+    "studentModuleAvailable": true,
+    "parentModuleAvailable": true,
+    "recommendedForFrontendNow": "/app/* unified endpoints"
+  }
+}
+

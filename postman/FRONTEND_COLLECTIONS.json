@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "description": "Import these Postman files for frontend integration. Regenerate with: npm run postman:build",
+  "productionBaseUrl": "https://backend-school-app.onrender.com/api/v1",
+  "collections": [
+    {
+      "file": "School-ERP-Admin.postman_collection.json",
+      "name": "School ERP — Admin / School panel",
+      "apiPrefix": "/api/v1",
+      "roles": ["SUPERADMIN", "SCHOOLADMIN", "HR", "ACCOUNTANT"],
+      "covers": ["dashboard/school-admin", "school/*", "school/students/*"]
+    },
+    {
+      "file": "School-ERP-Parent.postman_collection.json",
+      "name": "School ERP — Parent app",
+      "apiPrefix": "/api/v1",
+      "roles": ["PARENT"],
+      "covers": ["parent/*"],
+      "notes": "Run GET /parent/children first to populate childId; most routes need ?childId="
+    }
+  ],
+  "environments": [
+    {
+      "file": "School-ERP-Local.postman_environment.json",
+      "useFor": "local development"
+    },
+    {
+      "file": "School-ERP-Production.postman_environment.json",
+      "useFor": "Render / production"
+    }
+  ]
+}
