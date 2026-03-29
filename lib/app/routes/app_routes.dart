@@ -42,6 +42,11 @@ abstract class AppRoutes {
   static const TEACHER_AI_ASSISTANT = '/teacher-ai-assistant';
   static const TEACHER_NOTIFICATIONS = '/teacher-notifications';
 
+  // Staff Module
+  static const STAFF_HOME = '/staff-home';
+  static const STAFF_MODULES = '/staff-modules';
+  static const STAFF_MODULE_DETAIL = '/staff-module-detail';
+
   // Admin Module
   static const ADMIN_HOME = '/admin-dashboard';
   static const ADMIN_APPROVALS = '/admin-approvals';

@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 
 import '../../../app/services/app_storage.dart';
+import '../../../app/routes/app_pages.dart';
 import '../../../common/routes/common_routes_screens.dart';
 import '../../../common/services/auth_service.dart';
 import '../../../common/utils/app_toast.dart';
@@ -10,6 +11,8 @@ import '../../../common/utils/auth_route_resolver.dart';
 class LoginController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
   final AppStorage _storage = AppStorage();
+  static const String _staffEmail = 'staff@gmail.com';
+  static const String _staffPassword = 'Staff@123';
 
   final RxString email = ''.obs;
   final RxString password = ''.obs;
@@ -47,6 +50,12 @@ class LoginController extends GetxController {
     }
     if (p.length < 6) {
       _setWarning('Password must be at least 6 characters.');
+      return;
+    }
+
+    if (e.toLowerCase() == _staffEmail && p == _staffPassword) {
+      _storage.userRole = 'STAFF';
+      Get.offAllNamed(AppRoutes.STAFF_HOME);
       return;
     }
 

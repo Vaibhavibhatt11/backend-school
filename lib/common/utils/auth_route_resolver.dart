@@ -39,6 +39,8 @@ class AuthRouteResolver {
         return AppRoutes.PARENT_HOME;
       case 'TEACHER':
         return AppRoutes.TEACHER_HOME;
+      case 'STAFF':
+        return AppRoutes.STAFF_HOME;
       case 'SCHOOLADMIN':
       case 'SUPERADMIN':
       case 'HR':
@@ -52,6 +54,8 @@ class AuthRouteResolver {
         return AppRoutes.PARENT_HOME;
       case 'teacher':
         return AppRoutes.TEACHER_HOME;
+      case 'staff':
+        return AppRoutes.STAFF_HOME;
       case 'admin':
         return AppRoutes.ADMIN_HOME;
     }
