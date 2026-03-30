@@ -124,13 +124,13 @@ class NotificationsView extends GetView<NotificationsController> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: item.isRead ? Colors.white : AppColors.primary.withOpacity(0.05),
+        color: item.isRead ? Colors.white : AppColors.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color:
               item.isRead
                   ? Colors.grey.shade200
-                  : AppColors.primary.withOpacity(0.3),
+                  : AppColors.primary.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
@@ -139,7 +139,7 @@ class NotificationsView extends GetView<NotificationsController> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: categoryColor.withOpacity(0.1),
+              color: categoryColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(categoryIcon, color: categoryColor),

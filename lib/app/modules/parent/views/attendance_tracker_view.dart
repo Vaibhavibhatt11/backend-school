@@ -33,7 +33,7 @@ class AttendanceTrackerView extends GetView<AttendanceController> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.05),
+                color: AppColors.primary.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
@@ -159,13 +159,13 @@ class AttendanceTrackerView extends GetView<AttendanceController> {
                       Color bgColor;
                       Color textColor;
                       if (status == 'present') {
-                        bgColor = Colors.green.withOpacity(0.1);
+                        bgColor = Colors.green.withValues(alpha: 0.1);
                         textColor = Colors.green;
                       } else if (status == 'absent') {
-                        bgColor = Colors.red.withOpacity(0.1);
+                        bgColor = Colors.red.withValues(alpha: 0.1);
                         textColor = Colors.red;
                       } else if (status == 'late') {
-                        bgColor = Colors.orange.withOpacity(0.1);
+                        bgColor = Colors.orange.withValues(alpha: 0.1);
                         textColor = Colors.orange;
                       } else {
                         bgColor = Colors.transparent;
@@ -346,7 +346,7 @@ class AttendanceTrackerView extends GetView<AttendanceController> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(

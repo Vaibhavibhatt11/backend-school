@@ -49,7 +49,7 @@
 //                       width: 64,
 //                       height: 64,
 //                       decoration: BoxDecoration(
-//                         color: AppColors.primary.withOpacity(0.1),
+//                         color: AppColors.primary.withValues(alpha: 0.1),
 //                         borderRadius: BorderRadius.circular(20),
 //                       ),
 //                       child: const Icon(
@@ -117,7 +117,7 @@
 //                               borderRadius: BorderRadius.circular(12),
 //                               color:
 //                                   isActive
-//                                       ? AppColors.primary.withOpacity(0.05)
+//                                       ? AppColors.primary.withValues(alpha: 0.05)
 //                                       : (isDark
 //                                           ? AppColors.surfaceDark
 //                                           : Colors.white),
@@ -269,7 +269,7 @@
 //           borderRadius: BorderRadius.circular(12),
 //           boxShadow: [
 //             BoxShadow(
-//               color: Colors.black.withOpacity(0.05),
+//               color: Colors.black.withValues(alpha: 0.05),
 //               blurRadius: 4,
 //               offset: const Offset(0, 2),
 //             ),
@@ -298,7 +298,7 @@
 //           borderRadius: BorderRadius.circular(12),
 //           boxShadow: [
 //             BoxShadow(
-//               color: Colors.black.withOpacity(0.05),
+//               color: Colors.black.withValues(alpha: 0.05),
 //               blurRadius: 4,
 //               offset: const Offset(0, 2),
 //             ),
@@ -362,7 +362,7 @@ class OtpView extends GetView<OtpController> {
                       width: 64,
                       height: 64,
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
+                        color: AppColors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Icon(

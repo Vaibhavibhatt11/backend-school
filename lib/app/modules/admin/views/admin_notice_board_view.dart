@@ -60,7 +60,7 @@ class AdminNoticeBoardView extends GetView<AdminNoticeBoardController> {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
+                          color: AppColors.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: IconButton(
@@ -84,7 +84,7 @@ class AdminNoticeBoardView extends GetView<AdminNoticeBoardController> {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
+                          color: AppColors.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: IconButton(
@@ -181,7 +181,7 @@ class AdminNoticeBoardView extends GetView<AdminNoticeBoardController> {
                                         decoration: BoxDecoration(
                                           color: _getStatusColor(
                                             notice.status,
-                                          ).withOpacity(0.1),
+                                          ).withValues(alpha: 0.1),
                                           borderRadius: BorderRadius.circular(
                                             20,
                                           ),
@@ -238,7 +238,7 @@ class AdminNoticeBoardView extends GetView<AdminNoticeBoardController> {
                                                     ),
                                                 decoration: BoxDecoration(
                                                   color: AppColors.primary
-                                                      .withOpacity(0.1),
+                                                      .withValues(alpha: 0.1),
                                                   borderRadius:
                                                       BorderRadius.circular(20),
                                                 ),

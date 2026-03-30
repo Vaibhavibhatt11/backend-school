@@ -161,7 +161,7 @@ class AnnouncementsView extends GetView<AnnouncementsController> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
+                        color: AppColors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -303,7 +303,7 @@ class AnnouncementsView extends GetView<AnnouncementsController> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: target,
+                initialValue: target,
                 items: ['All', 'Grade 10-A', 'Grade 10-B', 'Grade 11-C']
                     .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                     .toList(),

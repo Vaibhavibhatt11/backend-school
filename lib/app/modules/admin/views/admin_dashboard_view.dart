@@ -266,7 +266,7 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
                       height: controller.attendanceTrend[index] * 0.8,
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.3 + index * 0.1),
+                        color: AppColors.primary.withValues(alpha: 0.3 + index * 0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -318,7 +318,7 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
@@ -329,7 +329,7 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -386,7 +386,7 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(Icons.how_to_reg, color: Colors.white),
@@ -424,7 +424,7 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.green, width: 2),
-                  color: Colors.white.withOpacity(0.3 - index * 0.1),
+                  color: Colors.white.withValues(alpha: 0.3 - index * 0.1),
                 ),
               ),
             ),
@@ -476,7 +476,7 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: color),

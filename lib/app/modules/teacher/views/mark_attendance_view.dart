@@ -60,7 +60,7 @@ class MarkAttendanceView extends GetView<MarkAttendanceController> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -153,19 +153,19 @@ class MarkAttendanceView extends GetView<MarkAttendanceController> {
                           children: [
                             _buildStatusChip(
                               'P',
-                              student.status == 'P',
+                              student.status.value == 'P',
                               () => controller.updateStatus(student, 'P'),
                             ),
                             const SizedBox(width: 4),
                             _buildStatusChip(
                               'A',
-                              student.status == 'A',
+                              student.status.value == 'A',
                               () => controller.updateStatus(student, 'A'),
                             ),
                             const SizedBox(width: 4),
                             _buildStatusChip(
                               'L',
-                              student.status == 'L',
+                              student.status.value == 'L',
                               () => controller.updateStatus(student, 'L'),
                             ),
                           ],

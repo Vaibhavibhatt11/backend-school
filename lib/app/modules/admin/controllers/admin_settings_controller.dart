@@ -34,7 +34,7 @@ class AdminSettingsController extends GetxController {
       final settings = settingsData['settings'] as Map<String, dynamic>? ?? const {};
       adminName.value = profile['fullName']?.toString() ?? 'Admin';
       adminSubtitle.value =
-          '${settings['name'] ?? 'School'} • ${profile['role'] ?? 'SCHOOLADMIN'}';
+          '${settings['name'] ?? 'School'} â€¢ ${profile['role'] ?? 'SCHOOLADMIN'}';
       final parts = adminName.value
           .split(' ')
           .where((e) => e.trim().isNotEmpty)

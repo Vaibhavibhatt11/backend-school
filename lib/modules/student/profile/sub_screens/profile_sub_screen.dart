@@ -184,7 +184,7 @@ class _InfoCard extends StatelessWidget {
             ],
           ),
           SizedBox(height: Responsive.h(context, 10)),
-          ...rows.map((r) => _InfoRow(label: r.label, value: r.value)).toList(),
+          ...rows.map((r) => _InfoRow(label: r.label, value: r.value)),
         ],
       ),
     );

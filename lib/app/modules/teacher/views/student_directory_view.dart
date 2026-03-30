@@ -11,7 +11,6 @@ class StudentDirectoryView extends GetView<StudentDirectoryController> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -96,7 +95,7 @@ class StudentDirectoryView extends GetView<StudentDirectoryController> {
                                           height: 32,
                                           decoration: BoxDecoration(
                                             color: AppColors.primary
-                                                .withOpacity(0.1),
+                                                .withValues(alpha: 0.1),
                                             shape: BoxShape.circle,
                                           ),
                                           child: Center(
@@ -243,7 +242,7 @@ class StudentDirectoryView extends GetView<StudentDirectoryController> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.1),
+                color: statusColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(

@@ -28,7 +28,7 @@ class TimetableView extends GetView<TimetableController> {
                         'Week of ${controller.selectedDay.value.day}/${controller.selectedDay.value.month}/${controller.selectedDay.value.year}',
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.primary.withOpacity(0.7),
+                          color: AppColors.primary.withValues(alpha: 0.7),
                         ),
                       ),
                     ),
@@ -110,10 +110,6 @@ class TimetableView extends GetView<TimetableController> {
           Expanded(
             child: Obx(() {
               // If there is a current time indicator
-              final now = DateTime.now();
-              final currentTimePosition =
-                  (now.hour - 8) * 60 + now.minute; // offset from 8am
-
               return ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 itemCount: controller.sessions.length,
@@ -137,10 +133,10 @@ class TimetableView extends GetView<TimetableController> {
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color:
-                                    session.isLive ?? false
+                                    session.isLive
                                         ? AppColors.primary
                                         : Colors.grey.shade300,
-                                width: session.isLive ?? false ? 2 : 1,
+                                width: session.isLive ? 2 : 1,
                               ),
                             ),
                             padding: const EdgeInsets.all(12),
@@ -195,13 +191,13 @@ class TimetableView extends GetView<TimetableController> {
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Text(
-                                      '${controller.formatTime(session.startTime ?? DateTime.now())}-${controller.formatTime(session.endTime ?? DateTime.now())}',
+                                      '${controller.formatTime(session.startTime)}-${controller.formatTime(session.endTime)}',
                                       style: TextStyle(
                                         fontSize: 10,
                                         color: Colors.grey.shade600,
                                       ),
                                     ),
-                                    if (session.isLive ?? false)
+                                    if (session.isLive)
                                       Container(
                                         margin: const EdgeInsets.only(top: 4),
                                         padding: const EdgeInsets.symmetric(
@@ -223,7 +219,7 @@ class TimetableView extends GetView<TimetableController> {
                                           ),
                                         ),
                                       ),
-                                    if (session.isCompleted ?? false)
+                                    if (session.isCompleted)
                                       const Icon(
                                         Icons.check_circle,
                                         color: Colors.green,
@@ -236,7 +232,7 @@ class TimetableView extends GetView<TimetableController> {
                           ),
                         ),
                         // Current time indicator
-                        if (session.isLive ?? false)
+                        if (session.isLive)
                           Positioned(
                             left: 0,
                             right: 0,
@@ -273,16 +269,16 @@ class TimetableView extends GetView<TimetableController> {
   }
 
   Color _getSessionColor(ClassSession session) {
-    if (session.isLive ?? false) return AppColors.primary.withOpacity(0.05);
-    if (session.isCompleted ?? false) return Colors.grey.shade100;
+    if (session.isLive) return AppColors.primary.withValues(alpha: 0.05);
+    if (session.isCompleted) return Colors.grey.shade100;
     if (session.title == 'Free Period') return Colors.transparent;
     return Colors.white;
   }
 
   Color _getLeftBarColor(ClassSession session) {
-    if (session.isLive ?? false) return AppColors.primary;
-    if (session.isCompleted ?? false) return Colors.green;
+    if (session.isLive) return AppColors.primary;
+    if (session.isCompleted) return Colors.green;
     if (session.title == 'Free Period') return Colors.grey;
-    return AppColors.primary.withOpacity(0.5);
+    return AppColors.primary.withValues(alpha: 0.5);
   }
 }

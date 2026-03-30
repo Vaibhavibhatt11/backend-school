@@ -208,7 +208,7 @@ class StudentHealthScreen extends GetView<StudentHealthController> {
               style: AppTextStyle.titleSmall(context).copyWith(fontWeight: FontWeight.w700),
             ),
             SizedBox(height: Responsive.h(context, 10)),
-            ...records.map((r) => _recordTile(context, r)).toList(),
+            ...records.map((r) => _recordTile(context, r)),
           ],
         ),
       );

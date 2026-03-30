@@ -75,7 +75,7 @@ class BranchSelectionView extends GetView<BranchController> {
                       decoration: BoxDecoration(
                         color:
                             branch.isSelected
-                                ? AppColors.primary.withOpacity(0.05)
+                                ? AppColors.primary.withValues(alpha: 0.05)
                                 : (isDark
                                     ? AppColors.surfaceDark
                                     : AppColors.surfaceLight),
@@ -98,7 +98,7 @@ class BranchSelectionView extends GetView<BranchController> {
                             decoration: BoxDecoration(
                               color:
                                   branch.isSelected
-                                      ? AppColors.primary.withOpacity(0.2)
+                                      ? AppColors.primary.withValues(alpha: 0.2)
                                       : (isDark
                                           ? AppColors.surfaceDark
                                           : Colors.grey[100]),

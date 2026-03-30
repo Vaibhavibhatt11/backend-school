@@ -77,7 +77,7 @@ class AdminProfileView extends GetView<AdminProfileController> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Text(
@@ -197,7 +197,7 @@ class AdminProfileView extends GetView<AdminProfileController> {
                       title: const Text('Email Notifications'),
                       value: controller.emailNotificationsEnabled.value,
                       onChanged: controller.onEmailNotificationsToggle,
-                      activeColor: AppColors.primary,
+                      activeThumbColor: AppColors.primary,
                     ),
                   ),
                 ],
@@ -290,7 +290,7 @@ class AdminProfileView extends GetView<AdminProfileController> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: AppColors.primary, size: 20),

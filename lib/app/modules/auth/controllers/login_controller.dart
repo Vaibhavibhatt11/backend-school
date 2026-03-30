@@ -27,8 +27,8 @@ class LoginController extends GetxController {
     isLoading.value = true;
     try {
       final response = await _authService.login(
-        email: emailOrPhone.value,
-        password: password.value,
+        email: email,
+        password: pass,
       );
 
       // Keep GetStorage in sync with SharedPreferences token for legacy flows.

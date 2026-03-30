@@ -194,7 +194,7 @@ class AIAssistantView extends GetView<AIAssistantController> {
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
+                        color: AppColors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -278,7 +278,7 @@ class AIAssistantView extends GetView<AIAssistantController> {
           controller.inputText.value = label;
           controller.sendMessage();
         },
-        backgroundColor: AppColors.primary.withOpacity(0.1),
+        backgroundColor: AppColors.primary.withValues(alpha: 0.1),
         labelStyle: const TextStyle(color: AppColors.primary),
       ),
     );

@@ -41,7 +41,7 @@ class SplashView extends GetView<SplashController> {
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -133,7 +133,7 @@ class SplashView extends GetView<SplashController> {
                         color:
                             Theme.of(context).brightness == Brightness.light
                                 ? Colors.grey[400]
-                                : AppColors.textSecondaryDark.withOpacity(0.5),
+                                : AppColors.textSecondaryDark.withValues(alpha: 0.5),
                         fontSize: 10,
                         letterSpacing: 1.2,
                         fontWeight: FontWeight.w500,

@@ -237,7 +237,7 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                                 decoration: BoxDecoration(
                                   color: _getIconColor(
                                     request.type,
-                                  ).withOpacity(0.1),
+                                  ).withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Icon(
@@ -270,7 +270,7 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                                           decoration: BoxDecoration(
                                             color: _getTypeColor(
                                               request.type,
-                                            ).withOpacity(0.1),
+                                            ).withValues(alpha: 0.1),
                                             borderRadius: BorderRadius.circular(
                                               12,
                                             ),

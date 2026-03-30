@@ -50,7 +50,7 @@ class InvoiceDetailView extends GetView<InvoiceDetailController> {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.amber.withOpacity(0.1),
+                      color: Colors.amber.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -163,7 +163,7 @@ class InvoiceDetailView extends GetView<InvoiceDetailController> {
                                 width: 40,
                                 height: 40,
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary.withOpacity(0.1),
+                                  color: AppColors.primary.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Icon(
@@ -265,7 +265,7 @@ class InvoiceDetailView extends GetView<InvoiceDetailController> {
                               width: 40,
                               height: 40,
                               decoration: BoxDecoration(
-                                color: Colors.green.withOpacity(0.1),
+                                color: Colors.green.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(

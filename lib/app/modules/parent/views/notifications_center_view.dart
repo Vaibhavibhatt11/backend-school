@@ -126,7 +126,7 @@ class NotificationsCenterView extends GetView<NotificationsController> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: _getIconColor(item['type']).withOpacity(0.1),
+              color: _getIconColor(item['type']).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(

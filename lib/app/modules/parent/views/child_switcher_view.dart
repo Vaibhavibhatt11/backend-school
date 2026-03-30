@@ -51,7 +51,7 @@ class ChildSwitcherView extends GetView<ChildSwitcherController> {
                           decoration: BoxDecoration(
                             color:
                                 isActive
-                                    ? AppColors.primary.withOpacity(0.05)
+                                    ? AppColors.primary.withValues(alpha: 0.05)
                                     : (isDark
                                         ? AppColors.surfaceDark
                                         : Colors.white),
@@ -145,9 +145,9 @@ class ChildSwitcherView extends GetView<ChildSwitcherController> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.05),
+                color: AppColors.primary.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
               ),
               child: Row(
                 children: const [

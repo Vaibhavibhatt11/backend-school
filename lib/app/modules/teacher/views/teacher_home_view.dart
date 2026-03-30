@@ -247,7 +247,7 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
+                        color: AppColors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -292,8 +292,8 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
             BoxShadow(
               color:
                   isPrimary
-                      ? AppColors.primary.withOpacity(0.3)
-                      : Colors.grey.withOpacity(0.1),
+                      ? AppColors.primary.withValues(alpha: 0.3)
+                      : Colors.grey.withValues(alpha: 0.1),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -306,8 +306,8 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
               decoration: BoxDecoration(
                 color:
                     isPrimary
-                        ? Colors.white.withOpacity(0.2)
-                        : AppColors.primary.withOpacity(0.1),
+                        ? Colors.white.withValues(alpha: 0.2)
+                        : AppColors.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -356,7 +356,7 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(

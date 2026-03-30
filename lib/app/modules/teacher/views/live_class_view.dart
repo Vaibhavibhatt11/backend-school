@@ -173,7 +173,7 @@ class LiveClassView extends GetView<LiveClassController> {
   //     decoration: BoxDecoration(
   //       color: Colors.white,
   //       borderRadius: BorderRadius.circular(16),
-  //       border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+  //       border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
   //     ),
   //     child: Column(
   //       crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,7 +209,7 @@ class LiveClassView extends GetView<LiveClassController> {
   //               width: 50,
   //               height: 50,
   //               decoration: BoxDecoration(
-  //                 color: AppColors.primary.withOpacity(0.1),
+  //                 color: AppColors.primary.withValues(alpha: 0.1),
   //                 borderRadius: BorderRadius.circular(12),
   //               ),
   //               child: const Icon(Icons.functions, color: AppColors.primary),
@@ -293,7 +293,7 @@ class LiveClassView extends GetView<LiveClassController> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,7 +330,7 @@ class LiveClassView extends GetView<LiveClassController> {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(Icons.functions, color: AppColors.primary),

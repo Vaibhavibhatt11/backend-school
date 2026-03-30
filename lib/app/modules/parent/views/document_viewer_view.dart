@@ -10,7 +10,6 @@ class DocumentViewerView extends GetView<DocumentViewerController> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: CustomAppBar(
         title: '',

@@ -78,7 +78,7 @@ class StudentProfileHubView extends GetView<ProfileController> {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Obx(
@@ -374,7 +374,7 @@ class StudentProfileHubView extends GetView<ProfileController> {
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color: Colors.orange.withOpacity(0.1),
+                              color: Colors.orange.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Icon(

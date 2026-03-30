@@ -40,7 +40,7 @@ class AdminAuditLogsView extends GetView<AdminAuditLogsController> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: IconButton(
@@ -152,7 +152,7 @@ class AdminAuditLogsView extends GetView<AdminAuditLogsController> {
             color:
                 selected
                     ? AppColors.primary
-                    : AppColors.primary.withOpacity(0.1),
+                    : AppColors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(30),
           ),
           child: Center(
@@ -187,7 +187,7 @@ class AdminAuditLogsView extends GetView<AdminAuditLogsController> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: _getIconColor(log.action).withOpacity(0.1),
+                color: _getIconColor(log.action).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -280,7 +280,7 @@ class AdminAuditLogsView extends GetView<AdminAuditLogsController> {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.purple.withOpacity(0.1),
+                        color: Colors.purple.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
                         border: Border.all(color: Colors.purple.shade100),
                       ),

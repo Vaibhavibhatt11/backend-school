@@ -187,7 +187,7 @@ class LibraryView extends GetView<LibraryController> {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Obx(
@@ -259,10 +259,10 @@ class LibraryView extends GetView<LibraryController> {
                                         decoration: BoxDecoration(
                                           color:
                                               loan['status'] == 'On Time'
-                                                  ? Colors.green.withOpacity(
+                                                  ? Colors.green.withValues(alpha: 
                                                     0.1,
                                                   )
-                                                  : Colors.red.withOpacity(0.1),
+                                                  : Colors.red.withValues(alpha: 0.1),
                                           borderRadius: BorderRadius.circular(
                                             12,
                                           ),
@@ -340,7 +340,7 @@ class LibraryView extends GetView<LibraryController> {
   Widget _buildCategoryCard(IconData icon, String label) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.1),
+        color: AppColors.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(

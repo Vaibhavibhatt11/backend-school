@@ -55,7 +55,7 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: IconButton(
@@ -106,7 +106,7 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.1),
+                            color: Colors.red.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(
@@ -175,7 +175,7 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
@@ -413,7 +413,7 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: category.color.withOpacity(0.1),
+                  color: category.color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
