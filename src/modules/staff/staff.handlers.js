@@ -330,9 +330,81 @@ async function getStaffCommunication(req, res, next) {
   }
 }
 
+async function sendStaffMessage(req, res, next) {
+  try {
+    const payload = z
+      .object({
+        to: z.string().trim().min(1),
+        message: z.string().trim().min(1),
+      })
+      .parse(req.body || {});
+    const schoolId = resolveStaffSchoolId(req);
+    const staff = await findStaffProfile(req, schoolId);
+
+    await prisma.auditLog.create({
+      data: {
+        schoolId,
+        actorId: req.user?.sub || null,
+        action: "STAFF_MESSAGE_SENT",
+        entity: "StaffCommunication",
+        entityId: staff.id,
+        meta: {
+          to: payload.to,
+          message: payload.message,
+        },
+      },
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Message sent successfully",
+      data: { to: payload.to, message: payload.message },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function saveMeetingNote(req, res, next) {
+  try {
+    const payload = z
+      .object({
+        title: z.string().trim().min(1),
+        note: z.string().trim().min(1),
+      })
+      .parse(req.body || {});
+    const schoolId = resolveStaffSchoolId(req);
+    const staff = await findStaffProfile(req, schoolId);
+
+    await prisma.auditLog.create({
+      data: {
+        schoolId,
+        actorId: req.user?.sub || null,
+        action: "STAFF_MEETING_NOTE_SAVED",
+        entity: "MeetingNote",
+        entityId: staff.id,
+        meta: {
+          title: payload.title,
+          note: payload.note,
+        },
+      },
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Meeting note saved successfully",
+      data: { title: payload.title },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   getStaffDashboard,
   getStaffProfile,
   getStaffReports,
   getStaffCommunication,
+  sendStaffMessage,
+  saveMeetingNote,
 };

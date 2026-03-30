@@ -1,6 +1,6 @@
 const { z } = require("zod");
 
-const { notFound } = require("../../utils/httpErrors");
+const { badRequest, notFound } = require("../../utils/httpErrors");
 const { prisma, scopedSchoolId, paginated, paginationFromQuery } = require("./school.common");
 
 function utcDayStart(dateInput) {
@@ -101,6 +101,83 @@ async function getPendingApprovalsSummary(req, res, next) {
         },
         topItems,
       },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function decidePendingApproval(req, res, next) {
+  try {
+    const params = z
+      .object({
+        approvalType: z.enum(["staff-leave", "student-leave", "face-checkin"]),
+        id: z.string().trim().min(1),
+      })
+      .parse(req.params);
+    const payload = z
+      .object({
+        decision: z.enum(["APPROVED", "REJECTED"]),
+        reason: z.string().trim().min(1).optional(),
+      })
+      .parse(req.body || {});
+    const schoolId = scopedSchoolId(req, undefined, true);
+
+    if (params.approvalType === "staff-leave") {
+      const leave = await prisma.leaveRequest.findUnique({ where: { id: params.id } });
+      if (!leave || leave.schoolId !== schoolId) throw notFound("Leave request not found", "LEAVE_REQUEST_NOT_FOUND");
+      await prisma.leaveRequest.update({
+        where: { id: leave.id },
+        data: {
+          status: payload.decision,
+          note: payload.reason || null,
+          reviewedById: req.user?.sub || null,
+          reviewedAt: new Date(),
+        },
+      });
+    } else if (params.approvalType === "student-leave") {
+      const reqRow = await prisma.studentLeaveRequest.findUnique({ where: { id: params.id } });
+      if (!reqRow || reqRow.schoolId !== schoolId) {
+        throw notFound("Student leave request not found", "STUDENT_LEAVE_REQUEST_NOT_FOUND");
+      }
+      await prisma.studentLeaveRequest.update({
+        where: { id: reqRow.id },
+        data: {
+          status: payload.decision,
+          remark: payload.reason || null,
+        },
+      });
+    } else if (params.approvalType === "face-checkin") {
+      const log = await prisma.faceCheckinLog.findUnique({ where: { id: params.id } });
+      if (!log || log.schoolId !== schoolId) throw notFound("Face checkin not found", "FACE_CHECKIN_NOT_FOUND");
+      await prisma.faceCheckinLog.update({
+        where: { id: log.id },
+        data: {
+          status: payload.decision,
+          reason: payload.reason || null,
+          reviewedById: req.user?.sub || null,
+          reviewedAt: new Date(),
+        },
+      });
+    } else {
+      throw badRequest("Unsupported approval type");
+    }
+
+    await prisma.auditLog.create({
+      data: {
+        schoolId,
+        actorId: req.user?.sub || null,
+        action: "PENDING_APPROVAL_DECISION",
+        entity: params.approvalType,
+        entityId: params.id,
+        meta: { decision: payload.decision, reason: payload.reason || null },
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Approval updated successfully",
+      data: { id: params.id, approvalType: params.approvalType, status: payload.decision },
     });
   } catch (error) {
     return next(error);
@@ -295,6 +372,7 @@ async function getAttendanceTrend(req, res, next) {
 module.exports = {
   getProfileMe,
   getPendingApprovalsSummary,
+  decidePendingApproval,
   getSchoolNotifications,
   getFeesSnapshot,
   getAttendanceTrend,

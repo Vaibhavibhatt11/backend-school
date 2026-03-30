@@ -94,6 +94,7 @@ const {
 const {
   getProfileMe,
   getPendingApprovalsSummary,
+  decidePendingApproval,
   getSchoolNotifications,
   getFeesSnapshot,
   getAttendanceTrend,
@@ -236,6 +237,7 @@ router.get("/profile", getSchoolProfile);
 router.get("/profile/me", getProfileMe);
 router.put("/profile", updateSchoolProfile);
 router.get("/approvals/pending-summary", getPendingApprovalsSummary);
+router.patch("/approvals/:approvalType/:id/decision", decidePendingApproval);
 router.get("/notifications", getSchoolNotifications);
 
 router.get("/permissions", getPermissionsList);
