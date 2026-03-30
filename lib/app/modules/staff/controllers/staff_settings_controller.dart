@@ -33,7 +33,7 @@ class StaffSettingsController extends GetxController {
     }
   }
 
-  Future<void> update({
+  Future<void> updateSettings({
     bool? notifications,
     bool? privacy,
     bool? compact,

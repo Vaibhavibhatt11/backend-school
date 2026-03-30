@@ -27,19 +27,19 @@ class StaffSettingsView extends GetView<StaffSettingsController> {
           const SizedBox(height: 12),
           SwitchListTile(
             value: controller.notificationsEnabled.value,
-            onChanged: (v) => controller.update(notifications: v),
+            onChanged: (v) => controller.updateSettings(notifications: v),
             title: const Text('Notification settings'),
             secondary: const Icon(Icons.notifications_active_rounded),
           ),
           SwitchListTile(
             value: controller.privacyMode.value,
-            onChanged: (v) => controller.update(privacy: v),
+            onChanged: (v) => controller.updateSettings(privacy: v),
             title: const Text('Privacy control'),
             secondary: const Icon(Icons.privacy_tip_rounded),
           ),
           SwitchListTile(
             value: controller.compactView.value,
-            onChanged: (v) => controller.update(compact: v),
+            onChanged: (v) => controller.updateSettings(compact: v),
             title: const Text('Compact view'),
             secondary: const Icon(Icons.tune_rounded),
           ),
