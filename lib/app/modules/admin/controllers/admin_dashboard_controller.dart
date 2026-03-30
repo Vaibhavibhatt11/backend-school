@@ -3,6 +3,7 @@ import 'package:erp_frontend/common/services/admin/admin_service.dart';
 import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:get/get.dart';
+import 'admin_shell_controller.dart';
 
 class AdminDashboardController extends GetxController {
   AdminDashboardController(this._adminService);
@@ -119,28 +120,39 @@ class AdminDashboardController extends GetxController {
     }
   }
 
+  void _goToAdminTab(int index) {
+    if (Get.isRegistered<AdminShellController>()) {
+      Get.find<AdminShellController>().setTab(index);
+      if (Get.currentRoute != AppRoutes.ADMIN_HOME) {
+        _safeToNamed(AppRoutes.ADMIN_HOME, arguments: {'tabIndex': index});
+      }
+      return;
+    }
+    _safeToNamed(AppRoutes.ADMIN_HOME, arguments: {'tabIndex': index});
+  }
+
   void onQuickActionTap(String action) {
     if (action == 'New Admission') {
-      _safeToNamed(AppRoutes.ADMIN_APPROVALS, arguments: {'tabIndex': 1});
+      _goToAdminTab(1);
       return;
     }
     if (action == 'Broadcast') {
-      _safeToNamed(AppRoutes.ADMIN_NOTICE_BOARD, arguments: {'tabIndex': 3});
+      _goToAdminTab(3);
       return;
     }
     if (action == 'Mark Leave') {
-      _safeToNamed(AppRoutes.ADMIN_ATTENDANCE);
+      _safeToNamed(AppRoutes.ADMIN_ATTENDANCE, arguments: {'tabIndex': 0});
       return;
     }
     if (action == 'Collect Fee') {
-      _safeToNamed(AppRoutes.ADMIN_FEE_SNAPSHOT);
+      _safeToNamed(AppRoutes.ADMIN_FEE_SNAPSHOT, arguments: {'tabIndex': 0});
       return;
     }
-    _safeToNamed(AppRoutes.ADMIN_HOME);
+    _goToAdminTab(0);
   }
 
   void onPendingApprovalsTap() {
-    _safeToNamed(AppRoutes.ADMIN_APPROVALS, arguments: {'tabIndex': 1});
+    _goToAdminTab(1);
   }
 
   void goToAttendance() {

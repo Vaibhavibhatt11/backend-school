@@ -147,91 +147,100 @@ class ParentHomeView extends GetView<ParentHomeController> {
             Row(
               children: [
                 Expanded(
-                  child: _buildStatCard(
-                    icon: Icons.verified_user,
-                    iconColor: Colors.green,
-                    label: 'Attendance',
-                    value: '${controller.attendance.value}%',
-                    sub: 'monthly',
-                    status: 'Present',
-                    statusColor: Colors.green,
+                  child: GestureDetector(
+                    onTap: () => Get.toNamed(AppRoutes.PARENT_ATTENDANCE),
+                    child: _buildStatCard(
+                      icon: Icons.verified_user,
+                      iconColor: Colors.green,
+                      label: 'Attendance',
+                      value: '${controller.attendance.value}%',
+                      sub: 'monthly',
+                      status: 'Present',
+                      statusColor: Colors.green,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: _buildStatCard(
-                    icon: Icons.payments,
-                    iconColor: Colors.amber,
-                    label: 'Fees Due',
-                    value: '\$${controller.feesDue.value}',
-                    sub: controller.feesDueDate.value,
-                    status: 'Pending',
-                    statusColor: Colors.amber,
+                  child: GestureDetector(
+                    onTap: () => Get.toNamed(AppRoutes.PARENT_FEES),
+                    child: _buildStatCard(
+                      icon: Icons.payments,
+                      iconColor: Colors.amber,
+                      label: 'Fees Due',
+                      value: '\$${controller.feesDue.value}',
+                      sub: controller.feesDueDate.value,
+                      status: 'Pending',
+                      statusColor: Colors.amber,
+                    ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             // Upcoming class
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.primary, AppColors.primaryLight],
+            GestureDetector(
+              onTap: controller.goToLiveClass,
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primary, AppColors.primaryLight],
+                  ),
+                  borderRadius: BorderRadius.circular(24),
                 ),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Upcoming Class',
-                          style: TextStyle(color: Colors.white70, fontSize: 12),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          controller.upcomingClass.value,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Upcoming Class',
+                            style: TextStyle(color: Colors.white70, fontSize: 12),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.schedule,
-                              color: Colors.white70,
-                              size: 14,
+                          const SizedBox(height: 4),
+                          Text(
+                            controller.upcomingClass.value,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Starts in ${controller.classStartIn.value}',
-                              style: const TextStyle(
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.schedule,
                                 color: Colors.white70,
-                                fontSize: 12,
+                                size: 14,
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
+                              const SizedBox(width: 4),
+                              Text(
+                                'Starts in ${controller.classStartIn.value}',
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(16),
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(Icons.arrow_forward, color: Colors.white),
                     ),
-                    child: const Icon(Icons.arrow_forward, color: Colors.white),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 24),

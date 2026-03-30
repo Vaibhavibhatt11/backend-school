@@ -21,6 +21,13 @@ class StaffShellView extends GetView<StaffShellController> {
 
   @override
   Widget build(BuildContext context) {
+    final args = Get.arguments;
+    final idx = (args is Map<String, dynamic> ? args['tabIndex'] : null);
+    if (idx is int && idx >= 0 && idx < _tabs.length && controller.currentIndex.value != idx) {
+      Future.microtask(() => controller.setTab(idx));
+    } else if (idx is num && idx.toInt() >= 0 && idx.toInt() < _tabs.length && controller.currentIndex.value != idx.toInt()) {
+      Future.microtask(() => controller.setTab(idx.toInt()));
+    }
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Obx(
       () => Scaffold(

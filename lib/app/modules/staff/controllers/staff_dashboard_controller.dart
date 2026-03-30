@@ -74,11 +74,11 @@ class StaffDashboardController extends GetxController {
     if (Get.isRegistered<StaffShellController>()) {
       Get.find<StaffShellController>().setTab(index);
       if (Get.currentRoute != AppRoutes.STAFF_HOME) {
-        Get.offNamed(AppRoutes.STAFF_HOME);
+        Get.offNamed(AppRoutes.STAFF_HOME, arguments: {'tabIndex': index});
       }
       return;
     }
-    Get.offNamed(AppRoutes.STAFF_HOME);
+    Get.offNamed(AppRoutes.STAFF_HOME, arguments: {'tabIndex': index});
   }
 
   void openModule(String moduleId) {

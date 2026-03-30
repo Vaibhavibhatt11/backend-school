@@ -126,7 +126,7 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                 children: [
                   Expanded(
                     child: GestureDetector(
-                      onTap: () {},
+                      onTap: () => controller.onTabChanged(0),
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         decoration: BoxDecoration(
