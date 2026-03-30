@@ -168,7 +168,7 @@ class DailyTimetableView extends GetView<TimetableController> {
       ),
       bottomNavigationBar: const ParentBottomNavBar(currentIndex: 3),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: controller.toggleView,
         child: const Icon(Icons.grid_view),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

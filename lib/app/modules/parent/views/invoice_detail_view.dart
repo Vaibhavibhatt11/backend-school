@@ -16,7 +16,10 @@ class InvoiceDetailView extends GetView<InvoiceDetailController> {
       appBar: CustomAppBar(
         title: 'Invoice Details',
         actions: [
-          IconButton(icon: const Icon(Icons.more_horiz), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.more_horiz),
+            onPressed: () => controller.loadInvoice(controller.invoiceId.value),
+          ),
         ],
       ),
       body: SingleChildScrollView(

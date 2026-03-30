@@ -16,7 +16,7 @@ class LiveClassroomPortalView extends GetView<LiveClassController> {
       appBar: CustomAppBar(
         title: 'Live Classes',
         actions: [
-          IconButton(icon: const Icon(Icons.calendar_today), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.calendar_today), onPressed: controller.loadLiveClasses),
           const AppUserAvatar(radius: 16),
         ],
       ),
@@ -302,7 +302,7 @@ class LiveClassroomPortalView extends GetView<LiveClassController> {
                               ),
                             ),
                             OutlinedButton(
-                              onPressed: () {},
+                              onPressed: controller.loadLiveClasses,
                               child: const Text('Join Soon'),
                             ),
                           ],

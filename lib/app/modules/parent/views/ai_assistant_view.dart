@@ -16,7 +16,7 @@ class AIAssistantView extends GetView<AIAssistantController> {
       appBar: CustomAppBar(
         title: 'AI School Assistant',
         actions: [
-          IconButton(icon: const Icon(Icons.more_horiz), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.more_horiz), onPressed: controller.loadSuggestionPrompts),
         ],
       ),
       body: Column(

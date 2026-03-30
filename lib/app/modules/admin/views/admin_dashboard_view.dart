@@ -97,7 +97,7 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
                 Stack(
                   children: [
                     IconButton(
-                      onPressed: () {},
+                      onPressed: controller.loadDashboard,
                       icon: const Icon(Icons.notifications_none),
                     ),
 

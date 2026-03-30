@@ -314,7 +314,7 @@ class StudentProfileHubView extends GetView<ProfileController> {
           ),
           IconButton(
             icon: const Icon(Icons.call, color: Colors.green, size: 20),
-            onPressed: () {},
+            onPressed: controller.loadProfile,
           ),
         ],
       ),
