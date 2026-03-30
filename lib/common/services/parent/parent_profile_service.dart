@@ -1,15 +1,21 @@
 import '../../api/api_client.dart';
 import '../../api/api_endpoints.dart';
+import 'package:get/get.dart';
 import 'parent_api_utils.dart';
+import 'parent_context_service.dart';
 
 class ParentProfileService {
   ParentProfileService(this._apiClient);
 
   final ApiClient _apiClient;
+  final ParentContextService _parentContext = Get.find<ParentContextService>();
 
   Future<Map<String, dynamic>> getProfileHub({String? childId}) async {
+    final scopedChildId = (childId == null || childId.isEmpty)
+        ? await _parentContext.ensureSelectedChildId()
+        : childId;
     final query = <String, dynamic>{
-      if (childId != null && childId.isNotEmpty) 'childId': childId,
+      if (scopedChildId != null && scopedChildId.isNotEmpty) 'childId': scopedChildId,
     };
     final res = await _apiClient.get(
       ApiEndpoints.parentProfileHub,
@@ -24,8 +30,11 @@ class ParentProfileService {
     int? limit,
     String? search,
   }) async {
+    final scopedChildId = (childId == null || childId.isEmpty)
+        ? await _parentContext.ensureSelectedChildId()
+        : childId;
     final query = <String, dynamic>{
-      if (childId != null && childId.isNotEmpty) 'childId': childId,
+      if (scopedChildId != null && scopedChildId.isNotEmpty) 'childId': scopedChildId,
       if (page != null) 'page': page,
       if (limit != null) 'limit': limit,
       if (search != null && search.isNotEmpty) 'search': search,
@@ -42,8 +51,11 @@ class ParentProfileService {
     int? page,
     int? limit,
   }) async {
+    final scopedChildId = (childId == null || childId.isEmpty)
+        ? await _parentContext.ensureSelectedChildId()
+        : childId;
     final query = <String, dynamic>{
-      if (childId != null && childId.isNotEmpty) 'childId': childId,
+      if (scopedChildId != null && scopedChildId.isNotEmpty) 'childId': scopedChildId,
       if (page != null) 'page': page,
       if (limit != null) 'limit': limit,
     };

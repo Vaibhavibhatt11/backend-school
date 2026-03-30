@@ -1,18 +1,24 @@
 import '../../api/api_client.dart';
 import '../../api/api_endpoints.dart';
+import 'package:get/get.dart';
 import 'parent_api_utils.dart';
+import 'parent_context_service.dart';
 
 class ParentCommunicationService {
   ParentCommunicationService(this._apiClient);
 
   final ApiClient _apiClient;
+  final ParentContextService _parentContext = Get.find<ParentContextService>();
 
   Future<Map<String, dynamic>> getAnnouncements({
     String? childId,
     String? type,
   }) async {
+    final scopedChildId = (childId == null || childId.isEmpty)
+        ? await _parentContext.ensureSelectedChildId()
+        : childId;
     final query = <String, dynamic>{
-      if (childId != null && childId.isNotEmpty) 'childId': childId,
+      if (scopedChildId != null && scopedChildId.isNotEmpty) 'childId': scopedChildId,
       if (type != null && type.isNotEmpty) 'type': type,
     };
     final res = await _apiClient.get(
@@ -28,8 +34,11 @@ class ParentCommunicationService {
     int? page,
     int? limit,
   }) async {
+    final scopedChildId = (childId == null || childId.isEmpty)
+        ? await _parentContext.ensureSelectedChildId()
+        : childId;
     final query = <String, dynamic>{
-      if (childId != null && childId.isNotEmpty) 'childId': childId,
+      if (scopedChildId != null && scopedChildId.isNotEmpty) 'childId': scopedChildId,
       if (page != null) 'page': page,
       if (limit != null) 'limit': limit,
     };

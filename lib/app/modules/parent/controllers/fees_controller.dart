@@ -1,6 +1,7 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../common/services/parent/parent_api_utils.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
 import '../../../../common/services/parent/parent_finance_service.dart';
 
@@ -13,6 +14,7 @@ class FeesController extends GetxController {
   final studentGrade = ''.obs;
   final totalOutstanding = 0.0.obs;
   final selectedTab = 0.obs; // 0: Pending, 1: Paid, 2: Overdue
+  final errorMessage = ''.obs;
 
   final invoices = <Map<String, dynamic>>[].obs;
   Worker? _childWorker;
@@ -29,6 +31,7 @@ class FeesController extends GetxController {
 
   Future<void> loadFees() async {
     isLoading.value = true;
+    errorMessage.value = '';
     try {
       final data = await _financeService.getFees(
         childId: _parentContext.selectedChildId.value,
@@ -65,6 +68,8 @@ class FeesController extends GetxController {
           apiOverdue.whereType<Map>().map((e) => Map<String, dynamic>.from(e)),
         );
       }
+    } catch (e) {
+      errorMessage.value = dioOrApiErrorMessage(e);
     } finally {
       isLoading.value = false;
     }

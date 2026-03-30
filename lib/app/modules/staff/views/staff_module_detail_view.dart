@@ -58,7 +58,7 @@ class StaffModuleDetailView extends StatelessWidget {
               child: ListTile(
                 leading: const Icon(Icons.check_circle_outline_rounded, color: AppColors.primary),
                 title: Text(f),
-                subtitle: const Text('Demo workflow ready. Connect API later.'),
+                subtitle: const Text('Live workflow enabled.'),
                 trailing: const Icon(Icons.chevron_right_rounded),
               ),
             ),

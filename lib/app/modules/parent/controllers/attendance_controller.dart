@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../../../../common/services/parent/parent_academics_service.dart';
+import '../../../../common/services/parent/parent_api_utils.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
 
 class AttendanceController extends GetxController {
@@ -16,6 +17,7 @@ class AttendanceController extends GetxController {
   final calendarDays = <int?>[].obs;
   final attendanceStats = <String, int>{'present': 0, 'absent': 0, 'late': 0}.obs;
   final dayStatusMap = <int, String>{}.obs;
+  final errorMessage = ''.obs;
   Worker? _childWorker;
 
   @override
@@ -71,6 +73,7 @@ class AttendanceController extends GetxController {
 
   Future<void> loadAttendance() async {
     isLoading.value = true;
+    errorMessage.value = '';
     try {
       final data = await _academicsService.getAttendance(
         childId: _parentContext.selectedChildId.value,
@@ -106,6 +109,8 @@ class AttendanceController extends GetxController {
           calendarDays.assignAll(days.map((e) => e == null ? null : _asInt(e)));
         }
       }
+    } catch (e) {
+      errorMessage.value = dioOrApiErrorMessage(e);
     } finally {
       isLoading.value = false;
     }

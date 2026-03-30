@@ -1,6 +1,7 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:get/get.dart';
+import '../../../../common/services/parent/parent_api_utils.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
 import '../../../../common/services/parent/parent_profile_service.dart';
 
@@ -20,6 +21,7 @@ class ProfileController extends GetxController {
   final currentTermGrade = ''.obs;
   final currentTermPercentage = 0.0.obs;
   final classAvg = 0.0.obs;
+  final errorMessage = ''.obs;
 
   final documents = <Map<String, dynamic>>[].obs;
   Worker? _childWorker;
@@ -36,6 +38,7 @@ class ProfileController extends GetxController {
 
   Future<void> loadProfile() async {
     isLoading.value = true;
+    errorMessage.value = '';
     try {
       final data = await _profileService.getProfileHub(
         childId: _parentContext.selectedChildId.value,
@@ -61,6 +64,8 @@ class ProfileController extends GetxController {
       } else {
         documents.clear();
       }
+    } catch (e) {
+      errorMessage.value = dioOrApiErrorMessage(e);
     } finally {
       isLoading.value = false;
     }

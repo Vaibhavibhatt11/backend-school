@@ -1,6 +1,7 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:get/get.dart';
 import '../../../../common/services/parent/parent_academics_service.dart';
+import '../../../../common/services/parent/parent_api_utils.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
 
 class TimetableController extends GetxController {
@@ -11,6 +12,7 @@ class TimetableController extends GetxController {
   final selectedDate = DateTime.now().obs;
   final selectedDay = DateTime.now().day.obs;
   final dayView = true.obs;
+  final errorMessage = ''.obs;
 
   final timetable = <Map<String, dynamic>>[].obs;
   Worker? _childWorker;
@@ -27,6 +29,7 @@ class TimetableController extends GetxController {
 
   Future<void> loadTimetable() async {
     isLoading.value = true;
+    errorMessage.value = '';
     try {
       final day = selectedDate.value.toIso8601String().split('T').first;
       final data = await _academicsService.getTimetable(
@@ -52,6 +55,8 @@ class TimetableController extends GetxController {
           }),
         );
       }
+    } catch (e) {
+      errorMessage.value = dioOrApiErrorMessage(e);
     } finally {
       isLoading.value = false;
     }

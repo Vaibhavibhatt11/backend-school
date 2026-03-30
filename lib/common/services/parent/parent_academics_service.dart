@@ -1,18 +1,24 @@
 import '../../api/api_client.dart';
 import '../../api/api_endpoints.dart';
+import 'package:get/get.dart';
 import 'parent_api_utils.dart';
+import 'parent_context_service.dart';
 
 class ParentAcademicsService {
   ParentAcademicsService(this._apiClient);
 
   final ApiClient _apiClient;
+  final ParentContextService _parentContext = Get.find<ParentContextService>();
 
   Future<Map<String, dynamic>> getAttendance({
     String? childId,
     String? month,
   }) async {
+    final scopedChildId = (childId == null || childId.isEmpty)
+        ? await _parentContext.ensureSelectedChildId()
+        : childId;
     final query = <String, dynamic>{
-      if (childId != null && childId.isNotEmpty) 'childId': childId,
+      if (scopedChildId != null && scopedChildId.isNotEmpty) 'childId': scopedChildId,
       if (month != null && month.isNotEmpty) 'month': month,
     };
     final res = await _apiClient.get(
@@ -26,8 +32,11 @@ class ParentAcademicsService {
     String? childId,
     String? day,
   }) async {
+    final scopedChildId = (childId == null || childId.isEmpty)
+        ? await _parentContext.ensureSelectedChildId()
+        : childId;
     final query = <String, dynamic>{
-      if (childId != null && childId.isNotEmpty) 'childId': childId,
+      if (scopedChildId != null && scopedChildId.isNotEmpty) 'childId': scopedChildId,
       if (day != null && day.isNotEmpty) 'day': day,
     };
     final res = await _apiClient.get(
@@ -41,8 +50,11 @@ class ParentAcademicsService {
     String? childId,
     String? term,
   }) async {
+    final scopedChildId = (childId == null || childId.isEmpty)
+        ? await _parentContext.ensureSelectedChildId()
+        : childId;
     final query = <String, dynamic>{
-      if (childId != null && childId.isNotEmpty) 'childId': childId,
+      if (scopedChildId != null && scopedChildId.isNotEmpty) 'childId': scopedChildId,
       if (term != null && term.isNotEmpty) 'term': term,
     };
     final res = await _apiClient.get(
@@ -53,8 +65,11 @@ class ParentAcademicsService {
   }
 
   Future<Map<String, dynamic>> getLiveClasses({String? childId}) async {
+    final scopedChildId = (childId == null || childId.isEmpty)
+        ? await _parentContext.ensureSelectedChildId()
+        : childId;
     final query = <String, dynamic>{
-      if (childId != null && childId.isNotEmpty) 'childId': childId,
+      if (scopedChildId != null && scopedChildId.isNotEmpty) 'childId': scopedChildId,
     };
     final res = await _apiClient.get(
       ApiEndpoints.parentLiveClasses,
