@@ -37,6 +37,11 @@ function buildCorsOriginHandler(allowedOrigins) {
     return true;
   }
 
+  // Allow quick dev/test setup via `CORS_ORIGIN=*`.
+  if (allowedOrigins.includes("*")) {
+    return true;
+  }
+
   const allowedSet = new Set(allowedOrigins);
 
   return (origin, callback) => {

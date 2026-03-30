@@ -5,7 +5,6 @@ const cache = require("../../lib/cache");
 const { forbidden, notFound } = require("../../utils/httpErrors");
 const { parsePagination } = require("../../utils/schoolScope");
 const {
-  requireChildId,
   validateId,
   validateQueryMonth,
   validateSearch,
@@ -71,6 +70,30 @@ async function resolveChildForParent(parentId, studentId) {
 
   if (!rel?.student) throw notFound("Child not linked to parent");
   return rel.student;
+}
+
+async function resolveChildIdForParent(parentId, childIdFromQuery) {
+  const raw = childIdFromQuery == null ? "" : String(childIdFromQuery).trim();
+  if (raw) {
+    // If frontend provides `childId`, just validate it.
+    return validateId(raw, "childId");
+  }
+
+  // If frontend doesn't provide `childId`, auto-select PRIMARY child.
+  const primaryRel = await prisma.studentParent.findFirst({
+    where: { parentId, isPrimary: true },
+    orderBy: { createdAt: "desc" },
+    select: { studentId: true },
+  });
+  if (primaryRel?.studentId) return primaryRel.studentId;
+
+  // Fallback: use latest linked child.
+  const anyRel = await prisma.studentParent.findFirst({
+    where: { parentId },
+    orderBy: { createdAt: "desc" },
+    select: { studentId: true },
+  });
+  return anyRel?.studentId ?? null;
 }
 
 function formatRelativeTime(date) {
@@ -283,7 +306,23 @@ async function listChildren(req, res, next) {
 async function getHome(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
+    const childId = await resolveChildIdForParent(parent.id, req.query.childId);
+    if (!childId) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          childName: "",
+          childGrade: "",
+          attendance: 0,
+          feesDue: 0,
+          feesDueDate: null,
+          upcomingClass: null,
+          classStartIn: null,
+          recentNotices: [],
+          subjectScores: {},
+        },
+      });
+    }
     const child = await resolveChildForParent(parent.id, childId);
 
     const monthKey = req.query.month ? String(req.query.month) : "current";
@@ -387,7 +426,10 @@ async function getHome(req, res, next) {
 async function getAnnouncements(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
+    const childId = await resolveChildIdForParent(parent.id, req.query.childId);
+    if (!childId) {
+      return res.status(200).json({ success: true, data: { announcements: [] } });
+    }
     const child = await resolveChildForParent(parent.id, childId); // scope / authorization check
 
     const type = req.query.type ? String(req.query.type).toLowerCase() : "all";
@@ -437,7 +479,10 @@ async function getAnnouncements(req, res, next) {
 async function getNotifications(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
+    const childId = await resolveChildIdForParent(parent.id, req.query.childId);
+    if (!childId) {
+      return res.status(200).json({ success: true, data: { notifications: [] } });
+    }
     const child = await resolveChildForParent(parent.id, childId);
 
     const cacheKey = cache.cacheKeys.parentNotifications(child.id);
@@ -499,7 +544,16 @@ async function getNotifications(req, res, next) {
 async function getAttendance(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
+    const childId = await resolveChildIdForParent(parent.id, req.query.childId);
+    if (!childId) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          calendarDays: new Array(35).fill(null),
+          attendanceStats: { present: 0, absent: 0, late: 0 },
+        },
+      });
+    }
     const child = await resolveChildForParent(parent.id, childId);
     const monthKey = req.query.month ? String(req.query.month) : "current";
     const cacheKey = cache.cacheKeys.parentAttendance(child.id, monthKey);
@@ -519,7 +573,13 @@ async function getAttendance(req, res, next) {
 async function getFees(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
+    const childId = await resolveChildIdForParent(parent.id, req.query.childId);
+    if (!childId) {
+      return res.status(200).json({
+        success: true,
+        data: { totalOutstanding: 0, invoices: [], overdueInvoices: [] },
+      });
+    }
     const child = await resolveChildForParent(parent.id, childId);
     const cacheKey = cache.cacheKeys.parentFees(child.id);
     const ttl = cache.CACHE_TTL.parentFees();
@@ -570,7 +630,10 @@ async function getInvoiceDetail(req, res, next) {
 async function getTimetable(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
+    const childId = await resolveChildIdForParent(parent.id, req.query.childId);
+    if (!childId) {
+      return res.status(200).json({ success: true, data: { items: [] } });
+    }
     const child = await resolveChildForParent(parent.id, childId);
 
     const day = parseDayQuery(req.query.day);
@@ -626,7 +689,24 @@ async function getTimetable(req, res, next) {
 async function getProgressReports(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
+    const childId = await resolveChildIdForParent(parent.id, req.query.childId);
+    if (!childId) {
+      const termInfo = getLatestTerm();
+      return res.status(200).json({
+        success: true,
+        data: {
+          studentName: "",
+          studentClass: "",
+          academicYear: String(new Date().getFullYear()),
+          selectedTerm: termInfo.term,
+          terms: [termInfo.term],
+          gpa: 0,
+          subjectScores: {},
+          attendance: { present: 0, absent: 0, late: 0 },
+          feeHistory: [0, 0, 0, 0, 0],
+        },
+      });
+    }
     const child = await resolveChildForParent(parent.id, childId);
 
     const termInfo = getLatestTerm();
@@ -703,7 +783,10 @@ async function getProgressReports(req, res, next) {
 async function getLiveClasses(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
+    const childId = await resolveChildIdForParent(parent.id, req.query.childId);
+    if (!childId) {
+      return res.status(200).json({ success: true, data: { liveClass: null, upcomingClasses: [] } });
+    }
     const child = await resolveChildForParent(parent.id, childId);
 
     const cacheKey = cache.cacheKeys.parentLiveClasses(child.id);
@@ -755,7 +838,26 @@ async function getLiveClasses(req, res, next) {
 async function getProfileHub(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
+    const childId = await resolveChildIdForParent(parent.id, req.query.childId);
+    if (!childId) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          studentName: "",
+          studentClass: "",
+          dob: null,
+          bloodGroup: null,
+          fatherName: null,
+          motherName: null,
+          medicalInfo: null,
+          academicYear: String(new Date().getFullYear()),
+          currentTermPercentage: null,
+          classAvg: null,
+          subjectScores: {},
+          documents: [],
+        },
+      });
+    }
     const child = await resolveChildForParent(parent.id, childId);
 
     const cacheKey = cache.cacheKeys.parentProfileHub(child.id);
@@ -799,7 +901,18 @@ async function getProfileHub(req, res, next) {
 async function getLibrary(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
+    const childId = await resolveChildIdForParent(parent.id, req.query.childId);
+    if (!childId) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          search: "",
+          recommendedBooks: [],
+          activeLoans: [],
+          pagination: { page: 1, limit: 20, total: 0, totalPages: 0 },
+        },
+      });
+    }
     const child = await resolveChildForParent(parent.id, childId);
 
     const { page, limit, skip } = parsePagination(req.query);
@@ -854,7 +967,13 @@ async function getLibrary(req, res, next) {
 async function getDocuments(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
+    const childId = await resolveChildIdForParent(parent.id, req.query.childId);
+    if (!childId) {
+      return res.status(200).json({
+        success: true,
+        data: { documents: [], pagination: { currentPage: 1, totalPages: 0 } },
+      });
+    }
     const child = await resolveChildForParent(parent.id, childId);
 
     const { page, limit, skip } = parsePagination(req.query);
@@ -892,7 +1011,19 @@ async function getDocuments(req, res, next) {
 async function getSettings(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
+    const childId = await resolveChildIdForParent(parent.id, req.query.childId);
+    if (!childId) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          preferences: {},
+          pushNotificationsEnabled: true,
+          faceIdEnabled: false,
+          selectedLanguage: "en",
+          darkModeOption: "system",
+        },
+      });
+    }
     const child = await resolveChildForParent(parent.id, childId);
 
     const s = await prisma.studentSettings.findUnique({ where: { studentId: child.id } });
@@ -924,7 +1055,10 @@ async function getSettings(req, res, next) {
 async function updateSettings(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
-    const childId = requireChildId(req.query);
+    const childId = await resolveChildIdForParent(parent.id, req.query.childId);
+    if (!childId) {
+      return res.status(200).json({ success: true, data: { preferences: validateSettingsBody(req.body ?? {}) } });
+    }
     const child = await resolveChildForParent(parent.id, childId);
 
     const preferences = validateSettingsBody(req.body ?? {});
