@@ -390,7 +390,6 @@ class ProgressReportsView extends GetView<ProgressReportsController> {
             const SizedBox(height: 80),
           ],
         ),
-      ),
       );
       }),
       bottomNavigationBar: const ParentBottomNavBar(
