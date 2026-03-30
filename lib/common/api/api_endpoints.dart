@@ -36,6 +36,8 @@ class ApiEndpoints {
   static const String dashboardSchoolAdmin = '/dashboard/school-admin';
   static const String schoolApprovalsPendingSummary =
       '/school/approvals/pending-summary';
+  static String schoolApprovalDecision(String approvalType, String id) =>
+      '/school/approvals/$approvalType/$id/decision';
   static const String schoolNotifications = '/school/notifications';
   static const String schoolFeesSnapshot = '/school/fees/snapshot';
   static const String schoolFeesSummary = '/school/fees/summary';
@@ -55,5 +57,8 @@ class ApiEndpoints {
   static const String staffProfile = '/staff/profile';
   static const String staffReports = '/staff/reports';
   static const String staffCommunication = '/staff/communication';
+  static const String staffCommunicationMessages = '/staff/communication/messages';
+  static const String staffCommunicationMeetingNotes =
+      '/staff/communication/meeting-notes';
 }
 

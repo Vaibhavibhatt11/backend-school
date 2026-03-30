@@ -17,6 +17,23 @@ class AdminService {
     return extractApiData(res.data, context: 'pending approvals');
   }
 
+  Future<Map<String, dynamic>> decideApproval({
+    required String approvalType,
+    required String id,
+    required bool approve,
+    String? reason,
+  }) async {
+    final endpoint = ApiEndpoints.schoolApprovalDecision(approvalType, id);
+    final res = await _apiClient.patch(
+      endpoint,
+      data: {
+        'decision': approve ? 'APPROVED' : 'REJECTED',
+        if (reason != null && reason.trim().isNotEmpty) 'reason': reason.trim(),
+      },
+    );
+    return extractApiData(res.data, context: 'approval decision');
+  }
+
   Future<Map<String, dynamic>> getNotifications({
     int page = 1,
     int limit = 20,

@@ -26,4 +26,32 @@ class StaffService {
     final res = await _apiClient.get(ApiEndpoints.staffCommunication);
     return extractApiData(res.data, context: 'staff communication');
   }
+
+  Future<Map<String, dynamic>> sendMessage({
+    required String to,
+    required String message,
+  }) async {
+    final res = await _apiClient.post(
+      ApiEndpoints.staffCommunicationMessages,
+      data: {
+        'to': to,
+        'message': message,
+      },
+    );
+    return extractApiData(res.data, context: 'send staff message');
+  }
+
+  Future<Map<String, dynamic>> saveMeetingNote({
+    required String title,
+    required String note,
+  }) async {
+    final res = await _apiClient.post(
+      ApiEndpoints.staffCommunicationMeetingNotes,
+      data: {
+        'title': title,
+        'note': note,
+      },
+    );
+    return extractApiData(res.data, context: 'save meeting note');
+  }
 }

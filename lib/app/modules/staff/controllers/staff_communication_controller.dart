@@ -1,6 +1,7 @@
 import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
 import 'package:erp_frontend/common/services/staff/staff_service.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class StaffCommunicationController extends GetxController {
@@ -70,7 +71,84 @@ class StaffCommunicationController extends GetxController {
     }
   }
 
-  Future<void> sendMessage() async => loadCommunication();
-  Future<void> addMeetingNote() async => loadCommunication();
+  Future<void> sendMessage() async {
+    final toController = TextEditingController();
+    final messageController = TextEditingController();
+    final result = await Get.dialog<bool>(
+      AlertDialog(
+        title: const Text('Send Message'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: toController,
+              decoration: const InputDecoration(labelText: 'To'),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: messageController,
+              decoration: const InputDecoration(labelText: 'Message'),
+              minLines: 2,
+              maxLines: 4,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Get.back(result: true), child: const Text('Send')),
+        ],
+      ),
+    );
+    if (result != true) return;
+    try {
+      await _staffService.sendMessage(
+        to: toController.text.trim(),
+        message: messageController.text.trim(),
+      );
+      await loadCommunication();
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    }
+  }
+
+  Future<void> addMeetingNote() async {
+    final titleController = TextEditingController();
+    final noteController = TextEditingController();
+    final result = await Get.dialog<bool>(
+      AlertDialog(
+        title: const Text('Save Meeting Note'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: titleController,
+              decoration: const InputDecoration(labelText: 'Title'),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: noteController,
+              decoration: const InputDecoration(labelText: 'Note'),
+              minLines: 2,
+              maxLines: 4,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+        ],
+      ),
+    );
+    if (result != true) return;
+    try {
+      await _staffService.saveMeetingNote(
+        title: titleController.text.trim(),
+        note: noteController.text.trim(),
+      );
+      await loadCommunication();
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    }
+  }
 }
 

@@ -35,6 +35,7 @@ class AdminApprovalsController extends GetxController {
   final isLoading = false.obs;
   final requests = <ApprovalRequest>[].obs;
   final loadError = RxnString();
+  final selectedTab = 0.obs;
 
   @override
   void onInit() {
@@ -70,12 +71,34 @@ class AdminApprovalsController extends GetxController {
     }
   }
 
-  void onReject(ApprovalRequest request) {
-    loadPendingApprovals();
+  String _mapApprovalType(String type) {
+    final t = type.trim().toUpperCase();
+    if (t == 'STAFF_LEAVE') return 'staff-leave';
+    if (t == 'STUDENT_LEAVE') return 'student-leave';
+    if (t == 'FACE_CHECKIN') return 'face-checkin';
+    return 'staff-leave';
   }
 
-  void onApprove(ApprovalRequest request) {
-    loadPendingApprovals();
+  Future<void> _decide(ApprovalRequest request, bool approve) async {
+    if (request.id.isEmpty) return;
+    try {
+      await _adminService.decideApproval(
+        approvalType: _mapApprovalType(request.type),
+        id: request.id,
+        approve: approve,
+      );
+      requests.removeWhere((r) => r.id == request.id);
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    }
+  }
+
+  Future<void> onReject(ApprovalRequest request) => _decide(request, false);
+
+  Future<void> onApprove(ApprovalRequest request) => _decide(request, true);
+
+  void onTabChanged(int index) {
+    selectedTab.value = index;
   }
 
   void onFloatingAction() {
