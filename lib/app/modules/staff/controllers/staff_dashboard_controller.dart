@@ -102,6 +102,7 @@ class StaffDashboardController extends GetxController {
       case 'profile':
         _goToStaffTab(1);
         return;
+      case 'communication':
       case 'communication_ai':
         _goToStaffTab(2);
         return;

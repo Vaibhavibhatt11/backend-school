@@ -54,4 +54,25 @@ class StaffService {
     );
     return extractApiData(res.data, context: 'save meeting note');
   }
+
+  Future<Map<String, dynamic>> getSettings() async {
+    final res = await _apiClient.get(ApiEndpoints.staffSettings);
+    return extractApiData(res.data, context: 'staff settings');
+  }
+
+  Future<Map<String, dynamic>> updateSettings({
+    required bool notificationsEnabled,
+    required bool privacyMode,
+    required bool compactView,
+  }) async {
+    final res = await _apiClient.put(
+      ApiEndpoints.staffSettings,
+      data: {
+        'notificationsEnabled': notificationsEnabled,
+        'privacyMode': privacyMode,
+        'compactView': compactView,
+      },
+    );
+    return extractApiData(res.data, context: 'update staff settings');
+  }
 }

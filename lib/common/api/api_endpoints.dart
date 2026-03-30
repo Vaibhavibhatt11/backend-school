@@ -24,6 +24,8 @@ class ApiEndpoints {
   static const String parentAttendance = '/parent/attendance';
   static const String parentFees = '/parent/fees';
   static String parentInvoiceById(String invoiceId) => '/parent/invoices/$invoiceId';
+  static String parentPayInvoiceBalance(String invoiceId) => '/parent/invoices/$invoiceId/pay-balance';
+  static const String parentQuickPayAll = '/parent/fees/quick-pay-all';
   static const String parentTimetable = '/parent/timetable';
   static const String parentProgressReports = '/parent/progress-reports';
   static const String parentLiveClasses = '/parent/live-classes';
@@ -62,5 +64,6 @@ class ApiEndpoints {
   static const String staffCommunicationMessages = '/staff/communication/messages';
   static const String staffCommunicationMeetingNotes =
       '/staff/communication/meeting-notes';
+  static const String staffSettings = '/staff/settings';
 }
 

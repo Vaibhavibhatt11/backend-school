@@ -24,7 +24,7 @@ class ParentHomeView extends GetView<ParentHomeController> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: controller.goToAIAssistant,
+        onPressed: controller.goToLiveClass,
         child: const Icon(Icons.video_call),
       ),
       body: Obx(() {

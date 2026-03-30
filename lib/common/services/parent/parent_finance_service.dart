@@ -28,5 +28,29 @@ class ParentFinanceService {
     final res = await _apiClient.get(ApiEndpoints.parentInvoiceById(invoiceId));
     return extractApiData(res.data, context: 'invoice');
   }
+
+  Future<Map<String, dynamic>> payInvoiceBalance(String invoiceId, {double? amount, String? method, String? transactionRef}) async {
+    final payload = <String, dynamic>{
+      if (amount != null) 'amount': amount,
+      if (method != null && method.isNotEmpty) 'method': method,
+      if (transactionRef != null && transactionRef.isNotEmpty) 'transactionRef': transactionRef,
+    };
+    final res = await _apiClient.post(
+      ApiEndpoints.parentPayInvoiceBalance(invoiceId),
+      data: payload,
+    );
+    return extractApiData(res.data, context: 'payInvoiceBalance');
+  }
+
+  Future<Map<String, dynamic>> quickPayAllInvoices({String? method, String? transactionRef}) async {
+    final payload = <String, dynamic>{};
+    if (method != null && method.isNotEmpty) payload['method'] = method;
+    if (transactionRef != null && transactionRef.isNotEmpty) payload['transactionRef'] = transactionRef;
+    final res = await _apiClient.post(
+      ApiEndpoints.parentQuickPayAll,
+      data: payload,
+    );
+    return extractApiData(res.data, context: 'quickPayAllInvoices');
+  }
 }
 

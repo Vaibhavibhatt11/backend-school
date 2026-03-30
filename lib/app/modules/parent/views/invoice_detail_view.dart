@@ -134,14 +134,16 @@ class InvoiceDetailView extends GetView<InvoiceDetailController> {
             // Fee breakdown
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Text(
+              children: [
+                const Text(
                   'Fee Breakdown',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                Text(
-                  '4 Items',
+                Obx(
+                  () => Text(
+                  '${controller.breakdown.length} Items',
                   style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
                 ),
               ],
             ),
@@ -329,12 +331,12 @@ class InvoiceDetailView extends GetView<InvoiceDetailController> {
       bottomNavigationBar: const ParentBottomNavBar(currentIndex: 2),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 80),
-        child: FloatingActionButton.extended(
+        child: Obx(() => FloatingActionButton.extended(
           onPressed: controller.payBalance,
-          label: const Text('Pay Balance (\$1,240)'),
+          label: Text('Pay Balance (\$${controller.totalDue.value.toStringAsFixed(2)})'),
           icon: const Icon(Icons.payments),
           backgroundColor: AppColors.primary,
-        ),
+        )),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );

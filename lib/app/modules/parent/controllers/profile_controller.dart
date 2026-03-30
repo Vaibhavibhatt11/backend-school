@@ -59,7 +59,17 @@ class ProfileController extends GetxController {
       currentTermGrade.value = _gradeFromPercent(currentTermPercentage.value);
       final docs = data['documents'];
       if (docs is List) {
-        documents.assignAll(docs.whereType<Map>().map((e) => Map<String, dynamic>.from(e)));
+        documents.assignAll(docs.whereType<Map>().map((e) {
+          final m = Map<String, dynamic>.from(e);
+          final sizeKb = m['sizeKb'];
+          final sizeLabel = sizeKb is num ? '${sizeKb.toStringAsFixed(0)} KB' : '-';
+          return {
+            ...m,
+            'name': (m['name'] ?? 'Document').toString(),
+            'status': (m['status'] ?? 'AVAILABLE').toString(),
+            'size': sizeLabel,
+          };
+        }));
       } else {
         documents.clear();
       }

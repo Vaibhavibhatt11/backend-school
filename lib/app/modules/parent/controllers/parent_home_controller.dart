@@ -87,5 +87,5 @@ class ParentHomeController extends GetxController {
   void goToNotifications() => Get.toNamed(AppRoutes.PARENT_NOTIFICATIONS);
   void goToAnnouncements() => Get.toNamed(AppRoutes.PARENT_ANNOUNCEMENTS);
   void goToPerformance() => Get.toNamed(AppRoutes.PARENT_PERFORMANCE);
-  void goToAIAssistant() => Get.toNamed(AppRoutes.PARENT_AI_ASSISTANT);
+  void goToLiveClass() => Get.toNamed(AppRoutes.PARENT_LIVE_CLASS);
 }

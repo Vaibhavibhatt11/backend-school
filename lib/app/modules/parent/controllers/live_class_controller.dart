@@ -40,31 +40,51 @@ class LiveClassController extends GetxController {
       );
       final current = data['liveClass'];
       if (current is Map) {
-        liveClass.assignAll(Map<String, dynamic>.from(current));
-        if (subject.value.isEmpty && liveClass['subject'] != null) {
-          subject.value = liveClass['subject'].toString();
-        }
+        final m = Map<String, dynamic>.from(current);
+        final title = (m['title'] ?? m['subject'] ?? '').toString();
+        final teacher = (m['teacher'] ?? '').toString();
+        final timeIso = (m['time'] ?? '').toString();
+        liveClass.assignAll({
+          'title': title,
+          'subject': title,
+          'teacher': teacher,
+          'time': _displayTime(timeIso),
+        });
+        if (subject.value.isEmpty && title.isNotEmpty) subject.value = title;
+      } else {
+        liveClass.clear();
       }
       final upcoming = data['upcomingClasses'];
       if (upcoming is List) {
         upcomingClasses.assignAll(
-          upcoming.whereType<Map>().map((e) => Map<String, dynamic>.from(e)),
+          upcoming.whereType<Map>().map((e) {
+            final m = Map<String, dynamic>.from(e);
+            final title = (m['title'] ?? m['subject'] ?? '').toString();
+            return {
+              'title': title,
+              'subject': title,
+              'teacher': (m['teacher'] ?? '').toString(),
+              'room': (m['room'] ?? '').toString(),
+              'time': _displayTime((m['time'] ?? '').toString()),
+              'isLive': m['isLive'] == true,
+            };
+          }),
         );
+      } else {
+        upcomingClasses.clear();
       }
     } finally {
       isLoading.value = false;
     }
   }
 
-  void joinClass() {
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Join Class'),
-        content: Text('Joining ${subject.value}...'),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('OK')),
-        ],
-      ),
-    );
+  String _displayTime(String iso) {
+    final d = DateTime.tryParse(iso);
+    if (d == null) return iso;
+    final hh = d.hour.toString().padLeft(2, '0');
+    final mm = d.minute.toString().padLeft(2, '0');
+    return '$hh:$mm';
   }
+
+  Future<void> joinClass() async => loadLiveClasses();
 }

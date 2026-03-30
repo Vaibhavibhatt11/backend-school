@@ -32,7 +32,7 @@ class DailyTimetableView extends GetView<TimetableController> {
               children: [
                 Obx(
                   () => Text(
-                    'October ${controller.selectedDay.value}, 2023',
+                    '${controller.selectedDate.value.year}-${controller.selectedDate.value.month.toString().padLeft(2, '0')}-${controller.selectedDate.value.day.toString().padLeft(2, '0')}',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -62,25 +62,21 @@ class DailyTimetableView extends GetView<TimetableController> {
                 scrollDirection: Axis.horizontal,
                 itemCount: 7,
                 itemBuilder: (context, index) {
-                  final dayNames = [
-                    'Mon',
-                    'Tue',
-                    'Wed',
-                    'Thu',
-                    'Fri',
-                    'Sat',
-                    'Sun',
-                  ];
-                  final dayNumbers = [21, 22, 23, 24, 25, 26, 27];
+                  final now = controller.selectedDate.value;
+                  final mondayOffset = now.weekday - 1;
+                  final monday = DateTime(now.year, now.month, now.day - mondayOffset);
+                  final d = DateTime(monday.year, monday.month, monday.day + index);
+                  final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                  final dayNumber = d.day;
                   return GestureDetector(
-                    onTap: () => controller.changeDate(dayNumbers[index]),
+                    onTap: () => controller.changeDate(dayNumber),
                     child: Obx(
                       () => Container(
                         width: 60,
                         margin: const EdgeInsets.only(right: 8),
                         decoration: BoxDecoration(
                           color:
-                              controller.selectedDay.value == dayNumbers[index]
+                              controller.selectedDay.value == dayNumber
                                   ? AppColors.primary
                                   : (isDark
                                       ? AppColors.surfaceDark
@@ -89,7 +85,7 @@ class DailyTimetableView extends GetView<TimetableController> {
                           border: Border.all(
                             color:
                                 controller.selectedDay.value ==
-                                        dayNumbers[index]
+                                        dayNumber
                                     ? AppColors.primary
                                     : (isDark
                                         ? AppColors.borderDark
@@ -104,7 +100,7 @@ class DailyTimetableView extends GetView<TimetableController> {
                               style: TextStyle(
                                 color:
                                     controller.selectedDay.value ==
-                                            dayNumbers[index]
+                                            dayNumber
                                         ? Colors.white
                                         : (isDark
                                             ? Colors.white
@@ -114,11 +110,11 @@ class DailyTimetableView extends GetView<TimetableController> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              dayNumbers[index].toString(),
+                              dayNumber.toString(),
                               style: TextStyle(
                                 color:
                                     controller.selectedDay.value ==
-                                            dayNumbers[index]
+                                            dayNumber
                                         ? Colors.white
                                         : (isDark
                                             ? Colors.white

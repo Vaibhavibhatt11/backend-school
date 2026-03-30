@@ -93,7 +93,7 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
             children: [
               _quickAction('Dashboard', Icons.dashboard_rounded, Colors.green, 'dashboard'),
               _quickAction('Profile', Icons.badge_rounded, Colors.blue, 'profile'),
-              _quickAction('Communication', Icons.support_agent_rounded, Colors.orange, 'communication_ai'),
+              _quickAction('Communication', Icons.support_agent_rounded, Colors.orange, 'communication'),
               _quickAction('Reports', Icons.bar_chart_rounded, Colors.purple, 'reports'),
             ],
           ),

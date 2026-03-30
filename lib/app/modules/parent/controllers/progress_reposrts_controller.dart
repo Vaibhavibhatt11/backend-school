@@ -71,17 +71,35 @@ class ProgressReportsController extends GetxController {
       if (gpaValue is num) gpa.value = gpaValue.toDouble();
       final attendanceValue = data['attendance'];
       if (attendanceValue is num) attendance.value = attendanceValue.toDouble();
-      if (data['attendanceStats'] is Map) {
-        final stats = data['attendanceStats'] as Map;
+      final statsRaw = data['attendanceStats'] is Map ? data['attendanceStats'] : data['attendance'];
+      if (statsRaw is Map) {
+        final stats = statsRaw;
         attendanceDistribution.assignAll({
           'present': int.tryParse('${stats['present'] ?? 0}') ?? 0,
           'late': int.tryParse('${stats['late'] ?? 0}') ?? 0,
           'absent': int.tryParse('${stats['absent'] ?? 0}') ?? 0,
         });
+        final total = attendanceDistribution['present']! +
+            attendanceDistribution['late']! +
+            attendanceDistribution['absent']!;
+        attendance.value = total > 0
+            ? ((attendanceDistribution['present']! + attendanceDistribution['late']!) * 100 / total)
+            : 0.0;
       }
       final scores = data['subjectScores'];
       if (scores is List) {
         subjects.assignAll(scores.whereType<Map>().map((e) => Map<String, dynamic>.from(e)));
+      } else if (scores is Map) {
+        final out = <Map<String, dynamic>>[];
+        scores.forEach((key, value) {
+          final scoreNum = value is num ? value.toDouble() : double.tryParse(value.toString()) ?? 0;
+          out.add({
+            'name': key.toString(),
+            'score': scoreNum,
+            'avg': scoreNum,
+          });
+        });
+        subjects.assignAll(out);
       }
       final fees = data['feeHistory'];
       if (fees is List) {

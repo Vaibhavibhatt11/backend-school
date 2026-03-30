@@ -1,18 +1,19 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
+import 'package:erp_frontend/app/modules/staff/controllers/staff_settings_controller.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:erp_frontend/app/services/app_storage.dart';
 import 'package:erp_frontend/common/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class StaffSettingsView extends StatelessWidget {
+class StaffSettingsView extends GetView<StaffSettingsController> {
   const StaffSettingsView({super.key});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return SafeArea(
-      child: ListView(
+      child: Obx(() => ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Text(
@@ -24,10 +25,25 @@ class StaffSettingsView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          _tile(isDark, Icons.notifications_active_rounded, 'Notification settings'),
+          SwitchListTile(
+            value: controller.notificationsEnabled.value,
+            onChanged: (v) => controller.update(notifications: v),
+            title: const Text('Notification settings'),
+            secondary: const Icon(Icons.notifications_active_rounded),
+          ),
+          SwitchListTile(
+            value: controller.privacyMode.value,
+            onChanged: (v) => controller.update(privacy: v),
+            title: const Text('Privacy control'),
+            secondary: const Icon(Icons.privacy_tip_rounded),
+          ),
+          SwitchListTile(
+            value: controller.compactView.value,
+            onChanged: (v) => controller.update(compact: v),
+            title: const Text('Compact view'),
+            secondary: const Icon(Icons.tune_rounded),
+          ),
           _tile(isDark, Icons.manage_accounts_rounded, 'Account settings'),
-          _tile(isDark, Icons.privacy_tip_rounded, 'Privacy control'),
-          _tile(isDark, Icons.tune_rounded, 'Other settings'),
           const SizedBox(height: 14),
           ElevatedButton.icon(
             onPressed: () async {
@@ -41,7 +57,7 @@ class StaffSettingsView extends StatelessWidget {
             label: const Text('Logout'),
           ),
         ],
-      ),
+      )),
     );
   }
 

@@ -90,7 +90,9 @@ class FeesManagementView extends GetView<FeesController> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: controller.quickPayAll,
+                      onPressed: () {
+                        controller.quickPayAll();
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: AppColors.primary,
@@ -131,9 +133,9 @@ class FeesManagementView extends GetView<FeesController> {
                               invoice['id'] as String? ?? '',
                             ),
                         onPayNow:
-                            () => controller.payNow(
-                              invoice['id'] as String? ?? '',
-                            ),
+                            () {
+                              controller.payNow(invoice['id'] as String? ?? '');
+                            },
                       );
                     }).toList(),
               ),

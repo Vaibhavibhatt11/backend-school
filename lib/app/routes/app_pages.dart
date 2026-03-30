@@ -12,7 +12,6 @@ import 'package:erp_frontend/app/modules/auth/views/reset_passowrd_view.dart';
 import 'package:erp_frontend/app/modules/auth/views/role_selection_view.dart';
 import 'package:erp_frontend/app/modules/auth/views/splash_view.dart';
 import 'package:erp_frontend/app/modules/parent/bindings/parent_binding.dart';
-import 'package:erp_frontend/app/modules/parent/views/ai_assistant_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/attendance_tracker_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/child_switcher_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/daily_timetable_view.dart';
@@ -127,7 +126,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.PARENT_AI_ASSISTANT,
-      page: () => const AIAssistantView(),
+      page: () => const ParentHomeView(),
       binding: ParentBinding(),
     ),
     GetPage(

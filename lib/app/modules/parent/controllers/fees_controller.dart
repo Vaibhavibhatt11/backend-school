@@ -85,16 +85,30 @@ class FeesController extends GetxController {
     Get.toNamed(AppRoutes.PARENT_INVOICE_DETAIL, arguments: {'id': id});
   }
 
-  void payNow(String id) {
+  Future<void> payNow(String id) async {
     if (id.isEmpty) return;
-    viewDetails(id);
+    try {
+      isLoading.value = true;
+      await _financeService.payInvoiceBalance(id);
+      await loadFees();
+    } catch (e) {
+      errorMessage.value = dioOrApiErrorMessage(e);
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  void quickPayAll() {
+  Future<void> quickPayAll() async {
     if (invoices.isEmpty) return;
-    final first = invoices.first['id']?.toString() ?? '';
-    if (first.isEmpty) return;
-    viewDetails(first);
+    try {
+      isLoading.value = true;
+      await _financeService.quickPayAllInvoices();
+      await loadFees();
+    } catch (e) {
+      errorMessage.value = dioOrApiErrorMessage(e);
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void goToHistory() {

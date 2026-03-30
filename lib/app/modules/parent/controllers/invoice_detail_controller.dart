@@ -39,28 +39,65 @@ class InvoiceDetailController extends GetxController {
       final invoice = data['invoice'];
       if (invoice is Map) {
         final map = Map<String, dynamic>.from(invoice);
-        status.value = map['status']?.toString() ?? status.value;
-        issuedDate.value = map['issuedDate']?.toString() ?? issuedDate.value;
-        studentName.value = map['studentName']?.toString() ?? studentName.value;
-        studentDetail.value = map['studentDetail']?.toString() ?? studentDetail.value;
+        status.value = map['status']?.toString() ?? '';
+        issuedDate.value = _formatDate(map['issueDate'] ?? map['issuedAt']) ?? '';
+        studentName.value = 'Student';
+        studentDetail.value = (map['invoiceNo'] ?? map['id'] ?? '').toString();
         studentPhotoUrl.value =
             (map['studentPhotoUrl'] ?? map['photoUrl'] ?? map['avatarUrl'] ?? studentPhotoUrl.value)
                 .toString();
-        dueDate.value = map['dueDate']?.toString() ?? dueDate.value;
-        final due = map['totalDue'];
-        if (due is num) totalDue.value = due.toDouble();
+        dueDate.value = _formatDate(map['dueDate']) ?? '';
+        final amountDue = (map['amountDue'] as num?)?.toDouble() ?? 0.0;
+        final amountPaid = (map['amountPaid'] as num?)?.toDouble() ?? 0.0;
+        final outstanding = (amountDue - amountPaid).clamp(0.0, double.infinity);
+        totalDue.value = outstanding;
+        invoiceId.value = (map['invoiceNo'] ?? map['id'] ?? id).toString();
+        subtotal.value = outstanding;
+        tax.value = 0;
+        total.value = outstanding;
+        breakdown.assignAll([
+          {
+            'item': (map['invoiceNo'] ?? 'Invoice').toString(),
+            'description': (map['status'] ?? '').toString(),
+            'amount': amountDue,
+          },
+          {
+            'item': 'Paid',
+            'description': 'Payments received',
+            'amount': -amountPaid,
+          },
+        ]);
       }
       final history = data['paymentHistory'];
       if (history is List) {
         paymentHistory.assignAll(
           history.whereType<Map>().map((e) => Map<String, dynamic>.from(e)),
         );
+      } else {
+        paymentHistory.clear();
       }
     } finally {
       isLoading.value = false;
     }
   }
 
-  void payBalance() {}
-  void download() {}
+  String? _formatDate(dynamic raw) {
+    if (raw == null) return null;
+    final d = DateTime.tryParse(raw.toString());
+    if (d == null) return raw.toString();
+    return '${d.day.toString().padLeft(2, '0')}-${d.month.toString().padLeft(2, '0')}-${d.year}';
+  }
+
+  Future<void> payBalance() async {
+    if (invoiceId.value.isEmpty) return;
+    isLoading.value = true;
+    try {
+      await _financeService.payInvoiceBalance(invoiceId.value);
+      await loadInvoice(invoiceId.value);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> download() async => loadInvoice(invoiceId.value);
 }

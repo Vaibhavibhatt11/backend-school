@@ -114,7 +114,7 @@ const List<StaffModuleItem> kStaffModules = [
   ),
   StaffModuleItem(
     id: 'communication_ai',
-    title: 'Communication Center with AI',
+    title: 'Communication Center',
     icon: Icons.support_agent_rounded,
     features: [
       'Message parents',

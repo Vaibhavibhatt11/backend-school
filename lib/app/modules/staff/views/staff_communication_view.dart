@@ -18,7 +18,7 @@ class StaffCommunicationView extends GetView<StaffCommunicationController> {
         padding: const EdgeInsets.all(16),
         children: [
           Text(
-            'Communication Center + AI',
+            'Communication Center',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,

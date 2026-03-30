@@ -2,6 +2,7 @@ import 'package:erp_frontend/app/modules/staff/controllers/staff_communication_c
 import 'package:erp_frontend/app/modules/staff/controllers/staff_dashboard_controller.dart';
 import 'package:erp_frontend/app/modules/staff/controllers/staff_profile_controller.dart';
 import 'package:erp_frontend/app/modules/staff/controllers/staff_reports_controller.dart';
+import 'package:erp_frontend/app/modules/staff/controllers/staff_settings_controller.dart';
 import 'package:erp_frontend/app/modules/staff/controllers/staff_shell_controller.dart';
 import 'package:erp_frontend/common/services/staff/staff_service.dart';
 import 'package:get/get.dart';
@@ -23,6 +24,9 @@ class StaffBinding extends Bindings {
     }
     if (!Get.isRegistered<StaffReportsController>()) {
       Get.put(StaffReportsController(Get.find<StaffService>()), permanent: true);
+    }
+    if (!Get.isRegistered<StaffSettingsController>()) {
+      Get.put(StaffSettingsController(Get.find<StaffService>()), permanent: true);
     }
   }
 }
