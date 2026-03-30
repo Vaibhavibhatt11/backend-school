@@ -121,34 +121,22 @@ class AdminDashboardController extends GetxController {
 
   void onQuickActionTap(String action) {
     if (action == 'New Admission') {
-      _safeToNamed(
-        AppRoutes.ADMIN_MODULE_DETAIL,
-        arguments: {'moduleId': 'admissions'},
-      );
+      _safeToNamed(AppRoutes.ADMIN_APPROVALS, arguments: {'tabIndex': 1});
       return;
     }
     if (action == 'Broadcast') {
-      _safeToNamed(
-        AppRoutes.ADMIN_MODULE_DETAIL,
-        arguments: {'moduleId': 'communication'},
-      );
+      _safeToNamed(AppRoutes.ADMIN_NOTICE_BOARD, arguments: {'tabIndex': 3});
       return;
     }
     if (action == 'Mark Leave') {
-      _safeToNamed(
-        AppRoutes.ADMIN_MODULE_DETAIL,
-        arguments: {'moduleId': 'attendance'},
-      );
+      _safeToNamed(AppRoutes.ADMIN_ATTENDANCE);
       return;
     }
     if (action == 'Collect Fee') {
-      _safeToNamed(
-        AppRoutes.ADMIN_MODULE_DETAIL,
-        arguments: {'moduleId': 'fees'},
-      );
+      _safeToNamed(AppRoutes.ADMIN_FEE_SNAPSHOT);
       return;
     }
-    AppToast.show('Module not mapped');
+    _safeToNamed(AppRoutes.ADMIN_HOME);
   }
 
   void onPendingApprovalsTap() {
@@ -164,6 +152,6 @@ class AdminDashboardController extends GetxController {
   }
 
   void goToAllModules() {
-    _safeToNamed(AppRoutes.ADMIN_MODULES);
+    _safeToNamed(AppRoutes.ADMIN_HOME, arguments: {'tabIndex': 0});
   }
 }

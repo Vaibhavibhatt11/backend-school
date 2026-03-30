@@ -3,8 +3,6 @@ import 'package:erp_frontend/app/modules/admin/views/admin_audit_logs_view.dart'
 import 'package:erp_frontend/app/modules/admin/views/admin_shell_view.dart';
 import 'package:erp_frontend/app/modules/admin/views/admin_fee_snapshot_view.dart';
 import 'package:erp_frontend/app/modules/admin/views/admin_profile_view.dart';
-import 'package:erp_frontend/app/modules/admin/views/admin_module_detail_view.dart';
-import 'package:erp_frontend/app/modules/admin/views/admin_modules_view.dart';
 import 'package:erp_frontend/app/modules/auth/bindings/auth_binding.dart';
 import 'package:erp_frontend/app/modules/auth/views/branch_selection_view.dart';
 import 'package:erp_frontend/app/modules/auth/views/forgot_password_view.dart';
@@ -43,8 +41,6 @@ import 'package:erp_frontend/app/modules/teacher/views/teacher_profile_view.dart
 import 'package:erp_frontend/app/modules/teacher/views/timetable_view.dart';
 import 'package:erp_frontend/app/modules/teacher/views/upload_view.dart';
 import 'package:erp_frontend/app/modules/staff/bindings/staff_binding.dart';
-import 'package:erp_frontend/app/modules/staff/views/staff_module_detail_view.dart';
-import 'package:erp_frontend/app/modules/staff/views/staff_modules_view.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_shell_view.dart';
 import 'package:get/get.dart';
 
@@ -232,12 +228,12 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.STAFF_MODULES,
-      page: () => const StaffModulesView(),
+      page: () => const StaffShellView(),
       binding: StaffBinding(),
     ),
     GetPage(
       name: AppRoutes.STAFF_MODULE_DETAIL,
-      page: () => const StaffModuleDetailView(),
+      page: () => const StaffShellView(),
       binding: StaffBinding(),
     ),
     GetPage(
@@ -287,17 +283,17 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.ADMIN_MODULES,
-      page: () => const AdminModulesView(),
+      page: () => const AdminShellView(),
       binding: AdminBinding(),
     ),
     GetPage(
       name: AppRoutes.ADMIN_MODULE_DETAIL,
-      page: () => const AdminModuleDetailView(),
+      page: () => const AdminShellView(),
       binding: AdminBinding(),
     ),
     GetPage(
       name: AppRoutes.ADMIN_FEATURE_DETAIL,
-      page: () => const AdminFeatureDetailView(),
+      page: () => const AdminShellView(),
       binding: AdminBinding(),
     ),
   ];

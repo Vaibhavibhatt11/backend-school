@@ -1,6 +1,5 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/modules/staff/controllers/staff_dashboard_controller.dart';
-import 'package:erp_frontend/app/modules/staff/models/staff_module_catalog.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -45,7 +44,7 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
                   ],
                 ),
               ),
-              IconButton(onPressed: controller.goToModules, icon: const Icon(Icons.apps_rounded)),
+              IconButton(onPressed: controller.loadDashboard, icon: const Icon(Icons.refresh_rounded)),
             ],
           ),
           const SizedBox(height: 16),
@@ -80,7 +79,7 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
                 'QUICK ACTIONS',
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey[600]),
               ),
-              TextButton(onPressed: controller.goToModules, child: const Text('View all modules')),
+              TextButton(onPressed: controller.loadDashboard, child: const Text('Refresh')),
             ],
           ),
           const SizedBox(height: 12),
@@ -92,12 +91,10 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
             mainAxisSpacing: 12,
             childAspectRatio: 1.2,
             children: [
-              _quickAction('Attendance & Leave', Icons.fact_check_rounded, Colors.green, 'attendance_leave'),
-              _quickAction('Class & Teaching', Icons.class_rounded, Colors.blue, 'class_teaching'),
-              _quickAction('Lesson Planning', Icons.event_note_rounded, Colors.orange, 'lesson_planning'),
-              _quickAction('Homework', Icons.assignment_rounded, Colors.purple, 'homework_assignment'),
-              _quickAction('Exams', Icons.quiz_rounded, Colors.teal, 'exam_assessment'),
-              _quickAction('Communication', Icons.support_agent_rounded, Colors.redAccent, 'communication_ai'),
+              _quickAction('Dashboard', Icons.dashboard_rounded, Colors.green, 'dashboard'),
+              _quickAction('Profile', Icons.badge_rounded, Colors.blue, 'profile'),
+              _quickAction('Communication', Icons.support_agent_rounded, Colors.orange, 'communication_ai'),
+              _quickAction('Reports', Icons.bar_chart_rounded, Colors.purple, 'reports'),
             ],
           ),
           const SizedBox(height: 24),
@@ -107,75 +104,7 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
           _miniTile('Homework Status', controller.homeworkStatus, isDark),
           _miniTile('Upcoming Exams', controller.upcomingExams, isDark),
           _miniTile('Meetings', controller.meetings, isDark),
-          const SizedBox(height: 8),
-          Text(
-            'ALL STAFF MODULES',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey[600]),
-          ),
-          const SizedBox(height: 10),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final crossAxisCount = constraints.maxWidth > 1100
-                  ? 4
-                  : constraints.maxWidth > 780
-                      ? 3
-                      : 2;
-              return GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: kStaffModules.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 1.1,
-                ),
-                itemBuilder: (_, index) {
-                  final module = kStaffModules[index];
-                  return InkWell(
-                    onTap: () => controller.openModule(module.id),
-                    borderRadius: BorderRadius.circular(14),
-                    child: Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: isDark ? AppColors.surfaceDark : Colors.white,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.14),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Icon(module.icon, color: AppColors.primary),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            module.title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              color: isDark ? AppColors.textDark : AppColors.textLight,
-                            ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            '${module.features.length} features',
-                            style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600, fontSize: 12),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
+          const SizedBox(height: 12),
         ],
       );
       }),
