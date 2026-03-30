@@ -49,15 +49,13 @@ class AdminAttendanceController extends GetxController {
 
       final studentSummary = student['summary'] as Map<String, dynamic>? ?? const {};
       final staffSummary = staff['summary'] as Map<String, dynamic>? ?? const {};
-      studentPresent.value =
-          (studentSummary['PRESENT'] as num?)?.toInt() ??
-          (studentSummary['LATE'] as num?)?.toInt() ??
-          0;
+      final studentPresentCount = (studentSummary['PRESENT'] as num?)?.toInt() ?? 0;
+      final studentLateCount = (studentSummary['LATE'] as num?)?.toInt() ?? 0;
+      studentPresent.value = studentPresentCount + studentLateCount;
       studentTotal.value = (student['total'] as num?)?.toInt() ?? 0;
-      staffPresent.value =
-          (staffSummary['PRESENT'] as num?)?.toInt() ??
-          (staffSummary['LATE'] as num?)?.toInt() ??
-          0;
+      final staffPresentCount = (staffSummary['PRESENT'] as num?)?.toInt() ?? 0;
+      final staffLateCount = (staffSummary['LATE'] as num?)?.toInt() ?? 0;
+      staffPresent.value = staffPresentCount + staffLateCount;
       staffTotal.value = (staff['total'] as num?)?.toInt() ?? 0;
 
       studentPercent.value = studentTotal.value > 0

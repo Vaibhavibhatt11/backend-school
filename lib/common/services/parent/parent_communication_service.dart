@@ -48,5 +48,19 @@ class ParentCommunicationService {
     );
     return extractApiData(res.data, context: 'notifications');
   }
+
+  Future<Map<String, dynamic>> markAllNotificationsRead({String? childId}) async {
+    final scopedChildId = (childId == null || childId.isEmpty)
+        ? await _parentContext.ensureSelectedChildId()
+        : childId;
+    final query = <String, dynamic>{
+      if (scopedChildId != null && scopedChildId.isNotEmpty) 'childId': scopedChildId,
+    };
+    final res = await _apiClient.post(
+      ApiEndpoints.parentMarkNotificationsRead,
+      query: query.isEmpty ? null : query,
+    );
+    return extractApiData(res.data, context: 'mark notifications read');
+  }
 }
 

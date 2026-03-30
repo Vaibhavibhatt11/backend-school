@@ -126,6 +126,29 @@ class AdminService {
     return extractApiData(res.data, context: 'announcements');
   }
 
+  Future<Map<String, dynamic>> createAnnouncement({
+    required String title,
+    required String content,
+    required String audience,
+    String status = 'DRAFT',
+  }) async {
+    final res = await _apiClient.post(
+      ApiEndpoints.schoolAnnouncements,
+      data: {
+        'title': title,
+        'content': content,
+        'audience': audience,
+        'status': status,
+      },
+    );
+    return extractApiData(res.data, context: 'create announcement');
+  }
+
+  Future<Map<String, dynamic>> sendAnnouncement(String id) async {
+    final res = await _apiClient.post('/school/announcements/$id/send');
+    return extractApiData(res.data, context: 'send announcement');
+  }
+
   Future<Map<String, dynamic>> getAuditLogs({
     int page = 1,
     int limit = 50,

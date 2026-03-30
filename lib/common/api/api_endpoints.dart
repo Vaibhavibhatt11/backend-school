@@ -19,6 +19,8 @@ class ApiEndpoints {
   static const String parentHome = '/parent/home';
   static const String parentAnnouncements = '/parent/announcements';
   static const String parentNotifications = '/parent/notifications';
+  static const String parentMarkNotificationsRead =
+      '/parent/notifications/mark-all-read';
   static const String parentAttendance = '/parent/attendance';
   static const String parentFees = '/parent/fees';
   static String parentInvoiceById(String invoiceId) => '/parent/invoices/$invoiceId';

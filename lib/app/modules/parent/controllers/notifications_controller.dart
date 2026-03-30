@@ -68,7 +68,16 @@ class NotificationsController extends GetxController {
   }
 
   void setFilter(String filter) => selectedFilter.value = filter;
-  Future<void> markAllRead() async => loadNotifications();
+  Future<void> markAllRead() async {
+    try {
+      await _communicationService.markAllNotificationsRead(
+        childId: _parentContext.selectedChildId.value,
+      );
+      await loadNotifications();
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    }
+  }
 
   @override
   void onClose() {

@@ -1,7 +1,6 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/modules/admin/controllers/admin_shell_controller.dart';
 import 'package:erp_frontend/app/navbar/admin_bottom_nav_bar.dart';
-import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/admin_notice_board_controller.dart';
@@ -68,8 +67,7 @@ class AdminNoticeBoardView extends GetView<AdminNoticeBoardController> {
                             Icons.search,
                             color: AppColors.primary,
                           ),
-                          onPressed:
-                              () => AppToast.show('Search notices'),
+                          onPressed: controller.loadAnnouncements,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -92,8 +90,7 @@ class AdminNoticeBoardView extends GetView<AdminNoticeBoardController> {
                             Icons.tune,
                             color: AppColors.primary,
                           ),
-                          onPressed:
-                              () => AppToast.show('Filter notices'),
+                          onPressed: controller.loadAnnouncements,
                         ),
                       ),
                     ],
@@ -130,7 +127,7 @@ class AdminNoticeBoardView extends GetView<AdminNoticeBoardController> {
                     controller.notices.where((n) {
                       if (controller.selectedTab.value == 0) return true;
                       if (controller.selectedTab.value == 1) {
-                        return n.status == 'PUBLISHED' ||
+                        return n.status == 'SENT' ||
                             n.status == 'SCHEDULED';
                       }
                       return n.status == 'DRAFT';
@@ -322,6 +319,7 @@ class AdminNoticeBoardView extends GetView<AdminNoticeBoardController> {
   Color _getStatusColor(String status) {
     switch (status) {
       case 'PUBLISHED':
+      case 'SENT':
         return Colors.green;
       case 'SCHEDULED':
         return Colors.amber;
