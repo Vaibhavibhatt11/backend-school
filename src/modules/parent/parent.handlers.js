@@ -148,7 +148,7 @@ async function getChildAttendance(child, monthStr) {
     _count: true,
   });
 
-  // Build calendarDays like the Flutter mock: 5 weeks (35 slots) with nulls outside month.
+  // Build a fixed 5-week calendar grid (35 slots) with nulls outside the selected month.
   const firstWeekdayIndex = (new Date(start).getDay() + 6) % 7; // Monday=0
   const calendarDays = new Array(35).fill(null);
   for (let i = 0; i < calendarDays.length; i++) {
@@ -211,8 +211,14 @@ async function getChildFees(child) {
 }
 
 function getLatestTerm() {
-  // Placeholder for term calculation: can be replaced by a configured school term model.
-  return { term: "Term 1", termStart: null, termEnd: null };
+  const now = new Date();
+  const month = now.getMonth() + 1;
+
+  let term = "Term 1";
+  if (month >= 5 && month <= 8) term = "Term 2";
+  if (month >= 9 && month <= 12) term = "Term 3";
+
+  return { term, termStart: null, termEnd: null };
 }
 
 async function getSubjectScores(child) {
@@ -667,6 +673,7 @@ async function getProgressReports(req, res, next) {
         studentClass: `${child.className ?? ""}${child.section ? `-${child.section}` : ""}`.trim(),
         academicYear: String(new Date().getFullYear()),
         selectedTerm: req.query.term ?? termInfo.term,
+        terms: [termInfo.term],
         gpa,
         subjectScores,
         attendance: { present: 0, absent: 0, late: 0 },
@@ -675,13 +682,15 @@ async function getProgressReports(req, res, next) {
     });
   } catch (e) {
     if (isClientError(e)) return next(e);
+    const termInfo = getLatestTerm();
     return res.status(200).json({
       success: true,
       data: {
         studentName: "",
         studentClass: "",
         academicYear: String(new Date().getFullYear()),
-        selectedTerm: "Term 1",
+        selectedTerm: termInfo.term,
+        terms: [termInfo.term],
         gpa: 0,
         subjectScores: {},
         attendance: { present: 0, absent: 0, late: 0 },
