@@ -41,14 +41,14 @@ class ControllerBinding extends Bindings {
     }
 
     // Parent module services
+    if (!Get.isRegistered<ParentContextService>()) {
+      Get.put<ParentContextService>(ParentContextService(), permanent: true);
+    }
     if (!Get.isRegistered<ParentDashboardService>()) {
       Get.put<ParentDashboardService>(
         ParentDashboardService(Get.find<ApiClient>()),
         permanent: true,
       );
-    }
-    if (!Get.isRegistered<ParentContextService>()) {
-      Get.put<ParentContextService>(ParentContextService(), permanent: true);
     }
     if (!Get.isRegistered<ParentCommunicationService>()) {
       Get.put<ParentCommunicationService>(
