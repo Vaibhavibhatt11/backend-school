@@ -35,6 +35,10 @@ async function schoolAdminDashboard(req, res, next) {
 
     const where = schoolId ? { schoolId } : {};
     const { monthStart, monthEnd } = monthWindow();
+    const { start: todayStart, end: todayEnd } = todayWindow();
+    const trendStart = new Date(todayStart);
+    trendStart.setUTCDate(trendStart.getUTCDate() - 6);
+    const trendEnd = new Date(todayEnd);
 
     const [
       students,
@@ -45,6 +49,13 @@ async function schoolAdminDashboard(req, res, next) {
       invoicesTotals,
       monthCollection,
       announcements,
+      staffAttendanceToday,
+      leavePending,
+      studentLeavePending,
+      facePending,
+      todayCollection,
+      schoolSettings,
+      studentTrendRows,
     ] = await Promise.all([
       prisma.student.count({ where }),
       prisma.staff.count({ where }),
@@ -71,10 +82,91 @@ async function schoolAdminDashboard(req, res, next) {
         _sum: { amount: true },
       }),
       prisma.announcement.count({ where }),
+      prisma.staffAttendance.groupBy({
+        by: ["status"],
+        where: { ...where, date: { gte: todayStart, lt: todayEnd } },
+        _count: { _all: true },
+      }),
+      prisma.leaveRequest.count({ where: { ...where, status: "PENDING" } }),
+      prisma.studentLeaveRequest.count({ where: { ...where, status: "PENDING" } }),
+      prisma.faceCheckinLog.count({ where: { ...where, status: "PENDING" } }),
+      prisma.payment.aggregate({
+        where: { ...where, paidAt: { gte: todayStart, lt: todayEnd } },
+        _sum: { amount: true },
+      }),
+      schoolId
+        ? prisma.school.findUnique({
+            where: { id: schoolId },
+            select: { currencyCode: true },
+          })
+        : Promise.resolve(null),
+      prisma.studentAttendance.findMany({
+        where: {
+          ...where,
+          date: { gte: trendStart, lt: trendEnd },
+        },
+        select: { date: true, status: true },
+      }),
     ]);
+
+    const teacherPresent = staffAttendanceToday.reduce((acc, row) => {
+      if (row.status === "PRESENT" || row.status === "LATE") return acc + row._count._all;
+      return acc;
+    }, 0);
+    const teacherPresence = staff > 0 ? Number(((teacherPresent / staff) * 100).toFixed(2)) : 0;
+    const pendingApprovals = leavePending + studentLeavePending + facePending;
+    const feePending =
+      (invoicesTotals._sum.amountDue || 0) - (invoicesTotals._sum.amountPaid || 0);
+
+    const dayMap = new Map();
+    for (let i = 0; i < 7; i += 1) {
+      const day = new Date(trendStart);
+      day.setUTCDate(trendStart.getUTCDate() + i);
+      dayMap.set(day.toISOString().slice(0, 10), {
+        date: day.toISOString().slice(0, 10),
+        present: 0,
+        late: 0,
+        absent: 0,
+        leave: 0,
+      });
+    }
+    for (const row of studentTrendRows) {
+      const key = row.date.toISOString().slice(0, 10);
+      const day = dayMap.get(key);
+      if (!day) continue;
+      if (row.status === "PRESENT") day.present += 1;
+      else if (row.status === "LATE") day.late += 1;
+      else if (row.status === "ABSENT") day.absent += 1;
+      else if (row.status === "LEAVE") day.leave += 1;
+    }
+    const attendanceTrend = Array.from(dayMap.values()).map((day) => {
+      const present = day.present + day.late;
+      return {
+        date: day.date,
+        presentPct: students > 0 ? Number(((present / students) * 100).toFixed(2)) : 0,
+        summary: {
+          PRESENT: day.present,
+          LATE: day.late,
+          ABSENT: day.absent,
+          LEAVE: day.leave,
+        },
+      };
+    });
+    const studentAttendancePct = attendanceTrend.length
+      ? attendanceTrend[attendanceTrend.length - 1].presentPct
+      : 0;
+    const avgAttendance =
+      attendanceTrend.length > 0
+        ? Number(
+            (
+              attendanceTrend.reduce((sum, item) => sum + item.presentPct, 0) / attendanceTrend.length
+            ).toFixed(2)
+          )
+        : 0;
 
     const payload = {
       success: true,
+      message: "School admin dashboard fetched successfully",
       data: {
         scope: schoolId ? { schoolId } : { schoolId: "all" },
         students,
@@ -89,6 +181,20 @@ async function schoolAdminDashboard(req, res, next) {
           outstandingAmount:
             (invoicesTotals._sum.amountDue || 0) - (invoicesTotals._sum.amountPaid || 0),
           monthCollection: monthCollection._sum.amount || 0,
+        },
+        ui: {
+          studentsTotal: students,
+          teacherTotal: staff,
+          teacherPresent,
+          teacherPresence,
+          pendingApprovals,
+          feeToday: todayCollection._sum.amount || 0,
+          feePending,
+          feeVsLastWeekPct: 0,
+          attendanceTrend,
+          studentAttendancePct,
+          studentAttendance: avgAttendance,
+          currencyCode: schoolSettings?.currencyCode || "USD",
         },
       },
     };

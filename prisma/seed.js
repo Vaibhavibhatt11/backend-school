@@ -165,6 +165,12 @@ async function main() {
       role: "HR",
       schoolId: school.id,
     },
+    {
+      fullName: "Riya Teacher",
+      email: "teacher@school.edu",
+      role: "TEACHER",
+      schoolId: school.id,
+    },
   ];
 
   for (const user of users) {
@@ -175,6 +181,7 @@ async function main() {
         role: user.role,
         schoolId: user.schoolId,
         isActive: true,
+        passwordHash: defaultPasswordHash,
       },
       create: {
         fullName: user.fullName,
@@ -297,6 +304,279 @@ async function main() {
     },
   });
 
+  const teacherUser = await prisma.user.findUnique({
+    where: { email: "teacher@school.edu" },
+  });
+
+  let teacherStaff = await prisma.staff.findFirst({
+    where: {
+      schoolId: school.id,
+      OR: [
+        { employeeCode: "EMP001" },
+        ...(teacherUser?.id ? [{ userId: teacherUser.id }] : []),
+        { email: "teacher@school.edu" },
+      ],
+    },
+  });
+  if (!teacherStaff) {
+    teacherStaff = await prisma.staff.create({
+      data: {
+        schoolId: school.id,
+        userId: teacherUser?.id || null,
+        employeeCode: "EMP001",
+        fullName: "Riya Teacher",
+        email: "teacher@school.edu",
+        phone: "+1-555-0188",
+        designation: "Science Teacher",
+        department: "Science",
+        isActive: true,
+        joinDate: new Date("2021-06-15"),
+      },
+    });
+  } else {
+    teacherStaff = await prisma.staff.update({
+      where: { id: teacherStaff.id },
+      data: {
+        schoolId: school.id,
+        userId: teacherUser?.id || teacherStaff.userId,
+        employeeCode: teacherStaff.employeeCode || "EMP001",
+        fullName: "Riya Teacher",
+        email: "teacher@school.edu",
+        phone: "+1-555-0188",
+        designation: "Science Teacher",
+        department: "Science",
+        isActive: true,
+        joinDate: teacherStaff.joinDate || new Date("2021-06-15"),
+      },
+    });
+  }
+
+  const science = await prisma.subject.upsert({
+    where: { schoolId_code: { schoolId: school.id, code: "SCI10" } },
+    update: {},
+    create: {
+      schoolId: school.id,
+      name: "Science",
+      code: "SCI10",
+      isActive: true,
+    },
+  });
+
+  await prisma.classRoom.update({
+    where: { id: demoClass.id },
+    data: { classTeacherId: teacherStaff.id },
+  });
+
+  await prisma.classSubject.upsert({
+    where: { classId_subjectId: { classId: demoClass.id, subjectId: science.id } },
+    update: { teacherId: teacherStaff.id },
+    create: {
+      classId: demoClass.id,
+      subjectId: science.id,
+      teacherId: teacherStaff.id,
+    },
+  });
+
+  await prisma.staffDocument.upsert({
+    where: { id: "seed-staff-doc-emp001" },
+    update: {
+      schoolId: school.id,
+      staffId: teacherStaff.id,
+      name: "Joining Letter.pdf",
+      url: "https://example.com/docs/joining-letter.pdf",
+      type: "PDF",
+    },
+    create: {
+      id: "seed-staff-doc-emp001",
+      schoolId: school.id,
+      staffId: teacherStaff.id,
+      name: "Joining Letter.pdf",
+      url: "https://example.com/docs/joining-letter.pdf",
+      type: "PDF",
+    },
+  });
+
+  await prisma.announcement.upsert({
+    where: { id: "seed-ann-1" },
+    update: {
+      schoolId: school.id,
+      title: "PTM Schedule Released",
+      content: "Parent teacher meetings start this Friday.",
+      audience: "PARENT,STUDENT",
+      status: "SENT",
+      createdById: teacherUser?.id || null,
+      sentAt: new Date(),
+    },
+    create: {
+      id: "seed-ann-1",
+      schoolId: school.id,
+      title: "PTM Schedule Released",
+      content: "Parent teacher meetings start this Friday.",
+      audience: "PARENT,STUDENT",
+      status: "SENT",
+      createdById: teacherUser?.id || null,
+      sentAt: new Date(),
+    },
+  });
+
+  const template = await prisma.notificationTemplate.upsert({
+    where: { schoolId_code: { schoolId: school.id, code: "GEN_ALERT" } },
+    update: {},
+    create: {
+      schoolId: school.id,
+      code: "GEN_ALERT",
+      title: "General Alert",
+      body: "School update",
+      channel: "APP",
+      isActive: true,
+    },
+  });
+
+  await prisma.notificationLog.upsert({
+    where: { id: "seed-notif-1" },
+    update: {
+      schoolId: school.id,
+      templateId: template.id,
+      announcementId: "seed-ann-1",
+      targetType: "PARENT",
+      targetRef: demoParentRecord.id,
+      channel: "APP",
+      status: "SENT",
+      payload: { title: "PTM Schedule Released" },
+    },
+    create: {
+      id: "seed-notif-1",
+      schoolId: school.id,
+      templateId: template.id,
+      announcementId: "seed-ann-1",
+      targetType: "PARENT",
+      targetRef: demoParentRecord.id,
+      channel: "APP",
+      status: "SENT",
+      payload: { title: "PTM Schedule Released" },
+    },
+  });
+
+  const now = new Date();
+  for (let i = 0; i < 7; i += 1) {
+    const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - i, 0, 0, 0));
+    await prisma.studentAttendance.upsert({
+      where: {
+        schoolId_studentId_date: {
+          schoolId: school.id,
+          studentId: demoStudent.id,
+          date,
+        },
+      },
+      update: { status: i === 2 ? "ABSENT" : i === 4 ? "LATE" : "PRESENT" },
+      create: {
+        schoolId: school.id,
+        studentId: demoStudent.id,
+        date,
+        status: i === 2 ? "ABSENT" : i === 4 ? "LATE" : "PRESENT",
+        remark: "Seed attendance",
+        markedById: teacherUser?.id || null,
+      },
+    });
+  }
+
+  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0));
+  await prisma.staffAttendance.upsert({
+    where: {
+      schoolId_staffId_date: {
+        schoolId: school.id,
+        staffId: teacherStaff.id,
+        date: today,
+      },
+    },
+    update: { status: "PRESENT" },
+    create: {
+      schoolId: school.id,
+      staffId: teacherStaff.id,
+      date: today,
+      status: "PRESENT",
+      markedById: teacherUser?.id || null,
+    },
+  });
+
+  const invoice = await prisma.invoice.upsert({
+    where: { schoolId_invoiceNo: { schoolId: school.id, invoiceNo: "INV-DEMO-001" } },
+    update: {
+      schoolId: school.id,
+      studentId: demoStudent.id,
+      invoiceNo: "INV-DEMO-001",
+      issueDate: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)),
+      dueDate: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 25)),
+      amountDue: 1500,
+      amountPaid: 700,
+      status: "PARTIAL",
+    },
+    create: {
+      schoolId: school.id,
+      studentId: demoStudent.id,
+      invoiceNo: "INV-DEMO-001",
+      issueDate: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)),
+      dueDate: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 25)),
+      amountDue: 1500,
+      amountPaid: 700,
+      status: "PARTIAL",
+    },
+  });
+
+  await prisma.payment.upsert({
+    where: { id: "seed-payment-1" },
+    update: {
+      schoolId: school.id,
+      studentId: demoStudent.id,
+      invoiceId: invoice.id,
+      receiptNo: "REC-DEMO-001",
+      amount: 700,
+      method: "ONLINE",
+      paidAt: new Date(),
+      collectedById: teacherUser?.id || null,
+    },
+    create: {
+      id: "seed-payment-1",
+      schoolId: school.id,
+      studentId: demoStudent.id,
+      invoiceId: invoice.id,
+      receiptNo: "REC-DEMO-001",
+      amount: 700,
+      method: "ONLINE",
+      paidAt: new Date(),
+      collectedById: teacherUser?.id || null,
+    },
+  });
+
+  await prisma.liveClassSession.upsert({
+    where: { id: "seed-live-1" },
+    update: {
+      schoolId: school.id,
+      classId: demoClass.id,
+      subjectId: science.id,
+      teacherId: teacherStaff.id,
+      title: "Science Live Class",
+      startsAt: new Date(Date.now() + 60 * 60 * 1000),
+      endsAt: new Date(Date.now() + 2 * 60 * 60 * 1000),
+      status: "SCHEDULED",
+      joinUrl: "https://meet.example.com/science-live",
+      platform: "Google Meet",
+    },
+    create: {
+      id: "seed-live-1",
+      schoolId: school.id,
+      classId: demoClass.id,
+      subjectId: science.id,
+      teacherId: teacherStaff.id,
+      title: "Science Live Class",
+      startsAt: new Date(Date.now() + 60 * 60 * 1000),
+      endsAt: new Date(Date.now() + 2 * 60 * 60 * 1000),
+      status: "SCHEDULED",
+      joinUrl: "https://meet.example.com/science-live",
+      platform: "Google Meet",
+    },
+  });
+
   console.log("Seed complete.");
   console.log("Login users (password: Admin123!):");
   console.log("- super@school.edu (superadmin)");
@@ -306,7 +586,9 @@ async function main() {
   console.log("\nTest student (password: Student123!):");
   console.log("- student@school.edu (STUDENT)");
   console.log("\nTest parent (password: Parent123!):");
-  console.log("- parent@school.edu (PARENT) — linked to demo student STU001");
+  console.log("- parent@school.edu (PARENT) - linked to demo student STU001");
+  console.log("\nTest teacher (password: Admin123!):");
+  console.log("- teacher@school.edu (TEACHER)");
 }
 
 main()

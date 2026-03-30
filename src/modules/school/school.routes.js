@@ -92,6 +92,13 @@ const {
   deleteAiFaq,
 } = require("./school.misc.handlers");
 const {
+  getProfileMe,
+  getPendingApprovalsSummary,
+  getSchoolNotifications,
+  getFeesSnapshot,
+  getAttendanceTrend,
+} = require("./school.admin.handlers");
+const {
   listExams,
   createExam,
   updateExam,
@@ -226,7 +233,10 @@ const {
 } = require("./school.homework.handlers");
 
 router.get("/profile", getSchoolProfile);
+router.get("/profile/me", getProfileMe);
 router.put("/profile", updateSchoolProfile);
+router.get("/approvals/pending-summary", getPendingApprovalsSummary);
+router.get("/notifications", getSchoolNotifications);
 
 router.get("/permissions", getPermissionsList);
 router.get("/admin-users", listAdminUsers);
@@ -284,6 +294,7 @@ router.put("/subjects/:id", updateSubject);
 router.delete("/subjects/:id", deleteSubject);
 
 router.get("/attendance/overview", attendanceOverview);
+router.get("/attendance/trend", getAttendanceTrend);
 router.get("/attendance/records", listAttendanceRecords);
 router.put("/attendance/records/:id", updateAttendanceRecord);
 router.get("/attendance/export", exportAttendance);
@@ -304,6 +315,7 @@ router.put("/timetable/periods/:id", updateTimetablePeriod);
 router.delete("/timetable/periods/:id", deleteTimetablePeriod);
 
 router.get("/fees/summary", getFeesSummary);
+router.get("/fees/snapshot", getFeesSnapshot);
 router.get("/fees/structures", listFeeStructures);
 router.post("/fees/structures", createFeeStructure);
 router.put("/fees/structures/:id", updateFeeStructure);

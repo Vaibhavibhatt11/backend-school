@@ -13,6 +13,7 @@ const hrRoutes = require("../modules/hr/hr.routes");
 const accountantRoutes = require("../modules/accountant/accountant.routes");
 const studentRoutes = require("../modules/student/student.routes");
 const parentRoutes = require("../modules/parent/parent.routes");
+const staffRoutes = require("../modules/staff/staff.routes");
 
 router.get("/health", (req, res) => {
   return res.status(200).json({
@@ -69,5 +70,6 @@ router.use(
 router.use("/student", auth, requireRole(["STUDENT"]), studentRoutes);
 
 router.use("/parent", auth, requireRole(["PARENT"]), parentRoutes);
+router.use("/staff", auth, requireRole(["TEACHER", "HR", "SCHOOLADMIN", "SUPERADMIN"]), staffRoutes);
 
 module.exports = router;

@@ -12,6 +12,7 @@ const { apiRateLimiter } = require("./middlewares/apiRateLimit");
 const { getOpenApiSpec } = require("./docs/openapi");
 const notFound = require("./middlewares/notFound");
 const errorHandler = require("./middlewares/errorHandler");
+const { apiResponseEnvelope } = require("./utils/apiResponse");
 
 const app = express();
 const swaggerEnabled =
@@ -82,6 +83,7 @@ app.use(morgan(env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(express.json({ limit: env.REQUEST_BODY_LIMIT }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(apiResponseEnvelope);
 
 app.get("/", (req, res) => {
   return res.status(200).json({
