@@ -18,6 +18,8 @@ const {
   getDocuments,
   getSettings,
   updateSettings,
+  payInvoiceBalance,
+  quickPayAllInvoices,
 } = require("./parent.handlers");
 
 // All parent routes require valid JWT (401 if missing)
@@ -40,6 +42,10 @@ router.get("/documents", getDocuments);
 
 router.get("/settings", getSettings);
 router.put("/settings", updateSettings);
+
+// Parent payments
+router.post("/invoices/:invoiceId/pay-balance", payInvoiceBalance);
+router.post("/fees/quick-pay-all", quickPayAllInvoices);
 
 module.exports = router;
 

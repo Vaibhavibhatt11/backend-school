@@ -139,6 +139,20 @@ async function run() {
         expected: [200],
         name: "GET /parent/invoices/:invoiceId",
       });
+      await api(`/parent/invoices/${invoiceId}/pay-balance`, {
+        method: "POST",
+        token: parentToken,
+        body: { amount: 1, method: "ONLINE" },
+        expected: [200, 201],
+        name: "POST /parent/invoices/:invoiceId/pay-balance",
+      });
+      await api(`/parent/fees/quick-pay-all`, {
+        method: "POST",
+        token: parentToken,
+        body: { method: "ONLINE" },
+        expected: [200, 201],
+        name: "POST /parent/fees/quick-pay-all",
+      });
     } else {
       console.log("INFO  No parent-linked invoice available to verify invoice detail endpoint");
     }

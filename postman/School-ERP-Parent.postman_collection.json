@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "school-erp-parent-1774250200495",
+    "_postman_id": "school-erp-parent-1774871006104",
     "name": "School ERP — Parent app (PARENT role)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Parent app APIs under `/api/v1/parent`. Same family account can use PARENT login (student app may share parent phone — use this collection for parent dashboard). Production base URL: `https://backend-school-app.onrender.com/api/v1`. Use environment **School ERP - Production (Render)** or set `base_url`. Run **01 Auth → login**, then **GET /parent/children** (saves `childId`), then other requests. Most endpoints require `?childId=...` for the selected child. Source: `src/modules/parent/parent.routes.js`."
@@ -279,7 +279,21 @@
                 }
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 2xx', function () { pm.response.to.be.success; });",
+                  "const j = pm.response.json();",
+                  "const inv = j && j.data && Array.isArray(j.data.invoices) ? j.data.invoices[0] : null;",
+                  "if (inv && inv.id) pm.collectionVariables.set('invoiceId', inv.id);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "GET /parent/invoices/:invoiceId",
@@ -296,6 +310,70 @@
                   "type": "string"
                 }
               ]
+            }
+          }
+        },
+        {
+          "name": "POST /parent/invoices/:invoiceId/pay-balance",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/parent/invoices/{{invoiceId}}/pay-balance",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST /parent/fees/quick-pay-all",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/parent/fees/quick-pay-all",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           }
         },

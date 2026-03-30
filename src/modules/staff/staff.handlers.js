@@ -400,6 +400,73 @@ async function saveMeetingNote(req, res, next) {
   }
 }
 
+async function getStaffSettings(req, res, next) {
+  try {
+    const schoolId = resolveStaffSchoolId(req);
+    const staff = await findStaffProfile(req, schoolId);
+    const latest = await prisma.auditLog.findFirst({
+      where: {
+        schoolId,
+        actorId: req.user?.sub || null,
+        action: "STAFF_SETTINGS_UPDATED",
+        entity: "StaffSettings",
+        entityId: staff.id,
+      },
+      orderBy: { createdAt: "desc" },
+      select: { meta: true },
+    });
+    const meta = latest?.meta && typeof latest.meta === "object" ? latest.meta : {};
+    return res.status(200).json({
+      success: true,
+      data: {
+        settings: {
+          notificationsEnabled: meta.notificationsEnabled !== false,
+          privacyMode: meta.privacyMode === true,
+          compactView: meta.compactView === true,
+        },
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function updateStaffSettings(req, res, next) {
+  try {
+    const payload = z
+      .object({
+        notificationsEnabled: z.boolean().optional(),
+        privacyMode: z.boolean().optional(),
+        compactView: z.boolean().optional(),
+      })
+      .parse(req.body || {});
+    const schoolId = resolveStaffSchoolId(req);
+    const staff = await findStaffProfile(req, schoolId);
+    await prisma.auditLog.create({
+      data: {
+        schoolId,
+        actorId: req.user?.sub || null,
+        action: "STAFF_SETTINGS_UPDATED",
+        entity: "StaffSettings",
+        entityId: staff.id,
+        meta: payload,
+      },
+    });
+    return res.status(200).json({
+      success: true,
+      data: {
+        settings: {
+          notificationsEnabled: payload.notificationsEnabled !== false,
+          privacyMode: payload.privacyMode === true,
+          compactView: payload.compactView === true,
+        },
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   getStaffDashboard,
   getStaffProfile,
@@ -407,4 +474,6 @@ module.exports = {
   getStaffCommunication,
   sendStaffMessage,
   saveMeetingNote,
+  getStaffSettings,
+  updateStaffSettings,
 };

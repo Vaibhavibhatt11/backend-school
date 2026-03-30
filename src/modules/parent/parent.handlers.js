@@ -1,5 +1,8 @@
 "use strict";
 
+const { z } = require("zod");
+const crypto = require("crypto");
+
 const prisma = require("../../lib/prisma");
 const cache = require("../../lib/cache");
 const { forbidden, notFound } = require("../../utils/httpErrors");
@@ -11,6 +14,28 @@ const {
   parseDayQuery,
   validateSettingsBody,
 } = require("./parent.security");
+
+function computeInvoiceStatus(amountDue, amountPaid, dueDate) {
+  const due = Number(amountDue ?? 0);
+  const paid = Number(amountPaid ?? 0);
+
+  if (paid >= due && due > 0) return "PAID";
+
+  const dueTs = dueDate ? new Date(dueDate).getTime() : NaN;
+  const overdue = Number.isFinite(dueTs) ? Date.now() > dueTs : false;
+
+  if (paid > 0 && overdue) return "OVERDUE";
+  if (paid > 0) return "PARTIAL";
+  return "ISSUED";
+}
+
+const paymentMethodEnum = z.enum(["CASH", "CARD", "UPI", "BANK_TRANSFER", "ONLINE"]);
+const payInvoiceBalanceSchema = z.object({
+  method: paymentMethodEnum.optional().default("ONLINE"),
+  amount: z.coerce.number().positive().optional(),
+  transactionRef: z.string().trim().min(1).optional(),
+  notes: z.string().trim().min(1).optional(),
+});
 
 function isMissingTableError(error, tableName) {
   const message = String(error?.message || "").toLowerCase();
@@ -661,6 +686,198 @@ async function getInvoiceDetail(req, res, next) {
   }
 }
 
+async function payInvoiceBalance(req, res, next) {
+  try {
+    const { parent } = await resolveParent(req);
+    const invoiceId = validateId(req.params.invoiceId, "invoiceId");
+    const payload = payInvoiceBalanceSchema.parse(req.body ?? {});
+
+    const invoice = await prisma.invoice.findFirst({
+      where: { id: invoiceId, schoolId: parent.schoolId },
+    });
+
+    if (!invoice) throw notFound("Invoice not found");
+
+    // Prevent IDOR: ensure this invoice belongs to a student linked to this parent.
+    await resolveChildForParent(parent.id, invoice.studentId);
+
+    const amountDue = Number(invoice.amountDue ?? 0);
+    const amountPaid = Number(invoice.amountPaid ?? 0);
+    const outstanding = Math.max(0, amountDue - amountPaid);
+
+    if (outstanding <= 0) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          payment: null,
+          invoice,
+          outstanding: 0,
+        },
+      });
+    }
+
+    const requested = payload.amount == null ? null : Number(payload.amount);
+    const payAmount = requested == null ? outstanding : Math.min(outstanding, requested);
+
+    if (payAmount <= 0) {
+      return res.status(200).json({ success: true, data: { payment: null, invoice, outstanding } });
+    }
+
+    const receiptNo = `REC-${crypto.randomUUID().slice(0, 10).toUpperCase()}`;
+    const now = new Date();
+
+    const payment = await prisma.payment.create({
+      data: {
+        schoolId: parent.schoolId,
+        studentId: invoice.studentId,
+        invoiceId: invoice.id,
+        receiptNo,
+        amount: payAmount,
+        method: payload.method,
+        transactionRef: payload.transactionRef ?? null,
+        paidAt: now,
+        collectedById: req.user?.sub || null,
+        notes: payload.notes ?? null,
+      },
+    });
+
+    const newAmountPaid = amountPaid + payAmount;
+    const updatedInvoice = await prisma.invoice.update({
+      where: { id: invoice.id },
+      data: {
+        amountPaid: newAmountPaid,
+        status: computeInvoiceStatus(amountDue, newAmountPaid, invoice.dueDate),
+      },
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        schoolId: parent.schoolId,
+        actorId: req.user?.sub || null,
+        action: "PARENT_INVOICE_PAID",
+        entity: "Invoice",
+        entityId: updatedInvoice.id,
+        meta: { paymentId: payment.id, amount: payAmount, method: payload.method },
+      },
+    });
+
+    await cache.del(cache.cacheKeys.parentFees(invoice.studentId));
+
+    return res.status(201).json({
+      success: true,
+      data: {
+        payment,
+        invoice: updatedInvoice,
+        outstanding: Math.max(0, amountDue - newAmountPaid),
+      },
+    });
+  } catch (e) {
+    if (isClientError(e)) return next(e);
+    return next(e);
+  }
+}
+
+async function quickPayAllInvoices(req, res, next) {
+  try {
+    const { parent } = await resolveParent(req);
+    const childId = await resolveChildIdForParent(parent.id, req.query.childId);
+
+    if (!childId) {
+      return res.status(200).json({ success: true, data: { paidCount: 0, payments: [] } });
+    }
+
+    const child = await resolveChildForParent(parent.id, childId);
+
+    // Optional payment metadata. Frontend currently calls without body, so defaults apply.
+    const payload = payInvoiceBalanceSchema.parse(req.body ?? {});
+
+    const invoices = await prisma.invoice.findMany({
+      where: {
+        schoolId: parent.schoolId,
+        studentId: child.id,
+        status: { in: ["ISSUED", "OVERDUE", "PARTIAL"] },
+      },
+      orderBy: { dueDate: "asc" },
+      select: { id: true, amountDue: true, amountPaid: true, studentId: true },
+    });
+
+    const targetInvoices = invoices.filter((inv) => Math.max(0, Number(inv.amountDue ?? 0) - Number(inv.amountPaid ?? 0)) > 0);
+
+    if (targetInvoices.length === 0) {
+      return res.status(200).json({ success: true, data: { paidCount: 0, payments: [] } });
+    }
+
+    const now = new Date();
+    const receiptsByInvoiceId = new Map();
+    for (const inv of targetInvoices) {
+      receiptsByInvoiceId.set(inv.id, `REC-${crypto.randomUUID().slice(0, 10).toUpperCase()}`);
+    }
+
+    const { payments, updatedInvoices } = await prisma.$transaction(async (tx) => {
+      const payments = [];
+      const updatedInvoices = [];
+
+      for (const inv of targetInvoices) {
+        const amountDue = Number(inv.amountDue ?? 0);
+        const amountPaid = Number(inv.amountPaid ?? 0);
+        const outstanding = Math.max(0, amountDue - amountPaid);
+        if (outstanding <= 0) continue;
+
+        const payment = await tx.payment.create({
+          data: {
+            schoolId: parent.schoolId,
+            studentId: inv.studentId,
+            invoiceId: inv.id,
+            receiptNo: receiptsByInvoiceId.get(inv.id),
+            amount: outstanding,
+            method: payload.method,
+            transactionRef: payload.transactionRef ?? null,
+            paidAt: now,
+            collectedById: req.user?.sub || null,
+            notes: payload.notes ?? null,
+          },
+        });
+
+        const newAmountPaid = amountPaid + outstanding;
+        const updatedInvoice = await tx.invoice.update({
+          where: { id: inv.id },
+          data: { amountPaid: newAmountPaid, status: computeInvoiceStatus(amountDue, newAmountPaid, inv.dueDate) },
+        });
+
+        payments.push(payment);
+        updatedInvoices.push(updatedInvoice);
+      }
+
+      return { payments, updatedInvoices };
+    });
+
+    await cache.del(cache.cacheKeys.parentFees(child.id));
+
+    await prisma.auditLog.create({
+      data: {
+        schoolId: parent.schoolId,
+        actorId: req.user?.sub || null,
+        action: "PARENT_QUICK_PAY_ALL",
+        entity: "Invoice",
+        entityId: child.id,
+        meta: { paidCount: payments.length, method: payload.method },
+      },
+    });
+
+    return res.status(201).json({
+      success: true,
+      data: {
+        paidCount: payments.length,
+        payments,
+        invoices: updatedInvoices,
+      },
+    });
+  } catch (e) {
+    if (isClientError(e)) return next(e);
+    return next(e);
+  }
+}
+
 async function getTimetable(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
@@ -1118,6 +1335,8 @@ module.exports = {
   getAttendance,
   getFees,
   getInvoiceDetail,
+  payInvoiceBalance,
+  quickPayAllInvoices,
   getTimetable,
   getProgressReports,
   getLiveClasses,

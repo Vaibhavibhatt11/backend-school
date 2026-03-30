@@ -68,6 +68,23 @@ function eventSaveFirstChild() {
   ];
 }
 
+function eventSaveFirstInvoice() {
+  return [
+    {
+      listen: "test",
+      script: {
+        type: "text/javascript",
+        exec: [
+          "pm.test('Status 2xx', function () { pm.response.to.be.success; });",
+          "const j = pm.response.json();",
+          "const inv = j && j.data && Array.isArray(j.data.invoices) ? j.data.invoices[0] : null;",
+          "if (inv && inv.id) pm.collectionVariables.set('invoiceId', inv.id);",
+        ],
+      },
+    },
+  ];
+}
+
 function toPostmanItem(it) {
   if (it.item) {
     return { name: it.name, item: it.item.map(toPostmanItem) };
@@ -120,8 +137,14 @@ const items = [
     req("GET /parent/announcements", "GET", "/parent/announcements?childId={{childId}}"),
     req("GET /parent/notifications", "GET", "/parent/notifications?childId={{childId}}"),
     req("GET /parent/attendance", "GET", "/parent/attendance?childId={{childId}}"),
-    req("GET /parent/fees", "GET", "/parent/fees?childId={{childId}}"),
+    (() => {
+      const r = req("GET /parent/fees", "GET", "/parent/fees?childId={{childId}}");
+      r.event = eventSaveFirstInvoice();
+      return r;
+    })(),
     req("GET /parent/invoices/:invoiceId", "GET", "/parent/invoices/{{invoiceId}}"),
+    req("POST /parent/invoices/:invoiceId/pay-balance", "POST", "/parent/invoices/{{invoiceId}}/pay-balance", {}),
+    req("POST /parent/fees/quick-pay-all", "POST", "/parent/fees/quick-pay-all", {}),
     req("GET /parent/timetable", "GET", "/parent/timetable?childId={{childId}}"),
     req("GET /parent/progress-reports", "GET", "/parent/progress-reports?childId={{childId}}"),
     req("GET /parent/live-classes", "GET", "/parent/live-classes?childId={{childId}}"),
