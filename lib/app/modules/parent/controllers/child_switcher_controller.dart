@@ -53,6 +53,6 @@ class ChildSwitcherController extends GetxController {
   }
 
   void linkAnotherChild() {
-    AppToast.show('Link-child endpoint is not configured yet.');
+    loadChildren();
   }
 }

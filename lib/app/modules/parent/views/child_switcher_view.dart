@@ -130,17 +130,6 @@ class ChildSwitcherView extends GetView<ChildSwitcherController> {
                     }).toList(),
               ),
             ),
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: controller.linkAnotherChild,
-              icon: const Icon(Icons.person_add_alt),
-              label: const Text('Link Another Child'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                side: const BorderSide(color: AppColors.primary),
-                minimumSize: const Size(double.infinity, 50),
-              ),
-            ),
             const SizedBox(height: 24),
             Container(
               padding: const EdgeInsets.all(16),

@@ -70,7 +70,7 @@ class StaffCommunicationController extends GetxController {
     }
   }
 
-  void sendMessage() => AppToast.show('Use the communication module to send messages.');
-  void addMeetingNote() => AppToast.show('Use the communication module to save notes.');
+  Future<void> sendMessage() async => loadCommunication();
+  Future<void> addMeetingNote() async => loadCommunication();
 }
 

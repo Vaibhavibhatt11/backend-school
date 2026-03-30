@@ -112,7 +112,7 @@ class StaffDashboardController extends GetxController {
         _goToStaffTab(4);
         return;
       default:
-        AppToast.show('This module is not mapped yet.');
+        _goToStaffTab(0);
     }
   }
 }
