@@ -16,7 +16,7 @@ class ProgressReportsView extends GetView<ProgressReportsController> {
       appBar: CustomAppBar(
         title: 'Progress Reports',
         actions: [
-          IconButton(icon: const Icon(Icons.ios_share), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.ios_share), onPressed: controller.loadProgressReport),
         ],
       ),
       body: Obx(() {

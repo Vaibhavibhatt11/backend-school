@@ -1,3 +1,4 @@
+import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../common/services/parent/parent_academics_service.dart';
@@ -45,6 +46,7 @@ class ProgressReportsController extends GetxController {
     try {
       final data = await _academicsService.getProgressReports(
         childId: _parentContext.selectedChildId.value,
+        term: selectedTerm.value.isEmpty ? null : selectedTerm.value,
       );
       studentName.value = data['studentName']?.toString() ?? studentName.value;
       studentClass.value = data['studentClass']?.toString() ?? studentClass.value;
@@ -93,29 +95,16 @@ class ProgressReportsController extends GetxController {
     }
   }
 
-  void setTerm(String term) => selectedTerm.value = term;
+  Future<void> setTerm(String term) async {
+    selectedTerm.value = term;
+    await loadProgressReport();
+  }
   void viewFullMarksheet() {
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Marksheet'),
-        content: const Text('Full marksheet will be displayed here.'),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('OK')),
-        ],
-      ),
-    );
+    loadProgressReport();
   }
 
   void payNow() {
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Payment'),
-        content: const Text('Redirecting to payment gateway...'),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('OK')),
-        ],
-      ),
-    );
+    Get.toNamed(AppRoutes.PARENT_FEES);
   }
 
   @override

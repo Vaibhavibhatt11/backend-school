@@ -38,6 +38,7 @@ class AnnouncementsController extends GetxController {
           items.whereType<Map>().map((e) {
             final m = Map<String, dynamic>.from(e);
             return {
+              'id': (m['id'] ?? '').toString(),
               'type': (m['type'] ?? 'general').toString().toLowerCase(),
               'title': (m['title'] ?? '').toString(),
               'description': (m['description'] ?? '').toString(),

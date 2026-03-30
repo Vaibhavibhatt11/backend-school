@@ -1,5 +1,4 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
-import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/admin_fee_snapshot_controller.dart';
@@ -63,7 +62,7 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
                       Icons.calendar_today,
                       color: AppColors.primary,
                     ),
-                    onPressed: () => AppToast.show('Select date range'),
+                    onPressed: controller.loadFeeSnapshot,
                   ),
                 ),
               ],

@@ -97,7 +97,7 @@ class NotificationsCenterView extends GetView<NotificationsController> {
         currentIndex: 0,
       ), // Notifications from home
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: controller.loadNotifications,
         child: const Icon(Icons.search),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -157,7 +157,7 @@ class NotificationsCenterView extends GetView<NotificationsController> {
                 if (item['action'] != null) ...[
                   const SizedBox(height: 8),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: controller.loadNotifications,
                     child: Text(
                       (item['action'] ?? '').toString(),
                       style: const TextStyle(color: AppColors.primary),

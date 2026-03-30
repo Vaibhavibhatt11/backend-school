@@ -110,7 +110,7 @@ class FeesManagementView extends GetView<FeesController> {
                   'Recent Invoices',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                TextButton(onPressed: () {}, child: const Text('History')),
+                TextButton(onPressed: controller.goToHistory, child: const Text('History')),
               ],
             ),
             const SizedBox(height: 8),

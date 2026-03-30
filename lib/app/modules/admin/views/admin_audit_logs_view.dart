@@ -1,5 +1,4 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
-import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/admin_audit_logs_controller.dart';
@@ -48,7 +47,7 @@ class AdminAuditLogsView extends GetView<AdminAuditLogsController> {
                         Icons.filter_list,
                         color: AppColors.primary,
                       ),
-                      onPressed: () => AppToast.show('Filter logs'),
+                      onPressed: controller.loadLogs,
                     ),
                   ),
                 ],

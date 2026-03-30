@@ -86,39 +86,19 @@ class FeesController extends GetxController {
   }
 
   void payNow(String id) {
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Payment'),
-        content: const Text('Payment gateway will be integrated soon.'),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('OK')),
-        ],
-      ),
-    );
+    if (id.isEmpty) return;
+    viewDetails(id);
   }
 
   void quickPayAll() {
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Quick Pay'),
-        content: const Text('Bulk payment is not available from this API yet.'),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('OK')),
-        ],
-      ),
-    );
+    if (invoices.isEmpty) return;
+    final first = invoices.first['id']?.toString() ?? '';
+    if (first.isEmpty) return;
+    viewDetails(first);
   }
 
   void goToHistory() {
-    Get.dialog(
-      AlertDialog(
-        title: const Text('History'),
-        content: const Text('Invoice history will be shown here.'),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('OK')),
-        ],
-      ),
-    );
+    selectedTab.value = 1;
   }
 
   @override

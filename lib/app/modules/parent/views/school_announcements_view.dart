@@ -15,8 +15,8 @@ class SchoolAnnouncementsView extends GetView<AnnouncementsController> {
       appBar: CustomAppBar(
         title: 'Announcements',
         actions: [
-          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.tune), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.search), onPressed: controller.loadAnnouncements),
+          IconButton(icon: const Icon(Icons.tune), onPressed: controller.loadAnnouncements),
         ],
       ),
       body: SingleChildScrollView(
@@ -30,7 +30,7 @@ class SchoolAnnouncementsView extends GetView<AnnouncementsController> {
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children:
-                    ['All', 'School', 'Class 4B', 'Sports']
+                    ['All', 'Urgent', 'Teacher']
                         .map(
                           (filter) => Padding(
                             padding: const EdgeInsets.only(right: 8),
@@ -167,7 +167,7 @@ class SchoolAnnouncementsView extends GetView<AnnouncementsController> {
                   ],
                 ),
               ),
-              IconButton(icon: const Icon(Icons.more_horiz), onPressed: () {}),
+              IconButton(icon: const Icon(Icons.more_horiz), onPressed: controller.loadAnnouncements),
             ],
           ),
           const SizedBox(height: 8),
@@ -201,7 +201,33 @@ class SchoolAnnouncementsView extends GetView<AnnouncementsController> {
   }
 
   Widget _buildGeneralCard(Map<String, dynamic> ann) {
-    // Similar to teacher but without image
-    return Container();
+    final isDark = Theme.of(Get.context!).brightness == Brightness.dark;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            (ann['title'] ?? '').toString(),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          const SizedBox(height: 4),
+          Text((ann['description'] ?? '').toString()),
+          const SizedBox(height: 8),
+          Text(
+            'Posted ${(ann['time'] ?? '').toString()} by ${(ann['postedBy'] ?? '').toString()}',
+            style: const TextStyle(fontSize: 10, color: Colors.grey),
+          ),
+        ],
+      ),
+    );
   }
 }

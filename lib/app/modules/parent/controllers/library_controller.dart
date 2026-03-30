@@ -37,13 +37,35 @@ class LibraryController extends GetxController {
       final recommended = data['recommendedBooks'];
       if (recommended is List) {
         recommendedBooks.assignAll(
-          recommended.whereType<Map>().map((e) => Map<String, dynamic>.from(e)),
+          recommended.whereType<Map>().map((e) {
+            final m = Map<String, dynamic>.from(e);
+            return {
+              'id': (m['id'] ?? '').toString(),
+              'title': (m['title'] ?? 'Book').toString(),
+              'author': (m['author'] ?? '').toString(),
+              'category': (m['category'] ?? '').toString(),
+              'availableCopies': m['availableCopies'],
+              'new': false,
+            };
+          }),
         );
       }
       final loans = data['activeLoans'];
       if (loans is List) {
         activeLoans.assignAll(
-          loans.whereType<Map>().map((e) => Map<String, dynamic>.from(e)),
+          loans.whereType<Map>().map((e) {
+            final m = Map<String, dynamic>.from(e);
+            final dueIso = (m['dueDate'] ?? '').toString();
+            final dueLabel = dueIso.isEmpty ? '-' : dueIso.split('T').first;
+            final status = (m['status'] ?? '').toString().toUpperCase();
+            return {
+              'id': (m['id'] ?? '').toString(),
+              'title': (m['title'] ?? 'Book').toString(),
+              'author': (m['author'] ?? '').toString(),
+              'due': dueLabel,
+              'status': status,
+            };
+          }),
         );
       }
     } catch (e) {

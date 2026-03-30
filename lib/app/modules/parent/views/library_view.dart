@@ -60,7 +60,7 @@ class LibraryView extends GetView<LibraryController> {
                   ),
                   child: IconButton(
                     icon: const Icon(Icons.tune),
-                    onPressed: () {},
+                    onPressed: controller.loadLibrary,
                   ),
                 ),
               ],
@@ -86,7 +86,7 @@ class LibraryView extends GetView<LibraryController> {
                   'Recommended',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                TextButton(onPressed: () {}, child: const Text('See All')),
+                TextButton(onPressed: controller.loadLibrary, child: const Text('See All')),
               ],
             ),
             const SizedBox(height: 8),
@@ -111,7 +111,7 @@ class LibraryView extends GetView<LibraryController> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child:
-                                book['new'] as bool
+                                ((book['new'] == true))
                                     ? const Align(
                                       alignment: Alignment.topRight,
                                       child: Padding(
@@ -230,13 +230,13 @@ class LibraryView extends GetView<LibraryController> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    loan['title']!,
+                                    (loan['title'] ?? '').toString(),
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   Text(
-                                    loan['author']!,
+                                    (loan['author'] ?? '').toString(),
                                     style: const TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey,
@@ -248,7 +248,7 @@ class LibraryView extends GetView<LibraryController> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        loan['due']!,
+                                        (loan['due'] ?? '-').toString(),
                                         style: const TextStyle(fontSize: 10),
                                       ),
                                       Container(
@@ -258,7 +258,7 @@ class LibraryView extends GetView<LibraryController> {
                                         ),
                                         decoration: BoxDecoration(
                                           color:
-                                              loan['status'] == 'On Time'
+                                              (loan['status'] ?? '').toString().toUpperCase() == 'ISSUED'
                                                   ? Colors.green.withValues(alpha: 
                                                     0.1,
                                                   )
@@ -268,11 +268,11 @@ class LibraryView extends GetView<LibraryController> {
                                           ),
                                         ),
                                         child: Text(
-                                          loan['status']!,
+                                          (loan['status'] ?? '').toString(),
                                           style: TextStyle(
                                             fontSize: 8,
                                             color:
-                                                loan['status'] == 'On Time'
+                                                (loan['status'] ?? '').toString().toUpperCase() == 'ISSUED'
                                                     ? Colors.green
                                                     : Colors.red,
                                           ),
