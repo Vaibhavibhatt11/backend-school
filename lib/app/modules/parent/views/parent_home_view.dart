@@ -345,7 +345,6 @@ class ParentHomeView extends GetView<ParentHomeController> {
                           ),
                         ),
                       ),
-                    ),
                   );
                   },
                 ),

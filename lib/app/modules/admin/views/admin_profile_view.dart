@@ -197,7 +197,7 @@ class AdminProfileView extends GetView<AdminProfileController> {
                       title: const Text('Email Notifications'),
                       value: controller.emailNotificationsEnabled.value,
                       onChanged: controller.onEmailNotificationsToggle,
-                      activeThumbColor: AppColors.primary,
+                      activeColor: AppColors.primary,
                     ),
                   ),
                 ],

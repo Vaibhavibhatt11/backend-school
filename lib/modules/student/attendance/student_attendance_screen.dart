@@ -376,7 +376,7 @@ void _showApplyLeaveSheet(BuildContext context, StudentAttendanceController cont
                 Text('Apply leave', style: AppTextStyle.titleLarge(ctx)),
                 SizedBox(height: Responsive.h(ctx, 12)),
                 DropdownButtonFormField<String>(
-                  initialValue: leaveType,
+                  value: leaveType,
                   items: const ['Sick', 'Casual', 'Emergency', 'Other']
                       .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                       .toList(),

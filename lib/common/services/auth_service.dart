@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+import 'package:dio/dio.dart' as dio;
 
 import 'package:get/get.dart';
 
@@ -18,7 +18,7 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-    final Response<dynamic> response = await _apiClient.post(
+    final dio.Response<dynamic> response = await _apiClient.post(
       ApiEndpoints.authLogin,
       data: {
         'email': email.trim(),
@@ -47,7 +47,7 @@ class AuthService {
     if (refreshToken == null || refreshToken.isEmpty) {
       throw Exception('No refresh token available.');
     }
-    final Response<dynamic> response = await _apiClient.post(
+    final dio.Response<dynamic> response = await _apiClient.post(
       ApiEndpoints.authRefresh,
       data: {'refreshToken': refreshToken},
     );
@@ -95,7 +95,8 @@ class AuthService {
   }
 
   Future<Map<String, dynamic>> me() async {
-    final Response<dynamic> response = await _apiClient.get(ApiEndpoints.authMe);
+    final dio.Response<dynamic> response =
+        await _apiClient.get(ApiEndpoints.authMe);
     final dynamic body = response.data;
     if (body is! Map<String, dynamic>) {
       throw Exception('Invalid profile response format.');

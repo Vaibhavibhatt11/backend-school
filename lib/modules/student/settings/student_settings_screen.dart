@@ -252,7 +252,7 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
             value: value,
             onChanged: onChanged,
             activeTrackColor: AppColor.primary.withValues(alpha: 0.5),
-            activeThumbColor: AppColor.primary,
+            activeColor: AppColor.primary,
           ),
         ],
       ),

@@ -302,13 +302,15 @@ class AnnouncementsView extends GetView<AnnouncementsController> {
                 maxLines: 3,
               ),
               const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                initialValue: target,
-                items: ['All', 'Grade 10-A', 'Grade 10-B', 'Grade 11-C']
-                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                    .toList(),
-                onChanged: (val) => target = val!,
-                decoration: const InputDecoration(labelText: 'Target'),
+              StatefulBuilder(
+                builder: (context, setState) => DropdownButtonFormField<String>(
+                  value: target,
+                  items: ['All', 'Grade 10-A', 'Grade 10-B', 'Grade 11-C']
+                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                      .toList(),
+                  onChanged: (val) => setState(() => target = val ?? 'All'),
+                  decoration: const InputDecoration(labelText: 'Target'),
+                ),
               ),
               const SizedBox(height: 12),
               Row(
