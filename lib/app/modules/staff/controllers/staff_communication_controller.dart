@@ -1,23 +1,76 @@
 import 'package:erp_frontend/common/utils/app_toast.dart';
+import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
+import 'package:erp_frontend/common/services/staff/staff_service.dart';
 import 'package:get/get.dart';
 
 class StaffCommunicationController extends GetxController {
-  final chats = <Map<String, String>>[
-    {'to': 'Parent - Aarav', 'last': 'Meeting scheduled for Friday.'},
-    {'to': 'Student - Riya', 'last': 'Submit notebook by tomorrow.'},
-  ].obs;
+  StaffCommunicationController(this._staffService);
 
-  final announcements = <String>[
-    'Unit test timetable published',
-    'Science fair registration open',
-  ].obs;
+  final StaffService _staffService;
+  final isLoading = false.obs;
+  final errorMessage = ''.obs;
 
-  final meetings = <Map<String, String>>[
-    {'title': 'PTM - Grade 8', 'time': 'Fri 4:30 PM'},
-    {'title': 'Mentoring session', 'time': 'Mon 11:00 AM'},
-  ].obs;
+  final chats = <Map<String, String>>[].obs;
+  final announcements = <String>[].obs;
+  final meetings = <Map<String, String>>[].obs;
 
-  void sendMessage() => AppToast.show('Message sent (demo).');
-  void addMeetingNote() => AppToast.show('Meeting note saved (demo).');
+  @override
+  void onInit() {
+    super.onInit();
+    loadCommunication();
+  }
+
+  Future<void> loadCommunication() async {
+    isLoading.value = true;
+    errorMessage.value = '';
+    try {
+      final data = await _staffService.getCommunication();
+      final rawChats = data['chats'];
+      if (rawChats is List) {
+        chats.assignAll(
+          rawChats.whereType<Map>().map((e) {
+            return {
+              'to': (e['to'] ?? '').toString(),
+              'last': (e['last'] ?? '').toString(),
+            };
+          }).toList(),
+        );
+      } else {
+        chats.clear();
+      }
+
+      final rawAnnouncements = data['announcements'];
+      if (rawAnnouncements is List) {
+        announcements.assignAll(rawAnnouncements.map((e) => e.toString()));
+      } else {
+        announcements.clear();
+      }
+
+      final rawMeetings = data['meetings'];
+      if (rawMeetings is List) {
+        meetings.assignAll(
+          rawMeetings.whereType<Map>().map((e) {
+            return {
+              'title': (e['title'] ?? '').toString(),
+              'time': (e['time'] ?? '').toString(),
+            };
+          }).toList(),
+        );
+      } else {
+        meetings.clear();
+      }
+    } catch (e) {
+      errorMessage.value = dioOrApiErrorMessage(e);
+      AppToast.show(errorMessage.value);
+      chats.clear();
+      announcements.clear();
+      meetings.clear();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void sendMessage() => AppToast.show('Use the communication module to send messages.');
+  void addMeetingNote() => AppToast.show('Use the communication module to save notes.');
 }
 

@@ -12,11 +12,14 @@ class ResetPasswordController extends GetxController {
   final obscureConfirm = true.obs;
   final isLoading = false.obs;
   late String identifier;
+  late String resetToken;
 
   @override
   void onInit() {
     super.onInit();
-    identifier = Get.arguments['identifier'] ?? '';
+    final args = Get.arguments ?? {};
+    identifier = args['identifier'] ?? '';
+    resetToken = args['resetToken'] ?? '';
   }
 
   void toggleNewVisibility() => obscureNew.toggle();
@@ -49,10 +52,13 @@ class ResetPasswordController extends GetxController {
       AppToast.show('Passwords do not match');
       return;
     }
+    if (resetToken.trim().isEmpty) {
+      AppToast.show('Reset token missing. Please request OTP again.');
+      return;
+    }
     isLoading.value = true;
     try {
-      // Dummy: assume we pass the email/phone from previous screen
-      await _userRepository.resetPassword('dummy@email.com', newPassword.value);
+      await _userRepository.resetPassword(resetToken, newPassword.value);
       AppToast.show('Password updated');
       Get.offAllNamed(AppRoutes.LOGIN);
     } finally {

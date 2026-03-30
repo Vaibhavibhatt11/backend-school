@@ -10,7 +10,11 @@ class StaffReportsView extends GetView<StaffReportsController> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return SafeArea(
-      child: ListView(
+      child: Obx(() {
+        if (controller.isLoading.value && controller.reportTiles.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Text(
@@ -57,7 +61,8 @@ class StaffReportsView extends GetView<StaffReportsController> {
             ),
           ),
         ],
-      ),
+      );
+      }),
     );
   }
 }

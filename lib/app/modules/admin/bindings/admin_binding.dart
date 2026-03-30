@@ -42,7 +42,10 @@ class AdminBinding extends Bindings {
       );
     }
     if (!Get.isRegistered<AdminReportsController>()) {
-      Get.put(AdminReportsController(), permanent: true);
+      Get.put(
+        AdminReportsController(Get.find<AdminService>()),
+        permanent: true,
+      );
     }
     if (!Get.isRegistered<AdminNoticeBoardController>()) {
       Get.put(

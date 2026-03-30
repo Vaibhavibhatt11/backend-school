@@ -9,8 +9,6 @@ import '../../../services/app_storage.dart';
 class LoginController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
   final _storage = AppStorage();
-  static const String _staffEmail = 'staff@gmail.com';
-  static const String _staffPassword = 'Staff@123';
 
   final emailOrPhone = ''.obs;
   final password = ''.obs;
@@ -26,11 +24,6 @@ class LoginController extends GetxController {
     }
     final email = emailOrPhone.value.trim();
     final pass = password.value;
-    if (email.toLowerCase() == _staffEmail && pass == _staffPassword) {
-      _storage.userRole = 'STAFF';
-      Get.offAllNamed(AppRoutes.STAFF_HOME);
-      return;
-    }
     isLoading.value = true;
     try {
       final response = await _authService.login(

@@ -4,7 +4,7 @@ class Message {
   final String text;
   final bool isUser;
   final DateTime timestamp;
-  final Map<String, dynamic>? data; // for structured responses
+  final Map<String, dynamic>? data;
 
   Message({
     required this.text,
@@ -21,51 +21,22 @@ class AiAssistantController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Add initial AI message
+    messages.clear();
+  }
+
+  void sendMessage() {
+    final text = inputText.value.trim();
+    if (text.isEmpty) return;
+
+    messages.add(Message(text: text, isUser: true, timestamp: DateTime.now()));
     messages.add(
       Message(
-        text:
-            'Hello, Mr. Smith! I’m ready to assist you. What can I help you with regarding your classes or students today?',
+        text: 'AI assistant is not configured for this module yet.',
         isUser: false,
         timestamp: DateTime.now(),
       ),
     );
-  }
-
-  void sendMessage() {
-    if (inputText.value.trim().isEmpty) return;
-    // Add user message
-    messages.add(
-      Message(text: inputText.value, isUser: true, timestamp: DateTime.now()),
-    );
-    // Simulate AI response
-    _simulateAIResponse(inputText.value);
     inputText.value = '';
-  }
-
-  void _simulateAIResponse(String userMessage) {
-    // Mock response
-    Future.delayed(const Duration(seconds: 1), () {
-      if (userMessage.toLowerCase().contains('policy')) {
-        messages.add(
-          Message(
-            text:
-                'Attendance Policy (Seniors):\n• Students must maintain a minimum of 90% attendance.\n• Late arrival (15+ mins) counts as a half-day absence.\n• Medical notes must be submitted within 48 hours.',
-            isUser: false,
-            timestamp: DateTime.now(),
-          ),
-        );
-      } else {
-        messages.add(
-          Message(
-            text:
-                'I understand you said: "$userMessage". How can I help further?',
-            isUser: false,
-            timestamp: DateTime.now(),
-          ),
-        );
-      }
-    });
   }
 
   void quickReply(String reply) {

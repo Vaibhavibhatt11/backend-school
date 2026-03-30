@@ -54,10 +54,15 @@ class AdminSettingsView extends GetView<AdminSettingsController> {
                 ),
                 child: Row(
                   children: [
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 32,
                       backgroundColor: AppColors.primary,
-                      child: Text('SJ', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      child: Obx(
+                        () => Text(
+                          controller.adminInitials.value,
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -177,11 +182,13 @@ class AdminSettingsView extends GetView<AdminSettingsController> {
                     onTap: controller.onTerms,
                   ),
                   const Divider(height: 1),
-                  const ListTile(
+                  ListTile(
                     title: Text('App Version'),
-                    trailing: Text(
-                      'v2.4.9 (Build 108)',
-                      style: TextStyle(color: Colors.grey),
+                    trailing: Obx(
+                      () => Text(
+                        controller.appVersion.value,
+                        style: TextStyle(color: Colors.grey),
+                      ),
                     ),
                   ),
                 ],
@@ -215,11 +222,13 @@ class AdminSettingsView extends GetView<AdminSettingsController> {
               ),
             ),
             const SizedBox(height: 16),
-            const Center(
-              child: Text(
-                'Logged in from San Francisco, US\nLast active: 2 mins ago',
+            Center(
+              child: Obx(
+                () => Text(
+                '${controller.sessionInfo.value}\nSchool admin session',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
               ),
             ),
           ],

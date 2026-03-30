@@ -21,6 +21,7 @@ class AttendanceController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _setMonthLabel();
     _generateDays();
     _childWorker = ever<String?>(
       _parentContext.selectedChildId,
@@ -29,10 +30,41 @@ class AttendanceController extends GetxController {
     loadAttendance();
   }
 
+  void _setMonthLabel() {
+    final now = DateTime.now();
+    final target = DateTime(now.year, now.month + currentMonthOffset.value, 1);
+    const monthNames = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    month.value = '${monthNames[target.month - 1]} ${target.year}';
+  }
+
+  String _monthParam() {
+    final now = DateTime.now();
+    final target = DateTime(now.year, now.month + currentMonthOffset.value, 1);
+    final mm = target.month.toString().padLeft(2, '0');
+    return '${target.year}-$mm';
+  }
+
   void _generateDays() {
+    final now = DateTime.now();
+    final target = DateTime(now.year, now.month + currentMonthOffset.value, 1);
+    final firstWeekdayIndex = target.weekday % 7; // Sunday=0 ... Saturday=6
+    final daysInMonth = DateTime(target.year, target.month + 1, 0).day;
     List<int?> days = List.filled(35, null);
-    for (int i = 0; i < 31; i++) {
-      days[i + 4] = i + 1; // start on Thursday
+    for (int i = 0; i < daysInMonth && i + firstWeekdayIndex < 35; i++) {
+      days[i + firstWeekdayIndex] = i + 1;
     }
     calendarDays.value = days;
   }
@@ -42,6 +74,7 @@ class AttendanceController extends GetxController {
     try {
       final data = await _academicsService.getAttendance(
         childId: _parentContext.selectedChildId.value,
+        month: _monthParam(),
       );
       if (data['studentName'] != null) {
         studentName.value = data['studentName'].toString();
@@ -61,11 +94,11 @@ class AttendanceController extends GetxController {
       final days = data['calendarDays'];
       if (days is List) {
         if (days.isNotEmpty && days.first is Map) {
-          final mapped = <int?>[];
+          final mapped = List<int?>.from(calendarDays);
           dayStatusMap.clear();
           for (final entry in days.whereType<Map>()) {
             final day = _asInt(entry['day']);
-            mapped.add(day);
+            if (day <= 0) continue;
             dayStatusMap[day] = (entry['status'] ?? '').toString().toLowerCase();
           }
           calendarDays.assignAll(mapped);
@@ -87,20 +120,20 @@ class AttendanceController extends GetxController {
   String getStatusForDay(int day) {
     final apiStatus = dayStatusMap[day];
     if (apiStatus != null && apiStatus.isNotEmpty) return apiStatus;
-    if (day == 13) return 'late';
-    if (day % 2 == 0) return 'present';
-    return 'absent';
+    return '';
   }
 
   void previousMonth() {
     currentMonthOffset.value--;
-    month.value = 'September 2023';
+    _setMonthLabel();
+    _generateDays();
     loadAttendance();
   }
 
   void nextMonth() {
     currentMonthOffset.value++;
-    month.value = 'November 2023';
+    _setMonthLabel();
+    _generateDays();
     loadAttendance();
   }
 

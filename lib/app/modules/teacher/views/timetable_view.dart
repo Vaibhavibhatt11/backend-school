@@ -23,11 +23,13 @@ class TimetableView extends GetView<TimetableController> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Week 12 • Oct 2023',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.primary.withOpacity(0.7),
+                    Obx(
+                      () => Text(
+                        'Week of ${controller.selectedDay.value.day}/${controller.selectedDay.value.month}/${controller.selectedDay.value.year}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.primary.withOpacity(0.7),
+                        ),
                       ),
                     ),
                     const Text(
@@ -238,7 +240,7 @@ class TimetableView extends GetView<TimetableController> {
                           Positioned(
                             left: 0,
                             right: 0,
-                            top: height * 0.3, // mock position
+                            top: height * 0.3,
                             child: Container(
                               height: 2,
                               color: AppColors.primary,

@@ -11,7 +11,11 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return SafeArea(
-      child: ListView(
+      child: Obx(() {
+        if (controller.isLoading.value && controller.todaySchedule.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Row(
@@ -173,7 +177,8 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
             },
           ),
         ],
-      ),
+      );
+      }),
     );
   }
 

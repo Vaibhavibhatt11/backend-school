@@ -15,6 +15,9 @@ class AdminSettingsController extends GetxController {
   final isLoading = false.obs;
   final adminName = 'Admin'.obs;
   final adminSubtitle = ''.obs;
+  final adminInitials = 'AD'.obs;
+  final sessionInfo = ''.obs;
+  final appVersion = 'v2.4.9'.obs;
 
   @override
   void onInit() {
@@ -31,7 +34,18 @@ class AdminSettingsController extends GetxController {
       final settings = settingsData['settings'] as Map<String, dynamic>? ?? const {};
       adminName.value = profile['fullName']?.toString() ?? 'Admin';
       adminSubtitle.value =
-          '${settings['name'] ?? 'School'} â€¢ ${profile['role'] ?? 'SCHOOLADMIN'}';
+          '${settings['name'] ?? 'School'} • ${profile['role'] ?? 'SCHOOLADMIN'}';
+      final parts = adminName.value
+          .split(' ')
+          .where((e) => e.trim().isNotEmpty)
+          .map((e) => e[0].toUpperCase())
+          .take(2)
+          .toList();
+      adminInitials.value = parts.isNotEmpty ? parts.join() : 'AD';
+      final lastLogin = profile['lastLoginAt']?.toString();
+      sessionInfo.value = (lastLogin != null && lastLogin.isNotEmpty)
+          ? 'Last login: $lastLogin'
+          : 'Last login: unavailable';
     } catch (e) {
       AppToast.show(dioOrApiErrorMessage(e));
     } finally {

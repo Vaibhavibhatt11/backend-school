@@ -27,12 +27,9 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
                 // Header
                 Row(
                   children: [
-                    CircleAvatar(
+                    const CircleAvatar(
                       radius: 24,
-                      backgroundImage: NetworkImage(
-                        'https://via.placeholder.com/150',
-                        scale: 1.0,
-                      ),
+                      child: Icon(Icons.person),
                     ),
                     const SizedBox(width: 12),
                     Expanded(

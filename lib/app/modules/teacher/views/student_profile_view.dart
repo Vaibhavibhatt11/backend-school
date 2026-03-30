@@ -129,14 +129,14 @@ class StudentProfileView extends GetView<StudentProfileController> {
                     Expanded(
                       child: _infoCard(
                         label: 'Date of Birth',
-                        value: 'May 14, 2008', // placeholder
+                        value: '--',
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: _infoCard(
                         label: 'Gender',
-                        value: 'Male', // placeholder
+                        value: '--',
                       ),
                     ),
                   ],
@@ -155,14 +155,14 @@ class StudentProfileView extends GetView<StudentProfileController> {
                 _parentTile(
                   name: 'Sarah Henderson',
                   relation: 'Mother',
-                  onCall: () => controller.callParent('1234567890'),
-                  onMessage: () => controller.messageParent('1234567890'),
+                  onCall: () => controller.callParent(''),
+                  onMessage: () => controller.messageParent(''),
                 ),
                 _parentTile(
                   name: 'Robert Henderson',
                   relation: 'Father',
-                  onCall: () => controller.callParent('0987654321'),
-                  onMessage: () => controller.messageParent('0987654321'),
+                  onCall: () => controller.callParent(''),
+                  onMessage: () => controller.messageParent(''),
                 ),
                 const SizedBox(height: 24),
                 // Attendance Record

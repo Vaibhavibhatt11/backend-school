@@ -54,6 +54,10 @@ class AuthService {
     }
     final success = body['success'];
     if (success == false) {
+      final message = body['message'];
+      if (message != null && message.toString().isNotEmpty) {
+        throw Exception(message.toString());
+      }
       final err = body['error'];
       if (err is Map && err['message'] != null) {
         throw Exception(err['message'].toString());

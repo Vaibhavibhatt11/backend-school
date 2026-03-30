@@ -27,8 +27,33 @@ class ParentHomeView extends GetView<ParentHomeController> {
         onPressed: controller.goToAIAssistant,
         child: const Icon(Icons.video_call),
       ),
-      body: Obx(
-        () => SingleChildScrollView(
+      body: Obx(() {
+        if (controller.isLoading.value && controller.recentNotices.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (controller.errorMessage.value.isNotEmpty &&
+            controller.recentNotices.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    controller.errorMessage.value,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: controller.loadHome,
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        return SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -351,36 +376,43 @@ class ParentHomeView extends GetView<ParentHomeController> {
               ),
               child: Column(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: ['Eng', 'Math', 'Sci', 'Art', 'Hist'].map((
-                      subject,
-                    ) {
-                      return Column(
-                        children: [
-                          Container(
-                            width: 30,
-                            height: 100,
-                            color: Colors.grey[200],
-                            child: Align(
-                              alignment: Alignment.bottomCenter,
-                              child: Container(
-                                height:
-                                    controller.subjectScores[subject]
-                                        ?.toDouble() ??
-                                    0,
-                                color: subject == 'Math'
-                                    ? AppColors.primary
-                                    : AppColors.primary.withOpacity(0.3),
+                  Obx(() {
+                    final scoreEntries = controller.subjectScores.entries.toList();
+                    if (scoreEntries.isEmpty) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Text('No score data available'),
+                      );
+                    }
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: scoreEntries.map((entry) {
+                        final subject = entry.key;
+                        final score = entry.value.clamp(0, 100);
+                        return Column(
+                          children: [
+                            Container(
+                              width: 30,
+                              height: 100,
+                              color: Colors.grey[200],
+                              child: Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Container(
+                                  height: score.toDouble(),
+                                  color: AppColors.primary.withOpacity(0.7),
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(subject, style: const TextStyle(fontSize: 10)),
-                        ],
-                      );
-                    }).toList(),
-                  ),
+                            const SizedBox(height: 4),
+                            Text(
+                              subject.length > 4 ? subject.substring(0, 4) : subject,
+                              style: const TextStyle(fontSize: 10),
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    );
+                  }),
                   const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
@@ -395,8 +427,8 @@ class ParentHomeView extends GetView<ParentHomeController> {
             const SizedBox(height: 80), // bottom padding
           ],
         ),
-      ),
-      ),
+      );
+      }),
       bottomNavigationBar: _buildBottomNavBar(0),
     );
   }

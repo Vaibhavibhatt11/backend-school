@@ -1,4 +1,3 @@
-import 'package:erp_frontend/app/core/constants/app_constants.dart';
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/modules/teacher/models/teacher_models.dart';
 import 'package:erp_frontend/app/navbar/teacher_bottom_nav_bar.dart';
@@ -221,10 +220,7 @@ class StudentDirectoryView extends GetView<StudentDirectoryController> {
         child: Row(
           children: [
             CircleAvatar(
-              backgroundImage: NetworkImage(
-                '${AppConstants.placeholderImage}${student.id}',
-              ),
-              child: student.imageUrl == null ? const Icon(Icons.person) : null,
+              child: const Icon(Icons.person),
             ),
             const SizedBox(width: 12),
             Expanded(

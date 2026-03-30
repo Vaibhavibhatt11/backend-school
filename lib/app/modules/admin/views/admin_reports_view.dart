@@ -13,7 +13,11 @@ class AdminReportsView extends GetView<AdminReportsController> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final content = SafeArea(
-      child: ListView(
+      child: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return ListView(
           padding: const EdgeInsets.all(16),
           children: [
             // Header
@@ -118,7 +122,7 @@ class AdminReportsView extends GetView<AdminReportsController> {
               title: 'Attendance Report',
               description:
                   'Detailed breakdown of student and staff presence logs for the selected period.',
-              badge: '94% Attendance',
+              badge: controller.attendanceBadge.value,
               badgeColor: Colors.green,
               primaryAction: 'View Detailed Log',
               onPrimary: controller.onViewDetailedLog,
@@ -143,7 +147,7 @@ class AdminReportsView extends GetView<AdminReportsController> {
               title: 'Fee Collections',
               description:
                   'Status of tuition fees, pending invoices, and historical payment collections.',
-              badge: '\$4,250.00',
+              badge: '\$${controller.feeOutstanding.value.toStringAsFixed(2)}',
               badgeColor: Colors.red,
               badgePrefix: 'Outstanding',
               primaryAction: 'Collection Analysis',
@@ -207,7 +211,8 @@ class AdminReportsView extends GetView<AdminReportsController> {
               ),
             ),
           ],
-      ),
+        );
+      }),
     );
     if (embedded) return content;
     return Scaffold(

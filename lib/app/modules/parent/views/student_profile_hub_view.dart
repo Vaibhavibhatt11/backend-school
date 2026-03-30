@@ -213,9 +213,14 @@ class StudentProfileHubView extends GetView<ProfileController> {
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
-                    Text('Term 1 (Current)'),
-                    Text('Grade: A+', style: TextStyle(color: Colors.green)),
+                  children: [
+                    Text('Current Term'),
+                    Obx(
+                      () => Text(
+                        'Grade: ${controller.currentTermGrade.value}',
+                        style: const TextStyle(color: Colors.green),
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -317,7 +322,15 @@ class StudentProfileHubView extends GetView<ProfileController> {
   }
 
   Widget _buildAcademicTab(bool isDark) {
-    return const Center(child: Text('Academic History (Placeholder)'));
+    return Center(
+      child: Obx(
+        () => Text(
+          controller.currentTermPercentage.value > 0
+              ? 'Current term performance: ${controller.currentTermPercentage.value.toStringAsFixed(1)}%'
+              : 'No academic history available yet.',
+        ),
+      ),
+    );
   }
 
   Widget _buildDocumentsTab(bool isDark) {
@@ -407,6 +420,6 @@ class StudentProfileHubView extends GetView<ProfileController> {
   }
 
   Widget _buildActivitiesTab(bool isDark) {
-    return const Center(child: Text('Activities (Placeholder)'));
+    return const Center(child: Text('No activities available yet.'));
   }
 }

@@ -11,63 +11,10 @@ class AnnouncementsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    announcements.assignAll(_mockAnnouncements());
+    announcements.clear();
     filteredAnnouncements.assignAll(announcements);
     ever(searchQuery, _filter);
     ever(selectedTab, (_) => _filter(searchQuery.value));
-  }
-
-  List<Announcement> _mockAnnouncements() {
-    return [
-      Announcement(
-        id: '1',
-        title: 'Upcoming Math Midterm Examination',
-        content:
-            'Please be informed that the midterm examination for Algebra II has been...',
-        authorName: 'Ms. Sarah Johnson',
-        authorImage: 'https://via.placeholder.com/150',
-        timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
-        targetGrades: ['10-B'],
-        isUrgent: false,
-        views: 12,
-      ),
-      Announcement(
-        id: '2',
-        title: 'Annual Sports Day Registration',
-        content:
-            'The deadline for sports day registration is tomorrow at 4 PM. Students who haven\'t...',
-        authorName: 'Mr. David Smith',
-        authorImage: 'https://via.placeholder.com/150',
-        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-        targetGrades: ['School-wide'],
-        isUrgent: true,
-        views: 128,
-      ),
-      Announcement(
-        id: '3',
-        title: 'New Lab Safety Protocols',
-        content:
-            'Effective immediately, all Grade 11 and 12 students must wear enhanced protective gear during chemistry sessions.',
-        authorName: 'Dr. Robert Chen',
-        authorImage: 'https://via.placeholder.com/150',
-        timestamp: DateTime.now().subtract(const Duration(hours: 5)),
-        targetGrades: ['11-12'],
-        isUrgent: false,
-        // imageUrl: 'https://via.placeholder.com/150',
-      ),
-      Announcement(
-        id: '4',
-        title: 'Parent-Teacher Meeting Schedule',
-        content:
-            'The schedule for the upcoming PT meeting has been finalized. Please check the portal to book your slots for individual sessions.',
-        authorName: 'Admin',
-        timestamp: DateTime.now().subtract(const Duration(days: 1)),
-        targetGrades: ['All'],
-        isUrgent: false,
-        fileUrl: 'https://example.com/PT_Meeting_2024.pdf',
-        fileName: 'PT_Meeting_2024.pdf',
-      ),
-    ];
   }
 
   void _filter(String query) {
@@ -87,7 +34,6 @@ class AnnouncementsController extends GetxController {
   }
 
   void createAnnouncement(Map<String, dynamic> data) {
-    // Add the new announcement to the list (mock)
     final newAnnouncement = Announcement(
       id: DateTime.now().toString(),
       title: data['title'],

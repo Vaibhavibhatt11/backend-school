@@ -51,16 +51,28 @@ class ProfileController extends GetxController {
       fatherName.value = data['fatherName']?.toString() ?? fatherName.value;
       motherName.value = data['motherName']?.toString() ?? motherName.value;
       final termPercent = data['currentTermPercentage'];
-      if (termPercent is num) currentTermPercentage.value = termPercent.toDouble();
+      currentTermPercentage.value = termPercent is num ? termPercent.toDouble() : 0.0;
       final avg = data['classAvg'];
-      if (avg is num) classAvg.value = avg.toDouble();
+      classAvg.value = avg is num ? avg.toDouble() : 0.0;
+      currentTermGrade.value = _gradeFromPercent(currentTermPercentage.value);
       final docs = data['documents'];
       if (docs is List) {
         documents.assignAll(docs.whereType<Map>().map((e) => Map<String, dynamic>.from(e)));
+      } else {
+        documents.clear();
       }
     } finally {
       isLoading.value = false;
     }
+  }
+
+  String _gradeFromPercent(double percent) {
+    if (percent >= 90) return 'A+';
+    if (percent >= 80) return 'A';
+    if (percent >= 70) return 'B';
+    if (percent >= 60) return 'C';
+    if (percent >= 50) return 'D';
+    return 'E';
   }
 
   void editPersonal() => AppToast.show('Edit personal info');

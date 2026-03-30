@@ -120,4 +120,47 @@ class AdminService {
     return extractApiData(res.data, context: 'audit logs');
   }
 
+  Future<Map<String, dynamic>> getClasses({
+    int page = 1,
+    int limit = 100,
+  }) async {
+    final res = await _apiClient.get(
+      ApiEndpoints.schoolClasses,
+      query: {'page': page, 'limit': limit},
+    );
+    return extractApiData(res.data, context: 'classes');
+  }
+
+  Future<Map<String, dynamic>> getAttendanceReport({
+    String? dateFrom,
+    String? dateTo,
+    String type = 'student',
+  }) async {
+    final query = <String, dynamic>{
+      'type': type,
+      if (dateFrom != null && dateFrom.isNotEmpty) 'dateFrom': dateFrom,
+      if (dateTo != null && dateTo.isNotEmpty) 'dateTo': dateTo,
+    };
+    final res = await _apiClient.get(
+      ApiEndpoints.schoolReportAttendance,
+      query: query,
+    );
+    return extractApiData(res.data, context: 'attendance report');
+  }
+
+  Future<Map<String, dynamic>> getFeesReport({
+    String? dateFrom,
+    String? dateTo,
+  }) async {
+    final query = <String, dynamic>{
+      if (dateFrom != null && dateFrom.isNotEmpty) 'dateFrom': dateFrom,
+      if (dateTo != null && dateTo.isNotEmpty) 'dateTo': dateTo,
+    };
+    final res = await _apiClient.get(
+      ApiEndpoints.schoolReportFees,
+      query: query.isEmpty ? null : query,
+    );
+    return extractApiData(res.data, context: 'fees report');
+  }
+
 }

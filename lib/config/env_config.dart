@@ -1,11 +1,10 @@
 class EnvConfig {
-  static String apiBaseUrl = 'https://api.example.com';
+  static String apiBaseUrl = const String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://backend-school-app.onrender.com/api/v1',
+  );
 
   static void init() {
-    // Load environment variables if needed
-    const environment = String.fromEnvironment('ENV', defaultValue: 'dev');
-    if (environment == 'prod') {
-      apiBaseUrl = 'https://api.prod.example.com';
-    }
+    // Base URL is configured via --dart-define=API_BASE_URL.
   }
 }

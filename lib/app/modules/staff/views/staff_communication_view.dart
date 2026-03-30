@@ -10,7 +10,11 @@ class StaffCommunicationView extends GetView<StaffCommunicationController> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return SafeArea(
-      child: ListView(
+      child: Obx(() {
+        if (controller.isLoading.value && controller.chats.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Text(
@@ -77,7 +81,8 @@ class StaffCommunicationView extends GetView<StaffCommunicationController> {
             ],
           ),
         ],
-      ),
+      );
+      }),
     );
   }
 

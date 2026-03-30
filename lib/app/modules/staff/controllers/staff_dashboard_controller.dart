@@ -1,44 +1,64 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
+import 'package:erp_frontend/common/services/staff/staff_service.dart';
+import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:get/get.dart';
 
 class StaffDashboardController extends GetxController {
-  final todaySchedule = <String>[
-    '08:30 - Grade 8 Science',
-    '10:00 - Grade 9 Math',
-    '12:30 - PTM follow-up',
-  ].obs;
+  StaffDashboardController(this._staffService);
 
-  final assignedClasses = <String>['8-A', '8-B', '9-C'].obs;
-  final pendingTasks = <String>[
-    'Upload Grade 9 unit test marks',
-    'Approve 2 leave requests',
-    'Publish homework for 8-B',
-  ].obs;
+  final StaffService _staffService;
+  final isLoading = false.obs;
+  final errorMessage = ''.obs;
 
-  final studentAlerts = <String>[
-    'Aarav: low attendance this week',
-    'Riya: pending assignment overdue',
-  ].obs;
+  final todaySchedule = <String>[].obs;
+  final assignedClasses = <String>[].obs;
+  final pendingTasks = <String>[].obs;
+  final studentAlerts = <String>[].obs;
+  final upcomingExams = <String>[].obs;
+  final meetings = <String>[].obs;
+  final notifications = <String>[].obs;
+  final homeworkStatus = <String>[].obs;
 
-  final upcomingExams = <String>[
-    'Science Quiz - Monday',
-    'Math Unit Test - Wednesday',
-  ].obs;
+  @override
+  void onInit() {
+    super.onInit();
+    loadDashboard();
+  }
 
-  final meetings = <String>[
-    'PTM: Fri 04:30 PM',
-    'Staff Meeting: Sat 10:00 AM',
-  ].obs;
+  Future<void> loadDashboard() async {
+    isLoading.value = true;
+    errorMessage.value = '';
+    try {
+      final data = await _staffService.getDashboard();
+      todaySchedule.assignAll(_asStringList(data['todaySchedule']));
+      assignedClasses.assignAll(_asStringList(data['assignedClasses']));
+      pendingTasks.assignAll(_asStringList(data['pendingTasks']));
+      studentAlerts.assignAll(_asStringList(data['studentAlerts']));
+      upcomingExams.assignAll(_asStringList(data['upcomingExams']));
+      meetings.assignAll(_asStringList(data['meetings']));
+      notifications.assignAll(_asStringList(data['notifications']));
+      homeworkStatus.assignAll(_asStringList(data['homeworkStatus']));
+    } catch (e) {
+      errorMessage.value = dioOrApiErrorMessage(e);
+      AppToast.show(errorMessage.value);
+      todaySchedule.clear();
+      assignedClasses.clear();
+      pendingTasks.clear();
+      studentAlerts.clear();
+      upcomingExams.clear();
+      meetings.clear();
+      notifications.clear();
+      homeworkStatus.clear();
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
-  final notifications = <String>[
-    'New circular published for Grade 8',
-    'Reminder: Submit weekly plan by 6 PM',
-  ].obs;
-
-  final homeworkStatus = <String>[
-    '8-A: 18/22 submissions reviewed',
-    '9-C: 12 submissions pending review',
-  ].obs;
+  List<String> _asStringList(dynamic value) {
+    if (value is! List) return <String>[];
+    return value.map((e) => e.toString()).where((e) => e.trim().isNotEmpty).toList();
+  }
 
   final quickActions = const <String>[
     'Attendance & Leave',

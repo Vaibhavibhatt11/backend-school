@@ -10,17 +10,22 @@ class ForgotPasswordController extends GetxController {
   final isLoading = false.obs;
 
   Future<void> sendRecovery() async {
-    if (recoveryInfo.isEmpty) {
-      AppToast.show('Enter email or phone');
+    final value = recoveryInfo.value.trim();
+    if (value.isEmpty) {
+      AppToast.show('Enter email');
+      return;
+    }
+    if (!value.contains('@')) {
+      AppToast.show('Enter a valid email address');
       return;
     }
     isLoading.value = true;
     try {
-      await _userRepository.sendOtp(recoveryInfo.value);
+      await _userRepository.sendOtp(value);
       // Navigate to OTP with purpose 'forgot'
       Get.toNamed(
         AppRoutes.OTP,
-        arguments: {'purpose': 'forgot', 'identifier': recoveryInfo.value},
+        arguments: {'purpose': 'forgot', 'identifier': value},
       );
     } finally {
       isLoading.value = false;

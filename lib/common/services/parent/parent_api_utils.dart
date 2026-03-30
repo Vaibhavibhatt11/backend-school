@@ -5,6 +5,8 @@ String dioOrApiErrorMessage(Object error) {
   if (error is DioException) {
     final data = error.response?.data;
     if (data is Map<String, dynamic>) {
+      final message = data['message']?.toString();
+      if (message != null && message.isNotEmpty) return message;
       final err = data['error'];
       if (err is Map<String, dynamic>) {
         final m = err['message']?.toString();
@@ -30,6 +32,10 @@ Map<String, dynamic> extractApiData(
 
   final success = payload['success'];
   if (success is bool && !success) {
+    final message = payload['message']?.toString();
+    if (message != null && message.isNotEmpty) {
+      throw Exception(message);
+    }
     final error = payload['error'];
     if (error is Map<String, dynamic>) {
       final message = error['message']?.toString();

@@ -1,6 +1,7 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:erp_frontend/app/services/app_storage.dart';
+import 'package:erp_frontend/common/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -29,7 +30,10 @@ class StaffSettingsView extends StatelessWidget {
           _tile(isDark, Icons.tune_rounded, 'Other settings'),
           const SizedBox(height: 14),
           ElevatedButton.icon(
-            onPressed: () {
+            onPressed: () async {
+              if (Get.isRegistered<AuthService>()) {
+                await Get.find<AuthService>().logout();
+              }
               AppStorage().clearAll();
               Get.offAllNamed(AppRoutes.LOGIN);
             },

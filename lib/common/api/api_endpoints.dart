@@ -10,6 +10,9 @@ class ApiEndpoints {
   static const String authRefresh = '/auth/refresh';
   static const String authMe = '/auth/me';
   static const String authLogout = '/auth/logout';
+  static const String authForgotPassword = '/auth/forgot-password';
+  static const String authVerifyOtp = '/auth/verify-otp';
+  static const String authResetPassword = '/auth/reset-password';
 
   // Parent app
   static const String parentChildren = '/parent/children';
@@ -43,5 +46,14 @@ class ApiEndpoints {
   static const String schoolSettings = '/school/settings';
   static const String schoolAnnouncements = '/school/announcements';
   static const String schoolAuditLogs = '/school/audit-logs';
+  static const String schoolClasses = '/school/classes';
+  static const String schoolReportAttendance = '/school/reports/attendance';
+  static const String schoolReportFees = '/school/reports/fees';
+
+  // Staff app
+  static const String staffDashboard = '/staff/dashboard';
+  static const String staffProfile = '/staff/profile';
+  static const String staffReports = '/staff/reports';
+  static const String staffCommunication = '/staff/communication';
 }
 

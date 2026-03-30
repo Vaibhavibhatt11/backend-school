@@ -19,7 +19,30 @@ class ProgressReportsView extends GetView<ProgressReportsController> {
           IconButton(icon: const Icon(Icons.ios_share), onPressed: () {}),
         ],
       ),
-      body: SingleChildScrollView(
+      body: Obx(() {
+        if (controller.isLoading.value && controller.subjects.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (controller.errorMessage.value.isNotEmpty &&
+            controller.subjects.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(controller.errorMessage.value, textAlign: TextAlign.center),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: controller.loadProgressReport,
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        return SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,39 +94,33 @@ class ProgressReportsView extends GetView<ProgressReportsController> {
             // Term selector
             SizedBox(
               height: 40,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children:
-                    ['Term 2', 'Term 1', 'Monthly Tests', 'Assignments']
-                        .asMap()
-                        .map(
-                          (index, term) => MapEntry(
-                            index,
-                            Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: Obx(
-                                () => ChoiceChip(
-                                  label: Text(term),
-                                  selected:
-                                      controller.selectedTerm.value == index,
-                                  onSelected: (selected) {
-                                    if (selected) controller.setTerm(index);
-                                  },
-                                  selectedColor: AppColors.primary,
-                                  labelStyle: TextStyle(
-                                    color:
-                                        controller.selectedTerm.value == index
-                                            ? Colors.white
-                                            : null,
-                                  ),
-                                ),
-                              ),
+              child: Obx(() {
+                final terms = controller.terms;
+                if (terms.isEmpty) return const SizedBox.shrink();
+                return ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: terms
+                      .map(
+                        (term) => Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: ChoiceChip(
+                            label: Text(term),
+                            selected: controller.selectedTerm.value == term,
+                            onSelected: (selected) {
+                              if (selected) controller.setTerm(term);
+                            },
+                            selectedColor: AppColors.primary,
+                            labelStyle: TextStyle(
+                              color: controller.selectedTerm.value == term
+                                  ? Colors.white
+                                  : null,
                             ),
                           ),
-                        )
-                        .values
-                        .toList(),
-              ),
+                        ),
+                      )
+                      .toList(),
+                );
+              }),
             ),
             const SizedBox(height: 24),
             // GPA and Attendance
@@ -155,28 +172,40 @@ class ProgressReportsView extends GetView<ProgressReportsController> {
                               ],
                             ),
                             const SizedBox(height: 4),
-                            Stack(
-                              children: [
-                                Container(
-                                  height: 8,
-                                  width: double.infinity,
-                                  color: Colors.grey[300],
-                                ),
-                                Container(
-                                  height: 8,
-                                  width: (subj['score'] as int).toDouble(),
-                                  color: AppColors.primary,
-                                ),
-                                // Class avg marker
-                                Positioned(
-                                  left: (subj['avg'] as int).toDouble(),
-                                  child: Container(
-                                    height: 8,
-                                    width: 2,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ],
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                final score = (subj['score'] is num)
+                                    ? (subj['score'] as num).toDouble().clamp(0, 100)
+                                    : (double.tryParse('${subj['score']}') ?? 0).clamp(0, 100);
+                                final avg = (subj['avg'] is num)
+                                    ? (subj['avg'] as num).toDouble().clamp(0, 100)
+                                    : (double.tryParse('${subj['avg']}') ?? 0).clamp(0, 100);
+                                final totalWidth = constraints.maxWidth;
+                                final scoreWidth = (score / 100) * totalWidth;
+                                final avgOffset = (avg / 100) * totalWidth;
+                                return Stack(
+                                  children: [
+                                    Container(
+                                      height: 8,
+                                      width: double.infinity,
+                                      color: Colors.grey[300],
+                                    ),
+                                    Container(
+                                      height: 8,
+                                      width: scoreWidth,
+                                      color: AppColors.primary,
+                                    ),
+                                    Positioned(
+                                      left: avgOffset,
+                                      child: Container(
+                                        height: 8,
+                                        width: 2,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
                             const SizedBox(height: 4),
                             Row(
@@ -227,19 +256,37 @@ class ProgressReportsView extends GetView<ProgressReportsController> {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      CircularProgressIndicator(
-                        value: 0.94,
-                        strokeWidth: 8,
-                        backgroundColor: Colors.grey[300],
-                        valueColor: const AlwaysStoppedAnimation(
-                          AppColors.primary,
-                        ),
+                      Obx(
+                        () {
+                          final present = controller.attendanceDistribution['present'] ?? 0;
+                          final late = controller.attendanceDistribution['late'] ?? 0;
+                          final absent = controller.attendanceDistribution['absent'] ?? 0;
+                          final total = present + late + absent;
+                          final pct = total > 0 ? ((present + late) / total) : 0.0;
+                          return CircularProgressIndicator(
+                            value: pct,
+                            strokeWidth: 8,
+                            backgroundColor: Colors.grey[300],
+                            valueColor: const AlwaysStoppedAnimation(
+                              AppColors.primary,
+                            ),
+                          );
+                        },
                       ),
-                      const Center(
-                        child: Text(
-                          '94%',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
+                      Obx(
+                        () {
+                          final present = controller.attendanceDistribution['present'] ?? 0;
+                          final late = controller.attendanceDistribution['late'] ?? 0;
+                          final absent = controller.attendanceDistribution['absent'] ?? 0;
+                          final total = present + late + absent;
+                          final pct = total > 0 ? (((present + late) / total) * 100).round() : 0;
+                          return Center(
+                            child: Text(
+                              '$pct%',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -282,39 +329,32 @@ class ProgressReportsView extends GetView<ProgressReportsController> {
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children:
-                  ['SEP', 'OCT', 'NOV', 'DEC', 'JAN']
-                      .asMap()
-                      .map(
-                        (index, month) => MapEntry(
-                          index,
-                          Column(
-                            children: [
-                              Container(
-                                width: 20,
-                                height: 80,
-                                color: Colors.grey[300],
-                                child: Align(
-                                  alignment: Alignment.bottomCenter,
-                                  child: Container(
-                                    height:
-                                        controller.feeHistory[index].toDouble(),
-                                    width: 20,
-                                    color:
-                                        index == 3
-                                            ? AppColors.primary.withOpacity(0.5)
-                                            : AppColors.primary,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(month),
-                            ],
+              children: List.generate(
+                controller.feeHistory.length,
+                (index) {
+                  final amount = controller.feeHistory[index].toDouble();
+                  final normalized = amount.clamp(0, 100);
+                  return Column(
+                    children: [
+                      Container(
+                        width: 20,
+                        height: 80,
+                        color: Colors.grey[300],
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Container(
+                            height: normalized * 0.8,
+                            width: 20,
+                            color: AppColors.primary,
                           ),
                         ),
-                      )
-                      .values
-                      .toList(),
+                      ),
+                      const SizedBox(height: 4),
+                      Text('M${index + 1}'),
+                    ],
+                  );
+                },
+              ),
             ),
             const SizedBox(height: 16),
             Row(
@@ -322,13 +362,13 @@ class ProgressReportsView extends GetView<ProgressReportsController> {
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
                       'PENDING AMOUNT',
                       style: TextStyle(fontSize: 10, color: Colors.grey),
                     ),
                     Text(
-                      '\$1,250.00',
+                      '\$${controller.feeHistory.fold<int>(0, (sum, v) => sum + v).toString()}',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -351,6 +391,8 @@ class ProgressReportsView extends GetView<ProgressReportsController> {
           ],
         ),
       ),
+      );
+      }),
       bottomNavigationBar: const ParentBottomNavBar(
         currentIndex: 0,
       ), // Reports from home

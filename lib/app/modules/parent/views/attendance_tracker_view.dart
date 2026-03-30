@@ -154,7 +154,7 @@ class AttendanceTrackerView extends GetView<AttendanceController> {
                       if (day == null) {
                         return Container();
                       }
-                      // Determine status based on dummy data (we'll add a method in controller)
+                      // Determine status from API-backed attendance map in controller.
                       String status = controller.getStatusForDay(day);
                       Color bgColor;
                       Color textColor;
@@ -225,54 +225,70 @@ class AttendanceTrackerView extends GetView<AttendanceController> {
                   Row(
                     children: [
                       // Circular progress
-                      SizedBox(
-                        width: 80,
-                        height: 80,
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            CircularProgressIndicator(
-                              value: 0.9,
-                              strokeWidth: 8,
-                              backgroundColor: Colors.white10,
-                              valueColor: const AlwaysStoppedAnimation(
-                                AppColors.primary,
-                              ),
-                            ),
-                            Center(
-                              child: Text(
-                                '90%',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
+                      Obx(
+                        () {
+                          final present = controller.attendanceStats['present'] ?? 0;
+                          final absent = controller.attendanceStats['absent'] ?? 0;
+                          final late = controller.attendanceStats['late'] ?? 0;
+                          final total = present + absent + late;
+                          final percent = total > 0 ? (present / total) : 0.0;
+                          return SizedBox(
+                            width: 80,
+                            height: 80,
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                CircularProgressIndicator(
+                                  value: percent,
+                                  strokeWidth: 8,
+                                  backgroundColor: Colors.white10,
+                                  valueColor: const AlwaysStoppedAnimation(
+                                    AppColors.primary,
+                                  ),
                                 ),
-                              ),
+                                Center(
+                                  child: Text(
+                                    '${(percent * 100).round()}%',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              'Excellent!',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Marcus has been very consistent. Only 2 absences recorded this month.',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
+                        child: Obx(
+                          () {
+                            final absent = controller.attendanceStats['absent'] ?? 0;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Attendance Overview',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  absent == 0
+                                      ? 'Great consistency this month.'
+                                      : '$absent absences recorded this month.',
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ),
                     ],

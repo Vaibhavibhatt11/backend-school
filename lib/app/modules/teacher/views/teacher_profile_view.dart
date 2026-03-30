@@ -39,9 +39,7 @@ class TeacherProfileView extends GetView<TeacherProfileController> {
                     children: [
                       const CircleAvatar(
                         radius: 60,
-                        backgroundImage: NetworkImage(
-                          'https://lh3.googleusercontent.com/aida-public/...', // placeholder
-                        ),
+                        child: Icon(Icons.person, size: 42),
                       ),
                       Positioned(
                         bottom: 0,

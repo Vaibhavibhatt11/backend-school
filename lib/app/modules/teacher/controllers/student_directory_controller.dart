@@ -11,60 +11,9 @@ class StudentDirectoryController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    students.assignAll(_mockStudents());
+    students.clear();
     filteredStudents.assignAll(students);
     ever(searchQuery, _filter);
-  }
-
-  List<Student> _mockStudents() {
-    return [
-      Student(
-        id: '1',
-        name: 'Aaron Thompson',
-        rollNo: '#2024-001',
-        grade: '10-A',
-        imageUrl: 'https://via.placeholder.com/150',
-        attendancePercentage: 95.0,
-        recentAttendance: {
-          'Mon': AttendanceStatus.present,
-          'Tue': AttendanceStatus.present,
-          'Wed': AttendanceStatus.present,
-          'Thu': AttendanceStatus.present,
-          'Fri': AttendanceStatus.present,
-        },
-      ),
-      Student(
-        id: '2',
-        name: 'Alice Walker',
-        rollNo: '#2024-002',
-        grade: '10-A',
-        imageUrl: 'https://via.placeholder.com/150',
-        attendancePercentage: 98.0,
-        recentAttendance: {
-          'Mon': AttendanceStatus.present,
-          'Tue': AttendanceStatus.present,
-          'Wed': AttendanceStatus.present,
-          'Thu': AttendanceStatus.present,
-          'Fri': AttendanceStatus.present,
-        },
-      ),
-      Student(
-        id: '3',
-        name: 'Benjamin Hayes',
-        rollNo: '#2024-003',
-        grade: '10-A',
-        imageUrl: 'https://via.placeholder.com/150',
-        attendancePercentage: 85.0,
-        recentAttendance: {
-          'Mon': AttendanceStatus.present,
-          'Tue': AttendanceStatus.present,
-          'Wed': AttendanceStatus.late,
-          'Thu': AttendanceStatus.present,
-          'Fri': AttendanceStatus.absent,
-        },
-      ),
-      // Add more students as needed
-    ];
   }
 
   void _filter(String query) {

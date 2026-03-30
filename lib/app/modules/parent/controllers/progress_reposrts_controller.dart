@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../common/services/parent/parent_academics_service.dart';
+import '../../../../common/services/parent/parent_api_utils.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
+import '../../../../common/utils/app_toast.dart';
 
 class ProgressReportsController extends GetxController {
   final ParentAcademicsService _academicsService = Get.find<ParentAcademicsService>();
   final ParentContextService _parentContext = Get.find<ParentContextService>();
 
   final isLoading = false.obs;
+  final errorMessage = ''.obs;
   final studentName = ''.obs;
   final studentClass = ''.obs;
   final studentPhotoUrl = ''.obs;
   final academicYear = ''.obs;
-  final selectedTerm = 0.obs; // 0: Term 2, 1: Term 1, etc.
+  final selectedTerm = ''.obs;
+  final terms = <String>[].obs;
   final gpa = 0.0.obs;
   final gpaChange = 0.0.obs;
   final attendance = 0.0.obs;
@@ -37,6 +41,7 @@ class ProgressReportsController extends GetxController {
 
   Future<void> loadProgressReport() async {
     isLoading.value = true;
+    errorMessage.value = '';
     try {
       final data = await _academicsService.getProgressReports(
         childId: _parentContext.selectedChildId.value,
@@ -47,8 +52,18 @@ class ProgressReportsController extends GetxController {
           (data['photoUrl'] ?? data['avatarUrl'] ?? data['studentPhotoUrl'] ?? studentPhotoUrl.value)
               .toString();
       academicYear.value = data['academicYear']?.toString() ?? academicYear.value;
-      if (data['selectedTerm'] != null) {
-        selectedTerm.value = int.tryParse(data['selectedTerm'].toString()) ?? selectedTerm.value;
+      final selected = data['selectedTerm']?.toString().trim();
+      if (selected != null && selected.isNotEmpty) {
+        selectedTerm.value = selected;
+      }
+      final apiTerms = data['terms'];
+      if (apiTerms is List) {
+        final parsed = apiTerms.map((e) => e.toString().trim()).where((e) => e.isNotEmpty).toList();
+        terms.assignAll(parsed);
+      } else if (selectedTerm.value.isNotEmpty) {
+        terms.assignAll([selectedTerm.value]);
+      } else {
+        terms.clear();
       }
       final gpaValue = data['gpa'];
       if (gpaValue is num) gpa.value = gpaValue.toDouble();
@@ -70,12 +85,15 @@ class ProgressReportsController extends GetxController {
       if (fees is List) {
         feeHistory.assignAll(fees.map((e) => int.tryParse(e.toString()) ?? 0));
       }
+    } catch (e) {
+      errorMessage.value = dioOrApiErrorMessage(e);
+      AppToast.show(errorMessage.value);
     } finally {
       isLoading.value = false;
     }
   }
 
-  void setTerm(int index) => selectedTerm.value = index;
+  void setTerm(String term) => selectedTerm.value = term;
   void viewFullMarksheet() {
     Get.dialog(
       AlertDialog(
