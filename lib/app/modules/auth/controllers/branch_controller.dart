@@ -1,6 +1,5 @@
 import 'package:erp_frontend/app/data/models/branch_model.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
-import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:get/get.dart';
 
 class BranchController extends GetxController {
@@ -15,7 +14,7 @@ class BranchController extends GetxController {
   }
 
   void loadBranches() {
-    // Dummy data
+    // Demo campuses until a public branch list API exists. First is pre-selected for one-tap continue.
     branches.value = [
       BranchModel(
         id: '1',
@@ -43,6 +42,9 @@ class BranchController extends GetxController {
         address: '101 Nature Pass, Parkside',
       ),
     ];
+    if (branches.isNotEmpty) {
+      selectBranch(branches.first.id);
+    }
   }
 
   void selectBranch(String id) {
@@ -60,11 +62,7 @@ class BranchController extends GetxController {
   }
 
   void confirmSelection() {
-    if (selectedBranchId.value != null) {
-      Get.toNamed(AppRoutes.LOGIN);
-    } else {
-      AppToast.show('Please select a branch');
-    }
+    Get.toNamed(AppRoutes.LOGIN);
   }
 
   List<BranchModel> get filteredBranches {

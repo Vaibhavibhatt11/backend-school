@@ -28,6 +28,7 @@ const List<StaffModuleItem> kStaffModules = [
       'Homework status',
       'Upcoming exams',
       'Meetings',
+      'AI task prioritization & workload hints (Teaching Assistant)',
     ],
   ),
   StaffModuleItem(
@@ -213,6 +214,19 @@ const List<StaffModuleItem> kStaffModules = [
       'Attendance reports',
       'Staff productivity reports',
       'Student progress reports',
+    ],
+  ),
+  StaffModuleItem(
+    id: 'ai_teaching_assistant',
+    title: 'AI Teaching Assistant (Edvieye)',
+    icon: Icons.smart_toy_rounded,
+    features: [
+      'AI lesson generator',
+      'AI quiz generator',
+      'AI question generator',
+      'AI answer explanations',
+      'Teaching assistant chat (live LLM when API key configured)',
+      'Homework & communication drafting helpers',
     ],
   ),
   StaffModuleItem(

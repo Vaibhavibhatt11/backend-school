@@ -9,7 +9,6 @@ import '../controllers/announcements_controller.dart';
 import '../controllers/live_class_controller.dart';
 import '../controllers/upload_controller.dart';
 import '../controllers/teacher_profile_controller.dart';
-import '../controllers/ai_assistant_controller.dart';
 import '../controllers/notifications_controller.dart';
 
 class TeacherBinding extends Bindings {
@@ -25,7 +24,6 @@ class TeacherBinding extends Bindings {
     Get.lazyPut(() => LiveClassController());
     Get.lazyPut(() => UploadController());
     Get.lazyPut(() => TeacherProfileController());
-    Get.lazyPut(() => AiAssistantController());
     Get.lazyPut(() => NotificationsController());
   }
 }

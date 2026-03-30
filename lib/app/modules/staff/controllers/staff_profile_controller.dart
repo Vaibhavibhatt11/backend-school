@@ -17,6 +17,8 @@ class StaffProfileController extends GetxController {
   final contact = ''.obs;
   final email = ''.obs;
   final documents = <String>[].obs;
+  final documentRows = <Map<String, String>>[].obs;
+  final staffId = ''.obs;
 
   @override
   void onInit() {
@@ -35,11 +37,26 @@ class StaffProfileController extends GetxController {
       experience.value = (data['experience'] ?? '').toString();
       contact.value = (data['contact'] ?? '').toString();
       email.value = (data['email'] ?? '').toString();
+      staffId.value = (data['staffId'] ?? '').toString();
       final rawDocs = data['documents'];
       if (rawDocs is List) {
         documents.assignAll(rawDocs.map((e) => e.toString()));
       } else {
         documents.clear();
+      }
+      documentRows.clear();
+      final rows = data['documentRows'];
+      if (rows is List) {
+        for (final e in rows) {
+          if (e is Map) {
+            documentRows.add({
+              'id': (e['id'] ?? '').toString(),
+              'name': (e['name'] ?? '').toString(),
+              'url': (e['url'] ?? '').toString(),
+              'type': (e['type'] ?? '').toString(),
+            });
+          }
+        }
       }
     } catch (e) {
       errorMessage.value = dioOrApiErrorMessage(e);

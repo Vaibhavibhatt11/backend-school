@@ -268,76 +268,85 @@ class ParentHomeView extends GetView<ParentHomeController> {
                   separatorBuilder: (_, __) => const SizedBox(width: 16),
                   itemBuilder: (context, index) {
                     final notice = controller.recentNotices[index];
-                    return Container(
-                      width: 280,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: isDark ? AppColors.surfaceDark : Colors.white,
+                    final typeStr = (notice['type'] ?? 'Notice').toString();
+                    final isUrgent = notice['urgent'] == true ||
+                        typeStr.toLowerCase().contains('urgent');
+                    return Material(
+                      color: Colors.transparent,
+                      child: InkWell(
                         borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: isDark
-                              ? AppColors.borderDark
-                              : AppColors.borderLight,
+                        onTap: controller.goToAnnouncements,
+                        child: Container(
+                          width: 280,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: isDark ? AppColors.surfaceDark : Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(
+                              color: isDark
+                                  ? AppColors.borderDark
+                                  : AppColors.borderLight,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: isUrgent ? Colors.red : Colors.orange,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    typeStr,
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                notice['title']!,
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                notice['description']!,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const Spacer(),
+                              Row(
+                                children: [
+                                  AppUserAvatar(
+                                    photoUrl: (notice['authorPhotoUrl'] ?? notice['photoUrl'])
+                                        ?.toString(),
+                                    radius: 12,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Posted by ${notice['postedBy']} • ${notice['time']}',
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  color: notice['type'] == 'Events'
-                                      ? Colors.blue
-                                      : Colors.orange,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                notice['type']!,
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            notice['title']!,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            notice['description']!,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const Spacer(),
-                          Row(
-                            children: [
-                              AppUserAvatar(
-                                photoUrl: (notice['authorPhotoUrl'] ?? notice['photoUrl'])
-                                    ?.toString(),
-                                radius: 12,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Posted by ${notice['postedBy']} • ${notice['time']}',
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
+                    ),
+                  );
                   },
                 ),
               ),

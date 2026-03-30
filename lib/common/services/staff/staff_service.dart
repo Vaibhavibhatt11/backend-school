@@ -75,4 +75,19 @@ class StaffService {
     );
     return extractApiData(res.data, context: 'update staff settings');
   }
+
+  /// Calls live OpenAI via backend when `OPENAI_API_KEY` is set on the server.
+  Future<Map<String, dynamic>> aiAssist({
+    required String prompt,
+    String contextType = 'general',
+  }) async {
+    final res = await _apiClient.post(
+      ApiEndpoints.staffAiAssist,
+      data: {
+        'prompt': prompt,
+        'contextType': contextType,
+      },
+    );
+    return extractApiData(res.data, context: 'staff AI assist');
+  }
 }

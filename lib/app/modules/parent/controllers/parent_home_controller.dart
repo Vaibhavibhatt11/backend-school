@@ -45,6 +45,7 @@ class ParentHomeController extends GetxController {
     isLoading.value = true;
     errorMessage.value = '';
     try {
+      await _parentContext.ensureSelectedChildId();
       final data = await _dashboardService.getHome(
         childId: _parentContext.selectedChildId.value,
         month: month,

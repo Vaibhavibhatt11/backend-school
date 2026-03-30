@@ -4,7 +4,7 @@ import '../../../common/fonts/common_textstyle.dart';
 import '../../../common/utils/responsive.dart';
 import '../../../widgets/app_card.dart';
 
-/// Reusable action tile for student module screens (e.g. AI Study Assistant).
+/// Reusable action tile for student module screens.
 class StudentModuleAction extends StatelessWidget {
   const StudentModuleAction({
     super.key,

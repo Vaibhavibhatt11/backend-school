@@ -8,6 +8,7 @@ import '../../common/services/system_service.dart';
 import '../../common/services/session_storage_service.dart';
 import '../../common/theme/app_color.dart';
 import '../../common/utils/auth_route_resolver.dart';
+import '../../common/utils/auth_user_parse.dart';
 import '../../common/utils/responsive.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -48,8 +49,8 @@ class _SplashScreenState extends State<SplashScreen> {
         final auth = Get.find<AuthService>();
         final body = await auth.me();
         final data = extractApiData(body, context: 'me');
-        final user = data['user'] as Map<String, dynamic>?;
-        role = user?['role']?.toString();
+        role = AuthUserParse.roleFromData(data) ??
+            AuthUserParse.roleFromAuthResponse(body is Map<String, dynamic> ? body : null);
         if (role != null && role.isNotEmpty) {
           appStorage.userRole = role;
         }

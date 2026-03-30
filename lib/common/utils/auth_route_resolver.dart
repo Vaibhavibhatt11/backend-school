@@ -45,6 +45,10 @@ class AuthRouteResolver {
       case 'HR':
       case 'ACCOUNTANT':
       case 'ADMIN':
+      case 'LIBRARIAN':
+      case 'TRANSPORT':
+      case 'HOSTEL_WARDEN':
+      case 'INVENTORY':
         return AppRoutes.ADMIN_HOME;
     }
     final lower = role.trim().toLowerCase();

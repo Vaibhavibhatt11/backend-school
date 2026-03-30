@@ -39,11 +39,6 @@ class StudentDashboardScreen extends GetView<StudentDashboardController> {
               _tile(context, 'Study Materials', Icons.menu_book_rounded, controller.goToStudyMaterials),
               _tile(context, 'Exams', Icons.quiz_rounded, controller.goToExams),
               SizedBox(height: Responsive.h(context, 12)),
-              // AI options commented for now
-              // SectionHeader(title: 'AI Assistants'),
-              // _tile(context, 'AI Study Assistant', Icons.smart_toy_rounded, controller.goToAiStudy),
-              // _tile(context, 'AI Career Advisor', Icons.work_rounded, controller.goToAiCareer),
-              // SizedBox(height: Responsive.h(context, 12)),
               SectionHeader(title: 'Finance & Services'),
               _tile(context, 'Fees', Icons.payments_rounded, controller.goToFees),
               _tile(context, 'Communication', Icons.chat_rounded, controller.goToCommunication),

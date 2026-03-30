@@ -4,6 +4,7 @@ import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:erp_frontend/common/utils/auth_route_resolver.dart';
 import 'package:get/get.dart';
 import '../../../../common/services/auth_service.dart';
+import '../../../../common/utils/auth_user_parse.dart';
 import '../../../services/app_storage.dart';
 
 class LoginController extends GetxController {
@@ -34,10 +35,9 @@ class LoginController extends GetxController {
       // Keep GetStorage in sync with SharedPreferences token for legacy flows.
       _storage.token = response.token;
 
-      final user = response.data?['user'];
-      String? role;
-      if (user is Map && user['role'] != null) {
-        role = user['role'].toString();
+      String? role = AuthUserParse.roleFromData(response.data);
+      role ??= AuthUserParse.roleFromAuthResponse(response.raw);
+      if (role != null && role.isNotEmpty) {
         _storage.userRole = role;
       }
 

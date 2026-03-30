@@ -164,6 +164,6 @@ class AdminDashboardController extends GetxController {
   }
 
   void goToAllModules() {
-    _safeToNamed(AppRoutes.ADMIN_HOME, arguments: {'tabIndex': 0});
+    _safeToNamed(AppRoutes.ADMIN_MODULES);
   }
 }

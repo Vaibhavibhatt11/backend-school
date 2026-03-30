@@ -1,8 +1,10 @@
 import 'package:erp_frontend/app/modules/admin/views/admin_attendance_view.dart';
 import 'package:erp_frontend/app/modules/admin/views/admin_audit_logs_view.dart';
-import 'package:erp_frontend/app/modules/admin/views/admin_shell_view.dart';
 import 'package:erp_frontend/app/modules/admin/views/admin_fee_snapshot_view.dart';
+import 'package:erp_frontend/app/modules/admin/views/admin_module_detail_view.dart';
+import 'package:erp_frontend/app/modules/admin/views/admin_modules_view.dart';
 import 'package:erp_frontend/app/modules/admin/views/admin_profile_view.dart';
+import 'package:erp_frontend/app/modules/admin/views/admin_shell_view.dart';
 import 'package:erp_frontend/app/modules/auth/bindings/auth_binding.dart';
 import 'package:erp_frontend/app/modules/auth/views/branch_selection_view.dart';
 import 'package:erp_frontend/app/modules/auth/views/forgot_password_view.dart';
@@ -27,7 +29,6 @@ import 'package:erp_frontend/app/modules/parent/views/school_announcements_view.
 import 'package:erp_frontend/app/modules/parent/views/settings_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/student_profile_hub_view.dart';
 import 'package:erp_frontend/app/modules/teacher/bindings/teacher_binding.dart';
-import 'package:erp_frontend/app/modules/teacher/views/ai_assistant_view.dart';
 import 'package:erp_frontend/app/modules/teacher/views/announcements_view.dart';
 import 'package:erp_frontend/app/modules/teacher/views/attendance_selector_view.dart';
 import 'package:erp_frontend/app/modules/teacher/views/live_class_view.dart';
@@ -40,6 +41,8 @@ import 'package:erp_frontend/app/modules/teacher/views/teacher_profile_view.dart
 import 'package:erp_frontend/app/modules/teacher/views/timetable_view.dart';
 import 'package:erp_frontend/app/modules/teacher/views/upload_view.dart';
 import 'package:erp_frontend/app/modules/staff/bindings/staff_binding.dart';
+import 'package:erp_frontend/app/modules/staff/views/staff_module_detail_view.dart';
+import 'package:erp_frontend/app/modules/staff/views/staff_modules_view.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_shell_view.dart';
 import 'package:get/get.dart';
 
@@ -125,11 +128,6 @@ class AppPages {
       binding: ParentBinding(),
     ),
     GetPage(
-      name: AppRoutes.PARENT_AI_ASSISTANT,
-      page: () => const ParentHomeView(),
-      binding: ParentBinding(),
-    ),
-    GetPage(
       name: AppRoutes.PARENT_PERFORMANCE,
       page: () => const ProgressReportsView(),
       binding: ParentBinding(),
@@ -211,11 +209,6 @@ class AppPages {
       binding: TeacherBinding(),
     ),
     GetPage(
-      name: AppRoutes.TEACHER_AI_ASSISTANT,
-      page: () => const AiAssistantView(),
-      binding: TeacherBinding(),
-    ),
-    GetPage(
       name: AppRoutes.TEACHER_NOTIFICATIONS,
       page: () => const NotificationsView(),
       binding: TeacherBinding(),
@@ -227,12 +220,12 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.STAFF_MODULES,
-      page: () => const StaffShellView(),
+      page: () => const StaffModulesView(),
       binding: StaffBinding(),
     ),
     GetPage(
       name: AppRoutes.STAFF_MODULE_DETAIL,
-      page: () => const StaffShellView(),
+      page: () => const StaffModuleDetailView(),
       binding: StaffBinding(),
     ),
     GetPage(
@@ -282,17 +275,17 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.ADMIN_MODULES,
-      page: () => const AdminShellView(),
+      page: () => const AdminModulesView(),
       binding: AdminBinding(),
     ),
     GetPage(
       name: AppRoutes.ADMIN_MODULE_DETAIL,
-      page: () => const AdminShellView(),
+      page: () => const AdminModuleDetailView(),
       binding: AdminBinding(),
     ),
     GetPage(
       name: AppRoutes.ADMIN_FEATURE_DETAIL,
-      page: () => const AdminShellView(),
+      page: () => const AdminFeatureDetailView(),
       binding: AdminBinding(),
     ),
   ];

@@ -1,6 +1,6 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/modules/admin/models/admin_module_catalog.dart';
-import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/app/modules/admin/utils/admin_portal_navigation.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -109,9 +109,9 @@ class _FeatureTile extends StatelessWidget {
         ),
       ),
       child: ListTile(
-        onTap: () => Get.toNamed(
-          AppRoutes.ADMIN_FEATURE_DETAIL,
-          arguments: {'moduleId': module.id, 'feature': feature},
+        onTap: () => AdminPortalNavigation.openFromCatalog(
+          moduleId: module.id,
+          feature: feature,
         ),
         leading: const Icon(Icons.task_alt_rounded, color: AppColors.primary),
         title: Text(

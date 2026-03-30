@@ -69,21 +69,6 @@ class LearnTab extends StatelessWidget {
                       icon: Icons.quiz_rounded,
                       onTap: () => Get.toNamed(CommonScreenRoutes.studentExams),
                     ),
-                    SizedBox(height: Responsive.h(context, 10)),
-                    // AI options commented for now
-                    // ModuleTile(
-                    //   title: 'AI Study Assistant',
-                    //   subtitle: 'Explain, summarize & practice',
-                    //   icon: Icons.smart_toy_rounded,
-                    //   onTap: () => Get.toNamed(CommonScreenRoutes.studentAiStudyAssistant),
-                    // ),
-                    // SizedBox(height: Responsive.h(context, 10)),
-                    // ModuleTile(
-                    //   title: 'AI Career Advisor',
-                    //   subtitle: 'Career guidance & suggestions',
-                    //   icon: Icons.work_rounded,
-                    //   onTap: () => Get.toNamed(CommonScreenRoutes.studentAiCareerAdvisor),
-                    // ),
                     SizedBox(height: Responsive.h(context, 24)),
                   ],
                 ),

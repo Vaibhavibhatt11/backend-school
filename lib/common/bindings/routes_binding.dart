@@ -27,10 +27,6 @@ import '../../modules/student/study_materials/student_study_materials_binding.da
 import '../../modules/student/study_materials/student_study_materials_screen.dart';
 import '../../modules/student/exams/student_exams_binding.dart';
 import '../../modules/student/exams/student_exams_screen.dart';
-import '../../modules/student/ai_study_assistant/student_ai_study_assistant_binding.dart';
-import '../../modules/student/ai_study_assistant/student_ai_study_assistant_screen.dart';
-import '../../modules/student/ai_career_advisor/student_ai_career_advisor_binding.dart';
-import '../../modules/student/ai_career_advisor/student_ai_career_advisor_screen.dart';
 import '../../modules/student/fees/student_fees_binding.dart';
 import '../../modules/student/fees/student_fees_screen.dart';
 import '../../modules/student/communication/student_communication_binding.dart';
@@ -109,16 +105,6 @@ class RoutesBinding {
       name: CommonScreenRoutes.studentExams,
       page: () => const StudentExamsScreen(),
       binding: StudentExamsBinding(),
-    ),
-    GetPage(
-      name: CommonScreenRoutes.studentAiStudyAssistant,
-      page: () => const StudentAiStudyAssistantScreen(),
-      binding: StudentAiStudyAssistantBinding(),
-    ),
-    GetPage(
-      name: CommonScreenRoutes.studentAiCareerAdvisor,
-      page: () => const StudentAiCareerAdvisorScreen(),
-      binding: StudentAiCareerAdvisorBinding(),
     ),
     GetPage(
       name: CommonScreenRoutes.studentFees,

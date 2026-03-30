@@ -1,5 +1,6 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/modules/staff/controllers/staff_dashboard_controller.dart';
+import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,8 +15,10 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
         if (controller.isLoading.value && controller.todaySchedule.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
-        return ListView(
-        padding: const EdgeInsets.all(16),
+        return Stack(
+          children: [
+            ListView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
         children: [
           Row(
             children: [
@@ -33,21 +36,51 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
                       'Welcome Back',
                       style: TextStyle(fontSize: 12, color: isDark ? AppColors.textSecondaryDark : Colors.grey[600]),
                     ),
-                    Text(
-                      'Staff Dashboard',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? AppColors.textDark : AppColors.textLight,
+                    Obx(
+                      () => Text(
+                        controller.staffName.value.isEmpty
+                            ? 'Staff Dashboard'
+                            : 'Hi, ${controller.staffName.value.split(' ').first}',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? AppColors.textDark : AppColors.textLight,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
+              IconButton(
+                tooltip: 'All modules',
+                onPressed: () => Get.toNamed(AppRoutes.STAFF_MODULES),
+                icon: const Icon(Icons.apps_rounded),
+              ),
               IconButton(onPressed: controller.loadDashboard, icon: const Icon(Icons.refresh_rounded)),
             ],
           ),
           const SizedBox(height: 16),
+          Obx(() {
+            if (controller.todayScheduleItems.isNotEmpty) {
+              return SizedBox(
+                height: 118,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: controller.todayScheduleItems.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 10),
+                  itemBuilder: (_, i) {
+                    final it = controller.todayScheduleItems[i];
+                    final subj = it['subject'] ?? '';
+                    final cls = it['classLabel'] ?? '';
+                    final line = cls.isNotEmpty ? '$subj · $cls' : subj;
+                    return _scheduleChip(it['time'] ?? '', line, isDark);
+                  },
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          }),
+          const SizedBox(height: 12),
           SizedBox(
             height: 160,
             child: ListView(
@@ -89,12 +122,13 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
             crossAxisCount: 2,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
-            childAspectRatio: 1.2,
+            childAspectRatio: 1.15,
             children: [
               _quickAction('Dashboard', Icons.dashboard_rounded, Colors.green, 'dashboard'),
               _quickAction('Profile', Icons.badge_rounded, Colors.blue, 'profile'),
               _quickAction('Communication', Icons.support_agent_rounded, Colors.orange, 'communication'),
               _quickAction('Reports', Icons.bar_chart_rounded, Colors.purple, 'reports'),
+              _quickAction('AI Assistant', Icons.smart_toy_rounded, Colors.teal, 'ai_teaching_assistant'),
             ],
           ),
           const SizedBox(height: 24),
@@ -106,8 +140,48 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
           _miniTile('Meetings', controller.meetings, isDark),
           const SizedBox(height: 12),
         ],
-      );
+            ),
+            Positioned(
+              right: 16,
+              bottom: 16,
+              child: FloatingActionButton.extended(
+                onPressed: controller.openAiAssistant,
+                backgroundColor: AppColors.primary,
+                icon: const Icon(Icons.smart_toy_rounded),
+                label: const Text('AI'),
+              ),
+            ),
+          ],
+        );
       }),
+    );
+  }
+
+  Widget _scheduleChip(String time, String line, bool isDark) {
+    return Container(
+      width: 200,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(time, style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.primary)),
+          const SizedBox(height: 6),
+          Text(
+            line.isEmpty ? 'Session' : line,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 13,
+              color: isDark ? AppColors.textDark : AppColors.textLight,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

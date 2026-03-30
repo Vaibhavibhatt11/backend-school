@@ -21,7 +21,6 @@ abstract class AppRoutes {
   static const PARENT_PROFILE = '/parent-profile';
   static const PARENT_CHILD_SWITCHER = '/parent-child-switcher';
   static const PARENT_ANNOUNCEMENTS = '/parent-announcements';
-  static const PARENT_AI_ASSISTANT = '/parent-ai-assistant';
   static const PARENT_PERFORMANCE = '/parent-performance';
   static const PARENT_LIVE_CLASS = '/parent-live-class';
   static const PARENT_LIBRARY = '/parent-library';
@@ -41,7 +40,6 @@ abstract class AppRoutes {
   static const TEACHER_LIVE_CLASS = '/teacher-live-class';
   static const TEACHER_UPLOAD = '/teacher-upload';
   static const TEACHER_PROFILE = '/teacher-profile';
-  static const TEACHER_AI_ASSISTANT = '/teacher-ai-assistant';
   static const TEACHER_NOTIFICATIONS = '/teacher-notifications';
 
   // Staff Module

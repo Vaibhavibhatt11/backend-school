@@ -12,11 +12,6 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed(AppRoutes.TEACHER_AI_ASSISTANT),
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.smart_toy),
-      ),
       body: Column(
         children: [
           const SizedBox(height: 12), // Status bar spacer

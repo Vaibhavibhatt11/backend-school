@@ -231,18 +231,6 @@ const List<AdminModuleItem> kAdminModules = [
     ],
   ),
   AdminModuleItem(
-    id: 'ai',
-    title: 'AI Assistant',
-    icon: Icons.smart_toy_rounded,
-    description: 'Automation and predictive assistance',
-    features: [
-      'AI helper for operations',
-      'AI student analysis',
-      'AI teacher analytics',
-      'AI academic prediction',
-    ],
-  ),
-  AdminModuleItem(
     id: 'security',
     title: 'Security & Permissions',
     icon: Icons.verified_user_rounded,

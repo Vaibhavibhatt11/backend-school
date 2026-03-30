@@ -2,7 +2,7 @@
     <!-- Required for calling backend APIs over the network. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="erp_frontend"
+        android:label="School ERP"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true">
@@ -43,6 +43,11 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Let url_launcher open HTTPS links on Android 11+ -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
         </intent>
     </queries>
 </manifest>

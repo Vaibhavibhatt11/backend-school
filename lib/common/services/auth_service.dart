@@ -1,8 +1,11 @@
 import 'package:dio/dio.dart';
 
+import 'package:get/get.dart';
+
 import '../api/api_client.dart';
 import '../api/api_endpoints.dart';
 import '../models/auth/login_response_model.dart';
+import 'parent/parent_context_service.dart';
 import 'session_storage_service.dart';
 
 class AuthService {
@@ -83,6 +86,11 @@ class AuthService {
     } catch (_) {
       // Still clear local session if network fails.
     }
+    try {
+      if (Get.isRegistered<ParentContextService>()) {
+        Get.find<ParentContextService>().setSelectedChildId(null);
+      }
+    } catch (_) {}
     await _sessionStorage.clearSession();
   }
 

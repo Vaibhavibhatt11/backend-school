@@ -5,7 +5,6 @@ import '../services/auth_service.dart';
 import '../services/session_storage_service.dart';
 import '../services/system_service.dart';
 import '../services/parent/parent_academics_service.dart';
-import '../services/parent/parent_ai_service.dart';
 import '../services/parent/parent_communication_service.dart';
 import '../services/parent/parent_context_service.dart';
 import '../services/parent/parent_dashboard_service.dart';
@@ -71,12 +70,6 @@ class ControllerBinding extends Bindings {
     if (!Get.isRegistered<ParentProfileService>()) {
       Get.put<ParentProfileService>(
         ParentProfileService(Get.find<ApiClient>()),
-        permanent: true,
-      );
-    }
-    if (!Get.isRegistered<ParentAiService>()) {
-      Get.put<ParentAiService>(
-        ParentAiService(Get.find<ApiClient>()),
         permanent: true,
       );
     }

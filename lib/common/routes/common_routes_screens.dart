@@ -21,8 +21,6 @@ class CommonScreenRoutes {
   static const String studentHomework = '/StudentHomework';
   static const String studentStudyMaterials = '/StudentStudyMaterials';
   static const String studentExams = '/StudentExams';
-  static const String studentAiStudyAssistant = '/StudentAiStudyAssistant';
-  static const String studentAiCareerAdvisor = '/StudentAiCareerAdvisor';
   static const String studentFees = '/StudentFees';
   static const String studentCommunication = '/StudentCommunication';
   static const String studentEvents = '/StudentEvents';

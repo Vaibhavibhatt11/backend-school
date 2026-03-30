@@ -28,8 +28,6 @@ class StudentDashboardController extends GetxController {
   void goToHomework() => Get.toNamed(CommonScreenRoutes.studentHomework);
   void goToStudyMaterials() => Get.toNamed(CommonScreenRoutes.studentStudyMaterials);
   void goToExams() => Get.toNamed(CommonScreenRoutes.studentExams);
-  void goToAiStudy() => Get.toNamed(CommonScreenRoutes.studentAiStudyAssistant);
-  void goToAiCareer() => Get.toNamed(CommonScreenRoutes.studentAiCareerAdvisor);
   void goToFees() => Get.toNamed(CommonScreenRoutes.studentFees);
   void goToCommunication() => Get.toNamed(CommonScreenRoutes.studentCommunication);
   void goToEvents() => Get.toNamed(CommonScreenRoutes.studentEvents);

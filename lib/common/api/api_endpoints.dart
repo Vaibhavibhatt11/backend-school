@@ -32,8 +32,6 @@ class ApiEndpoints {
   static const String parentProfileHub = '/parent/profile-hub';
   static const String parentLibrary = '/parent/library';
   static const String parentDocuments = '/parent/documents';
-  static const String parentAiAsk = '/parent/ai/ask';
-  static const String parentAiCareer = '/parent/ai/career';
   static const String parentSettings = '/parent/settings';
 
   // Admin app
@@ -65,5 +63,6 @@ class ApiEndpoints {
   static const String staffCommunicationMeetingNotes =
       '/staff/communication/meeting-notes';
   static const String staffSettings = '/staff/settings';
+  static const String staffAiAssist = '/staff/ai/assist';
 }
 

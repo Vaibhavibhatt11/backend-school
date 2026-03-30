@@ -2,6 +2,7 @@ import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/modules/staff/controllers/staff_profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class StaffProfileView extends GetView<StaffProfileController> {
   const StaffProfileView({super.key});
@@ -62,6 +63,10 @@ class StaffProfileView extends GetView<StaffProfileController> {
                   Text('Experience: ${controller.experience.value}'),
                   Text('Contact: ${controller.contact.value}'),
                   Text('Email: ${controller.email.value}'),
+                  if (controller.staffId.value.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text('Staff ID: ${controller.staffId.value}', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                  ],
                 ],
               ),
             ),
@@ -79,8 +84,39 @@ class StaffProfileView extends GetView<StaffProfileController> {
               children: [
                 const Text('Documents', style: TextStyle(fontWeight: FontWeight.w700)),
                 const SizedBox(height: 8),
-                Obx(
-                  () => Column(
+                Obx(() {
+                  if (controller.documentRows.isNotEmpty) {
+                    return Column(
+                      children: controller.documentRows.map((row) {
+                        final name = row['name'] ?? '';
+                        final url = row['url'] ?? '';
+                        final canOpen = url.isNotEmpty && Uri.tryParse(url)?.hasScheme == true;
+                        return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.description_rounded, color: AppColors.primary, size: 18),
+                          ),
+                          title: Text(name),
+                          subtitle: canOpen ? const Text('Tap to open') : null,
+                          trailing: const Icon(Icons.chevron_right_rounded),
+                          onTap: canOpen
+                              ? () async {
+                                  final u = Uri.parse(url);
+                                  if (await canLaunchUrl(u)) {
+                                    await launchUrl(u, mode: LaunchMode.externalApplication);
+                                  }
+                                }
+                              : null,
+                        );
+                      }).toList(),
+                    );
+                  }
+                  return Column(
                     children: controller.documents
                         .map(
                           (d) => ListTile(
@@ -98,8 +134,8 @@ class StaffProfileView extends GetView<StaffProfileController> {
                           ),
                         )
                         .toList(),
-                  ),
-                ),
+                  );
+                }),
               ],
             ),
           ),

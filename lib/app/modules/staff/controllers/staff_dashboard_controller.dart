@@ -1,5 +1,6 @@
-import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:erp_frontend/app/modules/staff/controllers/staff_shell_controller.dart';
+import 'package:erp_frontend/app/modules/staff/widgets/staff_ai_assistant_sheet.dart';
+import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
 import 'package:erp_frontend/common/services/staff/staff_service.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
@@ -20,6 +21,8 @@ class StaffDashboardController extends GetxController {
   final meetings = <String>[].obs;
   final notifications = <String>[].obs;
   final homeworkStatus = <String>[].obs;
+  final staffName = ''.obs;
+  final todayScheduleItems = <Map<String, String>>[].obs;
 
   @override
   void onInit() {
@@ -32,7 +35,9 @@ class StaffDashboardController extends GetxController {
     errorMessage.value = '';
     try {
       final data = await _staffService.getDashboard();
+      staffName.value = (data['staffName'] ?? '').toString();
       todaySchedule.assignAll(_asStringList(data['todaySchedule']));
+      _parseScheduleItems(data['todayScheduleItems']);
       assignedClasses.assignAll(_asStringList(data['assignedClasses']));
       pendingTasks.assignAll(_asStringList(data['pendingTasks']));
       studentAlerts.assignAll(_asStringList(data['studentAlerts']));
@@ -51,6 +56,8 @@ class StaffDashboardController extends GetxController {
       meetings.clear();
       notifications.clear();
       homeworkStatus.clear();
+      staffName.value = '';
+      todayScheduleItems.clear();
     } finally {
       isLoading.value = false;
     }
@@ -60,6 +67,22 @@ class StaffDashboardController extends GetxController {
     if (value is! List) return <String>[];
     return value.map((e) => e.toString()).where((e) => e.trim().isNotEmpty).toList();
   }
+
+  void _parseScheduleItems(dynamic value) {
+    todayScheduleItems.clear();
+    if (value is! List) return;
+    for (final e in value) {
+      if (e is Map) {
+        todayScheduleItems.add({
+          'time': (e['time'] ?? '').toString(),
+          'subject': (e['subject'] ?? '').toString(),
+          'classLabel': (e['classLabel'] ?? '').toString(),
+        });
+      }
+    }
+  }
+
+  void openAiAssistant() => StaffAiAssistantSheet.open();
 
   final quickActions = const <String>[
     'Dashboard',
@@ -105,6 +128,9 @@ class StaffDashboardController extends GetxController {
       case 'communication':
       case 'communication_ai':
         _goToStaffTab(2);
+        return;
+      case 'ai_teaching_assistant':
+        openAiAssistant();
         return;
       case 'reports':
         _goToStaffTab(3);

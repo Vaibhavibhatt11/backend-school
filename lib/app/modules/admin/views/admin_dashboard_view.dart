@@ -124,9 +124,15 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
-                  _buildFeeCard(),
+                  GestureDetector(
+                    onTap: controller.goToFeeSnapshot,
+                    child: _buildFeeCard(),
+                  ),
                   const SizedBox(width: 12),
-                  _buildAttendanceCard(),
+                  GestureDetector(
+                    onTap: controller.goToAttendance,
+                    child: _buildAttendanceCard(),
+                  ),
                 ],
               ),
             ),
