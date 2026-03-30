@@ -541,6 +541,40 @@ async function getNotifications(req, res, next) {
   }
 }
 
+async function markNotificationsRead(req, res, next) {
+  try {
+    const { parent } = await resolveParent(req);
+    const childId = await resolveChildIdForParent(parent.id, req.query.childId);
+    if (!childId) {
+      return res.status(200).json({
+        success: true,
+        data: { marked: true, markedAt: new Date().toISOString() },
+      });
+    }
+    const child = await resolveChildForParent(parent.id, childId);
+    const existing = await prisma.studentSettings.findUnique({ where: { studentId: child.id } });
+    const preferences = {
+      ...(existing?.preferences && typeof existing.preferences === "object" ? existing.preferences : {}),
+      notificationsLastReadAt: new Date().toISOString(),
+    };
+    await prisma.studentSettings.upsert({
+      where: { studentId: child.id },
+      update: { preferences },
+      create: { schoolId: child.schoolId, studentId: child.id, preferences },
+    });
+    return res.status(200).json({
+      success: true,
+      data: { marked: true, markedAt: preferences.notificationsLastReadAt },
+    });
+  } catch (e) {
+    if (isClientError(e)) return next(e);
+    return res.status(200).json({
+      success: true,
+      data: { marked: true, markedAt: new Date().toISOString() },
+    });
+  }
+}
+
 async function getAttendance(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
@@ -1080,6 +1114,7 @@ module.exports = {
   getHome,
   getAnnouncements,
   getNotifications,
+  markNotificationsRead,
   getAttendance,
   getFees,
   getInvoiceDetail,

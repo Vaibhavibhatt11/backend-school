@@ -6,6 +6,7 @@ const {
   getHome,
   getAnnouncements,
   getNotifications,
+  markNotificationsRead,
   getAttendance,
   getFees,
   getInvoiceDetail,
@@ -26,6 +27,7 @@ router.get("/children", listChildren);
 router.get("/home", getHome);
 router.get("/announcements", getAnnouncements);
 router.get("/notifications", getNotifications);
+router.post("/notifications/mark-all-read", markNotificationsRead);
 router.get("/attendance", getAttendance);
 router.get("/fees", getFees);
 router.get("/invoices/:invoiceId", getInvoiceDetail);
