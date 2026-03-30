@@ -72,11 +72,11 @@ class AdminNoticeBoardController extends GetxController {
   }
 
   void onAddNotice() {
-    AppToast.show('Create new notice');
+    loadAnnouncements();
   }
 
   void onNoticeTap(Notice notice) {
-    AppToast.show(notice.title);
+    selectedTab.value = 0;
   }
 
   void goToSystemAuditLogs() {

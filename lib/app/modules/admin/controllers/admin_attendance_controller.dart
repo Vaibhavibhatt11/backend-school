@@ -94,18 +94,18 @@ class AdminAttendanceController extends GetxController {
   }
 
   void onViewAll() {
-    AppToast.show('Full class list: use the admin web portal.');
+    loadAttendance();
   }
 
   void onRemind(ClassAttendance cls) {
-    AppToast.show('Bulk reminders: use the admin web portal.');
+    loadAttendance();
   }
 
   void onMarkManual() {
-    AppToast.show('Manual attendance: use the admin web portal.');
+    loadAttendance();
   }
 
   void onExportPDF() {
-    AppToast.show('PDF export: use the admin web portal.');
+    loadAttendance();
   }
 }

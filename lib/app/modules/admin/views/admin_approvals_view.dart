@@ -2,7 +2,6 @@ import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/modules/admin/controllers/admin_approvals_controller.dart';
 import 'package:erp_frontend/app/modules/admin/controllers/admin_shell_controller.dart';
 import 'package:erp_frontend/app/navbar/admin_bottom_nav_bar.dart';
-import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -73,7 +72,7 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                         ),
                         child: IconButton(
                           icon: const Icon(Icons.tune, size: 20),
-                          onPressed: () => AppToast.show('Filter options'),
+                          onPressed: controller.loadPendingApprovals,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -93,7 +92,7 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                                 Icons.notifications_none,
                                 size: 20,
                               ),
-                              onPressed: () => AppToast.show('No new notifications'),
+                              onPressed: controller.loadPendingApprovals,
                             ),
                           ),
                           Positioned(
@@ -148,7 +147,7 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                   ),
                   Expanded(
                     child: GestureDetector(
-                      onTap: () => AppToast.show('Show approved requests'),
+                      onTap: () => controller.onTabChanged(1),
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: const Center(
@@ -165,7 +164,7 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                   ),
                   Expanded(
                     child: GestureDetector(
-                      onTap: () => AppToast.show('Show rejected requests'),
+                      onTap: () => controller.onTabChanged(2),
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: const Center(

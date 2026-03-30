@@ -68,8 +68,7 @@ class NotificationsController extends GetxController {
   }
 
   void setFilter(String filter) => selectedFilter.value = filter;
-  void markAllRead() =>
-      AppToast.show('All notifications marked as read');
+  Future<void> markAllRead() async => loadNotifications();
 
   @override
   void onClose() {

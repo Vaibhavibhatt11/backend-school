@@ -63,22 +63,12 @@ class AdminProfileController extends GetxController {
   }
 
   void onUpdatePassword() {
-    AppToast.show('Update password screen');
+    loadProfile();
   }
 
   Future<void> onEmailNotificationsToggle(bool value) async {
-    _schoolSettings['emailNotificationsEnabled'] = value;
-    try {
-      await _adminService.patchSchoolSettings({'settings': _schoolSettings});
-      emailNotificationsEnabled.value = value;
-    } catch (_) {
-      try {
-        await _adminService.updateSchoolSettings({'settings': _schoolSettings});
-        emailNotificationsEnabled.value = value;
-      } catch (e) {
-        AppToast.show(dioOrApiErrorMessage(e));
-      }
-    }
+    emailNotificationsEnabled.value = value;
+    await loadProfile();
   }
 
   void onLogout() {

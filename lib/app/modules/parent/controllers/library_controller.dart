@@ -59,7 +59,7 @@ class LibraryController extends GetxController {
     searchQuery.value = query;
     loadLibrary();
   }
-  void scanQR() => AppToast.show('QR scanner opened');
+  Future<void> scanQR() async => loadLibrary();
   void viewBookDetails(String title) {
     Get.dialog(
       AlertDialog(

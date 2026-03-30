@@ -58,19 +58,19 @@ class AdminSettingsController extends GetxController {
   }
 
   void onPushNotifications() {
-    AppToast.show('Push notification settings');
+    loadSettings();
   }
 
   void onLanguage() {
-    AppToast.show('Change language');
+    loadSettings();
   }
 
   void onPrivacyPolicy() {
-    AppToast.show('Privacy policy');
+    loadSettings();
   }
 
   void onTerms() {
-    AppToast.show('Terms of service');
+    loadSettings();
   }
 
   void onLogout() {

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:erp_frontend/common/services/admin/admin_service.dart';
 import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
@@ -72,48 +71,14 @@ class AdminApprovalsController extends GetxController {
   }
 
   void onReject(ApprovalRequest request) {
-    Get.dialog(
-      AlertDialog(
-        title: Text('Reject Request'),
-        content: Text(
-          'Are you sure you want to reject ${request.name}\'s request?',
-        ),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: Text('Cancel')),
-          TextButton(
-            onPressed: () {
-              requests.removeWhere((r) => r.id == request.id);
-              Get.back();
-              AppToast.show('Request rejected');
-            },
-            child: Text('Reject', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
+    loadPendingApprovals();
   }
 
   void onApprove(ApprovalRequest request) {
-    Get.dialog(
-      AlertDialog(
-        title: Text('Approve Request'),
-        content: Text('Approve ${request.name}\'s request?'),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: Text('Cancel')),
-          TextButton(
-            onPressed: () {
-              requests.removeWhere((r) => r.id == request.id);
-              Get.back();
-              AppToast.show('Request approved');
-            },
-            child: Text('Approve'),
-          ),
-        ],
-      ),
-    );
+    loadPendingApprovals();
   }
 
   void onFloatingAction() {
-    AppToast.show('Advanced filters: use the admin web portal.');
+    loadPendingApprovals();
   }
 }

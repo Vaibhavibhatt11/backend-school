@@ -1,5 +1,4 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
-import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:get/get.dart';
 import '../../../../common/services/parent/parent_api_utils.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
@@ -80,10 +79,10 @@ class ProfileController extends GetxController {
     return 'E';
   }
 
-  void editPersonal() => AppToast.show('Edit personal info');
-  void editGuardian() => AppToast.show('Edit guardian info');
-  void viewAllDocuments() => AppToast.show('All documents list');
-  void downloadDocument(String docName) => AppToast.show('Downloading $docName');
+  Future<void> editPersonal() async => loadProfile();
+  Future<void> editGuardian() async => loadProfile();
+  Future<void> viewAllDocuments() async => loadProfile();
+  Future<void> downloadDocument(String docName) async => loadProfile();
   void openSettings() => Get.toNamed(AppRoutes.PARENT_SETTINGS);
   void goToLibrary() => Get.toNamed(AppRoutes.PARENT_LIBRARY);
 

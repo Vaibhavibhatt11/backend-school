@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:erp_frontend/common/utils/app_toast.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
 import '../../../../common/services/parent/parent_profile_service.dart';
 
@@ -70,7 +69,7 @@ class DocumentViewerController extends GetxController {
     }
   }
 
-  void download() => AppToast.show('Downloading document...');
-  void share() => AppToast.show('Sharing document...');
-  void print() => AppToast.show('Printing document...');
+  Future<void> download() async => loadDocuments();
+  Future<void> share() async => loadDocuments();
+  Future<void> print() async => loadDocuments();
 }

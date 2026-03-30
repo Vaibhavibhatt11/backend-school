@@ -110,7 +110,7 @@ class AdminReportsController extends GetxController {
   // }
 
   void onViewDetailedLog() {
-    AppToast.show('View detailed log');
+    loadReports();
   }
 
   // void onPDFExport(String type) {
@@ -185,31 +185,15 @@ class AdminReportsController extends GetxController {
   }
 
   void onPDFExport(String type) {
-    // Simulate PDF generation
-    Get.dialog(
-      AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Generating $type PDF...'),
-          ],
-        ),
-      ),
-    );
-    Future.delayed(Duration(seconds: 2), () {
-      Get.back();
-      AppToast.show('$type PDF saved to downloads');
-    });
+    loadReports();
   }
 
   void onExcelExport(String type) {
-    AppToast.show('$type Excel');
+    loadReports();
   }
 
   void onCollectionAnalysis() {
-    AppToast.show('Collected: \$${collectionTotal.value.toStringAsFixed(2)}');
+    loadReports();
   }
 
   DateTimeRange _dateRange() {

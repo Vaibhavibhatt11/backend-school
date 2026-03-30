@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import 'package:erp_frontend/common/services/admin/admin_service.dart';
 import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
-import 'package:erp_frontend/common/utils/app_toast.dart';
 
 class AuditLog {
   final String action;
@@ -93,6 +92,6 @@ class AdminAuditLogsController extends GetxController {
   void onFilter(String filter) => selectedFilter.value = filter;
 
   void onLogTap(AuditLog log) {
-    AppToast.show('${log.action} by ${log.admin}');
+    searchQuery.value = log.action;
   }
 }

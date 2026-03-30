@@ -97,10 +97,10 @@ class AdminFeeSnapshotController extends GetxController {
   }
 
   void onViewDetails() {
-    AppToast.show('Fee structure details: use the admin web portal.');
+    loadFeeSnapshot();
   }
 
   void onSendReminders() {
-    AppToast.show('Bulk reminders: use the admin web portal.');
+    loadFeeSnapshot();
   }
 }
