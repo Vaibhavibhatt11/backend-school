@@ -44,6 +44,7 @@ import 'package:erp_frontend/app/modules/staff/bindings/staff_binding.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_module_detail_view.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_modules_view.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_shell_view.dart';
+import 'package:erp_frontend/app/modules/staff/views/staff_feature_detail_view.dart';
 import 'package:get/get.dart';
 
 import '../modules/admin/bindings/admin_binding.dart';
@@ -226,6 +227,11 @@ class AppPages {
     GetPage(
       name: AppRoutes.STAFF_MODULE_DETAIL,
       page: () => const StaffModuleDetailView(),
+      binding: StaffBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.STAFF_FEATURE_DETAIL,
+      page: () => const StaffFeatureDetailView(),
       binding: StaffBinding(),
     ),
     GetPage(

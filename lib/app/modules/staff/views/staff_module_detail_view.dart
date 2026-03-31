@@ -66,13 +66,16 @@ class StaffModuleDetailView extends StatelessWidget {
                 border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
               ),
               child: ListTile(
-                onTap: () => StaffPortalNavigation.openModule(module.id),
+                onTap: () => StaffPortalNavigation.openModule(
+                  module.id,
+                  feature: f,
+                ),
                 leading: const Icon(Icons.check_circle_outline_rounded, color: AppColors.primary),
                 title: Text(f),
                 subtitle: Text(
                   module.id == 'ai_teaching_assistant'
                       ? 'Powered by server-side LLM when configured.'
-                      : 'Tap to open the matching area in Staff (Home, Profile, Comms, Reports, Settings).',
+                      : 'Tap to open the linked screen for this workflow.',
                 ),
                 trailing: const Icon(Icons.chevron_right_rounded),
               ),

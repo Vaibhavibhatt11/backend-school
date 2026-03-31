@@ -46,6 +46,7 @@ abstract class AppRoutes {
   static const STAFF_HOME = '/staff-home';
   static const STAFF_MODULES = '/staff-modules';
   static const STAFF_MODULE_DETAIL = '/staff-module-detail';
+  static const STAFF_FEATURE_DETAIL = '/staff-feature-detail';
 
   // Admin Module
   static const ADMIN_HOME = '/admin-dashboard';

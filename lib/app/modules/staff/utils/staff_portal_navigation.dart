@@ -6,31 +6,56 @@ import 'package:erp_frontend/common/utils/safe_navigation.dart';
 class StaffPortalNavigation {
   StaffPortalNavigation._();
 
-  static void openModule(String moduleId) {
+  static void openModule(
+    String moduleId, {
+    String? feature,
+  }) {
     if (moduleId == 'ai_teaching_assistant') {
       StaffAiAssistantSheet.open();
       return;
     }
 
-    var tab = 0;
     switch (moduleId) {
+      case 'dashboard':
+        SafeNavigation.offNamed(AppRoutes.STAFF_HOME, arguments: {'tabIndex': 0});
+        return;
       case 'profile':
-        tab = 1;
-        break;
+        SafeNavigation.offNamed(AppRoutes.STAFF_HOME, arguments: {'tabIndex': 1});
+        return;
       case 'communication':
       case 'communication_ai':
-        tab = 2;
-        break;
+        SafeNavigation.offNamed(AppRoutes.STAFF_HOME, arguments: {'tabIndex': 2});
+        return;
       case 'reports':
-        tab = 3;
-        break;
+        SafeNavigation.offNamed(AppRoutes.STAFF_HOME, arguments: {'tabIndex': 3});
+        return;
       case 'settings':
-        tab = 4;
-        break;
+        SafeNavigation.offNamed(AppRoutes.STAFF_HOME, arguments: {'tabIndex': 4});
+        return;
+      case 'attendance_leave':
+        SafeNavigation.toNamed(AppRoutes.TEACHER_ATTENDANCE_SELECTOR);
+        return;
+      case 'class_teaching':
+      case 'performance':
+        SafeNavigation.toNamed(AppRoutes.TEACHER_STUDENT_DIRECTORY);
+        return;
+      case 'lesson_planning':
+      case 'homework_assignment':
+      case 'study_material':
+        SafeNavigation.toNamed(AppRoutes.TEACHER_UPLOAD);
+        return;
+      case 'events':
+        SafeNavigation.toNamed(AppRoutes.TEACHER_ANNOUNCEMENTS);
+        return;
       default:
-        tab = 0;
+        SafeNavigation.toNamed(
+          AppRoutes.STAFF_FEATURE_DETAIL,
+          arguments: {
+            'module': moduleId.replaceAll('_', ' ').toUpperCase(),
+            'feature': feature ?? 'Feature',
+          },
+        );
+        return;
     }
-
-    SafeNavigation.offNamed(AppRoutes.STAFF_HOME, arguments: {'tabIndex': tab});
   }
 }
