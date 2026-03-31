@@ -39,6 +39,18 @@ function errorHandler(error, req, res, next) {
     });
   }
 
+  // Prisma connectivity/runtime failures (common on cold DB / dropped connections)
+  if (error?.code === "P1001" || error?.code === "P1017" || error?.code === "P2024") {
+    return res.status(503).json({
+      success: false,
+      message: "Database temporarily unavailable. Please try again in a moment.",
+      error: {
+        code: "DATABASE_UNAVAILABLE",
+        message: "Database temporarily unavailable. Please try again in a moment.",
+      },
+    });
+  }
+
   console.error(error);
   return res.status(500).json({
     success: false,
