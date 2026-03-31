@@ -1,3 +1,4 @@
+const { PrismaClient } = require("@prisma/client");
 const prisma = require("../lib/prisma");
 const env = require("../config/env");
 const { pingRedis } = require("../config/redis");
@@ -43,7 +44,19 @@ async function checkDatabase() {
         await pingDb();
         return { status: "up" };
       } catch (retryError) {
-        return { status: "down", error: retryError.message };
+        try {
+          // Final fallback: probe with a fresh one-off client.
+          const probe = new PrismaClient();
+          await withTimeout(
+            probe.$queryRaw`SELECT 1`,
+            env.HEALTHCHECK_DB_TIMEOUT_MS,
+            "Database readiness timeout"
+          );
+          await probe.$disconnect();
+          return { status: "up" };
+        } catch (probeError) {
+          return { status: "down", error: probeError.message };
+        }
       }
     }
     return { status: "down", error: error.message };
