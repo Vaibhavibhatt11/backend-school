@@ -47,14 +47,14 @@ router.use("/superadmin", auth, requireRole(["SUPERADMIN"]), superadminRoutes);
 router.use(
   "/school/students",
   auth,
-  requireRole(["SUPERADMIN", "SCHOOLADMIN", "HR", "ACCOUNTANT"]),
+  requireRole(["SUPERADMIN", "SCHOOLADMIN", "HR", "ACCOUNTANT", "TEACHER"]),
   studentsRoutes
 );
 
 router.use(
   "/school",
   auth,
-  requireRole(["SUPERADMIN", "SCHOOLADMIN", "HR", "ACCOUNTANT"]),
+  requireRole(["SUPERADMIN", "SCHOOLADMIN", "HR", "ACCOUNTANT", "TEACHER"]),
   schoolRoutes
 );
 
