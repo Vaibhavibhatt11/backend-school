@@ -62,7 +62,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                 const SizedBox(height: 16),
                 // Subtitle
                 Text(
-                  'Enter your registered email or phone number. We\'ll send you a secure link to reset your password.',
+                  'Enter your registered email address. We\'ll send you a secure link to reset your password.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color:
@@ -90,7 +90,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                 const SizedBox(height: 8),
                 // Input field
                 CustomTextField(
-                  hint: 'Email or Phone Number',
+                  hint: 'Email address',
                   onChanged: (val) => controller.recoveryInfo.value = val,
                   prefixIcon: const Icon(Icons.alternate_email),
                 ),

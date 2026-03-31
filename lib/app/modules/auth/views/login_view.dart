@@ -50,9 +50,9 @@ class LoginView extends GetView<LoginController> {
             ),
             const SizedBox(height: 32),
             CustomTextField(
-              label: 'Email or Phone Number',
+              label: 'Email Address',
               hint: 'e.g. user@school.edu',
-              onChanged: (val) => controller.emailOrPhone.value = val,
+              onChanged: (val) => controller.email.value = val,
               prefixIcon: const Icon(Icons.person_outline),
             ),
             const SizedBox(height: 16),

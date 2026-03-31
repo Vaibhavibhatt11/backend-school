@@ -11,7 +11,7 @@ class LoginController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
   final _storage = AppStorage();
 
-  final emailOrPhone = ''.obs;
+  final email = ''.obs;
   final password = ''.obs;
   final isLoading = false.obs;
   final obscurePassword = true.obs;
@@ -19,16 +19,20 @@ class LoginController extends GetxController {
   void togglePasswordVisibility() => obscurePassword.toggle();
 
   Future<void> signIn() async {
-    if (emailOrPhone.isEmpty || password.isEmpty) {
+    if (email.isEmpty || password.isEmpty) {
       AppToast.show('Please fill all fields');
       return;
     }
-    final email = emailOrPhone.value.trim();
+    final emailValue = email.value.trim();
+    if (!emailValue.contains('@')) {
+      AppToast.show('Please enter your registered email address');
+      return;
+    }
     final pass = password.value;
     isLoading.value = true;
     try {
       final response = await _authService.login(
-        email: email,
+        email: emailValue,
         password: pass,
       );
 
@@ -53,7 +57,7 @@ class LoginController extends GetxController {
     // For cases where user wants OTP directly (if needed)
     Get.toNamed(
       AppRoutes.OTP,
-      arguments: {'purpose': 'login', 'identifier': emailOrPhone.value},
+      arguments: {'purpose': 'login', 'identifier': email.value},
     );
   }
 
