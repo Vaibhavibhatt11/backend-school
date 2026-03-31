@@ -15,7 +15,18 @@ class StaffModuleDetailView extends StatelessWidget {
     final args = rawArgs?.cast<String, dynamic>() ?? const {};
     final id = (args['moduleId'] ?? '').toString();
     final module = kStaffModules.firstWhereOrNull((e) => e.id == id);
-    if (module == null) return const Scaffold(body: Center(child: Text('Module not found')));
+    if (module == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (id.isNotEmpty) {
+          StaffPortalNavigation.openModule(id);
+        } else {
+          Get.back();
+        }
+      });
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,

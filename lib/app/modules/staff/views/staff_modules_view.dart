@@ -1,6 +1,7 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/core/widgets/custom_app_bar.dart';
 import 'package:erp_frontend/app/modules/staff/models/staff_module_catalog.dart';
+import 'package:erp_frontend/app/modules/staff/utils/staff_portal_navigation.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -30,7 +31,16 @@ class StaffModulesView extends StatelessWidget {
               final m = kStaffModules[i];
               return InkWell(
                 borderRadius: BorderRadius.circular(14),
-                onTap: () => Get.toNamed(AppRoutes.STAFF_MODULE_DETAIL, arguments: {'moduleId': m.id}),
+                onTap: () {
+                  final args = <String, dynamic>{'moduleId': m.id};
+                  // Prefer feature list page. If navigation fails at runtime for any reason,
+                  // open module target directly so user is never blocked.
+                  try {
+                    Get.toNamed(AppRoutes.STAFF_MODULE_DETAIL, arguments: args);
+                  } catch (_) {
+                    StaffPortalNavigation.openModule(m.id);
+                  }
+                },
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(

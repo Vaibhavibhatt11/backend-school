@@ -40,29 +40,39 @@ class UploadView extends GetView<UploadController> {
               // Class and Subject selectors
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _buildDropdown(
-                        label: 'CLASS',
-                        value: controller.selectedClass.value,
-                        items: controller.classes,
-                        onChanged:
-                            (val) => controller.selectedClass.value = val!,
+                child: Obx(() {
+                  final classes = controller.classes.toList();
+                  final subjects = controller.subjects.toList();
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: _buildDropdown(
+                          label: 'CLASS',
+                          value: classes.contains(controller.selectedClass.value)
+                              ? controller.selectedClass.value
+                              : null,
+                          items: classes,
+                          onChanged: classes.isEmpty
+                              ? null
+                              : (val) => controller.selectedClass.value = val ?? '',
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildDropdown(
-                        label: 'SUBJECT',
-                        value: controller.selectedSubject.value,
-                        items: controller.subjects,
-                        onChanged:
-                            (val) => controller.selectedSubject.value = val!,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildDropdown(
+                          label: 'SUBJECT',
+                          value: subjects.contains(controller.selectedSubject.value)
+                              ? controller.selectedSubject.value
+                              : null,
+                          items: subjects,
+                          onChanged: subjects.isEmpty
+                              ? null
+                              : (val) => controller.selectedSubject.value = val ?? '',
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  );
+                }),
               ),
               const SizedBox(height: 24),
               // Upload area
@@ -216,91 +226,99 @@ class UploadView extends GetView<UploadController> {
                 ),
               ),
               Obx(
-                () => ListView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  itemCount: controller.uploadHistory.length,
-                  itemBuilder: (context, index) {
-                    final item = controller.uploadHistory[index];
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade200),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
+                () {
+                  if (controller.uploadHistory.isEmpty) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      child: Center(child: Text('No study materials found')),
+                    );
+                  }
+                  return ListView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    itemCount: controller.uploadHistory.length,
+                    itemBuilder: (context, index) {
+                      final item = controller.uploadHistory[index];
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                item.fileType.toLowerCase().contains('pdf')
+                                    ? Icons.picture_as_pdf
+                                    : Icons.image,
+                                color: AppColors.primary,
+                              ),
                             ),
-                            child: Icon(
-                              item.fileType == 'pdf'
-                                  ? Icons.picture_as_pdf
-                                  : Icons.image,
-                              color: AppColors.primary,
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.fileName,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Sent to ${item.targetClass} • ${_timeAgo(item.uploadedAt)}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            Column(
                               children: [
-                                Text(
-                                  item.fileName,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.shade100,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Text(
+                                    'SHARED',
+                                    style: TextStyle(
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green,
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Sent to ${item.targetClass} • ${_timeAgo(item.uploadedAt)}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey.shade600,
-                                  ),
+                                const Icon(
+                                  Icons.more_vert,
+                                  size: 16,
+                                  color: Colors.grey,
                                 ),
                               ],
                             ),
-                          ),
-                          Column(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.shade100,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: const Text(
-                                  'SHARED',
-                                  style: TextStyle(
-                                    fontSize: 8,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.green,
-                                  ),
-                                ),
-                              ),
-                              const Icon(
-                                Icons.more_vert,
-                                size: 16,
-                                color: Colors.grey,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
             ],
           ),
@@ -314,9 +332,9 @@ class UploadView extends GetView<UploadController> {
 
   Widget _buildDropdown({
     required String label,
-    required String value,
+    required String? value,
     required List<String> items,
-    required ValueChanged<String?> onChanged,
+    required ValueChanged<String?>? onChanged,
   }) {
     return Container(
       padding: const EdgeInsets.all(8),

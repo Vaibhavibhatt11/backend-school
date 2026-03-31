@@ -130,6 +130,11 @@ class AttendanceSelectorView extends GetView<AttendanceSelectorController> {
           const SizedBox(height: 20),
           Expanded(
             child: Obx(() {
+              if (controller.isLoading.value &&
+                  controller.pendingClasses.isEmpty &&
+                  controller.completedClasses.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
               if (controller.selectedTabIndex.value == 0) {
                 return _buildPendingList();
               } else {
@@ -144,6 +149,11 @@ class AttendanceSelectorView extends GetView<AttendanceSelectorController> {
   }
 
   Widget _buildPendingList() {
+    if (controller.pendingClasses.isEmpty) {
+      return const Center(
+        child: Text('No pending classes for today'),
+      );
+    }
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       itemCount: controller.pendingClasses.length,

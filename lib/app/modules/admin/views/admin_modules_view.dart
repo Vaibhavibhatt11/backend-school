@@ -1,5 +1,6 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/modules/admin/models/admin_module_catalog.dart';
+import 'package:erp_frontend/app/modules/admin/utils/admin_portal_navigation.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -51,10 +52,20 @@ class _ModuleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
-      onTap: () => Get.toNamed(
-        AppRoutes.ADMIN_MODULE_DETAIL,
-        arguments: {'moduleId': module.id},
-      ),
+      onTap: () {
+        final args = <String, dynamic>{'moduleId': module.id};
+        try {
+          Get.toNamed(
+            AppRoutes.ADMIN_MODULE_DETAIL,
+            arguments: args,
+          );
+        } catch (_) {
+          AdminPortalNavigation.openFromCatalog(
+            moduleId: module.id,
+            feature: module.title,
+          );
+        }
+      },
       borderRadius: BorderRadius.circular(14),
       child: Container(
         padding: const EdgeInsets.all(14),

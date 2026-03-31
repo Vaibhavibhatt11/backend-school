@@ -33,22 +33,22 @@ class StaffPortalNavigation {
         SafeNavigation.offNamed(AppRoutes.STAFF_HOME, arguments: {'tabIndex': 4});
         return;
       case 'attendance_leave':
-        SafeNavigation.toNamed(AppRoutes.TEACHER_ATTENDANCE_SELECTOR);
+        SafeNavigation.offNamed(AppRoutes.TEACHER_ATTENDANCE_SELECTOR);
         return;
       case 'class_teaching':
       case 'performance':
-        SafeNavigation.toNamed(AppRoutes.TEACHER_STUDENT_DIRECTORY);
+        SafeNavigation.offNamed(AppRoutes.TEACHER_STUDENT_DIRECTORY);
         return;
       case 'lesson_planning':
       case 'homework_assignment':
       case 'study_material':
-        SafeNavigation.toNamed(AppRoutes.TEACHER_UPLOAD);
+        SafeNavigation.offNamed(AppRoutes.TEACHER_UPLOAD);
         return;
       case 'events':
-        SafeNavigation.toNamed(AppRoutes.TEACHER_ANNOUNCEMENTS);
+        SafeNavigation.offNamed(AppRoutes.TEACHER_ANNOUNCEMENTS);
         return;
       default:
-        SafeNavigation.toNamed(
+        SafeNavigation.offNamed(
           AppRoutes.STAFF_FEATURE_DETAIL,
           arguments: {
             'module': moduleId.replaceAll('_', ' ').toUpperCase(),

@@ -85,14 +85,25 @@ class AnnouncementsView extends GetView<AnnouncementsController> {
           // Announcements list
           Expanded(
             child: Obx(
-              () => ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                itemCount: controller.filteredAnnouncements.length,
-                itemBuilder: (context, index) {
-                  final a = controller.filteredAnnouncements[index];
-                  return _buildAnnouncementCard(a);
-                },
-              ),
+              () {
+                if (controller.isLoading.value &&
+                    controller.filteredAnnouncements.isEmpty) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (controller.filteredAnnouncements.isEmpty) {
+                  return const Center(
+                    child: Text('No announcements available'),
+                  );
+                }
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  itemCount: controller.filteredAnnouncements.length,
+                  itemBuilder: (context, index) {
+                    final a = controller.filteredAnnouncements[index];
+                    return _buildAnnouncementCard(a);
+                  },
+                );
+              },
             ),
           ),
         ],

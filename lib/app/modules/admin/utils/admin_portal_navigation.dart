@@ -15,15 +15,15 @@ class AdminPortalNavigation {
     bool has(String s) => m.contains(s) || f.contains(s);
 
     if (m == 'fees' || has('fee') && !has('feedback')) {
-      SafeNavigation.toNamed(AppRoutes.ADMIN_FEE_SNAPSHOT);
+      SafeNavigation.offNamed(AppRoutes.ADMIN_FEE_SNAPSHOT);
       return;
     }
     if (m == 'attendance' || has('attendance') || has('leave')) {
-      SafeNavigation.toNamed(AppRoutes.ADMIN_ATTENDANCE);
+      SafeNavigation.offNamed(AppRoutes.ADMIN_ATTENDANCE);
       return;
     }
     if (m == 'admissions' || has('admission') || has('approv') || has('waiting')) {
-      SafeNavigation.toNamed(AppRoutes.ADMIN_APPROVALS, arguments: {'tabIndex': 1});
+      SafeNavigation.offNamed(AppRoutes.ADMIN_APPROVALS, arguments: {'tabIndex': 1});
       return;
     }
     if (m == 'communication' ||
@@ -33,23 +33,23 @@ class AdminPortalNavigation {
         has('notif') ||
         has('sms') ||
         has('whatsapp')) {
-      SafeNavigation.toNamed(AppRoutes.ADMIN_NOTICE_BOARD, arguments: {'tabIndex': 3});
+      SafeNavigation.offNamed(AppRoutes.ADMIN_NOTICE_BOARD, arguments: {'tabIndex': 3});
       return;
     }
     if (m == 'reports' || has('report') || has('analytic')) {
-      SafeNavigation.toNamed(AppRoutes.ADMIN_REPORTS, arguments: {'tabIndex': 2});
+      SafeNavigation.offNamed(AppRoutes.ADMIN_REPORTS, arguments: {'tabIndex': 2});
       return;
     }
     if (m == 'security' || has('audit') || has('permission')) {
-      SafeNavigation.toNamed(AppRoutes.ADMIN_AUDIT_LOGS);
+      SafeNavigation.offNamed(AppRoutes.ADMIN_AUDIT_LOGS);
       return;
     }
     if (m == 'settings' || has('setting') || has('privacy')) {
-      SafeNavigation.toNamed(AppRoutes.ADMIN_SETTINGS, arguments: {'tabIndex': 4});
+      SafeNavigation.offNamed(AppRoutes.ADMIN_SETTINGS, arguments: {'tabIndex': 4});
       return;
     }
     if (m == 'dashboard') {
-      SafeNavigation.toNamed(AppRoutes.ADMIN_HOME, arguments: {'tabIndex': 0});
+      SafeNavigation.offNamed(AppRoutes.ADMIN_HOME, arguments: {'tabIndex': 0});
       return;
     }
     if (m == 'students' ||
@@ -62,11 +62,11 @@ class AdminPortalNavigation {
         m == 'hostel' ||
         m == 'inventory' ||
         m == 'payroll') {
-      SafeNavigation.toNamed(AppRoutes.ADMIN_REPORTS, arguments: {'tabIndex': 2});
+      SafeNavigation.offNamed(AppRoutes.ADMIN_REPORTS, arguments: {'tabIndex': 2});
       return;
     }
 
-    SafeNavigation.toNamed(
+    SafeNavigation.offNamed(
       AppRoutes.ADMIN_FEATURE_DETAIL,
       arguments: {'moduleId': moduleId, 'feature': feature},
     );

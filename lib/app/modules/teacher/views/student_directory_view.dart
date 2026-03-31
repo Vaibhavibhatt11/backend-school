@@ -71,6 +71,14 @@ class StudentDirectoryView extends GetView<StudentDirectoryController> {
             Expanded(
               child: Obx(() {
                 final grouped = controller.groupedStudents;
+                if (controller.isLoading.value && grouped.isEmpty) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (grouped.isEmpty) {
+                  return const Center(
+                    child: Text('No students found for this class'),
+                  );
+                }
 
                 return Row(
                   children: [
@@ -181,9 +189,12 @@ class StudentDirectoryView extends GetView<StudentDirectoryController> {
   }
 
   Widget _buildStudentTile(Student student) {
+    final latestStatus = student.recentAttendance.isEmpty
+        ? AttendanceStatus.unknown
+        : student.recentAttendance.values.last;
     Color statusColor;
     IconData statusIcon;
-    switch (student.recentAttendance.values.last) {
+    switch (latestStatus) {
       // just an example
       case AttendanceStatus.present:
         statusColor = Colors.green;
@@ -250,7 +261,7 @@ class StudentDirectoryView extends GetView<StudentDirectoryController> {
                   Icon(statusIcon, size: 14, color: statusColor),
                   const SizedBox(width: 4),
                   Text(
-                    student.recentAttendance.values.last
+                    latestStatus
                         .toString()
                         .split('.')
                         .last,

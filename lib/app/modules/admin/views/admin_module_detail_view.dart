@@ -12,14 +12,23 @@ class AdminModuleDetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     final rawArgs = Get.arguments as Map?;
     final args = rawArgs?.cast<String, dynamic>() ?? const {};
-    final moduleId = (args?['moduleId'] ?? '').toString();
+    final moduleId = (args['moduleId'] ?? '').toString();
     final module = kAdminModules.firstWhereOrNull((m) => m.id == moduleId);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (module == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Module')),
-        body: const Center(child: Text('Module not found')),
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (moduleId.isNotEmpty) {
+          AdminPortalNavigation.openFromCatalog(
+            moduleId: moduleId,
+            feature: args['feature']?.toString() ?? moduleId,
+          );
+        } else {
+          Get.back();
+        }
+      });
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
