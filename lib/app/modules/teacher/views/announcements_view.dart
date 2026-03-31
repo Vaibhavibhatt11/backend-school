@@ -281,8 +281,7 @@ class AnnouncementsView extends GetView<AnnouncementsController> {
   void _showCreateDialog() {
     final titleController = TextEditingController();
     final contentController = TextEditingController();
-    bool isUrgent = false;
-    String target = 'All';
+    final audienceController = TextEditingController(text: 'All');
 
     Get.dialog(
       AlertDialog(
@@ -302,28 +301,11 @@ class AnnouncementsView extends GetView<AnnouncementsController> {
                 maxLines: 3,
               ),
               const SizedBox(height: 12),
-              StatefulBuilder(
-                builder: (context, setState) => DropdownButtonFormField<String>(
-                  value: target,
-                  items: ['All', 'Grade 10-A', 'Grade 10-B', 'Grade 11-C']
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                      .toList(),
-                  onChanged: (val) => setState(() => target = val ?? 'All'),
-                  decoration: const InputDecoration(labelText: 'Target'),
+              TextField(
+                controller: audienceController,
+                decoration: const InputDecoration(
+                  labelText: 'Audience (example: All, Grade 10-A)',
                 ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  const Text('Urgent'),
-                  const SizedBox(width: 8),
-                  StatefulBuilder(
-                    builder: (context, setState) => Checkbox(
-                      value: isUrgent,
-                      onChanged: (val) => setState(() => isUrgent = val!),
-                    ),
-                  ),
-                ],
               ),
             ],
           ),
@@ -334,12 +316,13 @@ class AnnouncementsView extends GetView<AnnouncementsController> {
             onPressed: () {
               if (titleController.text.isNotEmpty &&
                   contentController.text.isNotEmpty) {
-                controller.createAnnouncement({
-                  'title': titleController.text,
-                  'content': contentController.text,
-                  'target': target,
-                  'isUrgent': isUrgent,
-                });
+                controller.createAnnouncement(
+                  title: titleController.text.trim(),
+                  content: contentController.text.trim(),
+                  audience: audienceController.text.trim().isEmpty
+                      ? 'All'
+                      : audienceController.text.trim(),
+                );
               }
             },
             child: const Text('Post'),

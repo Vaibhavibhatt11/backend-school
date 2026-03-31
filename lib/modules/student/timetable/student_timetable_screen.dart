@@ -12,32 +12,27 @@ class StudentTimetableScreen extends GetView<StudentTimetableController> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
-    return SizedBox(
-      width: size.width > 0 ? size.width : 400,
-      height: size.height > 0 ? size.height : 700,
-      child: AppScaffold(
-        title: 'Timetable',
-        body: SingleChildScrollView(
-          padding: EdgeInsets.all(Responsive.w(context, 16)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSectionHeader(context),
-              SizedBox(height: Responsive.h(context, 20)),
-              Obx(() {
-                final classIds = controller.availableClassIds;
-                if (classIds.isEmpty) return const SizedBox.shrink();
-                final classId = classIds.first;
-                final timetable = controller.timetableForClass(classId);
-                if (timetable == null) return const SizedBox.shrink();
-                return _TimetableCard(
-                  timetable: timetable,
-                  controller: controller,
-                );
-              }),
-            ],
-          ),
+    return AppScaffold(
+      title: 'Timetable',
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(Responsive.w(context, 16)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionHeader(context),
+            SizedBox(height: Responsive.h(context, 20)),
+            Obx(() {
+              final classIds = controller.availableClassIds;
+              if (classIds.isEmpty) return const SizedBox.shrink();
+              final classId = classIds.first;
+              final timetable = controller.timetableForClass(classId);
+              if (timetable == null) return const SizedBox.shrink();
+              return _TimetableCard(
+                timetable: timetable,
+                controller: controller,
+              );
+            }),
+          ],
         ),
       ),
     );

@@ -24,6 +24,8 @@ class StudentDashboardScreen extends GetView<StudentDashboardController> {
               Obx(() => Text(
                     '${controller.greeting.value}, ${controller.userName.value}',
                     style: AppTextStyle.headlineLarge(context),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   )),
               SizedBox(height: Responsive.h(context, 4)),
               Text(

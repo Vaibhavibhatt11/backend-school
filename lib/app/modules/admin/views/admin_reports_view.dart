@@ -22,40 +22,42 @@ class AdminReportsView extends GetView<AdminReportsController> {
           children: [
             // Header
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        if (embedded && Get.isRegistered<AdminShellController>()) {
-                          Get.find<AdminShellController>().setTab(0);
-                          return;
-                        }
-                        if (Get.key.currentState?.canPop() ?? false) {
-                          Get.back();
-                        }
-                      },
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          'Reports',
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          'School Admin Portal',
-                          style: TextStyle(color: Colors.grey, fontSize: 14),
-                        ),
-                      ],
-                    ),
-                  ],
+                IconButton(
+                  onPressed: () {
+                    if (embedded && Get.isRegistered<AdminShellController>()) {
+                      Get.find<AdminShellController>().setTab(0);
+                      return;
+                    }
+                    if (Get.key.currentState?.canPop() ?? false) {
+                      Get.back();
+                    }
+                  },
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded),
                 ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        'Reports',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'School Admin Portal',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: Colors.grey, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
                 Stack(
                   children: [
                     const CircleAvatar(
@@ -368,54 +370,43 @@ class AdminReportsView extends GetView<AdminReportsController> {
             ),
           ),
           const SizedBox(height: 8),
-          Row(
-            children:
-                secondaryActions.map((action) {
-                  return Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: OutlinedButton(
-                        onPressed: () => action.onTap(action.label),
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(
-                            color:
-                                action.label.contains('PDF')
-                                    ? AppColors.primary
-                                    : Colors.green,
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: secondaryActions.map((action) {
+              final isPdf = action.label.contains('PDF');
+              return SizedBox(
+                width: 140,
+                child: OutlinedButton(
+                  onPressed: () => action.onTap(action.label),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: isPdf ? AppColors.primary : Colors.green),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(action.icon, size: 16, color: isPdf ? AppColors.primary : Colors.green),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          action.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isPdf ? AppColors.primary : Colors.green,
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              action.icon,
-                              size: 16,
-                              color:
-                                  action.label.contains('PDF')
-                                      ? AppColors.primary
-                                      : Colors.green,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              action.label,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color:
-                                    action.label.contains('PDF')
-                                        ? AppColors.primary
-                                        : Colors.green,
-                              ),
-                            ),
-                          ],
                         ),
                       ),
-                    ),
-                  );
-                }).toList(),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
           ),
         ],
       ),

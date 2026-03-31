@@ -65,9 +65,21 @@ class MarkAttendanceView extends GetView<MarkAttendanceController> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildStatColumn('Present', '28', AppColors.primary),
-                  _buildStatColumn('Absent', '2', Colors.red),
-                  _buildStatColumn('Late', '2', Colors.orange),
+                  _buildStatColumn(
+                    'Present',
+                    controller.presentCount.value.toString(),
+                    AppColors.primary,
+                  ),
+                  _buildStatColumn(
+                    'Absent',
+                    controller.absentCount.value.toString(),
+                    Colors.red,
+                  ),
+                  _buildStatColumn(
+                    'Late',
+                    controller.lateCount.value.toString(),
+                    Colors.orange,
+                  ),
                 ],
               ),
             ),
@@ -84,7 +96,7 @@ class MarkAttendanceView extends GetView<MarkAttendanceController> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              onChanged: controller.searchQuery.call,
+              onChanged: (value) => controller.searchQuery.value = value,
             ),
           ),
           const SizedBox(height: 12),
@@ -126,7 +138,8 @@ class MarkAttendanceView extends GetView<MarkAttendanceController> {
                     child: Row(
                       children: [
                         CircleAvatar(
-                          backgroundImage: NetworkImage(student.imageUrl),
+                          backgroundImage: student.imageUrl.isNotEmpty ? NetworkImage(student.imageUrl) : null,
+                          child: student.imageUrl.isEmpty ? const Icon(Icons.person_rounded) : null,
                         ),
                         const SizedBox(width: 12),
                         Expanded(

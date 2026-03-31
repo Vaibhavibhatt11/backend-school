@@ -50,10 +50,19 @@ class ApiEndpoints {
   static const String schoolProfileMe = '/school/profile/me';
   static const String schoolSettings = '/school/settings';
   static const String schoolAnnouncements = '/school/announcements';
+  static String schoolAnnouncementSend(String id) => '/school/announcements/$id/send';
+  static const String schoolStudyMaterials = '/school/study-materials';
   static const String schoolAuditLogs = '/school/audit-logs';
   static const String schoolClasses = '/school/classes';
+  static const String schoolSubjects = '/school/subjects';
   static const String schoolReportAttendance = '/school/reports/attendance';
   static const String schoolReportFees = '/school/reports/fees';
+
+  // School (used by teacher/staff attendance screens)
+  static String schoolTimetableTeacher(String staffId) => '/school/timetable/teacher/$staffId';
+  static const String schoolStudents = '/school/students';
+  static const String schoolAttendanceRecords = '/school/attendance/records';
+  static const String schoolAttendanceBulkMark = '/school/attendance/bulk-mark';
 
   // Staff app
   static const String staffDashboard = '/staff/dashboard';

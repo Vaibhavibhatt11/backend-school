@@ -31,14 +31,14 @@ class StudentDirectoryView extends GetView<StudentDirectoryController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Grade 10-A',
+                          controller.classTitle.value,
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
-                          'Mathematics • 24 Students',
+                          '${controller.classSubtitle.value}${controller.classSubtitle.value.isNotEmpty ? ' • ' : ''}${controller.studentCount.value} Students',
                           style: TextStyle(color: Colors.grey.shade600),
                         ),
                       ],

@@ -47,75 +47,83 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
               const SizedBox(height: 16),
             ],
             // Header with profile
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 24,
-                  backgroundColor: AppColors.primary,
-                  child: Text(
-                    controller.adminName.value.isNotEmpty
-                        ? controller.adminName.value
-                            .trim()
-                            .split(RegExp(r'\s+'))
-                            .take(2)
-                            .map((p) => p.isEmpty ? '' : p[0].toUpperCase())
-                            .join()
-                        : 'AD',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Welcome Back',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      ),
-                      Text(
-                        controller.adminName.value,
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final compact = constraints.maxWidth < 380;
+                return Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 24,
+                      backgroundColor: AppColors.primary,
+                      child: Text(
+                        controller.adminName.value.isNotEmpty
+                            ? controller.adminName.value
+                                .trim()
+                                .split(RegExp(r'\s+'))
+                                .take(2)
+                                .map((p) => p.isEmpty ? '' : p[0].toUpperCase())
+                                .join()
+                            : 'AD',
                         style: const TextStyle(
-                          fontSize: 18,
+                          color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  onPressed: controller.goToAttendance,
-                  icon: const Icon(Icons.calendar_today_outlined),
-                ),
-                IconButton(
-                  onPressed: controller.goToFeeSnapshot,
-                  icon: const Icon(Icons.payments_outlined),
-                ),
-                Stack(
-                  children: [
-                    IconButton(
-                      onPressed: controller.loadDashboard,
-                      icon: const Icon(Icons.notifications_none),
                     ),
-
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Welcome Back',
+                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          ),
+                          Text(
+                            controller.adminName.value,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+                    if (!compact) ...[
+                      IconButton(
+                        onPressed: controller.goToAttendance,
+                        icon: const Icon(Icons.calendar_today_outlined),
+                      ),
+                      IconButton(
+                        onPressed: controller.goToFeeSnapshot,
+                        icon: const Icon(Icons.payments_outlined),
+                      ),
+                    ],
+                    Stack(
+                      children: [
+                        IconButton(
+                          onPressed: controller.loadDashboard,
+                          icon: const Icon(Icons.notifications_none),
+                        ),
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
-                ),
-              ],
+                );
+              },
             ),
             const SizedBox(height: 16),
             // Horizontal scroll cards

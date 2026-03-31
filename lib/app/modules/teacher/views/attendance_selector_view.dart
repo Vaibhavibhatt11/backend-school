@@ -10,6 +10,18 @@ class AttendanceSelectorView extends GetView<AttendanceSelectorController> {
 
   @override
   Widget build(BuildContext context) {
+    final d = controller.selectedDate.value;
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final weekday = [
+      'Mon',
+      'Tue',
+      'Wed',
+      'Thu',
+      'Fri',
+      'Sat',
+      'Sun',
+    ][(d.weekday - 1).clamp(0, 6)];
+
     return Scaffold(
       body: Column(
         children: [
@@ -31,9 +43,11 @@ class AttendanceSelectorView extends GetView<AttendanceSelectorController> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            child: Text(
-              'Thursday, Oct 24 • 3 classes left',
-              style: TextStyle(color: Colors.grey.shade600),
+            child: Obx(
+              () => Text(
+                '$weekday, ${monthNames[d.month - 1]} ${d.day} • ${controller.pendingClasses.length} classes pending',
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
             ),
           ),
           // Segmented control
@@ -220,17 +234,75 @@ class AttendanceSelectorView extends GetView<AttendanceSelectorController> {
   }
 
   Widget _buildCompletedList() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.check_circle_outline, size: 48, color: Colors.grey),
-          SizedBox(height: 8),
-          Text('2 classes completed today'),
-          SizedBox(height: 4),
-          Text('View history', style: TextStyle(color: AppColors.primary)),
-        ],
-      ),
-    );
+    return Obx(() {
+      if (controller.completedClasses.isEmpty) {
+        return const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.check_circle_outline, size: 48, color: Colors.grey),
+              SizedBox(height: 8),
+              Text('No classes completed today'),
+            ],
+          ),
+        );
+      }
+
+      return ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        itemCount: controller.completedClasses.length,
+        itemBuilder: (context, index) {
+          final cls = controller.completedClasses[index];
+          return Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  cls['title']?.toString() ?? '',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  cls['subtitle']?.toString() ?? '',
+                  style: TextStyle(color: Colors.grey.shade600),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    const Icon(Icons.schedule, size: 14),
+                    const SizedBox(width: 4),
+                    Text(cls['time']?.toString() ?? ''),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Get.toNamed(
+                      AppRoutes.TEACHER_MARK_ATTENDANCE,
+                      arguments: {'class': cls},
+                    ),
+                    child: const Text('Edit Attendance'),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    });
   }
 }
