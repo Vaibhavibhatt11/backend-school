@@ -577,6 +577,204 @@ async function main() {
     },
   });
 
+  // Seed records for admin approvals/testing actions
+  const leaveAttendance = await prisma.staffAttendance.upsert({
+    where: {
+      schoolId_staffId_date: {
+        schoolId: school.id,
+        staffId: teacherStaff.id,
+        date: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1, 0, 0, 0)),
+      },
+    },
+    update: { status: "LEAVE" },
+    create: {
+      schoolId: school.id,
+      staffId: teacherStaff.id,
+      date: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1, 0, 0, 0)),
+      status: "LEAVE",
+      markedById: teacherUser?.id || null,
+    },
+  });
+
+  await prisma.leaveRequest.upsert({
+    where: { id: "seed-leave-req-1" },
+    update: {
+      schoolId: school.id,
+      staffId: teacherStaff.id,
+      attendanceId: leaveAttendance.id,
+      date: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1, 0, 0, 0)),
+      reason: "Medical leave for one day",
+      status: "PENDING",
+      createdById: teacherUser?.id || null,
+    },
+    create: {
+      id: "seed-leave-req-1",
+      schoolId: school.id,
+      staffId: teacherStaff.id,
+      attendanceId: leaveAttendance.id,
+      date: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1, 0, 0, 0)),
+      reason: "Medical leave for one day",
+      status: "PENDING",
+      createdById: teacherUser?.id || null,
+    },
+  });
+
+  await prisma.studentLeaveRequest.upsert({
+    where: { id: "seed-student-leave-1" },
+    update: {
+      schoolId: school.id,
+      studentId: demoStudent.id,
+      fromDate: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0)),
+      toDate: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 2, 0, 0, 0)),
+      reason: "Family function leave request",
+      status: "PENDING",
+    },
+    create: {
+      id: "seed-student-leave-1",
+      schoolId: school.id,
+      studentId: demoStudent.id,
+      fromDate: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0)),
+      toDate: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 2, 0, 0, 0)),
+      reason: "Family function leave request",
+      status: "PENDING",
+    },
+  });
+
+  await prisma.faceCheckinLog.upsert({
+    where: { id: "seed-face-pending-1" },
+    update: {
+      schoolId: school.id,
+      personType: "VISITOR",
+      personRefId: null,
+      name: "Demo Visitor",
+      location: "Main Gate",
+      confidence: 91,
+      status: "PENDING",
+      reason: null,
+    },
+    create: {
+      id: "seed-face-pending-1",
+      schoolId: school.id,
+      personType: "VISITOR",
+      personRefId: null,
+      name: "Demo Visitor",
+      location: "Main Gate",
+      confidence: 91,
+      status: "PENDING",
+      reason: null,
+    },
+  });
+
+  // Seed records for staff module actions and parent library/documents
+  await prisma.studentDocument.upsert({
+    where: { id: "seed-student-doc-1" },
+    update: {
+      schoolId: school.id,
+      studentId: demoStudent.id,
+      name: "Transfer Certificate.pdf",
+      url: "https://example.com/docs/transfer-certificate.pdf",
+      type: "PDF",
+      sizeKb: 420,
+      uploadedById: teacherUser?.id || null,
+    },
+    create: {
+      id: "seed-student-doc-1",
+      schoolId: school.id,
+      studentId: demoStudent.id,
+      name: "Transfer Certificate.pdf",
+      url: "https://example.com/docs/transfer-certificate.pdf",
+      type: "PDF",
+      sizeKb: 420,
+      uploadedById: teacherUser?.id || null,
+    },
+  });
+
+  const libraryBook = await prisma.libraryBook.upsert({
+    where: { id: "seed-library-book-1" },
+    update: {
+      schoolId: school.id,
+      title: "NCERT Science - Grade 10",
+      author: "NCERT",
+      category: "Science",
+      totalCopies: 12,
+      availableCopies: 8,
+      isActive: true,
+    },
+    create: {
+      id: "seed-library-book-1",
+      schoolId: school.id,
+      title: "NCERT Science - Grade 10",
+      author: "NCERT",
+      category: "Science",
+      totalCopies: 12,
+      availableCopies: 8,
+      isActive: true,
+    },
+  });
+
+  await prisma.libraryBorrow.upsert({
+    where: { id: "seed-library-borrow-1" },
+    update: {
+      schoolId: school.id,
+      bookId: libraryBook.id,
+      borrowerType: "STUDENT",
+      borrowerRefId: demoStudent.id,
+      issuedAt: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 5, 0, 0, 0)),
+      dueDate: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 5, 0, 0, 0)),
+      status: "ISSUED",
+    },
+    create: {
+      id: "seed-library-borrow-1",
+      schoolId: school.id,
+      bookId: libraryBook.id,
+      borrowerType: "STUDENT",
+      borrowerRefId: demoStudent.id,
+      issuedAt: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 5, 0, 0, 0)),
+      dueDate: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 5, 0, 0, 0)),
+      status: "ISSUED",
+    },
+  });
+
+  await prisma.meetingRequest.upsert({
+    where: { id: "seed-meeting-1" },
+    update: {
+      schoolId: school.id,
+      studentId: demoStudent.id,
+      requestedById: teacherUser?.id || null,
+      staffId: teacherStaff.id,
+      preferredDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+      purpose: "PTM discussion",
+      status: "PENDING",
+    },
+    create: {
+      id: "seed-meeting-1",
+      schoolId: school.id,
+      studentId: demoStudent.id,
+      requestedById: teacherUser?.id || null,
+      staffId: teacherStaff.id,
+      preferredDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+      purpose: "PTM discussion",
+      status: "PENDING",
+    },
+  });
+
+  await prisma.reportJob.upsert({
+    where: { id: "seed-report-job-1" },
+    update: {
+      schoolId: school.id,
+      type: "ATTENDANCE",
+      status: "QUEUED",
+      requestedBy: teacherUser?.id || null,
+    },
+    create: {
+      id: "seed-report-job-1",
+      schoolId: school.id,
+      type: "ATTENDANCE",
+      status: "QUEUED",
+      requestedBy: teacherUser?.id || null,
+    },
+  });
+
   console.log("Seed complete.");
   console.log("Login users (password: Admin123!):");
   console.log("- super@school.edu (superadmin)");
