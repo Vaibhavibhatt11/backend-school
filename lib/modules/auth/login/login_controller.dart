@@ -68,7 +68,14 @@ class LoginController extends GetxController {
       String msg;
       final data = e.response?.data;
       if (data is Map<String, dynamic>) {
-        msg = data['message']?.toString() ?? 'Login failed.';
+        final top = data['message']?.toString();
+        final err = data['error'];
+        final nested = err is Map<String, dynamic> ? err['message']?.toString() : null;
+        msg = (top != null && top.isNotEmpty)
+            ? top
+            : (nested != null && nested.isNotEmpty)
+                ? nested
+                : 'Login failed.';
       } else if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout ||
           e.type == DioExceptionType.sendTimeout) {
