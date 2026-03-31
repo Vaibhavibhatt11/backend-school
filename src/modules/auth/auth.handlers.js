@@ -149,7 +149,15 @@ function requestUserAgent(req) {
 const TRANSIENT_PRISMA_CODES = new Set(["P1001", "P1017", "P2024"]);
 
 function isTransientPrismaError(error) {
-  return Boolean(error && typeof error === "object" && TRANSIENT_PRISMA_CODES.has(error.code));
+  if (!error || typeof error !== "object") return false;
+  if (TRANSIENT_PRISMA_CODES.has(error.code)) return true;
+
+  const message = String(error.message || "").toLowerCase();
+  return (
+    message.includes("server has closed the connection") ||
+    message.includes("connection terminated unexpectedly") ||
+    message.includes("connection is closed")
+  );
 }
 
 async function withTransientPrismaRetry(fn, retries = 1) {

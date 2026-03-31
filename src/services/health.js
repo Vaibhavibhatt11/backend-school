@@ -12,14 +12,40 @@ function withTimeout(promise, timeoutMs, errorMessage) {
 }
 
 async function checkDatabase() {
-  try {
-    await withTimeout(
+  const isRetryableDisconnect = (error) => {
+    const message = String(error?.message || "").toLowerCase();
+    return (
+      error?.code === "P1001" ||
+      error?.code === "P1017" ||
+      error?.code === "P2024" ||
+      message.includes("server has closed the connection") ||
+      message.includes("connection terminated unexpectedly") ||
+      message.includes("connection is closed")
+    );
+  };
+
+  const pingDb = () =>
+    withTimeout(
       prisma.$queryRaw`SELECT 1`,
       env.HEALTHCHECK_DB_TIMEOUT_MS,
       "Database readiness timeout"
     );
+
+  try {
+    await pingDb();
     return { status: "up" };
   } catch (error) {
+    if (isRetryableDisconnect(error)) {
+      try {
+        // Recover from stale pooled connection (common after DB sleep/wake).
+        await prisma.$disconnect();
+        await new Promise((resolve) => setTimeout(resolve, 250));
+        await pingDb();
+        return { status: "up" };
+      } catch (retryError) {
+        return { status: "down", error: retryError.message };
+      }
+    }
     return { status: "down", error: error.message };
   }
 }
