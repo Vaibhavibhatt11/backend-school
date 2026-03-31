@@ -2,24 +2,100 @@ import 'package:dio/dio.dart';
 
 /// Best-effort message from `{ success: false, error: { message } }` or Dio errors.
 String dioOrApiErrorMessage(Object error) {
+  String normalizeGenericMessage(
+    String candidate, {
+    int? statusCode,
+    DioExceptionType? type,
+  }) {
+    final normalized = candidate.trim().toLowerCase();
+    const generic = {
+      'something went wrong',
+      'server error',
+      'request failed',
+      'internal server error',
+      'login failed',
+      'unable to login. please try again.',
+    };
+    if (!generic.contains(normalized)) return candidate;
+
+    if (statusCode == 401) {
+      return 'Invalid email or password.';
+    }
+    if (statusCode == 429) {
+      return 'Too many login attempts. Please wait and try again.';
+    }
+    if (statusCode == 503) {
+      return 'Server is waking up. Please try again in 10-20 seconds.';
+    }
+    if (statusCode != null && statusCode >= 500) {
+      return 'Server issue right now. Please try again shortly.';
+    }
+    if (type == DioExceptionType.connectionTimeout ||
+        type == DioExceptionType.receiveTimeout ||
+        type == DioExceptionType.sendTimeout) {
+      return 'Request timed out. Please try again.';
+    }
+    if (type == DioExceptionType.connectionError) {
+      return 'Cannot reach server. Check internet and try again.';
+    }
+    return 'Unable to process request right now. Please try again.';
+  }
+
   if (error is DioException) {
+    final statusCode = error.response?.statusCode;
     final data = error.response?.data;
     if (data is Map<String, dynamic>) {
-      final message = data['message']?.toString();
-      if (message != null && message.isNotEmpty) return message;
+      final message = data['message']?.toString().trim();
+      if (message != null && message.isNotEmpty) {
+        return normalizeGenericMessage(
+          message,
+          statusCode: statusCode,
+          type: error.type,
+        );
+      }
       final err = data['error'];
       if (err is Map<String, dynamic>) {
-        final m = err['message']?.toString();
-        if (m != null && m.isNotEmpty) return m;
+        final m = err['message']?.toString().trim();
+        if (m != null && m.isNotEmpty) {
+          return normalizeGenericMessage(
+            m,
+            statusCode: statusCode,
+            type: error.type,
+          );
+        }
       }
-      final m = data['message']?.toString();
-      if (m != null && m.isNotEmpty) return m;
     }
+
+    if (statusCode == 401) return 'Invalid email or password.';
+    if (statusCode == 429) {
+      return 'Too many login attempts. Please wait and try again.';
+    }
+    if (statusCode == 503) {
+      return 'Server is waking up. Please try again in 10-20 seconds.';
+    }
+    if (statusCode != null && statusCode >= 500) {
+      return 'Server issue right now. Please try again shortly.';
+    }
+    if (error.type == DioExceptionType.connectionTimeout ||
+        error.type == DioExceptionType.receiveTimeout ||
+        error.type == DioExceptionType.sendTimeout) {
+      return 'Request timed out. Please try again.';
+    }
+    if (error.type == DioExceptionType.connectionError) {
+      return 'Cannot reach server. Check internet and try again.';
+    }
+
     if (error.message != null && error.message!.isNotEmpty) {
-      return error.message!;
+      return normalizeGenericMessage(
+        error.message!,
+        statusCode: statusCode,
+        type: error.type,
+      );
     }
   }
-  return error.toString().replaceFirst(RegExp(r'^Exception:\s*'), '');
+  final raw = error.toString().replaceFirst(RegExp(r'^Exception:\s*'), '').trim();
+  if (raw.isEmpty) return 'Unable to process request right now. Please try again.';
+  return normalizeGenericMessage(raw);
 }
 
 Map<String, dynamic> extractApiData(

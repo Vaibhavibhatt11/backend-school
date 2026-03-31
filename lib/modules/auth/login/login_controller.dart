@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import '../../../app/services/app_storage.dart';
 import '../../../common/routes/common_routes_screens.dart';
 import '../../../common/services/auth_service.dart';
+import '../../../common/services/parent/parent_api_utils.dart';
 import '../../../common/utils/app_toast.dart';
 import '../../../common/utils/auth_route_resolver.dart';
 
@@ -65,27 +66,7 @@ class LoginController extends GetxController {
 
       AuthRouteResolver.goHomeForRole(role);
     } on DioException catch (e) {
-      String msg;
-      final data = e.response?.data;
-      if (data is Map<String, dynamic>) {
-        final top = data['message']?.toString();
-        final err = data['error'];
-        final nested = err is Map<String, dynamic> ? err['message']?.toString() : null;
-        msg = (top != null && top.isNotEmpty)
-            ? top
-            : (nested != null && nested.isNotEmpty)
-                ? nested
-                : 'Login failed.';
-      } else if (e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.receiveTimeout ||
-          e.type == DioExceptionType.sendTimeout) {
-        msg = 'Request timed out. Please try again.';
-      } else if (e.type == DioExceptionType.connectionError) {
-        msg = 'Cannot reach server. Check internet/API URL and try again.';
-      } else {
-        msg = 'Unable to login. Please try again.';
-      }
-      _setWarning(msg);
+      _setWarning(dioOrApiErrorMessage(e));
     } catch (e) {
       _setWarning(e.toString().replaceFirst('Exception: ', ''));
     } finally {
