@@ -11,7 +11,16 @@ if (!process.env.DATABASE_URL) {
 const bcrypt = require("bcryptjs");
 const { PrismaClient } = require("@prisma/client");
 
-const prisma = new PrismaClient();
+let prisma;
+try {
+  prisma = new PrismaClient();
+} catch (e) {
+  console.error(
+    "[seed] PrismaClient initialization failed. Skipping seed to allow deploy:",
+    e?.message || e
+  );
+  process.exit(0);
+}
 
 async function main() {
   const defaultPlans = [
