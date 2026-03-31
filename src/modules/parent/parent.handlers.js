@@ -37,6 +37,24 @@ const payInvoiceBalanceSchema = z.object({
   notes: z.string().trim().min(1).optional(),
 });
 
+const updateProfileHubSchema = z
+  .object({
+    studentName: z.string().trim().min(1).max(100).optional(),
+    dob: z.string().trim().min(1).optional(),
+    bloodGroup: z.string().trim().max(20).optional(),
+    fatherName: z.string().trim().max(100).optional(),
+    motherName: z.string().trim().max(100).optional(),
+  })
+  .refine((v) => Object.keys(v).length > 0, {
+    message: "At least one field is required",
+  });
+
+const createMeetingRequestSchema = z.object({
+  staffId: z.string().trim().min(1).optional(),
+  preferredDate: z.coerce.date().optional(),
+  purpose: z.string().trim().max(500).optional(),
+});
+
 function isMissingTableError(error, tableName) {
   const message = String(error?.message || "").toLowerCase();
   const t = String(tableName || "").toLowerCase();
@@ -895,8 +913,12 @@ async function getTimetable(req, res, next) {
     const result = await cache.getOrSet(cacheKey, ttl, async () => {
       const targetDate = day
         ? (() => {
+            if (typeof day === "string") {
+              const parsed = new Date(`${day}T00:00:00.000Z`);
+              if (!Number.isNaN(parsed.getTime())) return parsed;
+            }
             const now = new Date();
-            return new Date(now.getFullYear(), now.getMonth(), day);
+            return new Date(now.getFullYear(), now.getMonth(), Number(day));
           })()
         : new Date();
 
@@ -907,10 +929,20 @@ async function getTimetable(req, res, next) {
       end.setHours(23, 59, 59, 999);
 
       const sessions = await prisma.liveClassSession.findMany({
-        where: { schoolId: child.schoolId, classId: child.classId, startsAt: { gte: start, lte: end } },
+        where: {
+          schoolId: child.schoolId,
+          classId: child.classId,
+          startsAt: { gte: start, lte: end },
+          status: { in: ["TIMETABLE", "UPCOMING", "LIVE"] },
+        },
         orderBy: { startsAt: "asc" },
         take: 20,
-        include: { subject: { select: { id: true, name: true } }, teacher: { select: { fullName: true } } },
+        select: {
+          startsAt: true,
+          title: true,
+          subject: { select: { name: true } },
+          teacher: { select: { fullName: true } },
+        },
       });
 
       const now = Date.now();
@@ -927,13 +959,41 @@ async function getTimetable(req, res, next) {
         };
       });
 
-      return { items };
+      return { date: targetDate.toISOString().split("T")[0], items };
     });
 
     return res.status(200).json({ success: true, data: result });
   } catch (e) {
     if (isClientError(e)) return next(e);
     return res.status(200).json({ success: true, data: { items: [] } });
+  }
+}
+
+async function createMeetingRequest(req, res, next) {
+  try {
+    const { parent } = await resolveParent(req);
+    const childId = await resolveChildIdForParent(parent.id, req.query.childId);
+    if (!childId) {
+      return res.status(400).json({
+        success: false,
+        error: { code: "BAD_REQUEST", message: "No child selected" },
+      });
+    }
+    const child = await resolveChildForParent(parent.id, childId);
+    const payload = createMeetingRequestSchema.parse(req.body || {});
+
+    const rec = await prisma.meetingRequest.create({
+      data: {
+        schoolId: child.schoolId,
+        studentId: child.id,
+        staffId: payload.staffId ? validateId(payload.staffId, "staffId") : null,
+        preferredDate: payload.preferredDate ?? null,
+        purpose: payload.purpose ?? null,
+      },
+    });
+    return res.status(201).json({ success: true, data: rec });
+  } catch (e) {
+    return next(e);
   }
 }
 
@@ -1149,6 +1209,124 @@ async function getProfileHub(req, res, next) {
   }
 }
 
+async function updateProfileHub(req, res, next) {
+  try {
+    const { parent } = await resolveParent(req);
+    const childId = await resolveChildIdForParent(parent.id, req.query.childId);
+    if (!childId) {
+      return res.status(400).json({
+        success: false,
+        error: { code: "BAD_REQUEST", message: "No child selected" },
+      });
+    }
+    const child = await resolveChildForParent(parent.id, childId);
+    const payload = updateProfileHubSchema.parse(req.body ?? {});
+
+    let parsedDob = null;
+    if (payload.dob !== undefined) {
+      const d = new Date(payload.dob);
+      if (Number.isNaN(d.getTime())) {
+        return res.status(400).json({
+          success: false,
+          error: { code: "BAD_REQUEST", message: "Invalid date of birth" },
+        });
+      }
+      parsedDob = d;
+    }
+
+    await prisma.$transaction(async (tx) => {
+      const studentUpdate = {};
+      if (payload.studentName !== undefined) {
+        const parts = payload.studentName.trim().split(/\s+/).filter(Boolean);
+        if (parts.length > 0) {
+          studentUpdate.firstName = parts[0];
+          studentUpdate.lastName = parts.slice(1).join(" ") || "";
+        }
+      }
+      if (parsedDob !== null) {
+        studentUpdate.dob = parsedDob;
+      }
+      if (payload.bloodGroup !== undefined) {
+        const existingMedical =
+          child.medicalInfo && typeof child.medicalInfo === "object" ? child.medicalInfo : {};
+        studentUpdate.medicalInfo = {
+          ...existingMedical,
+          bloodGroup: payload.bloodGroup || null,
+        };
+      }
+      if (Object.keys(studentUpdate).length > 0) {
+        await tx.student.update({
+          where: { id: child.id },
+          data: studentUpdate,
+        });
+      }
+
+      async function upsertGuardianName(relationContains, fullName) {
+        if (fullName === undefined) return;
+        const trimmed = String(fullName || "").trim();
+        if (!trimmed) return;
+
+        const existingRel = await tx.studentParent.findFirst({
+          where: {
+            studentId: child.id,
+            relationType: { contains: relationContains, mode: "insensitive" },
+          },
+          include: { parent: true },
+          orderBy: { createdAt: "desc" },
+        });
+
+        if (existingRel?.parent) {
+          await tx.parent.update({
+            where: { id: existingRel.parent.id },
+            data: { fullName: trimmed },
+          });
+          return;
+        }
+
+        const createdParent = await tx.parent.create({
+          data: {
+            schoolId: child.schoolId,
+            fullName: trimmed,
+            email: null,
+            phone: null,
+            isActive: true,
+          },
+        });
+        await tx.studentParent.create({
+          data: {
+            studentId: child.id,
+            parentId: createdParent.id,
+            relationType: relationContains.toUpperCase(),
+            isPrimary: false,
+          },
+        });
+      }
+
+      await upsertGuardianName("father", payload.fatherName);
+      await upsertGuardianName("mother", payload.motherName);
+    });
+
+    await cache.del(cache.cacheKeys.parentProfileHub(child.id));
+    const refreshed = await resolveChildForParent(parent.id, child.id);
+    const profile = await getChildProfile(refreshed);
+    const subjectScores = await getSubjectScores(refreshed);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        ...profile,
+        academicYear: String(new Date().getFullYear()),
+        currentTermPercentage: null,
+        classAvg: null,
+        subjectScores,
+        documents: [],
+      },
+    });
+  } catch (e) {
+    return next(e);
+  }
+}
+
 async function getLibrary(req, res, next) {
   try {
     const { parent } = await resolveParent(req);
@@ -1338,9 +1516,11 @@ module.exports = {
   payInvoiceBalance,
   quickPayAllInvoices,
   getTimetable,
+  createMeetingRequest,
   getProgressReports,
   getLiveClasses,
   getProfileHub,
+  updateProfileHub,
   getLibrary,
   getDocuments,
   getSettings,

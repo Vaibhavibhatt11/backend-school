@@ -11,9 +11,11 @@ const {
   getFees,
   getInvoiceDetail,
   getTimetable,
+  createMeetingRequest,
   getProgressReports,
   getLiveClasses,
   getProfileHub,
+  updateProfileHub,
   getLibrary,
   getDocuments,
   getSettings,
@@ -34,9 +36,11 @@ router.get("/attendance", getAttendance);
 router.get("/fees", getFees);
 router.get("/invoices/:invoiceId", getInvoiceDetail);
 router.get("/timetable", getTimetable);
+router.post("/meetings/request", createMeetingRequest);
 router.get("/progress-reports", getProgressReports);
 router.get("/live-classes", getLiveClasses);
 router.get("/profile-hub", getProfileHub);
+router.put("/profile-hub", updateProfileHub);
 router.get("/library", getLibrary);
 router.get("/documents", getDocuments);
 
