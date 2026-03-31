@@ -146,6 +146,29 @@ function requestUserAgent(req) {
   return typeof req.headers["user-agent"] === "string" ? req.headers["user-agent"] : null;
 }
 
+const TRANSIENT_PRISMA_CODES = new Set(["P1001", "P1017", "P2024"]);
+
+function isTransientPrismaError(error) {
+  return Boolean(error && typeof error === "object" && TRANSIENT_PRISMA_CODES.has(error.code));
+}
+
+async function withTransientPrismaRetry(fn, retries = 1) {
+  let lastError;
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      if (!isTransientPrismaError(error) || attempt >= retries) {
+        throw error;
+      }
+      // Short backoff for cold/waking DB connections.
+      await new Promise((resolve) => setTimeout(resolve, 250 * (attempt + 1)));
+    }
+  }
+  throw lastError;
+}
+
 function invalidOtp(res, message = "Invalid or expired OTP") {
   return res.status(400).json({
     success: false,
@@ -190,9 +213,11 @@ async function loginByRole(req, res, next) {
     const { email, password } = loginSchema.parse(req.body);
     const normalizedEmail = email.toLowerCase();
 
-    const user = await prisma.user.findUnique({
-      where: { email: normalizedEmail },
-    });
+    const user = await withTransientPrismaRetry(() =>
+      prisma.user.findUnique({
+        where: { email: normalizedEmail },
+      })
+    );
 
     if (!user || !user.isActive) {
       return unauthorized(res, "Invalid email or password");
@@ -203,7 +228,7 @@ async function loginByRole(req, res, next) {
       return unauthorized(res, "Invalid email or password");
     }
 
-    const { accessToken, refreshToken } = await issueLoginTokens(user, req);
+    const { accessToken, refreshToken } = await withTransientPrismaRetry(() => issueLoginTokens(user, req));
 
     return res.status(200).json({
       success: true,
