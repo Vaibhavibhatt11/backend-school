@@ -31,6 +31,9 @@ class ApiClient {
 
   final SessionStorageService _sessionStorage;
   late final Dio _dio;
+  final Map<String, _CachedGetResponse> _getCache = {};
+  final Map<String, Future<Response<dynamic>>> _inFlightGets = {};
+  static const Duration _defaultGetCacheTtl = Duration(seconds: 15);
 
   Dio get dio => _dio;
 
@@ -39,7 +42,40 @@ class ApiClient {
     Map<String, dynamic>? query,
     Options? options,
   }) {
-    return _dio.get(path, queryParameters: query, options: options);
+    final skipCache = options?.extra?['skipCache'] == true;
+    if (skipCache || _isUncacheablePath(path)) {
+      return _dio.get(path, queryParameters: query, options: options);
+    }
+    final cacheKey = _buildCacheKey(path, query);
+    final cached = _getCache[cacheKey];
+    if (cached != null && DateTime.now().isBefore(cached.expiresAt)) {
+      return Future.value(
+        Response<dynamic>(
+          data: cached.data,
+          requestOptions: RequestOptions(path: path, queryParameters: query ?? const {}),
+          statusCode: cached.statusCode,
+        ),
+      );
+    }
+    final inFlight = _inFlightGets[cacheKey];
+    if (inFlight != null) return inFlight;
+
+    final future = _dio
+        .get(path, queryParameters: query, options: options)
+        .then((response) {
+          _getCache[cacheKey] = _CachedGetResponse(
+            data: response.data,
+            statusCode: response.statusCode,
+            expiresAt: DateTime.now().add(_defaultGetCacheTtl),
+          );
+          return response;
+        })
+        .whenComplete(() {
+          _inFlightGets.remove(cacheKey);
+        });
+
+    _inFlightGets[cacheKey] = future;
+    return future;
   }
 
   Future<Response<dynamic>> post(
@@ -48,6 +84,7 @@ class ApiClient {
     Map<String, dynamic>? query,
     Options? options,
   }) {
+    _invalidateGetCache();
     return _dio.post(path, data: data, queryParameters: query, options: options);
   }
 
@@ -57,6 +94,7 @@ class ApiClient {
     Map<String, dynamic>? query,
     Options? options,
   }) {
+    _invalidateGetCache();
     return _dio.put(path, data: data, queryParameters: query, options: options);
   }
 
@@ -66,8 +104,36 @@ class ApiClient {
     Map<String, dynamic>? query,
     Options? options,
   }) {
+    _invalidateGetCache();
     return _dio.patch(path, data: data, queryParameters: query, options: options);
   }
+
+  void _invalidateGetCache() {
+    _getCache.clear();
+  }
+
+  bool _isUncacheablePath(String path) {
+    return path.contains('/auth/');
+  }
+
+  String _buildCacheKey(String path, Map<String, dynamic>? query) {
+    if (query == null || query.isEmpty) return path;
+    final keys = query.keys.map((k) => k.toString()).toList()..sort();
+    final parts = keys.map((k) => '$k=${query[k]}').join('&');
+    return '$path?$parts';
+  }
+}
+
+class _CachedGetResponse {
+  _CachedGetResponse({
+    required this.data,
+    required this.statusCode,
+    required this.expiresAt,
+  });
+
+  final dynamic data;
+  final int? statusCode;
+  final DateTime expiresAt;
 }
 
 /// On 401, refresh once via [SessionStorageService] and retry the failed request.

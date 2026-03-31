@@ -27,6 +27,7 @@ class ApiEndpoints {
   static String parentPayInvoiceBalance(String invoiceId) => '/parent/invoices/$invoiceId/pay-balance';
   static const String parentQuickPayAll = '/parent/fees/quick-pay-all';
   static const String parentTimetable = '/parent/timetable';
+  static const String parentMeetingsRequest = '/parent/meetings/request';
   static const String parentProgressReports = '/parent/progress-reports';
   static const String parentLiveClasses = '/parent/live-classes';
   static const String parentProfileHub = '/parent/profile-hub';
@@ -64,5 +65,8 @@ class ApiEndpoints {
       '/staff/communication/meeting-notes';
   static const String staffSettings = '/staff/settings';
   static const String staffAiAssist = '/staff/ai/assist';
+
+  // Student app
+  static const String studentMeetingsRequest = '/student/meetings/request';
 }
 

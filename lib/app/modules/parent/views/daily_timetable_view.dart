@@ -69,7 +69,7 @@ class DailyTimetableView extends GetView<TimetableController> {
                   final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
                   final dayNumber = d.day;
                   return GestureDetector(
-                    onTap: () => controller.changeDate(dayNumber),
+                    onTap: () => controller.changeDate(d),
                     child: Obx(
                       () => Container(
                         width: 60,
@@ -134,29 +134,54 @@ class DailyTimetableView extends GetView<TimetableController> {
             const SizedBox(height: 24),
             // Timetable list
             Obx(
-              () => Column(
-                children:
-                    controller.timetable.map((item) {
-                      return _buildClassCard(
-                        time: (item['time'] ?? '').toString(),
-                        subject: (item['subject'] ?? '').toString(),
-                        teacher: (item['teacher'] ?? '').toString(),
-                        room: (item['room'] ?? '').toString(),
-                        period: (item['period'] ?? '').toString(),
-                        isLive: item['isLive'] == true,
-                        progress: item['progress'] is num
-                            ? (item['progress'] as num).toDouble()
-                            : null,
-                        remaining: item['remaining']?.toString(),
-                        onJoin:
-                            item['isLive'] == true
-                                ? () => controller.joinLiveClass(
-                                  (item['subject'] ?? '').toString(),
-                                )
-                                : null,
-                      );
-                    }).toList(),
-              ),
+              () {
+                if (controller.isLoading.value) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                if (controller.errorMessage.value.isNotEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    child: Center(
+                      child: Text(
+                        controller.errorMessage.value,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                }
+                if (controller.timetable.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Center(
+                      child: Text('No timetable classes scheduled for this day.'),
+                    ),
+                  );
+                }
+                return Column(
+                  children: controller.timetable.map((item) {
+                    return _buildClassCard(
+                      time: (item['time'] ?? '').toString(),
+                      subject: (item['subject'] ?? '').toString(),
+                      teacher: (item['teacher'] ?? '').toString(),
+                      room: (item['room'] ?? '').toString(),
+                      period: (item['period'] ?? '').toString(),
+                      isLive: item['isLive'] == true,
+                      progress: item['progress'] is num
+                          ? (item['progress'] as num).toDouble()
+                          : null,
+                      remaining: item['remaining']?.toString(),
+                      onJoin: item['isLive'] == true
+                          ? () => controller.joinLiveClass(
+                                (item['subject'] ?? '').toString(),
+                              )
+                          : null,
+                    );
+                  }).toList(),
+                );
+              },
             ),
             const SizedBox(height: 80),
           ],

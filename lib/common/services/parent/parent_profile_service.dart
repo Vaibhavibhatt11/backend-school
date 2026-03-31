@@ -24,6 +24,24 @@ class ParentProfileService {
     return extractApiData(res.data, context: 'profile hub');
   }
 
+  Future<Map<String, dynamic>> updateProfileHub(
+    Map<String, dynamic> payload, {
+    String? childId,
+  }) async {
+    final scopedChildId = (childId == null || childId.isEmpty)
+        ? await _parentContext.ensureSelectedChildId()
+        : childId;
+    final query = <String, dynamic>{
+      if (scopedChildId != null && scopedChildId.isNotEmpty) 'childId': scopedChildId,
+    };
+    final res = await _apiClient.put(
+      ApiEndpoints.parentProfileHub,
+      data: payload,
+      query: query.isEmpty ? null : query,
+    );
+    return extractApiData(res.data, context: 'update profile hub');
+  }
+
   Future<Map<String, dynamic>> getLibrary({
     String? childId,
     int? page,

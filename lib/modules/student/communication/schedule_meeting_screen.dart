@@ -120,7 +120,7 @@ class _ScheduleMeetingScreenState extends State<ScheduleMeetingScreen> {
     );
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     final validForm = _formKey.currentState?.validate() ?? false;
     if (!validForm) return;
     if (_selectedDate == null) {
@@ -137,17 +137,20 @@ class _ScheduleMeetingScreenState extends State<ScheduleMeetingScreen> {
     }
 
     final communicationController = Get.find<StudentCommunicationController>();
-    communicationController.addScheduledMeeting(
-      facultyName: _facultyCtrl.text,
-      subject: _subjectCtrl.text,
-      reason: _reasonCtrl.text,
-      date: _selectedDate!,
-      day: _dayLabel,
-      time: _timeCtrl.text,
-    );
-
-    AppToast.show('Your meeting has been added.');
-    Get.back();
+    try {
+      await communicationController.submitMeetingRequest(
+        facultyName: _facultyCtrl.text,
+        subject: _subjectCtrl.text,
+        reason: _reasonCtrl.text,
+        date: _selectedDate!,
+        day: _dayLabel,
+        time: _timeCtrl.text,
+      );
+      AppToast.show('Your meeting has been added.');
+      Get.back();
+    } catch (e) {
+      AppToast.show(e.toString().replaceFirst('Exception: ', ''));
+    }
   }
 
   @override
@@ -358,13 +361,30 @@ class _ScheduleMeetingScreenState extends State<ScheduleMeetingScreen> {
                             },
                           ),
                           SizedBox(height: Responsive.h(context, 18)),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: _submit,
-                              icon: const Icon(Icons.send_rounded),
-                              label: const Text('Schedule meeting'),
-                            ),
+                          Obx(
+                            () {
+                              final communicationController = Get.find<StudentCommunicationController>();
+                              return SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  onPressed: communicationController.isScheduling.value
+                                      ? null
+                                      : _submit,
+                                  icon: communicationController.isScheduling.value
+                                      ? const SizedBox(
+                                          width: 18,
+                                          height: 18,
+                                          child: CircularProgressIndicator(strokeWidth: 2),
+                                        )
+                                      : const Icon(Icons.send_rounded),
+                                  label: Text(
+                                    communicationController.isScheduling.value
+                                        ? 'Scheduling...'
+                                        : 'Schedule meeting',
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),

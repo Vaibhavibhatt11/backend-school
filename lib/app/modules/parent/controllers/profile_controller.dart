@@ -1,4 +1,5 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../common/services/parent/parent_api_utils.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
@@ -24,6 +25,7 @@ class ProfileController extends GetxController {
 
   final documents = <Map<String, dynamic>>[].obs;
   Worker? _childWorker;
+  final isSaving = false.obs;
 
   @override
   void onInit() {
@@ -89,8 +91,42 @@ class ProfileController extends GetxController {
     return 'E';
   }
 
-  Future<void> editPersonal() async => loadProfile();
-  Future<void> editGuardian() async => loadProfile();
+  Future<void> editPersonal() async {
+    final nameCtrl = TextEditingController(text: studentName.value);
+    final dobCtrl = TextEditingController(text: dob.value);
+    final bloodCtrl = TextEditingController(text: bloodGroup.value);
+    final confirmed = await _showEditDialog(
+      title: 'Edit Personal Details',
+      fields: [
+        _EditField('Student Name', nameCtrl),
+        _EditField('Date of Birth (YYYY-MM-DD)', dobCtrl),
+        _EditField('Blood Group', bloodCtrl),
+      ],
+    );
+    if (!confirmed) return;
+    await _saveProfileUpdates({
+      'studentName': nameCtrl.text.trim(),
+      'dob': dobCtrl.text.trim(),
+      'bloodGroup': bloodCtrl.text.trim(),
+    });
+  }
+
+  Future<void> editGuardian() async {
+    final fatherCtrl = TextEditingController(text: fatherName.value);
+    final motherCtrl = TextEditingController(text: motherName.value);
+    final confirmed = await _showEditDialog(
+      title: 'Edit Guardian Info',
+      fields: [
+        _EditField('Father Name', fatherCtrl),
+        _EditField('Mother Name', motherCtrl),
+      ],
+    );
+    if (!confirmed) return;
+    await _saveProfileUpdates({
+      'fatherName': fatherCtrl.text.trim(),
+      'motherName': motherCtrl.text.trim(),
+    });
+  }
   Future<void> viewAllDocuments() async => loadProfile();
   Future<void> downloadDocument(String docName) async => loadProfile();
   void openSettings() => Get.toNamed(AppRoutes.PARENT_SETTINGS);
@@ -106,4 +142,72 @@ class ProfileController extends GetxController {
     _childWorker?.dispose();
     super.onClose();
   }
+
+  Future<bool> _showEditDialog({
+    required String title,
+    required List<_EditField> fields,
+  }) async {
+    final result = await Get.dialog<bool>(
+      AlertDialog(
+        title: Text(title),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: fields
+                .map(
+                  (f) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: TextField(
+                      controller: f.controller,
+                      decoration: InputDecoration(
+                        labelText: f.label,
+                        border: const OutlineInputBorder(),
+                        isDense: true,
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text('Cancel'),
+          ),
+          Obx(
+            () => FilledButton(
+              onPressed: isSaving.value ? null : () => Get.back(result: true),
+              child: Text(isSaving.value ? 'Saving...' : 'Save'),
+            ),
+          ),
+        ],
+      ),
+      barrierDismissible: !isSaving.value,
+    );
+    return result == true;
+  }
+
+  Future<void> _saveProfileUpdates(Map<String, dynamic> data) async {
+    isSaving.value = true;
+    try {
+      await _profileService.updateProfileHub(
+        data,
+        childId: _parentContext.selectedChildId.value,
+      );
+      await loadProfile();
+      Get.snackbar('Success', 'Profile updated successfully');
+    } catch (e) {
+      errorMessage.value = dioOrApiErrorMessage(e);
+      Get.snackbar('Error', errorMessage.value);
+    } finally {
+      isSaving.value = false;
+    }
+  }
+}
+
+class _EditField {
+  _EditField(this.label, this.controller);
+  final String label;
+  final TextEditingController controller;
 }

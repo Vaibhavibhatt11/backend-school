@@ -72,6 +72,7 @@ class AttendanceController extends GetxController {
   }
 
   Future<void> loadAttendance() async {
+    if (isLoading.value) return;
     isLoading.value = true;
     errorMessage.value = '';
     try {

@@ -28,6 +28,7 @@ class TimetableController extends GetxController {
   }
 
   Future<void> loadTimetable() async {
+    if (isLoading.value) return;
     isLoading.value = true;
     errorMessage.value = '';
     try {
@@ -62,13 +63,9 @@ class TimetableController extends GetxController {
     }
   }
 
-  void changeDate(int day) {
-    selectedDay.value = day;
-    selectedDate.value = DateTime(
-      selectedDate.value.year,
-      selectedDate.value.month,
-      day,
-    );
+  void changeDate(DateTime date) {
+    selectedDate.value = DateTime(date.year, date.month, date.day);
+    selectedDay.value = selectedDate.value.day;
     loadTimetable();
   }
 

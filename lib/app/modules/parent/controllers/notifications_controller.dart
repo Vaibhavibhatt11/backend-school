@@ -25,6 +25,7 @@ class NotificationsController extends GetxController {
   }
 
   Future<void> loadNotifications() async {
+    if (isLoading.value) return;
     isLoading.value = true;
     try {
       final data = await _communicationService.getNotifications(

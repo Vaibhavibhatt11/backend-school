@@ -1,10 +1,18 @@
 import 'package:get/get.dart';
+import '../../../common/api/api_client.dart';
+import '../../../common/api/api_endpoints.dart';
+import '../../../common/services/parent/parent_context_service.dart';
+import '../../../common/services/session_storage_service.dart';
+import '../../../common/services/parent/parent_api_utils.dart';
 import 'models/communication_models.dart';
 
 class StudentCommunicationController extends GetxController {
+  final ApiClient _apiClient = Get.find<ApiClient>();
+  final SessionStorageService _sessionStorage = Get.find<SessionStorageService>();
   final RxInt unreadCount = 0.obs;
   final RxList<CommunicationItem> items = <CommunicationItem>[].obs;
   final RxList<ScheduledMeeting> scheduledMeetings = <ScheduledMeeting>[].obs;
+  final isScheduling = false.obs;
 
   /// all | message | alert | announcement | meeting
   final RxString selectedFilter = 'all'.obs;
@@ -42,6 +50,55 @@ class StudentCommunicationController extends GetxController {
       ),
     );
     _sortMeetings();
+  }
+
+  Future<void> submitMeetingRequest({
+    required String facultyName,
+    required String subject,
+    required String reason,
+    required DateTime date,
+    required String day,
+    required String time,
+  }) async {
+    if (isScheduling.value) return;
+    isScheduling.value = true;
+    try {
+      final loginResponse = await _sessionStorage.getLoginResponse();
+      final role =
+          (loginResponse?['data']?['user']?['role'] ?? '').toString().toUpperCase();
+      final payload = {
+        'preferredDate': date.toIso8601String(),
+        'purpose': '$subject meeting with $facultyName at $time ($day). Reason: $reason',
+      };
+
+      if (role == 'PARENT') {
+        String? childId;
+        if (Get.isRegistered<ParentContextService>()) {
+          final ctx = Get.find<ParentContextService>();
+          childId = ctx.selectedChildId.value ?? await ctx.ensureSelectedChildId();
+        }
+        await _apiClient.post(
+          ApiEndpoints.parentMeetingsRequest,
+          data: payload,
+          query: (childId != null && childId.isNotEmpty) ? {'childId': childId} : null,
+        );
+      } else {
+        await _apiClient.post(ApiEndpoints.studentMeetingsRequest, data: payload);
+      }
+
+      addScheduledMeeting(
+        facultyName: facultyName,
+        subject: subject,
+        reason: reason,
+        date: date,
+        day: day,
+        time: time,
+      );
+    } catch (e) {
+      throw Exception(dioOrApiErrorMessage(e));
+    } finally {
+      isScheduling.value = false;
+    }
   }
 
   void _sortMeetings() {

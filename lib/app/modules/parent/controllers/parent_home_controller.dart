@@ -43,6 +43,7 @@ class ParentHomeController extends GetxController {
   }
 
   Future<void> loadHome({String? month}) async {
+    if (isLoading.value) return;
     isLoading.value = true;
     errorMessage.value = '';
     try {
