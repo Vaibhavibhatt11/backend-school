@@ -1,6 +1,6 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/utils/safe_navigation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class ParentBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -11,19 +11,19 @@ class ParentBottomNavBar extends StatelessWidget {
     if (index == currentIndex) return;
     switch (index) {
       case 0:
-        Get.offNamed(AppRoutes.PARENT_HOME);
+        SafeNavigation.offNamed(AppRoutes.PARENT_HOME);
         break;
       case 1:
-        Get.offNamed(AppRoutes.PARENT_ATTENDANCE);
+        SafeNavigation.offNamed(AppRoutes.PARENT_ATTENDANCE);
         break;
       case 2:
-        Get.offNamed(AppRoutes.PARENT_FEES);
+        SafeNavigation.offNamed(AppRoutes.PARENT_FEES);
         break;
       case 3:
-        Get.offNamed(AppRoutes.PARENT_TIMETABLE);
+        SafeNavigation.offNamed(AppRoutes.PARENT_TIMETABLE);
         break;
       case 4:
-        Get.offNamed(AppRoutes.PARENT_PROFILE);
+        SafeNavigation.offNamed(AppRoutes.PARENT_PROFILE);
         break;
     }
   }

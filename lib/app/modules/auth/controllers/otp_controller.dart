@@ -1,5 +1,9 @@
+import 'dart:async';
+
+import 'package:flutter/widgets.dart';
 import 'package:erp_frontend/app/data/repositories/user_repository.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:get/get.dart';
 
@@ -11,6 +15,7 @@ class OtpController extends GetxController {
   final resendSeconds = 45.obs;
   late String purpose;
   late String identifier;
+  Timer? _resendTimer;
 
   @override
   void onInit() {
@@ -22,11 +27,13 @@ class OtpController extends GetxController {
   }
 
   void startResendTimer() {
-    Future.delayed(const Duration(seconds: 1), () {
-      if (resendSeconds.value > 0) {
-        resendSeconds.value--;
-        startResendTimer();
+    _resendTimer?.cancel();
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (resendSeconds.value <= 0) {
+        timer.cancel();
+        return;
       }
+      resendSeconds.value--;
     });
   }
 
@@ -50,10 +57,14 @@ class OtpController extends GetxController {
         email: identifier,
         otp: otpCode.value,
       );
-      Get.offNamed(
-        AppRoutes.RESET_PASSWORD,
-        arguments: {'identifier': identifier, 'resetToken': resetToken},
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.offNamed(
+          AppRoutes.RESET_PASSWORD,
+          arguments: {'identifier': identifier, 'resetToken': resetToken},
+        );
+      });
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
     } finally {
       isLoading.value = false;
     }
@@ -62,7 +73,17 @@ class OtpController extends GetxController {
   Future<void> resendCode() async {
     resendSeconds.value = 45;
     startResendTimer();
-    await _userRepository.sendOtp(identifier);
-    AppToast.show('OTP resent');
+    try {
+      await _userRepository.sendOtp(identifier);
+      AppToast.show('OTP resent');
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    }
+  }
+
+  @override
+  void onClose() {
+    _resendTimer?.cancel();
+    super.onClose();
   }
 }

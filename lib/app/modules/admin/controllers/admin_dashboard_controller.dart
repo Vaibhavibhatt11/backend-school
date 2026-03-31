@@ -2,6 +2,7 @@ import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:erp_frontend/common/services/admin/admin_service.dart';
 import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
+import 'package:erp_frontend/common/utils/safe_navigation.dart';
 import 'package:get/get.dart';
 import 'admin_shell_controller.dart';
 
@@ -114,7 +115,8 @@ class AdminDashboardController extends GetxController {
     if (_isNavigating) return;
     _isNavigating = true;
     try {
-      await Get.toNamed(route, arguments: arguments);
+      SafeNavigation.toNamed(route, arguments: arguments);
+      await Future.delayed(const Duration(milliseconds: 250));
     } finally {
       _isNavigating = false;
     }

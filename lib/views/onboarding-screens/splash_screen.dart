@@ -19,6 +19,15 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  void _safeOffAllNamed(String route) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (Get.currentRoute != route) {
+        Get.offAllNamed(route);
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -38,7 +47,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     if (token == null || token.isEmpty) {
-      Get.offAllNamed(CommonScreenRoutes.loginScreen);
+      _safeOffAllNamed(CommonScreenRoutes.loginScreen);
       return;
     }
 
@@ -50,13 +59,13 @@ class _SplashScreenState extends State<SplashScreen> {
         final body = await auth.me();
         final data = extractApiData(body, context: 'me');
         role = AuthUserParse.roleFromData(data) ??
-            AuthUserParse.roleFromAuthResponse(body is Map<String, dynamic> ? body : null);
+            AuthUserParse.roleFromAuthResponse(body);
         if (role != null && role.isNotEmpty) {
           appStorage.userRole = role;
         }
       } catch (_) {
         if (!mounted) return;
-        Get.offAllNamed(CommonScreenRoutes.loginScreen);
+        _safeOffAllNamed(CommonScreenRoutes.loginScreen);
         return;
       }
     }

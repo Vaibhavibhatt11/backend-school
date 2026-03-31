@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:erp_frontend/common/services/auth_service.dart';
 import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
@@ -6,10 +7,18 @@ import 'package:erp_frontend/common/utils/auth_route_resolver.dart';
 import 'package:erp_frontend/common/utils/auth_user_parse.dart';
 import 'package:get/get.dart';
 import '../../../data/models/user_model.dart';
-import '../../../services/app_storage.dart';
 
 class RoleController extends GetxController {
-  final _storage = AppStorage();
+  void _safeOffNamed(String route, {bool clearStack = false}) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.currentRoute == route) return;
+      if (clearStack) {
+        Get.offAllNamed(route);
+      } else {
+        Get.offNamed(route);
+      }
+    });
+  }
 
   Future<void> selectRole(UserRole role) async {
     try {
@@ -17,7 +26,7 @@ class RoleController extends GetxController {
       final body = await auth.me();
       final data = extractApiData(body, context: 'me');
       final backendRole = AuthUserParse.roleFromData(data) ??
-          AuthUserParse.roleFromAuthResponse(body is Map<String, dynamic> ? body : null);
+          AuthUserParse.roleFromAuthResponse(body);
       if (backendRole != null && backendRole.isNotEmpty) {
         if (!_backendAllowsUiRole(backendRole, role)) {
           AppToast.show(
@@ -29,20 +38,20 @@ class RoleController extends GetxController {
       }
     } catch (_) {
       AppToast.show('Session expired. Please sign in again.');
-      Get.offAllNamed(AppRoutes.LOGIN);
+      _safeOffNamed(AppRoutes.LOGIN, clearStack: true);
       return;
     }
 
     switch (role) {
       case UserRole.parent:
-        Get.offNamed(AppRoutes.PARENT_HOME);
+        _safeOffNamed(AppRoutes.PARENT_HOME);
         break;
       case UserRole.teacher:
         // Live staff APIs use `StaffShellView` (same as post-login routing).
-        Get.offNamed(AppRoutes.STAFF_HOME);
+        _safeOffNamed(AppRoutes.STAFF_HOME);
         break;
       case UserRole.admin:
-        Get.offNamed(AppRoutes.ADMIN_HOME);
+        _safeOffNamed(AppRoutes.ADMIN_HOME);
         break;
     }
   }

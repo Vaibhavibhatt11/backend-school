@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:erp_frontend/app/data/models/branch_model.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:get/get.dart';
@@ -62,7 +63,11 @@ class BranchController extends GetxController {
   }
 
   void confirmSelection() {
-    Get.toNamed(AppRoutes.LOGIN);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.currentRoute != AppRoutes.LOGIN) {
+        Get.toNamed(AppRoutes.LOGIN);
+      }
+    });
   }
 
   List<BranchModel> get filteredBranches {

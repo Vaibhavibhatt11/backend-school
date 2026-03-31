@@ -1,7 +1,7 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/utils/safe_navigation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class AdminBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -16,19 +16,19 @@ class AdminBottomNavBar extends StatelessWidget {
     if (index == currentIndex) return;
     switch (index) {
       case 0:
-        Get.toNamed(AppRoutes.ADMIN_HOME, arguments: {'tabIndex': 0});
+        SafeNavigation.toNamed(AppRoutes.ADMIN_HOME, arguments: {'tabIndex': 0});
         break;
       case 1:
-        Get.toNamed(AppRoutes.ADMIN_APPROVALS, arguments: {'tabIndex': 1});
+        SafeNavigation.toNamed(AppRoutes.ADMIN_APPROVALS, arguments: {'tabIndex': 1});
         break;
       case 2:
-        Get.toNamed(AppRoutes.ADMIN_REPORTS, arguments: {'tabIndex': 2});
+        SafeNavigation.toNamed(AppRoutes.ADMIN_REPORTS, arguments: {'tabIndex': 2});
         break;
       case 3:
-        Get.toNamed(AppRoutes.ADMIN_NOTICE_BOARD, arguments: {'tabIndex': 3});
+        SafeNavigation.toNamed(AppRoutes.ADMIN_NOTICE_BOARD, arguments: {'tabIndex': 3});
         break;
       case 4:
-        Get.toNamed(AppRoutes.ADMIN_SETTINGS, arguments: {'tabIndex': 4});
+        SafeNavigation.toNamed(AppRoutes.ADMIN_SETTINGS, arguments: {'tabIndex': 4});
         break;
     }
   }

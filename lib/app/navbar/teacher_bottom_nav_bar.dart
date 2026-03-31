@@ -1,7 +1,7 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/utils/safe_navigation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class TeacherBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -10,19 +10,19 @@ class TeacherBottomNavBar extends StatelessWidget {
   void _onTap(int index) {
     switch (index) {
       case 0:
-        Get.offNamed(AppRoutes.TEACHER_HOME);
+        SafeNavigation.offNamed(AppRoutes.TEACHER_HOME);
         break;
       case 1:
-        Get.offNamed(AppRoutes.TEACHER_ATTENDANCE_SELECTOR);
+        SafeNavigation.offNamed(AppRoutes.TEACHER_ATTENDANCE_SELECTOR);
         break;
       case 2:
-        Get.offNamed(AppRoutes.TEACHER_LIVE_CLASS); // Classes hub
+        SafeNavigation.offNamed(AppRoutes.TEACHER_LIVE_CLASS); // Classes hub
         break;
       case 3:
-        Get.offNamed(AppRoutes.TEACHER_TIMETABLE);
+        SafeNavigation.offNamed(AppRoutes.TEACHER_TIMETABLE);
         break;
       case 4:
-        Get.offNamed(AppRoutes.TEACHER_PROFILE);
+        SafeNavigation.offNamed(AppRoutes.TEACHER_PROFILE);
         break;
     }
   }

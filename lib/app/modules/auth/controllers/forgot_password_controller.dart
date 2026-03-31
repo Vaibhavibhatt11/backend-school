@@ -1,5 +1,7 @@
+import 'package:flutter/widgets.dart';
 import 'package:erp_frontend/app/data/repositories/user_repository.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:get/get.dart';
 
@@ -23,10 +25,14 @@ class ForgotPasswordController extends GetxController {
     try {
       await _userRepository.sendOtp(value);
       // Navigate to OTP with purpose 'forgot'
-      Get.toNamed(
-        AppRoutes.OTP,
-        arguments: {'purpose': 'forgot', 'identifier': value},
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.toNamed(
+          AppRoutes.OTP,
+          arguments: {'purpose': 'forgot', 'identifier': value},
+        );
+      });
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
     } finally {
       isLoading.value = false;
     }

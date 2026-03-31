@@ -156,8 +156,9 @@ class LoginView extends GetView<LoginController> {
               ),
             ),
             const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 8,
               children: [
                 TextButton(
                   onPressed: () {},
@@ -172,7 +173,6 @@ class LoginView extends GetView<LoginController> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
                 TextButton(
                   onPressed: () {},
                   child: Text(

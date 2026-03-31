@@ -1,6 +1,6 @@
 import 'package:erp_frontend/app/modules/staff/widgets/staff_ai_assistant_sheet.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
-import 'package:get/get.dart';
+import 'package:erp_frontend/common/utils/safe_navigation.dart';
 
 /// Opens the staff shell tab (or AI sheet) for a catalog module id.
 class StaffPortalNavigation {
@@ -31,6 +31,6 @@ class StaffPortalNavigation {
         tab = 0;
     }
 
-    Get.offNamed(AppRoutes.STAFF_HOME, arguments: {'tabIndex': tab});
+    SafeNavigation.offNamed(AppRoutes.STAFF_HOME, arguments: {'tabIndex': tab});
   }
 }

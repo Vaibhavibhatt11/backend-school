@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../../common/services/parent/parent_api_utils.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
 import '../../../../common/services/parent/parent_dashboard_service.dart';
+import '../../../../common/utils/safe_navigation.dart';
 
 class ParentHomeController extends GetxController {
   final ParentDashboardService _dashboardService = Get.find<ParentDashboardService>();
@@ -84,9 +85,9 @@ class ParentHomeController extends GetxController {
     return int.tryParse(value?.toString() ?? '') ?? fallback;
   }
 
-  void goToChildSwitcher() => Get.toNamed(AppRoutes.PARENT_CHILD_SWITCHER);
-  void goToNotifications() => Get.toNamed(AppRoutes.PARENT_NOTIFICATIONS);
-  void goToAnnouncements() => Get.toNamed(AppRoutes.PARENT_ANNOUNCEMENTS);
-  void goToPerformance() => Get.toNamed(AppRoutes.PARENT_PERFORMANCE);
-  void goToLiveClass() => Get.toNamed(AppRoutes.PARENT_LIVE_CLASS);
+  void goToChildSwitcher() => SafeNavigation.toNamed(AppRoutes.PARENT_CHILD_SWITCHER);
+  void goToNotifications() => SafeNavigation.toNamed(AppRoutes.PARENT_NOTIFICATIONS);
+  void goToAnnouncements() => SafeNavigation.toNamed(AppRoutes.PARENT_ANNOUNCEMENTS);
+  void goToPerformance() => SafeNavigation.toNamed(AppRoutes.PARENT_PERFORMANCE);
+  void goToLiveClass() => SafeNavigation.toNamed(AppRoutes.PARENT_LIVE_CLASS);
 }

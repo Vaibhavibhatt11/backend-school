@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 import '../../app/routes/app_pages.dart';
@@ -7,6 +8,17 @@ import 'app_toast.dart';
 /// Maps backend `user.role` (and legacy enum strings) to the correct home route.
 class AuthRouteResolver {
   AuthRouteResolver._();
+
+  static void _navigateSafely(
+    void Function(String route) go,
+    String route,
+  ) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.currentRoute != route) {
+        go(route);
+      }
+    });
+  }
 
   /// Navigates to Parent, Teacher, or Admin shell based on [role].
   /// [clearStack] uses [Get.offAllNamed] when true (post-login), [Get.offNamed] when false.
@@ -22,11 +34,11 @@ class AuthRouteResolver {
             : 'This app does not support role: $role',
       );
       final go = clearStack ? Get.offAllNamed : Get.offNamed;
-      go(CommonScreenRoutes.loginScreen);
+      _navigateSafely(go, CommonScreenRoutes.loginScreen);
       return;
     }
     final go = clearStack ? Get.offAllNamed : Get.offNamed;
-    go(route);
+    _navigateSafely(go, route);
   }
 
   /// Returns a route name, or null if unsupported / missing.

@@ -132,13 +132,15 @@ class RoleSelectionView extends GetView<RoleController> {
                 ),
                 child: Icon(icon, color: AppColors.primary, size: 32),
               ),
-              const SizedBox(width: 20),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -149,6 +151,8 @@ class RoleSelectionView extends GetView<RoleController> {
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color:
                             isDark
@@ -159,8 +163,10 @@ class RoleSelectionView extends GetView<RoleController> {
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
               Icon(
                 Icons.chevron_right,
+                size: 20,
                 color: isDark ? AppColors.textSecondaryDark : Colors.grey,
               ),
             ],

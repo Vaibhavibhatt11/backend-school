@@ -4,6 +4,7 @@ import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
 import 'package:erp_frontend/common/services/staff/staff_service.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
+import 'package:erp_frontend/common/utils/safe_navigation.dart';
 import 'package:get/get.dart';
 
 class StaffDashboardController extends GetxController {
@@ -91,17 +92,17 @@ class StaffDashboardController extends GetxController {
     'Reports',
   ];
 
-  void goToModules() => Get.offNamed(AppRoutes.STAFF_HOME);
+  void goToModules() => SafeNavigation.offNamed(AppRoutes.STAFF_HOME);
 
   void _goToStaffTab(int index) {
     if (Get.isRegistered<StaffShellController>()) {
       Get.find<StaffShellController>().setTab(index);
       if (Get.currentRoute != AppRoutes.STAFF_HOME) {
-        Get.offNamed(AppRoutes.STAFF_HOME, arguments: {'tabIndex': index});
+        SafeNavigation.offNamed(AppRoutes.STAFF_HOME, arguments: {'tabIndex': index});
       }
       return;
     }
-    Get.offNamed(AppRoutes.STAFF_HOME, arguments: {'tabIndex': index});
+    SafeNavigation.offNamed(AppRoutes.STAFF_HOME, arguments: {'tabIndex': index});
   }
 
   void openModule(String moduleId) {
