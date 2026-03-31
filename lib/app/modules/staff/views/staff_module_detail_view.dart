@@ -11,8 +11,9 @@ class StaffModuleDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final args = Get.arguments as Map<String, dynamic>?;
-    final id = (args?['moduleId'] ?? '').toString();
+    final rawArgs = Get.arguments as Map?;
+    final args = rawArgs?.cast<String, dynamic>() ?? const {};
+    final id = (args['moduleId'] ?? '').toString();
     final module = kStaffModules.firstWhereOrNull((e) => e.id == id);
     if (module == null) return const Scaffold(body: Center(child: Text('Module not found')));
     final isDark = Theme.of(context).brightness == Brightness.dark;

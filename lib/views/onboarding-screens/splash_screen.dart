@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../app/services/app_storage.dart';
@@ -34,14 +36,46 @@ class _SplashScreenState extends State<SplashScreen> {
     _boot();
   }
 
-  Future<void> _boot() async {
-    await Future.delayed(const Duration(seconds: 2));
-    try {
-      final sys = Get.find<SystemService>();
-      await Future.wait([sys.health(), sys.ready()]);
-    } catch (_) {
-      // Backend may be unreachable; still allow login / offline UX.
+  void _warmBackendChecks() {
+    final sys = Get.find<SystemService>();
+    unawaited(sys.health().catchError((_) {}));
+    unawaited(sys.ready().catchError((_) {}));
+  }
+
+  Future<String?> _resolveRoleFast(SessionStorageService session) async {
+    final appStorage = AppStorage();
+    final storedRole = appStorage.userRole;
+    if (storedRole != null && storedRole.isNotEmpty) return storedRole;
+
+    // Fast local path: parse previously saved auth response.
+    final cachedLogin = await session.getLoginResponse();
+    final cachedRole = AuthUserParse.roleFromAuthResponse(cachedLogin);
+    if (cachedRole != null && cachedRole.isNotEmpty) {
+      appStorage.userRole = cachedRole;
+      return cachedRole;
     }
+
+    // Fallback path: single lightweight /auth/me probe with timeout.
+    try {
+      final auth = Get.find<AuthService>();
+      final body = await auth
+          .me()
+          .timeout(const Duration(milliseconds: 1500));
+      final data = extractApiData(body, context: 'me');
+      final role = AuthUserParse.roleFromData(data) ??
+          AuthUserParse.roleFromAuthResponse(body);
+      if (role != null && role.isNotEmpty) {
+        appStorage.userRole = role;
+      }
+      return role;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _boot() async {
+    // Do not block app start on backend probes.
+    _warmBackendChecks();
     final session = Get.find<SessionStorageService>();
     final token = await session.getToken();
     if (!mounted) return;
@@ -51,24 +85,7 @@ class _SplashScreenState extends State<SplashScreen> {
       return;
     }
 
-    final appStorage = AppStorage();
-    String? role = appStorage.userRole;
-    if (role == null || role.isEmpty) {
-      try {
-        final auth = Get.find<AuthService>();
-        final body = await auth.me();
-        final data = extractApiData(body, context: 'me');
-        role = AuthUserParse.roleFromData(data) ??
-            AuthUserParse.roleFromAuthResponse(body);
-        if (role != null && role.isNotEmpty) {
-          appStorage.userRole = role;
-        }
-      } catch (_) {
-        if (!mounted) return;
-        _safeOffAllNamed(CommonScreenRoutes.loginScreen);
-        return;
-      }
-    }
+    final role = await _resolveRoleFast(session);
 
     if (!mounted) return;
     AuthRouteResolver.goHomeForRole(role);

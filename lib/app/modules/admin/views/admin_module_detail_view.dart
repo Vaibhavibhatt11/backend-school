@@ -10,7 +10,8 @@ class AdminModuleDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final args = Get.arguments as Map<String, dynamic>?;
+    final rawArgs = Get.arguments as Map?;
+    final args = rawArgs?.cast<String, dynamic>() ?? const {};
     final moduleId = (args?['moduleId'] ?? '').toString();
     final module = kAdminModules.firstWhereOrNull((m) => m.id == moduleId);
     final isDark = Theme.of(context).brightness == Brightness.dark;
