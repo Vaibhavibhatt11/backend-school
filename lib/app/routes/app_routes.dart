@@ -28,7 +28,6 @@ abstract class AppRoutes {
   static const PARENT_NOTIFICATIONS = '/parent-notifications';
   static const PARENT_SETTINGS = '/parent-settings';
 
-  // Teacher/Admin (placeholders)
   // Teacher Module
   static const TEACHER_HOME = '/teacher-home';
   static const TEACHER_ATTENDANCE_SELECTOR = '/teacher-attendance-selector';
@@ -58,6 +57,13 @@ abstract class AppRoutes {
   static const ADMIN_AUDIT_LOGS = '/admin-audit-logs';
   static const ADMIN_PROFILE = '/admin-profile';
   static const ADMIN_SETTINGS = '/admin-settings';
+  static const ADMIN_ADMISSIONS = '/admin-admissions';
+  static const ADMIN_STUDENTS = '/admin-students';
+  static const ADMIN_PEOPLE = '/admin-people';
+  static const ADMIN_ACADEMICS = '/admin-academics';
+  static const ADMIN_SCHEDULE = '/admin-schedule';
+  static const ADMIN_RESOURCES = '/admin-resources';
+  static const ADMIN_OPERATIONS = '/admin-operations';
   static const ADMIN_MODULES = '/admin-modules';
   static const ADMIN_MODULE_DETAIL = '/admin-module-detail';
   static const ADMIN_FEATURE_DETAIL = '/admin-feature-detail';

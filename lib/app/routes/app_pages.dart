@@ -1,10 +1,17 @@
 import 'package:erp_frontend/app/modules/admin/views/admin_attendance_view.dart';
+import 'package:erp_frontend/app/modules/admin/views/admin_academics_view.dart';
 import 'package:erp_frontend/app/modules/admin/views/admin_audit_logs_view.dart';
+import 'package:erp_frontend/app/modules/admin/views/admin_admissions_view.dart';
 import 'package:erp_frontend/app/modules/admin/views/admin_fee_snapshot_view.dart';
 import 'package:erp_frontend/app/modules/admin/views/admin_module_detail_view.dart';
 import 'package:erp_frontend/app/modules/admin/views/admin_modules_view.dart';
+import 'package:erp_frontend/app/modules/admin/views/admin_operations_view.dart';
+import 'package:erp_frontend/app/modules/admin/views/admin_people_view.dart';
 import 'package:erp_frontend/app/modules/admin/views/admin_profile_view.dart';
+import 'package:erp_frontend/app/modules/admin/views/admin_resources_view.dart';
+import 'package:erp_frontend/app/modules/admin/views/admin_schedule_view.dart';
 import 'package:erp_frontend/app/modules/admin/views/admin_shell_view.dart';
+import 'package:erp_frontend/app/modules/admin/views/admin_students_view.dart';
 import 'package:erp_frontend/app/modules/auth/bindings/auth_binding.dart';
 import 'package:erp_frontend/app/modules/auth/views/branch_selection_view.dart';
 import 'package:erp_frontend/app/modules/auth/views/forgot_password_view.dart';
@@ -150,7 +157,6 @@ class AppPages {
       page: () => const SettingsView(),
       binding: ParentBinding(),
     ),
-    // teacher routes (placeholders)
     GetPage(
       name: AppRoutes.TEACHER_HOME,
       page: () => const TeacherShellView(),
@@ -269,6 +275,41 @@ class AppPages {
     GetPage(
       name: AppRoutes.ADMIN_SETTINGS,
       page: () => const AdminShellView(),
+      binding: AdminBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ADMIN_ADMISSIONS,
+      page: () => const AdminAdmissionsView(),
+      binding: AdminBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ADMIN_STUDENTS,
+      page: () => const AdminStudentsView(),
+      binding: AdminBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ADMIN_PEOPLE,
+      page: () => const AdminPeopleView(),
+      binding: AdminBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ADMIN_ACADEMICS,
+      page: () => const AdminAcademicsView(),
+      binding: AdminBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ADMIN_SCHEDULE,
+      page: () => const AdminScheduleView(),
+      binding: AdminBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ADMIN_RESOURCES,
+      page: () => const AdminResourcesView(),
+      binding: AdminBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ADMIN_OPERATIONS,
+      page: () => const AdminOperationsView(),
       binding: AdminBinding(),
     ),
     GetPage(

@@ -17,6 +17,7 @@ class StaffShellView extends StatefulWidget {
 
 class _StaffShellViewState extends State<StaffShellView> {
   late final StaffShellController controller;
+  int? _lastSyncedIndex;
 
   static const _tabs = [
     StaffDashboardView(),
@@ -30,9 +31,22 @@ class _StaffShellViewState extends State<StaffShellView> {
   void initState() {
     super.initState();
     controller = Get.find<StaffShellController>();
-    controller.setTab(
-      StaffShellController.resolveIndex(arguments: Get.arguments),
-    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _scheduleTabSync();
+  }
+
+  void _scheduleTabSync() {
+    final index = StaffShellController.resolveIndex(arguments: Get.arguments);
+    if (_lastSyncedIndex == index) return;
+    _lastSyncedIndex = index;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      controller.setTab(index);
+    });
   }
 
   @override
@@ -48,7 +62,8 @@ class _StaffShellViewState extends State<StaffShellView> {
           children: _tabs,
         ),
         bottomNavigationBar: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          constraints: const BoxConstraints(minHeight: 76),
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
           decoration: BoxDecoration(
             color: isDark ? AppColors.surfaceDark : Colors.white,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
@@ -60,6 +75,7 @@ class _StaffShellViewState extends State<StaffShellView> {
             ],
           ),
           child: SafeArea(
+            top: false,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -78,23 +94,39 @@ class _StaffShellViewState extends State<StaffShellView> {
 
   Widget _item(IconData icon, String label, int idx) {
     final active = controller.currentIndex.value == idx;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => controller.setTab(idx),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: active ? AppColors.primary : Colors.grey),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              color: active ? AppColors.primary : Colors.grey,
-              fontWeight: active ? FontWeight.bold : FontWeight.normal,
-            ),
+    return Expanded(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => controller.setTab(idx),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 22,
+                color: active ? AppColors.primary : Colors.grey,
+              ),
+              const SizedBox(height: 4),
+              SizedBox(
+                height: 12,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: active ? AppColors.primary : Colors.grey,
+                      fontWeight: active ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

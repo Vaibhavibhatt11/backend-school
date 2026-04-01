@@ -172,7 +172,7 @@ class AdminFeatureDetailView extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'This workflow now opens through real admin screens and live data instead of placeholder forms.',
+                    'This workflow opens through real admin screens backed by live data.',
                     style: TextStyle(
                       color: isDark
                           ? AppColors.textSecondaryDark

@@ -2,9 +2,7 @@ import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/core/widgets/custom_app_bar.dart';
 import 'package:erp_frontend/app/modules/staff/models/staff_module_catalog.dart';
 import 'package:erp_frontend/app/modules/staff/utils/staff_portal_navigation.dart';
-import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class StaffModulesView extends StatelessWidget {
   const StaffModulesView({super.key});
@@ -24,6 +22,11 @@ class StaffModulesView extends StatelessWidget {
               : c.maxWidth > 680
               ? 3
               : 2;
+          final childAspectRatio = c.maxWidth > 1000
+              ? 1.02
+              : c.maxWidth > 680
+              ? 0.94
+              : 0.82;
           return GridView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: kStaffModules.length,
@@ -31,21 +34,14 @@ class StaffModulesView extends StatelessWidget {
               crossAxisCount: cols,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: 1.05,
+              childAspectRatio: childAspectRatio,
             ),
             itemBuilder: (_, i) {
               final m = kStaffModules[i];
               final screens = StaffPortalNavigation.screensForModule(m.id);
               return InkWell(
                 borderRadius: BorderRadius.circular(14),
-                onTap: () {
-                  final args = <String, dynamic>{'moduleId': m.id};
-                  try {
-                    Get.toNamed(AppRoutes.STAFF_MODULE_DETAIL, arguments: args);
-                  } catch (_) {
-                    StaffPortalNavigation.openModule(m.id);
-                  }
-                },
+                onTap: () => StaffPortalNavigation.openModule(m.id),
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -69,11 +65,17 @@ class StaffModulesView extends StatelessWidget {
                     children: [
                       Icon(m.icon, color: AppColors.primary),
                       const SizedBox(height: 8),
-                      Text(
-                        m.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      SizedBox(
+                        height: 38,
+                        child: Align(
+                          alignment: Alignment.topLeft,
+                          child: Text(
+                            m.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 4),
                       if (screens.isNotEmpty)
@@ -89,8 +91,9 @@ class StaffModulesView extends StatelessWidget {
                           ),
                         ),
                       const Spacer(),
+                      const SizedBox(height: 6),
                       Text(
-                        '${screens.length} screens available',
+                        'Tap to open live module',
                         style: const TextStyle(
                           fontSize: 12,
                           color: AppColors.primary,

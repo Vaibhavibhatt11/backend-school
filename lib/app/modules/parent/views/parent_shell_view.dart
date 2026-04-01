@@ -17,6 +17,7 @@ class ParentShellView extends StatefulWidget {
 
 class _ParentShellViewState extends State<ParentShellView> {
   late final ParentShellController controller;
+  int? _lastSyncedIndex;
 
   static const List<Widget> _tabs = [
     ParentHomeView(embedded: true),
@@ -30,12 +31,25 @@ class _ParentShellViewState extends State<ParentShellView> {
   void initState() {
     super.initState();
     controller = Get.find<ParentShellController>();
-    controller.setTab(
-      ParentShellController.resolveIndex(
-        Get.currentRoute,
-        arguments: Get.arguments,
-      ),
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _scheduleTabSync();
+  }
+
+  void _scheduleTabSync() {
+    final index = ParentShellController.resolveIndex(
+      Get.currentRoute,
+      arguments: Get.arguments,
     );
+    if (_lastSyncedIndex == index) return;
+    _lastSyncedIndex = index;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      controller.setTab(index);
+    });
   }
 
   @override

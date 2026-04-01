@@ -42,8 +42,15 @@ class AdminPortalNavigation {
       case 'admissions':
         return const [
           AdminPortalScreen(
+            title: 'Admissions Center',
+            description:
+                'Create, review, document, and onboard real admission applications.',
+            route: AppRoutes.ADMIN_ADMISSIONS,
+          ),
+          AdminPortalScreen(
             title: 'Approvals Queue',
-            description: 'Review pending admissions and related requests.',
+            description:
+                'Review pending approvals linked to admissions activity.',
             route: AppRoutes.ADMIN_APPROVALS,
             arguments: {'tabIndex': 1},
           ),
@@ -53,20 +60,20 @@ class AdminPortalNavigation {
             route: AppRoutes.ADMIN_NOTICE_BOARD,
             arguments: {'tabIndex': 3},
           ),
-          AdminPortalScreen(
-            title: 'Reports',
-            description: 'Track admission-related operational trends.',
-            route: AppRoutes.ADMIN_REPORTS,
-            arguments: {'tabIndex': 2},
-          ),
         ];
       case 'students':
         return const [
           AdminPortalScreen(
-            title: 'Executive Dashboard',
-            description: 'Student totals and school-wide snapshot.',
-            route: AppRoutes.ADMIN_HOME,
-            arguments: {'tabIndex': 0},
+            title: 'Student Management',
+            description:
+                'Create, update, move, deactivate, and document real student records.',
+            route: AppRoutes.ADMIN_STUDENTS,
+          ),
+          AdminPortalScreen(
+            title: 'Parent Directory',
+            description: 'Manage linked parents and guardian invitations.',
+            route: AppRoutes.ADMIN_PEOPLE,
+            arguments: {'initialTab': 0},
           ),
           AdminPortalScreen(
             title: 'Attendance Overview',
@@ -83,10 +90,11 @@ class AdminPortalNavigation {
       case 'staff':
         return const [
           AdminPortalScreen(
-            title: 'Executive Dashboard',
-            description: 'Track teacher presence and staffing KPIs.',
-            route: AppRoutes.ADMIN_HOME,
-            arguments: {'tabIndex': 0},
+            title: 'Staff Directory',
+            description:
+                'Create, update, activate, and remove real staff records.',
+            route: AppRoutes.ADMIN_PEOPLE,
+            arguments: {'initialTab': 1},
           ),
           AdminPortalScreen(
             title: 'Attendance Overview',
@@ -102,22 +110,22 @@ class AdminPortalNavigation {
       case 'academics':
         return const [
           AdminPortalScreen(
+            title: 'Academic Setup',
+            description: 'Manage live classes and subjects from one place.',
+            route: AppRoutes.ADMIN_ACADEMICS,
+            arguments: {'initialTab': 0},
+          ),
+          AdminPortalScreen(
+            title: 'Subject Catalog',
+            description: 'Create and update subject masters with real data.',
+            route: AppRoutes.ADMIN_ACADEMICS,
+            arguments: {'initialTab': 1},
+          ),
+          AdminPortalScreen(
             title: 'Reports',
             description: 'View live academic and class performance summaries.',
             route: AppRoutes.ADMIN_REPORTS,
             arguments: {'tabIndex': 2},
-          ),
-          AdminPortalScreen(
-            title: 'Executive Dashboard',
-            description: 'Stay on top of school-wide academic operations.',
-            route: AppRoutes.ADMIN_HOME,
-            arguments: {'tabIndex': 0},
-          ),
-          AdminPortalScreen(
-            title: 'Notice Board',
-            description: 'Publish class and academic announcements.',
-            route: AppRoutes.ADMIN_NOTICE_BOARD,
-            arguments: {'tabIndex': 3},
           ),
         ];
       case 'attendance':
@@ -162,7 +170,13 @@ class AdminPortalNavigation {
       case 'exams':
         return const [
           AdminPortalScreen(
-            title: 'Reports',
+            title: 'Exam Control',
+            description: 'Create exams, publish them, and enter marks.',
+            route: AppRoutes.ADMIN_SCHEDULE,
+            arguments: {'initialTab': 1},
+          ),
+          AdminPortalScreen(
+            title: 'Exam Reports',
             description: 'Track academic reporting and performance outcomes.',
             route: AppRoutes.ADMIN_REPORTS,
             arguments: {'tabIndex': 2},
@@ -173,35 +187,30 @@ class AdminPortalNavigation {
             route: AppRoutes.ADMIN_NOTICE_BOARD,
             arguments: {'tabIndex': 3},
           ),
-          AdminPortalScreen(
-            title: 'Executive Dashboard',
-            description: 'Keep exam operations visible in the main dashboard.',
-            route: AppRoutes.ADMIN_HOME,
-            arguments: {'tabIndex': 0},
-          ),
         ];
       case 'timetable':
         return const [
+          AdminPortalScreen(
+            title: 'Schedule Manager',
+            description: 'Manage timetable slots and live class sessions.',
+            route: AppRoutes.ADMIN_SCHEDULE,
+            arguments: {'initialTab': 0},
+          ),
           AdminPortalScreen(
             title: 'Reports',
             description: 'See live class coverage and operational trends.',
             route: AppRoutes.ADMIN_REPORTS,
             arguments: {'tabIndex': 2},
           ),
-          AdminPortalScreen(
-            title: 'Attendance Overview',
-            description: 'Monitor attendance impact on timetable coverage.',
-            route: AppRoutes.ADMIN_ATTENDANCE,
-          ),
-          AdminPortalScreen(
-            title: 'Executive Dashboard',
-            description: 'View the latest school-wide scheduling context.',
-            route: AppRoutes.ADMIN_HOME,
-            arguments: {'tabIndex': 0},
-          ),
         ];
       case 'library':
         return const [
+          AdminPortalScreen(
+            title: 'Library Desk',
+            description: 'Manage books, issue flows, and returns.',
+            route: AppRoutes.ADMIN_RESOURCES,
+            arguments: {'initialTab': 0},
+          ),
           AdminPortalScreen(
             title: 'Reports',
             description:
@@ -209,56 +218,32 @@ class AdminPortalNavigation {
             route: AppRoutes.ADMIN_REPORTS,
             arguments: {'tabIndex': 2},
           ),
-          AdminPortalScreen(
-            title: 'Notice Board',
-            description: 'Share library and circulation announcements.',
-            route: AppRoutes.ADMIN_NOTICE_BOARD,
-            arguments: {'tabIndex': 3},
-          ),
         ];
       case 'transport':
         return const [
           AdminPortalScreen(
-            title: 'Reports',
-            description:
-                'Monitor route-related operations and school coverage.',
-            route: AppRoutes.ADMIN_REPORTS,
-            arguments: {'tabIndex': 2},
-          ),
-          AdminPortalScreen(
-            title: 'Attendance Overview',
-            description: 'Compare transport-linked attendance movement.',
-            route: AppRoutes.ADMIN_ATTENDANCE,
+            title: 'Transport Desk',
+            description: 'Manage routes, drivers, and student allocations.',
+            route: AppRoutes.ADMIN_OPERATIONS,
+            arguments: {'initialTab': 0},
           ),
         ];
       case 'hostel':
         return const [
           AdminPortalScreen(
-            title: 'Reports',
-            description: 'Review hostel-linked operational summaries.',
-            route: AppRoutes.ADMIN_REPORTS,
-            arguments: {'tabIndex': 2},
-          ),
-          AdminPortalScreen(
-            title: 'Notice Board',
-            description: 'Post hostel updates and visitor notices.',
-            route: AppRoutes.ADMIN_NOTICE_BOARD,
-            arguments: {'tabIndex': 3},
+            title: 'Hostel Desk',
+            description: 'Manage rooms, allocations, attendance, and visitors.',
+            route: AppRoutes.ADMIN_OPERATIONS,
+            arguments: {'initialTab': 1},
           ),
         ];
       case 'inventory':
         return const [
           AdminPortalScreen(
-            title: 'Reports',
-            description:
-                'Track live operational reporting for assets and stock.',
-            route: AppRoutes.ADMIN_REPORTS,
-            arguments: {'tabIndex': 2},
-          ),
-          AdminPortalScreen(
-            title: 'Audit Logs',
-            description: 'Review recent system changes affecting operations.',
-            route: AppRoutes.ADMIN_AUDIT_LOGS,
+            title: 'Inventory Desk',
+            description: 'Manage stock items and transaction movements.',
+            route: AppRoutes.ADMIN_RESOURCES,
+            arguments: {'initialTab': 1},
           ),
         ];
       case 'communication':
@@ -278,16 +263,10 @@ class AdminPortalNavigation {
       case 'events':
         return const [
           AdminPortalScreen(
-            title: 'Notice Board',
-            description: 'Publish event updates and activity announcements.',
-            route: AppRoutes.ADMIN_NOTICE_BOARD,
-            arguments: {'tabIndex': 3},
-          ),
-          AdminPortalScreen(
-            title: 'Reports',
-            description: 'Monitor operational event reporting.',
-            route: AppRoutes.ADMIN_REPORTS,
-            arguments: {'tabIndex': 2},
+            title: 'Event Desk',
+            description: 'Create events, registrations, and gallery updates.',
+            route: AppRoutes.ADMIN_OPERATIONS,
+            arguments: {'initialTab': 2},
           ),
         ];
       case 'reports':
@@ -377,9 +356,84 @@ class AdminPortalNavigation {
         has('admission') ||
         has('approv') ||
         has('waiting')) {
+      SafeNavigation.offNamed(AppRoutes.ADMIN_ADMISSIONS);
+      return;
+    }
+    if (has('parent') || has('guardian')) {
       SafeNavigation.offNamed(
-        AppRoutes.ADMIN_APPROVALS,
-        arguments: {'tabIndex': 1},
+        AppRoutes.ADMIN_PEOPLE,
+        arguments: {'initialTab': 0},
+      );
+      return;
+    }
+    if (m == 'students' || has('student') || has('enroll')) {
+      SafeNavigation.offNamed(AppRoutes.ADMIN_STUDENTS);
+      return;
+    }
+    if (m == 'staff' || has('staff') || has('teacher') || has('employee')) {
+      SafeNavigation.offNamed(
+        AppRoutes.ADMIN_PEOPLE,
+        arguments: {'initialTab': 1},
+      );
+      return;
+    }
+    if (m == 'academics' ||
+        has('class') ||
+        has('subject') ||
+        has('curriculum') ||
+        has('syllabus')) {
+      SafeNavigation.offNamed(
+        AppRoutes.ADMIN_ACADEMICS,
+        arguments: {'initialTab': has('subject') ? 1 : 0},
+      );
+      return;
+    }
+    if (m == 'timetable' || has('timetable') || has('schedule')) {
+      SafeNavigation.offNamed(
+        AppRoutes.ADMIN_SCHEDULE,
+        arguments: {'initialTab': 0},
+      );
+      return;
+    }
+    if (m == 'exams' || has('exam') || has('marks') || has('result')) {
+      SafeNavigation.offNamed(
+        AppRoutes.ADMIN_SCHEDULE,
+        arguments: {'initialTab': 1},
+      );
+      return;
+    }
+    if (m == 'library' || has('library') || has('book')) {
+      SafeNavigation.offNamed(
+        AppRoutes.ADMIN_RESOURCES,
+        arguments: {'initialTab': 0},
+      );
+      return;
+    }
+    if (m == 'inventory' || has('inventory') || has('asset') || has('stock')) {
+      SafeNavigation.offNamed(
+        AppRoutes.ADMIN_RESOURCES,
+        arguments: {'initialTab': 1},
+      );
+      return;
+    }
+    if (m == 'transport' || has('transport') || has('route') || has('bus')) {
+      SafeNavigation.offNamed(
+        AppRoutes.ADMIN_OPERATIONS,
+        arguments: {'initialTab': 0},
+      );
+      return;
+    }
+    if (m == 'hostel' || has('hostel') || has('room') || has('visitor')) {
+      SafeNavigation.offNamed(
+        AppRoutes.ADMIN_OPERATIONS,
+        arguments: {'initialTab': 1},
+      );
+      return;
+    }
+    if (m == 'events' || has('event') || has('activity') || has('gallery')) {
+      SafeNavigation.offNamed(
+        AppRoutes.ADMIN_OPERATIONS,
+        arguments: {'initialTab': 2},
       );
       return;
     }
@@ -418,16 +472,7 @@ class AdminPortalNavigation {
       SafeNavigation.offNamed(AppRoutes.ADMIN_HOME, arguments: {'tabIndex': 0});
       return;
     }
-    if (m == 'students' ||
-        m == 'staff' ||
-        m == 'academics' ||
-        m == 'exams' ||
-        m == 'timetable' ||
-        m == 'library' ||
-        m == 'transport' ||
-        m == 'hostel' ||
-        m == 'inventory' ||
-        m == 'payroll') {
+    if (m == 'payroll') {
       SafeNavigation.offNamed(
         AppRoutes.ADMIN_REPORTS,
         arguments: {'tabIndex': 2},

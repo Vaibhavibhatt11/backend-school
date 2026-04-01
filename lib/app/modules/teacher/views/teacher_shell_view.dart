@@ -17,6 +17,7 @@ class TeacherShellView extends StatefulWidget {
 
 class _TeacherShellViewState extends State<TeacherShellView> {
   late final TeacherShellController controller;
+  int? _lastSyncedIndex;
 
   static const List<Widget> _tabs = [
     TeacherHomeView(embedded: true),
@@ -30,12 +31,25 @@ class _TeacherShellViewState extends State<TeacherShellView> {
   void initState() {
     super.initState();
     controller = Get.find<TeacherShellController>();
-    controller.setTab(
-      TeacherShellController.resolveIndex(
-        Get.currentRoute,
-        arguments: Get.arguments,
-      ),
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _scheduleTabSync();
+  }
+
+  void _scheduleTabSync() {
+    final index = TeacherShellController.resolveIndex(
+      Get.currentRoute,
+      arguments: Get.arguments,
     );
+    if (_lastSyncedIndex == index) return;
+    _lastSyncedIndex = index;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      controller.setTab(index);
+    });
   }
 
   @override

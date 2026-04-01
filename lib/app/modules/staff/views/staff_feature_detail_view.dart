@@ -56,7 +56,7 @@ class StaffFeatureDetailView extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'This workflow is now routed through real staff and teacher screens instead of a placeholder page.',
+                    'This workflow is routed through real staff and teacher screens.',
                     style: TextStyle(
                       color: isDark
                           ? AppColors.textSecondaryDark

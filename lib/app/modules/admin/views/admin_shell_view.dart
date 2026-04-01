@@ -17,6 +17,7 @@ class AdminShellView extends StatefulWidget {
 
 class _AdminShellViewState extends State<AdminShellView> {
   late final AdminShellController controller;
+  int? _lastSyncedIndex;
 
   static const List<Widget> _tabs = [
     AdminDashboardView(embedded: true),
@@ -30,20 +31,32 @@ class _AdminShellViewState extends State<AdminShellView> {
   void initState() {
     super.initState();
     controller = Get.find<AdminShellController>();
-    final args = Get.arguments;
-    final idx = (args is Map<String, dynamic> ? args['tabIndex'] : null);
-    if (idx is int && idx >= 0 && idx < _tabs.length) {
-      controller.setTab(idx);
-    } else if (idx is num && idx.toInt() >= 0 && idx.toInt() < _tabs.length) {
-      controller.setTab(idx.toInt());
-    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _scheduleTabSync();
+  }
+
+  void _scheduleTabSync() {
+    final index = AdminShellController.resolveIndex(arguments: Get.arguments);
+    if (_lastSyncedIndex == index) return;
+    _lastSyncedIndex = index;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      controller.setTab(index);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Obx(
       () => Scaffold(
-        body: IndexedStack(index: controller.currentIndex.value, children: _tabs),
+        body: IndexedStack(
+          index: controller.currentIndex.value,
+          children: _tabs,
+        ),
         bottomNavigationBar: AdminBottomNavBar(
           currentIndex: controller.currentIndex.value,
           onTap: controller.setTab,
@@ -52,4 +65,3 @@ class _AdminShellViewState extends State<AdminShellView> {
     );
   }
 }
-
