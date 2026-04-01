@@ -30,22 +30,16 @@ class _TeacherShellViewState extends State<TeacherShellView> {
   void initState() {
     super.initState();
     controller = Get.find<TeacherShellController>();
-    _syncNavigationState();
-  }
-
-  void _syncNavigationState() {
-    final index = TeacherShellController.resolveIndex(
-      Get.currentRoute,
-      arguments: Get.arguments,
+    controller.setTab(
+      TeacherShellController.resolveIndex(
+        Get.currentRoute,
+        arguments: Get.arguments,
+      ),
     );
-    if (controller.currentIndex.value != index) {
-      Future.microtask(() => controller.setTab(index));
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    _syncNavigationState();
     return Obx(
       () => Scaffold(
         body: IndexedStack(

@@ -13,11 +13,17 @@ class StaffModulesView extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
-      appBar: const CustomAppBar(title: 'All Staff Modules'),
+      backgroundColor: isDark
+          ? AppColors.backgroundDark
+          : AppColors.backgroundLight,
+      appBar: const CustomAppBar(title: 'Staff ERP Modules'),
       body: LayoutBuilder(
         builder: (context, c) {
-          final cols = c.maxWidth > 1000 ? 4 : c.maxWidth > 680 ? 3 : 2;
+          final cols = c.maxWidth > 1000
+              ? 4
+              : c.maxWidth > 680
+              ? 3
+              : 2;
           return GridView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: kStaffModules.length,
@@ -29,12 +35,11 @@ class StaffModulesView extends StatelessWidget {
             ),
             itemBuilder: (_, i) {
               final m = kStaffModules[i];
+              final screens = StaffPortalNavigation.screensForModule(m.id);
               return InkWell(
                 borderRadius: BorderRadius.circular(14),
                 onTap: () {
                   final args = <String, dynamic>{'moduleId': m.id};
-                  // Prefer feature list page. If navigation fails at runtime for any reason,
-                  // open module target directly so user is never blocked.
                   try {
                     Get.toNamed(AppRoutes.STAFF_MODULE_DETAIL, arguments: args);
                   } catch (_) {
@@ -46,7 +51,11 @@ class StaffModulesView extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isDark ? AppColors.surfaceDark : Colors.white,
                     borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+                    border: Border.all(
+                      color: isDark
+                          ? AppColors.borderDark
+                          : AppColors.borderLight,
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.05),
@@ -60,9 +69,33 @@ class StaffModulesView extends StatelessWidget {
                     children: [
                       Icon(m.icon, color: AppColors.primary),
                       const SizedBox(height: 8),
-                      Text(m.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)),
+                      Text(
+                        m.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 4),
+                      if (screens.isNotEmpty)
+                        Text(
+                          screens.first.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondaryLight,
+                          ),
+                        ),
                       const Spacer(),
-                      Text('${m.features.length} features', style: const TextStyle(fontSize: 12, color: AppColors.primary)),
+                      Text(
+                        '${screens.length} screens available',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.primary,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -74,4 +107,3 @@ class StaffModulesView extends StatelessWidget {
     );
   }
 }
-

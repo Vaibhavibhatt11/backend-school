@@ -12,9 +12,11 @@ class AdminModulesView extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: isDark
+          ? AppColors.backgroundDark
+          : AppColors.backgroundLight,
       appBar: AppBar(
-        title: const Text('Admin Modules'),
+        title: const Text('Admin ERP Modules'),
         backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
       ),
       body: LayoutBuilder(
@@ -22,8 +24,8 @@ class AdminModulesView extends StatelessWidget {
           final crossAxisCount = constraints.maxWidth > 1100
               ? 4
               : constraints.maxWidth > 780
-                  ? 3
-                  : 2;
+              ? 3
+              : 2;
           return GridView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: kAdminModules.length,
@@ -51,14 +53,12 @@ class _ModuleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final screens = AdminPortalNavigation.screensForModule(module.id);
     return InkWell(
       onTap: () {
         final args = <String, dynamic>{'moduleId': module.id};
         try {
-          Get.toNamed(
-            AppRoutes.ADMIN_MODULE_DETAIL,
-            arguments: args,
-          );
+          Get.toNamed(AppRoutes.ADMIN_MODULE_DETAIL, arguments: args);
         } catch (_) {
           AdminPortalNavigation.openFromCatalog(
             moduleId: module.id,
@@ -112,12 +112,27 @@ class _ModuleCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 12,
-                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : AppColors.textSecondaryLight,
                 ),
               ),
             ),
+            if (screens.isNotEmpty)
+              Text(
+                screens.first.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : AppColors.textSecondaryLight,
+                ),
+              ),
+            const SizedBox(height: 4),
             Text(
-              '${module.features.length} features',
+              '${screens.length} screens available',
               style: const TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w600,
@@ -130,4 +145,3 @@ class _ModuleCard extends StatelessWidget {
     );
   }
 }
-

@@ -30,22 +30,16 @@ class _ParentShellViewState extends State<ParentShellView> {
   void initState() {
     super.initState();
     controller = Get.find<ParentShellController>();
-    _syncNavigationState();
-  }
-
-  void _syncNavigationState() {
-    final index = ParentShellController.resolveIndex(
-      Get.currentRoute,
-      arguments: Get.arguments,
+    controller.setTab(
+      ParentShellController.resolveIndex(
+        Get.currentRoute,
+        arguments: Get.arguments,
+      ),
     );
-    if (controller.currentIndex.value != index) {
-      Future.microtask(() => controller.setTab(index));
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    _syncNavigationState();
     return Obx(
       () => Scaffold(
         body: IndexedStack(

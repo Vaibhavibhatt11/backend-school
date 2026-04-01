@@ -8,8 +8,15 @@ import 'package:erp_frontend/app/modules/staff/views/staff_settings_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class StaffShellView extends GetView<StaffShellController> {
+class StaffShellView extends StatefulWidget {
   const StaffShellView({super.key});
+
+  @override
+  State<StaffShellView> createState() => _StaffShellViewState();
+}
+
+class _StaffShellViewState extends State<StaffShellView> {
+  late final StaffShellController controller;
 
   static const _tabs = [
     StaffDashboardView(),
@@ -20,25 +27,37 @@ class StaffShellView extends GetView<StaffShellController> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    controller = Get.find<StaffShellController>();
+    controller.setTab(
+      StaffShellController.resolveIndex(arguments: Get.arguments),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final args = Get.arguments;
-    final idx = (args is Map<String, dynamic> ? args['tabIndex'] : null);
-    if (idx is int && idx >= 0 && idx < _tabs.length && controller.currentIndex.value != idx) {
-      Future.microtask(() => controller.setTab(idx));
-    } else if (idx is num && idx.toInt() >= 0 && idx.toInt() < _tabs.length && controller.currentIndex.value != idx.toInt()) {
-      Future.microtask(() => controller.setTab(idx.toInt()));
-    }
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Obx(
       () => Scaffold(
-        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
-        body: IndexedStack(index: controller.currentIndex.value, children: _tabs),
+        backgroundColor: isDark
+            ? AppColors.backgroundDark
+            : AppColors.backgroundLight,
+        body: IndexedStack(
+          index: controller.currentIndex.value,
+          children: _tabs,
+        ),
         bottomNavigationBar: Container(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           decoration: BoxDecoration(
             color: isDark ? AppColors.surfaceDark : Colors.white,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)],
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+              ),
+            ],
           ),
           child: SafeArea(
             child: Row(
@@ -80,4 +99,3 @@ class StaffShellView extends GetView<StaffShellController> {
     );
   }
 }
-
