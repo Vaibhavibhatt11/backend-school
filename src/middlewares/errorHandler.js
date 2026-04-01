@@ -1,3 +1,5 @@
+const prisma = require("../lib/prisma");
+
 function errorHandler(error, req, res, next) {
   // express/body-parser: malformed JSON body (Postman raw typo, wrong Content-Type, etc.)
   if (error?.type === "entity.parse.failed") {
@@ -40,7 +42,7 @@ function errorHandler(error, req, res, next) {
   }
 
   // Prisma connectivity/runtime failures (common on cold DB / dropped connections)
-  if (error?.code === "P1001" || error?.code === "P1017" || error?.code === "P2024") {
+  if (prisma.isTransientPrismaError(error)) {
     return res.status(503).json({
       success: false,
       message: "Database temporarily unavailable. Please try again in a moment.",

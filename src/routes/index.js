@@ -32,7 +32,7 @@ router.get("/ready", async (req, res) => {
   return res.status(readiness.ready ? 200 : 503).json({
     success: readiness.ready,
     data: {
-      status: readiness.ready ? "ready" : "not_ready",
+      status: readiness.status,
       checks: readiness.checks,
       timestamp: new Date().toISOString(),
     },

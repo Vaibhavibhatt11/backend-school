@@ -9,6 +9,7 @@ const swaggerUi = require("swagger-ui-express");
 const env = require("./config/env");
 const apiRoutes = require("./routes");
 const { apiRateLimiter } = require("./middlewares/apiRateLimit");
+const ensureDatabaseReady = require("./middlewares/ensureDatabaseReady");
 const { getOpenApiSpec } = require("./docs/openapi");
 const notFound = require("./middlewares/notFound");
 const errorHandler = require("./middlewares/errorHandler");
@@ -120,7 +121,7 @@ if (swaggerEnabled) {
   );
 }
 
-app.use("/api/v1", apiRateLimiter, apiRoutes);
+app.use("/api/v1", apiRateLimiter, ensureDatabaseReady, apiRoutes);
 app.use(notFound);
 app.use(errorHandler);
 

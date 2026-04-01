@@ -12,18 +12,18 @@ function createError(message, details) {
   return error;
 }
 
-async function waitForServer(timeoutMs = 20_000) {
+async function waitForServer(timeoutMs = 60_000) {
   const startedAt = Date.now();
   while (Date.now() - startedAt < timeoutMs) {
     try {
-      const res = await fetch(`${BASE_URL}/health`);
+      const res = await fetch(`${BASE_URL}/ready`);
       if (res.ok) return;
     } catch {
       // retry
     }
     await sleep(500);
   }
-  throw createError("Server did not become healthy in time");
+  throw createError("Server did not become ready in time");
 }
 
 async function api(pathname, options = {}) {

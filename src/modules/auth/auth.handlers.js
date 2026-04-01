@@ -171,9 +171,8 @@ async function withTransientPrismaRetry(fn, retries = 1) {
         throw error;
       }
       // Short backoff for cold/waking DB connections.
-      await prisma.$disconnect().catch(() => {});
       await new Promise((resolve) => setTimeout(resolve, 250 * (attempt + 1)));
-      await prisma.$connect().catch(() => {});
+      await prisma.ensureReady({ force: true }).catch(() => {});
     }
   }
   throw lastError;

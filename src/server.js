@@ -5,6 +5,9 @@ const { getRedis } = require("./config/redis");
 
 const server = app.listen(env.PORT, () => {
   console.log(`[server] running on http://localhost:${env.PORT}`);
+  prisma.ensureReady({ force: true }).catch((error) => {
+    console.warn(`[server] prisma warmup pending: ${error.message}`);
+  });
 });
 server.keepAliveTimeout = env.SERVER_KEEP_ALIVE_TIMEOUT_MS;
 server.headersTimeout = env.SERVER_HEADERS_TIMEOUT_MS;
