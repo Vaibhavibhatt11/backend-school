@@ -1,5 +1,4 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../common/services/parent/parent_academics_service.dart';
 import '../../../../common/services/parent/parent_api_utils.dart';
@@ -7,7 +6,8 @@ import '../../../../common/services/parent/parent_context_service.dart';
 import '../../../../common/utils/app_toast.dart';
 
 class ProgressReportsController extends GetxController {
-  final ParentAcademicsService _academicsService = Get.find<ParentAcademicsService>();
+  final ParentAcademicsService _academicsService =
+      Get.find<ParentAcademicsService>();
   final ParentContextService _parentContext = Get.find<ParentContextService>();
 
   final isLoading = false.obs;
@@ -25,7 +25,11 @@ class ProgressReportsController extends GetxController {
 
   final subjects = <Map<String, dynamic>>[].obs;
 
-  final attendanceDistribution = <String, int>{'present': 0, 'late': 0, 'absent': 0}.obs;
+  final attendanceDistribution = <String, int>{
+    'present': 0,
+    'late': 0,
+    'absent': 0,
+  }.obs;
 
   final feeHistory = <int>[].obs;
   Worker? _childWorker;
@@ -49,18 +53,26 @@ class ProgressReportsController extends GetxController {
         term: selectedTerm.value.isEmpty ? null : selectedTerm.value,
       );
       studentName.value = data['studentName']?.toString() ?? studentName.value;
-      studentClass.value = data['studentClass']?.toString() ?? studentClass.value;
+      studentClass.value =
+          data['studentClass']?.toString() ?? studentClass.value;
       studentPhotoUrl.value =
-          (data['photoUrl'] ?? data['avatarUrl'] ?? data['studentPhotoUrl'] ?? studentPhotoUrl.value)
+          (data['photoUrl'] ??
+                  data['avatarUrl'] ??
+                  data['studentPhotoUrl'] ??
+                  studentPhotoUrl.value)
               .toString();
-      academicYear.value = data['academicYear']?.toString() ?? academicYear.value;
+      academicYear.value =
+          data['academicYear']?.toString() ?? academicYear.value;
       final selected = data['selectedTerm']?.toString().trim();
       if (selected != null && selected.isNotEmpty) {
         selectedTerm.value = selected;
       }
       final apiTerms = data['terms'];
       if (apiTerms is List) {
-        final parsed = apiTerms.map((e) => e.toString().trim()).where((e) => e.isNotEmpty).toList();
+        final parsed = apiTerms
+            .map((e) => e.toString().trim())
+            .where((e) => e.isNotEmpty)
+            .toList();
         terms.assignAll(parsed);
       } else if (selectedTerm.value.isNotEmpty) {
         terms.assignAll([selectedTerm.value]);
@@ -71,7 +83,9 @@ class ProgressReportsController extends GetxController {
       if (gpaValue is num) gpa.value = gpaValue.toDouble();
       final attendanceValue = data['attendance'];
       if (attendanceValue is num) attendance.value = attendanceValue.toDouble();
-      final statsRaw = data['attendanceStats'] is Map ? data['attendanceStats'] : data['attendance'];
+      final statsRaw = data['attendanceStats'] is Map
+          ? data['attendanceStats']
+          : data['attendance'];
       if (statsRaw is Map) {
         final stats = statsRaw;
         attendanceDistribution.assignAll({
@@ -79,25 +93,29 @@ class ProgressReportsController extends GetxController {
           'late': int.tryParse('${stats['late'] ?? 0}') ?? 0,
           'absent': int.tryParse('${stats['absent'] ?? 0}') ?? 0,
         });
-        final total = attendanceDistribution['present']! +
+        final total =
+            attendanceDistribution['present']! +
             attendanceDistribution['late']! +
             attendanceDistribution['absent']!;
         attendance.value = total > 0
-            ? ((attendanceDistribution['present']! + attendanceDistribution['late']!) * 100 / total)
+            ? ((attendanceDistribution['present']! +
+                      attendanceDistribution['late']!) *
+                  100 /
+                  total)
             : 0.0;
       }
       final scores = data['subjectScores'];
       if (scores is List) {
-        subjects.assignAll(scores.whereType<Map>().map((e) => Map<String, dynamic>.from(e)));
+        subjects.assignAll(
+          scores.whereType<Map>().map((e) => Map<String, dynamic>.from(e)),
+        );
       } else if (scores is Map) {
         final out = <Map<String, dynamic>>[];
         scores.forEach((key, value) {
-          final scoreNum = value is num ? value.toDouble() : double.tryParse(value.toString()) ?? 0;
-          out.add({
-            'name': key.toString(),
-            'score': scoreNum,
-            'avg': scoreNum,
-          });
+          final scoreNum = value is num
+              ? value.toDouble()
+              : double.tryParse(value.toString()) ?? 0;
+          out.add({'name': key.toString(), 'score': scoreNum, 'avg': scoreNum});
         });
         subjects.assignAll(out);
       }
@@ -117,6 +135,7 @@ class ProgressReportsController extends GetxController {
     selectedTerm.value = term;
     await loadProgressReport();
   }
+
   void viewFullMarksheet() {
     loadProgressReport();
   }

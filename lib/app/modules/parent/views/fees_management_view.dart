@@ -7,7 +7,9 @@ import '../../../navbar/parent_bottom_nav_bar.dart';
 import '../controllers/fees_controller.dart';
 
 class FeesManagementView extends GetView<FeesController> {
-  const FeesManagementView({super.key});
+  final bool embedded;
+
+  const FeesManagementView({super.key, this.embedded = false});
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +31,11 @@ class FeesManagementView extends GetView<FeesController> {
           children: [
             Obx(
               () => Text(
-                '${controller.studentName.value} • ${controller.studentGrade.value}',
+                '${controller.studentName.value} - ${controller.studentGrade.value}',
                 style: TextStyle(
-                  color:
-                      isDark ? AppColors.textSecondaryDark : Colors.grey[600],
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : Colors.grey[600],
                 ),
               ),
             ),
@@ -112,32 +115,34 @@ class FeesManagementView extends GetView<FeesController> {
                   'Recent Invoices',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                TextButton(onPressed: controller.goToHistory, child: const Text('History')),
+                TextButton(
+                  onPressed: controller.goToHistory,
+                  child: const Text('History'),
+                ),
               ],
             ),
             const SizedBox(height: 8),
             // Invoices list
             Obx(
               () => Column(
-                children:
-                    controller.invoices.map((invoice) {
-                      return _buildInvoiceCard(
-                        title: (invoice['title'] ?? '').toString(),
-                        subtitle: (invoice['subtitle'] ?? '').toString(),
-                        amount: (invoice['amount'] is num)
-                            ? (invoice['amount'] as num).toDouble()
-                            : double.tryParse(invoice['amount']?.toString() ?? '') ?? 0,
-                        dueDate: (invoice['dueDate'] ?? '').toString(),
-                        onViewDetails:
-                            () => controller.viewDetails(
-                              invoice['id'] as String? ?? '',
-                            ),
-                        onPayNow:
-                            () {
-                              controller.payNow(invoice['id'] as String? ?? '');
-                            },
-                      );
-                    }).toList(),
+                children: controller.invoices.map((invoice) {
+                  return _buildInvoiceCard(
+                    title: (invoice['title'] ?? '').toString(),
+                    subtitle: (invoice['subtitle'] ?? '').toString(),
+                    amount: (invoice['amount'] is num)
+                        ? (invoice['amount'] as num).toDouble()
+                        : double.tryParse(
+                                invoice['amount']?.toString() ?? '',
+                              ) ??
+                              0,
+                    dueDate: (invoice['dueDate'] ?? '').toString(),
+                    onViewDetails: () =>
+                        controller.viewDetails(invoice['id'] as String? ?? ''),
+                    onPayNow: () {
+                      controller.payNow(invoice['id'] as String? ?? '');
+                    },
+                  );
+                }).toList(),
               ),
             ),
             const SizedBox(height: 16),
@@ -185,7 +190,9 @@ class FeesManagementView extends GetView<FeesController> {
           ],
         ),
       ),
-      bottomNavigationBar: const ParentBottomNavBar(currentIndex: 2),
+      bottomNavigationBar: embedded
+          ? null
+          : const ParentBottomNavBar(currentIndex: 2),
     );
   }
 
@@ -197,22 +204,20 @@ class FeesManagementView extends GetView<FeesController> {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
-              color:
-                  controller.selectedTab.value == index
-                      ? (Theme.of(Get.context!).brightness == Brightness.dark
-                          ? AppColors.surfaceDark
-                          : Colors.white)
-                      : Colors.transparent,
+              color: controller.selectedTab.value == index
+                  ? (Theme.of(Get.context!).brightness == Brightness.dark
+                        ? AppColors.surfaceDark
+                        : Colors.white)
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
               label,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color:
-                    controller.selectedTab.value == index
-                        ? AppColors.primary
-                        : Colors.grey,
+                color: controller.selectedTab.value == index
+                    ? AppColors.primary
+                    : Colors.grey,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -234,16 +239,14 @@ class FeesManagementView extends GetView<FeesController> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color:
-            Theme.of(Get.context!).brightness == Brightness.dark
-                ? AppColors.surfaceDark
-                : Colors.white,
+        color: Theme.of(Get.context!).brightness == Brightness.dark
+            ? AppColors.surfaceDark
+            : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color:
-              Theme.of(Get.context!).brightness == Brightness.dark
-                  ? AppColors.borderDark
-                  : AppColors.borderLight,
+          color: Theme.of(Get.context!).brightness == Brightness.dark
+              ? AppColors.borderDark
+              : AppColors.borderLight,
         ),
       ),
       child: Column(

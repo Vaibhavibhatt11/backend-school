@@ -5,9 +5,20 @@ import 'package:flutter/material.dart';
 
 class TeacherBottomNavBar extends StatelessWidget {
   final int currentIndex;
-  const TeacherBottomNavBar({super.key, required this.currentIndex});
+  final ValueChanged<int>? onTap;
+
+  const TeacherBottomNavBar({
+    super.key,
+    required this.currentIndex,
+    this.onTap,
+  });
 
   void _onTap(int index) {
+    if (onTap != null) {
+      onTap!(index);
+      return;
+    }
+    if (index == currentIndex) return;
     switch (index) {
       case 0:
         SafeNavigation.offNamed(AppRoutes.TEACHER_HOME);
@@ -36,7 +47,10 @@ class TeacherBottomNavBar extends StatelessWidget {
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+          ),
         ],
       ),
       child: SafeArea(
@@ -60,22 +74,31 @@ class TeacherBottomNavBar extends StatelessWidget {
   }
 
   Widget _buildNavItem(IconData icon, String label, bool active, int index) {
-    return GestureDetector(
-      onTap: () => _onTap(index),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: active ? AppColors.primary : Colors.grey),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              color: active ? AppColors.primary : Colors.grey,
-              fontWeight: active ? FontWeight.bold : FontWeight.normal,
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _onTap(index),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: active ? AppColors.primary : Colors.grey),
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: active ? AppColors.primary : Colors.grey,
+                    fontWeight: active ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

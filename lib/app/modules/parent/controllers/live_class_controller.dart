@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../common/services/parent/parent_academics_service.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
 
 class LiveClassController extends GetxController {
-  final ParentAcademicsService _academicsService = Get.find<ParentAcademicsService>();
+  final ParentAcademicsService _academicsService =
+      Get.find<ParentAcademicsService>();
   final ParentContextService _parentContext = Get.find<ParentContextService>();
 
   final isLoading = false.obs;

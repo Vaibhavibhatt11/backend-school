@@ -10,10 +10,12 @@ import '../controllers/live_class_controller.dart';
 import '../controllers/upload_controller.dart';
 import '../controllers/teacher_profile_controller.dart';
 import '../controllers/notifications_controller.dart';
+import '../controllers/teacher_shell_controller.dart';
 
 class TeacherBinding extends Bindings {
   @override
   void dependencies() {
+    Get.lazyPut(() => TeacherShellController());
     Get.lazyPut(() => TeacherHomeController());
     Get.lazyPut(() => AttendanceSelectorController());
     Get.lazyPut(() => MarkAttendanceController());

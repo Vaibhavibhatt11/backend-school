@@ -32,8 +32,12 @@ class UploadController extends GetxController {
   Future<void> _loadDropdownsAndHistory() async {
     await _loadClasses();
     await _loadSubjects();
-    if (classes.isNotEmpty && selectedClass.value.isEmpty) selectedClass.value = classes.first;
-    if (subjects.isNotEmpty && selectedSubject.value.isEmpty) selectedSubject.value = subjects.first;
+    if (classes.isNotEmpty && selectedClass.value.isEmpty) {
+      selectedClass.value = classes.first;
+    }
+    if (subjects.isNotEmpty && selectedSubject.value.isEmpty) {
+      selectedSubject.value = subjects.first;
+    }
     await loadHistory();
   }
 
@@ -54,7 +58,7 @@ class UploadController extends GetxController {
         final name = raw['name']?.toString();
         final section = raw['section']?.toString() ?? '';
         if (id == null || id.isEmpty || name == null || name.isEmpty) continue;
-        final label = section.isNotEmpty ? '${name}-$section' : name;
+        final label = section.isNotEmpty ? '$name-$section' : name;
         _classIdByLabel[label] = id;
         classes.add(label);
       }
@@ -118,11 +122,14 @@ class UploadController extends GetxController {
           final id = raw['id']?.toString() ?? '';
           final title = raw['title']?.toString() ?? '';
           final type = raw['type']?.toString() ?? 'PDF';
-          final url = raw['url']?.toString();
           final createdAtRaw = raw['createdAt']?.toString();
-          final createdAt = createdAtRaw != null ? DateTime.tryParse(createdAtRaw) : null;
+          final createdAt = createdAtRaw != null
+              ? DateTime.tryParse(createdAtRaw)
+              : null;
           final classId = raw['classId']?.toString();
-          final targetClass = classId != null ? (classLabelById[classId] ?? classId) : (selectedClass.value.isNotEmpty ? selectedClass.value : '');
+          final targetClass = classId != null
+              ? (classLabelById[classId] ?? classId)
+              : (selectedClass.value.isNotEmpty ? selectedClass.value : '');
           return UploadHistoryItem(
             id: id,
             fileName: title,
@@ -140,6 +147,8 @@ class UploadController extends GetxController {
 
   void pickFile() {
     // Real file upload (multipart/url creation) is not implemented in this screen.
-    AppToast.show('File upload is not wired yet. Study materials list is real.');
+    AppToast.show(
+      'File upload is not wired yet. Study materials list is real.',
+    );
   }
 }

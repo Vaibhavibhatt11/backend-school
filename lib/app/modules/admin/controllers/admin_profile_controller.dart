@@ -21,8 +21,6 @@ class AdminProfileController extends GetxController {
   final location = '-'.obs;
   final emailNotificationsEnabled = true.obs;
 
-  Map<String, dynamic> _schoolSettings = {};
-
   @override
   void onInit() {
     super.onInit();
@@ -37,24 +35,26 @@ class AdminProfileController extends GetxController {
       final pendingData = await _adminService.getPendingApprovalsSummary();
       try {
         final settingsData = await _adminService.getSchoolSettings();
-        final settings = settingsData['settings'] as Map<String, dynamic>? ?? const {};
-        _schoolSettings = Map<String, dynamic>.from(settings);
-        final emailPref = settings['emailNotificationsEnabled'] ?? settings['emailNotifications'];
+        final settings =
+            settingsData['settings'] as Map<String, dynamic>? ?? const {};
+        final emailPref =
+            settings['emailNotificationsEnabled'] ??
+            settings['emailNotifications'];
         if (emailPref is bool) {
           emailNotificationsEnabled.value = emailPref;
         }
-      } catch (_) {
-        _schoolSettings = {};
-      }
+      } catch (_) {}
 
-      final profile = profileData['profile'] as Map<String, dynamic>? ?? const {};
+      final profile =
+          profileData['profile'] as Map<String, dynamic>? ?? const {};
       final school = schoolData['profile'] as Map<String, dynamic>? ?? const {};
       name.value = profile['fullName']?.toString() ?? 'Admin';
       id.value = profile['id']?.toString() ?? '-';
       branchName.value = school['name']?.toString() ?? '-';
       branchCode.value = school['code']?.toString() ?? '-';
       location.value = school['timezone']?.toString() ?? '-';
-      pendingApprovals.value = (pendingData['totalPending'] as num?)?.toInt() ?? 0;
+      pendingApprovals.value =
+          (pendingData['totalPending'] as num?)?.toInt() ?? 0;
     } catch (e) {
       AppToast.show(dioOrApiErrorMessage(e));
     } finally {

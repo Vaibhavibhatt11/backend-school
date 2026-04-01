@@ -2,153 +2,156 @@ import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/navbar/teacher_bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../controllers/teacher_profile_controller.dart';
 
 class TeacherProfileView extends GetView<TeacherProfileController> {
-  const TeacherProfileView({super.key});
+  final bool embedded;
+
+  const TeacherProfileView({super.key, this.embedded = false});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          const SizedBox(height: 12),
-          // Header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Profile',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                ),
-                IconButton(icon: const Icon(Icons.edit), onPressed: () {}),
-              ],
-            ),
-          ),
-          Expanded(
+      body: SafeArea(
+        child: Obx(() {
+          return RefreshIndicator(
+            onRefresh: controller.loadProfile,
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
               children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Profile',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.refresh),
+                      onPressed: controller.loadProfile,
+                    ),
+                  ],
+                ),
+                if (controller.errorMessage.value.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  _buildErrorCard(controller.errorMessage.value),
+                ],
                 const SizedBox(height: 20),
-                // Profile image
                 Center(
-                  child: Stack(
-                    children: [
-                      const CircleAvatar(
-                        radius: 60,
-                        child: Icon(Icons.person, size: 42),
+                  child: CircleAvatar(
+                    radius: 60,
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.12),
+                    child: Text(
+                      controller.initials,
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
                       ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          width: 20,
-                          height: 20,
-                          decoration: const BoxDecoration(
-                            color: Colors.green,
-                            shape: BoxShape.circle,
-                            border: Border.fromBorderSide(
-                              BorderSide(color: Colors.white, width: 2),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Center(
-                  child: Text(
-                    'Sarah Jenkins',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const Center(
-                  child: Text(
-                    'Senior Educator',
-                    style: TextStyle(color: AppColors.primary),
-                  ),
-                ),
-                const SizedBox(height: 8),
                 Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 6,
+                  child: Text(
+                    controller.name.value.isEmpty
+                        ? 'Teacher'
+                        : controller.name.value,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                if (controller.department.value.isNotEmpty)
+                  Center(
+                    child: Text(
+                      controller.department.value,
+                      style: const TextStyle(color: AppColors.primary),
                     ),
-                    child: const Text(
-                      'EMP-2024-089',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                  ),
+                if (controller.staffId.value.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        controller.staffId.value,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
                 const SizedBox(height: 24),
-                // Designated Subjects
-                _buildSectionTitle('Designated Subjects'),
+                _buildSectionTitle('Professional Details'),
                 const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _buildSubjectChip('Advanced Mathematics'),
-                    _buildSubjectChip('Quantum Physics'),
-                    _buildSubjectChip('Statistics'),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                // School Information
-                _buildSectionTitle('School Information'),
-                const SizedBox(height: 8),
-                _buildInfoTile(
-                  icon: Icons.school,
-                  title: 'St. Xavier’s High School',
-                  subtitle: 'Main Campus, Block A',
-                ),
                 _buildInfoTile(
                   icon: Icons.account_tree,
-                  title: 'Science Department',
-                  subtitle: 'Secondary Education Wing',
+                  title: controller.department.value.isEmpty
+                      ? 'Department unavailable'
+                      : controller.department.value,
+                  subtitle: controller.qualification.value.isEmpty
+                      ? 'Qualification unavailable'
+                      : controller.qualification.value,
+                ),
+                _buildInfoTile(
+                  icon: Icons.work_outline,
+                  title: controller.experience.value.isEmpty
+                      ? 'Experience unavailable'
+                      : controller.experience.value,
+                  subtitle: controller.staffId.value.isEmpty
+                      ? 'Staff ID unavailable'
+                      : 'Staff ID: ${controller.staffId.value}',
                 ),
                 const SizedBox(height: 24),
-                // App Settings
-                _buildSectionTitle('App Settings'),
+                _buildSectionTitle('Contact'),
                 const SizedBox(height: 8),
-                _buildSettingsTile(
-                  icon: Icons.notifications_active,
-                  title: 'Notification Preferences',
-                  onTap: () {},
-                ),
-                _buildSettingsTile(
-                  icon: Icons.security,
-                  title: 'Security & Privacy',
-                  onTap: () {},
-                ),
-                _buildSettingsTile(
-                  icon: Icons.translate,
-                  title: 'Language',
-                  trailing: Text(
-                    'English',
-                    style: TextStyle(color: Colors.grey.shade600),
-                  ),
-                  onTap: () {},
-                ),
-                _buildSettingsTile(
-                  icon: Icons.help_outline,
-                  title: 'Help & Support',
-                  onTap: () {},
+                _buildInfoTile(
+                  icon: Icons.phone_outlined,
+                  title: controller.contact.value.isEmpty
+                      ? 'Contact unavailable'
+                      : controller.contact.value,
+                  subtitle: controller.email.value.isEmpty
+                      ? 'Email unavailable'
+                      : controller.email.value,
                 ),
                 const SizedBox(height: 24),
-                // Logout button
+                _buildSectionTitle('Documents'),
+                const SizedBox(height: 8),
+                if (controller.isLoading.value && controller.documents.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else if (controller.documents.isEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: const Text('No documents available.'),
+                  )
+                else
+                  ...controller.documents.map(_buildDocumentTile),
+                const SizedBox(height: 24),
                 OutlinedButton.icon(
                   onPressed: controller.logout,
                   icon: const Icon(Icons.logout, color: Colors.red),
@@ -164,20 +167,33 @@ class TeacherProfileView extends GetView<TeacherProfileController> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                Center(
-                  child: Text(
-                    'Version 2.4.12 (Build 450)',
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-                  ),
-                ),
-                const SizedBox(height: 40),
               ],
             ),
-          ),
+          );
+        }),
+      ),
+      bottomNavigationBar: embedded
+          ? null
+          : const TeacherBottomNavBar(currentIndex: 4),
+    );
+  }
+
+  Widget _buildErrorCard(String message) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.red.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.error_outline, color: Colors.red),
+          const SizedBox(width: 10),
+          Expanded(child: Text(message)),
         ],
       ),
-      bottomNavigationBar: const TeacherBottomNavBar(currentIndex: 4),
     );
   }
 
@@ -189,17 +205,6 @@ class TeacherProfileView extends GetView<TeacherProfileController> {
         fontWeight: FontWeight.bold,
         color: Colors.grey.shade600,
       ),
-    );
-  }
-
-  Widget _buildSubjectChip(String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(label, style: const TextStyle(color: AppColors.primary)),
     );
   }
 
@@ -246,18 +251,27 @@ class TeacherProfileView extends GetView<TeacherProfileController> {
     );
   }
 
-  Widget _buildSettingsTile({
-    required IconData icon,
-    required String title,
-    Widget? trailing,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      leading: Icon(icon, color: AppColors.primary),
-      title: Text(title),
-      trailing: trailing ?? const Icon(Icons.chevron_right),
-      onTap: onTap,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  Widget _buildDocumentTile(String name) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.description_outlined, color: AppColors.primary),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              name,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

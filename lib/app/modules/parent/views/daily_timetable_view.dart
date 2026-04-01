@@ -6,7 +6,9 @@ import '../../../navbar/parent_bottom_nav_bar.dart';
 import '../controllers/timetable_controller.dart';
 
 class DailyTimetableView extends GetView<TimetableController> {
-  const DailyTimetableView({super.key});
+  final bool embedded;
+
+  const DailyTimetableView({super.key, this.embedded = false});
 
   @override
   Widget build(BuildContext context) {
@@ -64,9 +66,25 @@ class DailyTimetableView extends GetView<TimetableController> {
                 itemBuilder: (context, index) {
                   final now = controller.selectedDate.value;
                   final mondayOffset = now.weekday - 1;
-                  final monday = DateTime(now.year, now.month, now.day - mondayOffset);
-                  final d = DateTime(monday.year, monday.month, monday.day + index);
-                  final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                  final monday = DateTime(
+                    now.year,
+                    now.month,
+                    now.day - mondayOffset,
+                  );
+                  final d = DateTime(
+                    monday.year,
+                    monday.month,
+                    monday.day + index,
+                  );
+                  final dayNames = [
+                    'Mon',
+                    'Tue',
+                    'Wed',
+                    'Thu',
+                    'Fri',
+                    'Sat',
+                    'Sun',
+                  ];
                   final dayNumber = d.day;
                   return GestureDetector(
                     onTap: () => controller.changeDate(d),
@@ -75,21 +93,16 @@ class DailyTimetableView extends GetView<TimetableController> {
                         width: 60,
                         margin: const EdgeInsets.only(right: 8),
                         decoration: BoxDecoration(
-                          color:
-                              controller.selectedDay.value == dayNumber
-                                  ? AppColors.primary
-                                  : (isDark
-                                      ? AppColors.surfaceDark
-                                      : Colors.white),
+                          color: controller.selectedDay.value == dayNumber
+                              ? AppColors.primary
+                              : (isDark ? AppColors.surfaceDark : Colors.white),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color:
-                                controller.selectedDay.value ==
-                                        dayNumber
-                                    ? AppColors.primary
-                                    : (isDark
-                                        ? AppColors.borderDark
-                                        : AppColors.borderLight),
+                            color: controller.selectedDay.value == dayNumber
+                                ? AppColors.primary
+                                : (isDark
+                                      ? AppColors.borderDark
+                                      : AppColors.borderLight),
                           ),
                         ),
                         child: Column(
@@ -98,13 +111,9 @@ class DailyTimetableView extends GetView<TimetableController> {
                             Text(
                               dayNames[index],
                               style: TextStyle(
-                                color:
-                                    controller.selectedDay.value ==
-                                            dayNumber
-                                        ? Colors.white
-                                        : (isDark
-                                            ? Colors.white
-                                            : Colors.black),
+                                color: controller.selectedDay.value == dayNumber
+                                    ? Colors.white
+                                    : (isDark ? Colors.white : Colors.black),
                                 fontSize: 10,
                               ),
                             ),
@@ -112,13 +121,9 @@ class DailyTimetableView extends GetView<TimetableController> {
                             Text(
                               dayNumber.toString(),
                               style: TextStyle(
-                                color:
-                                    controller.selectedDay.value ==
-                                            dayNumber
-                                        ? Colors.white
-                                        : (isDark
-                                            ? Colors.white
-                                            : Colors.black),
+                                color: controller.selectedDay.value == dayNumber
+                                    ? Colors.white
+                                    : (isDark ? Colors.white : Colors.black),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 18,
                               ),
@@ -133,61 +138,61 @@ class DailyTimetableView extends GetView<TimetableController> {
             ),
             const SizedBox(height: 24),
             // Timetable list
-            Obx(
-              () {
-                if (controller.isLoading.value) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 24),
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                if (controller.errorMessage.value.isNotEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 24),
-                    child: Center(
-                      child: Text(
-                        controller.errorMessage.value,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  );
-                }
-                if (controller.timetable.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 24),
-                    child: Center(
-                      child: Text('No timetable classes scheduled for this day.'),
-                    ),
-                  );
-                }
-                return Column(
-                  children: controller.timetable.map((item) {
-                    return _buildClassCard(
-                      time: (item['time'] ?? '').toString(),
-                      subject: (item['subject'] ?? '').toString(),
-                      teacher: (item['teacher'] ?? '').toString(),
-                      room: (item['room'] ?? '').toString(),
-                      period: (item['period'] ?? '').toString(),
-                      isLive: item['isLive'] == true,
-                      progress: item['progress'] is num
-                          ? (item['progress'] as num).toDouble()
-                          : null,
-                      remaining: item['remaining']?.toString(),
-                      onJoin: item['isLive'] == true
-                          ? () => controller.joinLiveClass(
-                                (item['subject'] ?? '').toString(),
-                              )
-                          : null,
-                    );
-                  }).toList(),
+            Obx(() {
+              if (controller.isLoading.value) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24),
+                  child: Center(child: CircularProgressIndicator()),
                 );
-              },
-            ),
+              }
+              if (controller.errorMessage.value.isNotEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Center(
+                    child: Text(
+                      controller.errorMessage.value,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                );
+              }
+              if (controller.timetable.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24),
+                  child: Center(
+                    child: Text('No timetable classes scheduled for this day.'),
+                  ),
+                );
+              }
+              return Column(
+                children: controller.timetable.map((item) {
+                  return _buildClassCard(
+                    time: (item['time'] ?? '').toString(),
+                    subject: (item['subject'] ?? '').toString(),
+                    teacher: (item['teacher'] ?? '').toString(),
+                    room: (item['room'] ?? '').toString(),
+                    period: (item['period'] ?? '').toString(),
+                    isLive: item['isLive'] == true,
+                    progress: item['progress'] is num
+                        ? (item['progress'] as num).toDouble()
+                        : null,
+                    remaining: item['remaining']?.toString(),
+                    onJoin: item['isLive'] == true
+                        ? () => controller.joinLiveClass(
+                            (item['subject'] ?? '').toString(),
+                          )
+                        : null,
+                  );
+                }).toList(),
+              );
+            }),
             const SizedBox(height: 80),
           ],
         ),
       ),
-      bottomNavigationBar: const ParentBottomNavBar(currentIndex: 3),
+      bottomNavigationBar: embedded
+          ? null
+          : const ParentBottomNavBar(currentIndex: 3),
       floatingActionButton: FloatingActionButton(
         onPressed: controller.toggleView,
         child: const Icon(Icons.grid_view),
@@ -205,11 +210,11 @@ class DailyTimetableView extends GetView<TimetableController> {
           decoration: BoxDecoration(
             color:
                 (index == 0 && controller.dayView.value) ||
-                        (index == 1 && !controller.dayView.value)
-                    ? (Theme.of(Get.context!).brightness == Brightness.dark
-                        ? AppColors.surfaceDark
-                        : Colors.white)
-                    : Colors.transparent,
+                    (index == 1 && !controller.dayView.value)
+                ? (Theme.of(Get.context!).brightness == Brightness.dark
+                      ? AppColors.surfaceDark
+                      : Colors.white)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Text(
@@ -218,9 +223,9 @@ class DailyTimetableView extends GetView<TimetableController> {
               fontWeight: FontWeight.bold,
               color:
                   (index == 0 && controller.dayView.value) ||
-                          (index == 1 && !controller.dayView.value)
-                      ? AppColors.primary
-                      : Colors.grey,
+                      (index == 1 && !controller.dayView.value)
+                  ? AppColors.primary
+                  : Colors.grey,
             ),
           ),
         ),
@@ -247,10 +252,9 @@ class DailyTimetableView extends GetView<TimetableController> {
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color:
-              isLive
-                  ? AppColors.primary
-                  : (isDark ? AppColors.borderDark : AppColors.borderLight),
+          color: isLive
+              ? AppColors.primary
+              : (isDark ? AppColors.borderDark : AppColors.borderLight),
           width: isLive ? 2 : 1,
         ),
       ),

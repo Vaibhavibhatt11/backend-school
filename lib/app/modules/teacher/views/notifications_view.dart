@@ -35,6 +35,34 @@ class NotificationsView extends GetView<NotificationsController> {
           // Notifications list grouped by date
           Expanded(
             child: Obx(() {
+              if (controller.isLoading.value &&
+                  controller.notifications.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (controller.errorMessage.value.isNotEmpty &&
+                  controller.notifications.isEmpty) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          controller.errorMessage.value,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton(
+                          onPressed: controller.loadNotifications,
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
               final today = <NotificationItem>[];
               final yesterday = <NotificationItem>[];
               final older = <NotificationItem>[];
@@ -64,9 +92,9 @@ class NotificationsView extends GetView<NotificationsController> {
       ),
       bottomNavigationBar: const TeacherBottomNavBar(currentIndex: -1),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: controller.loadNotifications,
         backgroundColor: AppColors.primary,
-        child: const Icon(Icons.filter_list),
+        child: const Icon(Icons.refresh),
       ),
     );
   }
@@ -95,25 +123,21 @@ class NotificationsView extends GetView<NotificationsController> {
     Color categoryColor;
     IconData categoryIcon;
     switch (item.category) {
-      case 'Attendance':
+      case 'Tasks':
         categoryColor = AppColors.primary;
         categoryIcon = Icons.event_busy;
         break;
-      case 'Principal':
+      case 'Announcements':
         categoryColor = Colors.amber;
         categoryIcon = Icons.campaign;
         break;
-      case 'System':
+      case 'Exams':
         categoryColor = Colors.blue;
-        categoryIcon = Icons.update;
+        categoryIcon = Icons.assignment;
         break;
-      case 'Timetable':
+      case 'Meetings':
         categoryColor = Colors.purple;
-        categoryIcon = Icons.schedule;
-        break;
-      case 'Reports':
-        categoryColor = Colors.green;
-        categoryIcon = Icons.description;
+        categoryIcon = Icons.groups;
         break;
       default:
         categoryColor = Colors.grey;
@@ -124,13 +148,14 @@ class NotificationsView extends GetView<NotificationsController> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: item.isRead ? Colors.white : AppColors.primary.withValues(alpha: 0.05),
+        color: item.isRead
+            ? Colors.white
+            : AppColors.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color:
-              item.isRead
-                  ? Colors.grey.shade200
-                  : AppColors.primary.withValues(alpha: 0.3),
+          color: item.isRead
+              ? Colors.grey.shade200
+              : AppColors.primary.withValues(alpha: 0.3),
         ),
       ),
       child: Row(

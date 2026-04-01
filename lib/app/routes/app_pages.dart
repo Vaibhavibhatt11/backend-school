@@ -14,31 +14,23 @@ import 'package:erp_frontend/app/modules/auth/views/reset_passowrd_view.dart';
 import 'package:erp_frontend/app/modules/auth/views/role_selection_view.dart';
 import 'package:erp_frontend/app/modules/auth/views/splash_view.dart';
 import 'package:erp_frontend/app/modules/parent/bindings/parent_binding.dart';
-import 'package:erp_frontend/app/modules/parent/views/attendance_tracker_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/child_switcher_view.dart';
-import 'package:erp_frontend/app/modules/parent/views/daily_timetable_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/document_viewer_view.dart';
-import 'package:erp_frontend/app/modules/parent/views/fees_management_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/invoice_detail_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/library_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/live_classroom_portal_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/notifications_center_view.dart';
-import 'package:erp_frontend/app/modules/parent/views/parent_home_view.dart';
+import 'package:erp_frontend/app/modules/parent/views/parent_shell_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/progress_reports_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/school_announcements_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/settings_view.dart';
-import 'package:erp_frontend/app/modules/parent/views/student_profile_hub_view.dart';
 import 'package:erp_frontend/app/modules/teacher/bindings/teacher_binding.dart';
 import 'package:erp_frontend/app/modules/teacher/views/announcements_view.dart';
-import 'package:erp_frontend/app/modules/teacher/views/attendance_selector_view.dart';
-import 'package:erp_frontend/app/modules/teacher/views/live_class_view.dart';
 import 'package:erp_frontend/app/modules/teacher/views/mark_attendance_view.dart';
 import 'package:erp_frontend/app/modules/teacher/views/notifications_view.dart';
 import 'package:erp_frontend/app/modules/teacher/views/student_directory_view.dart';
 import 'package:erp_frontend/app/modules/teacher/views/student_profile_view.dart';
-import 'package:erp_frontend/app/modules/teacher/views/teacher_home_view.dart';
-import 'package:erp_frontend/app/modules/teacher/views/teacher_profile_view.dart';
-import 'package:erp_frontend/app/modules/teacher/views/timetable_view.dart';
+import 'package:erp_frontend/app/modules/teacher/views/teacher_shell_view.dart';
 import 'package:erp_frontend/app/modules/teacher/views/upload_view.dart';
 import 'package:erp_frontend/app/modules/staff/bindings/staff_binding.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_module_detail_view.dart';
@@ -90,17 +82,17 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.PARENT_HOME,
-      page: () => const ParentHomeView(),
+      page: () => const ParentShellView(),
       binding: ParentBinding(),
     ),
     GetPage(
       name: AppRoutes.PARENT_ATTENDANCE,
-      page: () => const AttendanceTrackerView(),
+      page: () => const ParentShellView(),
       binding: ParentBinding(),
     ),
     GetPage(
       name: AppRoutes.PARENT_FEES,
-      page: () => const FeesManagementView(),
+      page: () => const ParentShellView(),
       binding: ParentBinding(),
     ),
     GetPage(
@@ -110,12 +102,12 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.PARENT_TIMETABLE,
-      page: () => const DailyTimetableView(),
+      page: () => const ParentShellView(),
       binding: ParentBinding(),
     ),
     GetPage(
       name: AppRoutes.PARENT_PROFILE,
-      page: () => const StudentProfileHubView(),
+      page: () => const ParentShellView(),
       binding: ParentBinding(),
     ),
     GetPage(
@@ -161,12 +153,12 @@ class AppPages {
     // teacher routes (placeholders)
     GetPage(
       name: AppRoutes.TEACHER_HOME,
-      page: () => const TeacherHomeView(),
+      page: () => const TeacherShellView(),
       binding: TeacherBinding(),
     ),
     GetPage(
       name: AppRoutes.TEACHER_ATTENDANCE_SELECTOR,
-      page: () => const AttendanceSelectorView(),
+      page: () => const TeacherShellView(),
       binding: TeacherBinding(),
     ),
     GetPage(
@@ -186,7 +178,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.TEACHER_TIMETABLE,
-      page: () => const TimetableView(),
+      page: () => const TeacherShellView(),
       binding: TeacherBinding(),
     ),
     GetPage(
@@ -196,7 +188,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.TEACHER_LIVE_CLASS,
-      page: () => const LiveClassView(),
+      page: () => const TeacherShellView(),
       binding: TeacherBinding(),
     ),
     GetPage(
@@ -206,7 +198,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.TEACHER_PROFILE,
-      page: () => const TeacherProfileView(),
+      page: () => const TeacherShellView(),
       binding: TeacherBinding(),
     ),
     GetPage(

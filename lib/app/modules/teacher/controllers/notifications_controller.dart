@@ -1,70 +1,98 @@
 import 'package:erp_frontend/app/modules/teacher/models/teacher_models.dart';
+import 'package:erp_frontend/common/services/staff/staff_service.dart';
 import 'package:get/get.dart';
 
 class NotificationsController extends GetxController {
+  final StaffService _staffService = Get.find<StaffService>();
+
   final notifications = <NotificationItem>[].obs;
+  final isLoading = false.obs;
+  final errorMessage = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
-    _loadNotifications();
+    loadNotifications();
   }
 
-  void _loadNotifications() {
-    notifications.assignAll([
-      NotificationItem(
-        id: '1',
-        title: 'Attendance Pending',
-        body: 'Class 10B attendance for Period 3 has not been submitted yet.',
-        category: 'Attendance',
-        timestamp: DateTime.now(),
-        isRead: false,
-      ),
-      NotificationItem(
-        id: '2',
-        title: 'Staff Meeting Rescheduled',
-        body: 'The weekly briefing has been moved to 3:00 PM in the Main Hall.',
-        category: 'Principal',
-        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-        isRead: false,
-      ),
-      NotificationItem(
-        id: '3',
-        title: 'Gradebook Update',
-        body:
-            'New bulk-entry features are now available in your teacher portal.',
-        category: 'System',
-        timestamp: DateTime.now().subtract(const Duration(hours: 4)),
-        isRead: true,
-      ),
-      NotificationItem(
-        id: '4',
-        title: 'New Schedule Published',
-        body:
-            'The revised timetable for the upcoming mid-term exams is now ready.',
-        category: 'Timetable',
-        timestamp: DateTime.now().subtract(
-          const Duration(days: 1, hours: -4, minutes: 30),
+  Future<void> loadNotifications() async {
+    isLoading.value = true;
+    errorMessage.value = '';
+    try {
+      final data = await _staffService.getDashboard();
+      final items = <NotificationItem>[];
+
+      items.addAll(
+        _buildItems(
+          data['pendingTasks'],
+          category: 'Tasks',
+          titleBuilder: (value) => 'Pending Task',
         ),
-        isRead: true,
-      ),
-      NotificationItem(
-        id: '5',
-        title: 'Monthly Report Generated',
-        body:
-            'Your professional performance summary for last month has been uploaded.',
-        category: 'Reports',
-        timestamp: DateTime.now().subtract(
-          const Duration(days: 1, hours: -9, minutes: 15),
+      );
+      items.addAll(
+        _buildItems(
+          data['notifications'],
+          category: 'Announcements',
+          titleBuilder: (value) => value,
         ),
-        isRead: true,
-      ),
-    ]);
+      );
+      items.addAll(
+        _buildItems(
+          data['upcomingExams'],
+          category: 'Exams',
+          titleBuilder: (value) => 'Upcoming Exam',
+        ),
+      );
+      items.addAll(
+        _buildItems(
+          data['meetings'],
+          category: 'Meetings',
+          titleBuilder: (value) => 'Meeting Update',
+        ),
+      );
+
+      notifications.assignAll(items);
+    } catch (e) {
+      errorMessage.value = e.toString();
+      notifications.clear();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  List<NotificationItem> _buildItems(
+    dynamic value, {
+    required String category,
+    required String Function(String value) titleBuilder,
+  }) {
+    if (value is! List) {
+      return const <NotificationItem>[];
+    }
+
+    return value
+        .map((item) => item.toString().trim())
+        .where((item) => item.isNotEmpty)
+        .toList()
+        .asMap()
+        .entries
+        .map(
+          (entry) => NotificationItem(
+            id: '$category-${entry.key}',
+            title: titleBuilder(entry.value),
+            body: entry.value,
+            category: category,
+            timestamp: DateTime.now().subtract(
+              Duration(minutes: entry.key * 10),
+            ),
+            isRead: false,
+          ),
+        )
+        .toList();
   }
 
   void markAllAsRead() {
-    for (var n in notifications) {
-      n.isRead = true;
+    for (final item in notifications) {
+      item.isRead = true;
     }
     notifications.refresh();
   }

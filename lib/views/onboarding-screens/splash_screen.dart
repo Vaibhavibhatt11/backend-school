@@ -38,8 +38,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void _warmBackendChecks() {
     final sys = Get.find<SystemService>();
-    unawaited(sys.health().catchError((_) {}));
-    unawaited(sys.ready().catchError((_) {}));
+    unawaited(sys.health().catchError((_) => <String, dynamic>{}));
+    unawaited(sys.ready().catchError((_) => <String, dynamic>{}));
   }
 
   Future<String?> _resolveRoleFast(SessionStorageService session) async {
@@ -58,11 +58,10 @@ class _SplashScreenState extends State<SplashScreen> {
     // Fallback path: single lightweight /auth/me probe with timeout.
     try {
       final auth = Get.find<AuthService>();
-      final body = await auth
-          .me()
-          .timeout(const Duration(milliseconds: 1500));
+      final body = await auth.me().timeout(const Duration(milliseconds: 1500));
       final data = extractApiData(body, context: 'me');
-      final role = AuthUserParse.roleFromData(data) ??
+      final role =
+          AuthUserParse.roleFromData(data) ??
           AuthUserParse.roleFromAuthResponse(body);
       if (role != null && role.isNotEmpty) {
         appStorage.userRole = role;

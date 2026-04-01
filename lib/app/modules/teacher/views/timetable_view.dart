@@ -6,7 +6,9 @@ import 'package:get/get.dart';
 import '../controllers/timetable_controller.dart';
 
 class TimetableView extends GetView<TimetableController> {
-  const TimetableView({super.key});
+  final bool embedded;
+
+  const TimetableView({super.key, this.embedded = false});
 
   @override
   Widget build(BuildContext context) {
@@ -70,10 +72,9 @@ class TimetableView extends GetView<TimetableController> {
                         color: isSelected ? AppColors.primary : Colors.white,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color:
-                              isSelected
-                                  ? AppColors.primary
-                                  : Colors.grey.shade300,
+                          color: isSelected
+                              ? AppColors.primary
+                              : Colors.grey.shade300,
                         ),
                       ),
                       child: Column(
@@ -83,10 +84,9 @@ class TimetableView extends GetView<TimetableController> {
                             controller.weekDays[index],
                             style: TextStyle(
                               fontSize: 12,
-                              color:
-                                  isSelected
-                                      ? Colors.white
-                                      : Colors.grey.shade600,
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.grey.shade600,
                             ),
                           ),
                           Text(
@@ -132,10 +132,9 @@ class TimetableView extends GetView<TimetableController> {
                               color: _getSessionColor(session),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color:
-                                    session.isLive
-                                        ? AppColors.primary
-                                        : Colors.grey.shade300,
+                                color: session.isLive
+                                    ? AppColors.primary
+                                    : Colors.grey.shade300,
                                 width: session.isLive ? 2 : 1,
                               ),
                             ),
@@ -264,7 +263,9 @@ class TimetableView extends GetView<TimetableController> {
           ),
         ],
       ),
-      bottomNavigationBar: const TeacherBottomNavBar(currentIndex: 3),
+      bottomNavigationBar: embedded
+          ? null
+          : const TeacherBottomNavBar(currentIndex: 3),
     );
   }
 

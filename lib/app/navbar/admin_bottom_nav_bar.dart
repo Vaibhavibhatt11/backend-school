@@ -16,19 +16,34 @@ class AdminBottomNavBar extends StatelessWidget {
     if (index == currentIndex) return;
     switch (index) {
       case 0:
-        SafeNavigation.toNamed(AppRoutes.ADMIN_HOME, arguments: {'tabIndex': 0});
+        SafeNavigation.offNamed(
+          AppRoutes.ADMIN_HOME,
+          arguments: {'tabIndex': 0},
+        );
         break;
       case 1:
-        SafeNavigation.toNamed(AppRoutes.ADMIN_APPROVALS, arguments: {'tabIndex': 1});
+        SafeNavigation.offNamed(
+          AppRoutes.ADMIN_APPROVALS,
+          arguments: {'tabIndex': 1},
+        );
         break;
       case 2:
-        SafeNavigation.toNamed(AppRoutes.ADMIN_REPORTS, arguments: {'tabIndex': 2});
+        SafeNavigation.offNamed(
+          AppRoutes.ADMIN_REPORTS,
+          arguments: {'tabIndex': 2},
+        );
         break;
       case 3:
-        SafeNavigation.toNamed(AppRoutes.ADMIN_NOTICE_BOARD, arguments: {'tabIndex': 3});
+        SafeNavigation.offNamed(
+          AppRoutes.ADMIN_NOTICE_BOARD,
+          arguments: {'tabIndex': 3},
+        );
         break;
       case 4:
-        SafeNavigation.toNamed(AppRoutes.ADMIN_SETTINGS, arguments: {'tabIndex': 4});
+        SafeNavigation.offNamed(
+          AppRoutes.ADMIN_SETTINGS,
+          arguments: {'tabIndex': 4},
+        );
         break;
     }
   }
@@ -42,7 +57,10 @@ class AdminBottomNavBar extends StatelessWidget {
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+          ),
         ],
       ),
       child: SafeArea(
@@ -61,21 +79,30 @@ class AdminBottomNavBar extends StatelessWidget {
   }
 
   Widget _buildNavItem(IconData icon, String label, bool active, int index) {
-    return GestureDetector(
-      onTap: () => _onTap(index),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: active ? AppColors.primary : Colors.grey),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              color: active ? AppColors.primary : Colors.grey,
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _onTap(index),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: active ? AppColors.primary : Colors.grey),
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: active ? AppColors.primary : Colors.grey,
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

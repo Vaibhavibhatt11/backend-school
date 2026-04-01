@@ -25,7 +25,9 @@ class InvoiceDetailController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    final argId = (Get.arguments is Map) ? Get.arguments['id']?.toString() : null;
+    final argId = (Get.arguments is Map)
+        ? Get.arguments['id']?.toString()
+        : null;
     if (argId != null && argId.isNotEmpty) {
       invoiceId.value = argId;
       loadInvoice(argId);
@@ -40,33 +42,54 @@ class InvoiceDetailController extends GetxController {
       if (invoice is Map) {
         final map = Map<String, dynamic>.from(invoice);
         status.value = map['status']?.toString() ?? '';
-        issuedDate.value = _formatDate(map['issueDate'] ?? map['issuedAt']) ?? '';
-        studentName.value = 'Student';
-        studentDetail.value = (map['invoiceNo'] ?? map['id'] ?? '').toString();
+        issuedDate.value =
+            _formatDate(map['issueDate'] ?? map['issuedAt']) ?? '';
+        studentName.value =
+            (map['studentName'] ?? map['student']?['name'] ?? studentName.value)
+                .toString();
+        final classLabel = (map['studentClass'] ?? map['classLabel'] ?? '')
+            .toString()
+            .trim();
+        final invoiceLabel = (map['invoiceNo'] ?? map['id'] ?? '').toString();
+        studentDetail.value = [
+          classLabel,
+          invoiceLabel,
+        ].where((value) => value.isNotEmpty).join(' - ');
         studentPhotoUrl.value =
-            (map['studentPhotoUrl'] ?? map['photoUrl'] ?? map['avatarUrl'] ?? studentPhotoUrl.value)
+            (map['studentPhotoUrl'] ??
+                    map['photoUrl'] ??
+                    map['avatarUrl'] ??
+                    studentPhotoUrl.value)
                 .toString();
         dueDate.value = _formatDate(map['dueDate']) ?? '';
         final amountDue = (map['amountDue'] as num?)?.toDouble() ?? 0.0;
         final amountPaid = (map['amountPaid'] as num?)?.toDouble() ?? 0.0;
-        final outstanding = (amountDue - amountPaid).clamp(0.0, double.infinity);
+        final outstanding = (amountDue - amountPaid).clamp(
+          0.0,
+          double.infinity,
+        );
         totalDue.value = outstanding;
         invoiceId.value = (map['invoiceNo'] ?? map['id'] ?? id).toString();
         subtotal.value = outstanding;
         tax.value = 0;
         total.value = outstanding;
-        breakdown.assignAll([
-          {
-            'item': (map['invoiceNo'] ?? 'Invoice').toString(),
+        final rows = <Map<String, dynamic>>[];
+        if (amountDue > 0) {
+          rows.add({
+            'item': (map['feeStructureName'] ?? map['invoiceNo'] ?? 'Invoice')
+                .toString(),
             'description': (map['status'] ?? '').toString(),
             'amount': amountDue,
-          },
-          {
+          });
+        }
+        if (amountPaid > 0) {
+          rows.add({
             'item': 'Paid',
             'description': 'Payments received',
             'amount': -amountPaid,
-          },
-        ]);
+          });
+        }
+        breakdown.assignAll(rows);
       }
       final history = data['paymentHistory'];
       if (history is List) {

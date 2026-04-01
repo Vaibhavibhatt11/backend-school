@@ -6,12 +6,27 @@ import 'package:get/get.dart';
 import '../controllers/attendance_selector_controller.dart';
 
 class AttendanceSelectorView extends GetView<AttendanceSelectorController> {
-  const AttendanceSelectorView({super.key});
+  final bool embedded;
+
+  const AttendanceSelectorView({super.key, this.embedded = false});
 
   @override
   Widget build(BuildContext context) {
     final d = controller.selectedDate.value;
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthNames = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     final weekday = [
       'Mon',
       'Tue',
@@ -67,24 +82,21 @@ class AttendanceSelectorView extends GetView<AttendanceSelectorController> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         decoration: BoxDecoration(
-                          color:
-                              controller.selectedTabIndex.value == 0
-                                  ? Colors.white
-                                  : Colors.transparent,
+                          color: controller.selectedTabIndex.value == 0
+                              ? Colors.white
+                              : Colors.transparent,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Center(
                           child: Text(
                             'Pending',
                             style: TextStyle(
-                              fontWeight:
-                                  controller.selectedTabIndex.value == 0
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                              color:
-                                  controller.selectedTabIndex.value == 0
-                                      ? AppColors.primary
-                                      : Colors.grey,
+                              fontWeight: controller.selectedTabIndex.value == 0
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: controller.selectedTabIndex.value == 0
+                                  ? AppColors.primary
+                                  : Colors.grey,
                             ),
                           ),
                         ),
@@ -99,24 +111,21 @@ class AttendanceSelectorView extends GetView<AttendanceSelectorController> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         decoration: BoxDecoration(
-                          color:
-                              controller.selectedTabIndex.value == 1
-                                  ? Colors.white
-                                  : Colors.transparent,
+                          color: controller.selectedTabIndex.value == 1
+                              ? Colors.white
+                              : Colors.transparent,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Center(
                           child: Text(
                             'Completed',
                             style: TextStyle(
-                              fontWeight:
-                                  controller.selectedTabIndex.value == 1
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                              color:
-                                  controller.selectedTabIndex.value == 1
-                                      ? AppColors.primary
-                                      : Colors.grey,
+                              fontWeight: controller.selectedTabIndex.value == 1
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: controller.selectedTabIndex.value == 1
+                                  ? AppColors.primary
+                                  : Colors.grey,
                             ),
                           ),
                         ),
@@ -144,15 +153,15 @@ class AttendanceSelectorView extends GetView<AttendanceSelectorController> {
           ),
         ],
       ),
-      bottomNavigationBar: const TeacherBottomNavBar(currentIndex: 1),
+      bottomNavigationBar: embedded
+          ? null
+          : const TeacherBottomNavBar(currentIndex: 1),
     );
   }
 
   Widget _buildPendingList() {
     if (controller.pendingClasses.isEmpty) {
-      return const Center(
-        child: Text('No pending classes for today'),
-      );
+      return const Center(child: Text('No pending classes for today'));
     }
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -228,11 +237,10 @@ class AttendanceSelectorView extends GetView<AttendanceSelectorController> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed:
-                      () => Get.toNamed(
-                        AppRoutes.TEACHER_MARK_ATTENDANCE,
-                        arguments: {'class': cls},
-                      ),
+                  onPressed: () => Get.toNamed(
+                    AppRoutes.TEACHER_MARK_ATTENDANCE,
+                    arguments: {'class': cls},
+                  ),
                   child: const Text('Mark Attendance'),
                 ),
               ),
@@ -282,7 +290,10 @@ class AttendanceSelectorView extends GetView<AttendanceSelectorController> {
               children: [
                 Text(
                   cls['title']?.toString() ?? '',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Text(

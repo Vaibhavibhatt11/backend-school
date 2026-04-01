@@ -11,7 +11,6 @@ class AdminReportsView extends GetView<AdminReportsController> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final content = SafeArea(
       child: Obx(() {
         if (controller.isLoading.value) {
@@ -63,7 +62,14 @@ class AdminReportsView extends GetView<AdminReportsController> {
                     const CircleAvatar(
                       radius: 20,
                       backgroundColor: AppColors.primary,
-                      child: Text('AD', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                      child: Text(
+                        'AD',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
                     ),
                     Positioned(
                       bottom: 0,
@@ -167,51 +173,6 @@ class AdminReportsView extends GetView<AdminReportsController> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            // Exam Performance (coming soon)
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.surfaceDark : Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: Colors.grey.shade300,
-                  style: BorderStyle.solid,
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(Icons.auto_graph, color: Colors.grey),
-                      ),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text(
-                            'Exam Performance',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            'Coming soon for Mid-Terms',
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const Icon(Icons.chevron_right, color: Colors.grey),
-                ],
-              ),
-            ),
           ],
         );
       }),
@@ -234,10 +195,9 @@ class AdminReportsView extends GetView<AdminReportsController> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color:
-              Theme.of(Get.context!).brightness == Brightness.dark
-                  ? AppColors.surfaceDark
-                  : Colors.white,
+          color: Theme.of(Get.context!).brightness == Brightness.dark
+              ? AppColors.surfaceDark
+              : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.grey.shade200),
         ),
@@ -282,10 +242,9 @@ class AdminReportsView extends GetView<AdminReportsController> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color:
-            Theme.of(Get.context!).brightness == Brightness.dark
-                ? AppColors.surfaceDark
-                : Colors.white,
+        color: Theme.of(Get.context!).brightness == Brightness.dark
+            ? AppColors.surfaceDark
+            : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey.shade200),
       ),
@@ -380,7 +339,9 @@ class AdminReportsView extends GetView<AdminReportsController> {
                 child: OutlinedButton(
                   onPressed: () => action.onTap(action.label),
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: isPdf ? AppColors.primary : Colors.green),
+                    side: BorderSide(
+                      color: isPdf ? AppColors.primary : Colors.green,
+                    ),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -389,7 +350,11 @@ class AdminReportsView extends GetView<AdminReportsController> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(action.icon, size: 16, color: isPdf ? AppColors.primary : Colors.green),
+                      Icon(
+                        action.icon,
+                        size: 16,
+                        color: isPdf ? AppColors.primary : Colors.green,
+                      ),
                       const SizedBox(width: 4),
                       Flexible(
                         child: Text(

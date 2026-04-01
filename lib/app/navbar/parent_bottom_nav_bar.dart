@@ -4,10 +4,15 @@ import 'package:flutter/material.dart';
 
 class ParentBottomNavBar extends StatelessWidget {
   final int currentIndex;
+  final ValueChanged<int>? onTap;
 
-  const ParentBottomNavBar({super.key, required this.currentIndex});
+  const ParentBottomNavBar({super.key, required this.currentIndex, this.onTap});
 
   void _onTap(int index) {
+    if (onTap != null) {
+      onTap!(index);
+      return;
+    }
     if (index == currentIndex) return;
     switch (index) {
       case 0:
@@ -37,7 +42,10 @@ class ParentBottomNavBar extends StatelessWidget {
         color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+          ),
         ],
       ),
       child: SafeArea(
@@ -61,23 +69,34 @@ class ParentBottomNavBar extends StatelessWidget {
   }
 
   Widget _buildNavItem(IconData icon, String label, bool active, int index) {
-    return GestureDetector(
-      onTap: () => _onTap(index),
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: active ? const Color(0xFF137FEC) : Colors.grey),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              color: active ? const Color(0xFF137FEC) : Colors.grey,
-              fontWeight: active ? FontWeight.bold : FontWeight.normal,
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _onTap(index),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  color: active ? const Color(0xFF137FEC) : Colors.grey,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: active ? const Color(0xFF137FEC) : Colors.grey,
+                    fontWeight: active ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

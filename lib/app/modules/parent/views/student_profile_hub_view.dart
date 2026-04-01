@@ -7,7 +7,9 @@ import '../../../navbar/parent_bottom_nav_bar.dart';
 import '../controllers/profile_controller.dart';
 
 class StudentProfileHubView extends GetView<ProfileController> {
-  const StudentProfileHubView({super.key});
+  final bool embedded;
+
+  const StudentProfileHubView({super.key, this.embedded = false});
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +136,9 @@ class StudentProfileHubView extends GetView<ProfileController> {
           ],
         ),
       ),
-      bottomNavigationBar: const ParentBottomNavBar(currentIndex: 4),
+      bottomNavigationBar: embedded
+          ? null
+          : const ParentBottomNavBar(currentIndex: 4),
     );
   }
 
@@ -353,65 +357,63 @@ class StudentProfileHubView extends GetView<ProfileController> {
           const SizedBox(height: 8),
           Obx(
             () => Column(
-              children:
-                  controller.documents.map((doc) {
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: isDark ? AppColors.surfaceDark : Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color:
-                              isDark
-                                  ? AppColors.borderDark
-                                  : AppColors.borderLight,
+              children: controller.documents.map((doc) {
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.surfaceDark : Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isDark
+                          ? AppColors.borderDark
+                          : AppColors.borderLight,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.description,
+                          color: Colors.orange,
                         ),
                       ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: Colors.orange.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              doc['name']!,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                            child: const Icon(
-                              Icons.description,
-                              color: Colors.orange,
+                            Text(
+                              '${doc['status']} • ${doc['size']}',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  doc['name']!,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  '${doc['status']} • ${doc['size']}',
-                                  style: const TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.download),
-                            onPressed:
-                                () => controller.downloadDocument(doc['name']!),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    );
-                  }).toList(),
+                      IconButton(
+                        icon: const Icon(Icons.download),
+                        onPressed: () =>
+                            controller.downloadDocument(doc['name']!),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
             ),
           ),
         ],

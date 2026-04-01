@@ -12,11 +12,13 @@ import '../controllers/live_class_controller.dart';
 import '../controllers/library_controller.dart';
 import '../controllers/document_viewer_controller.dart';
 import '../controllers/notifications_controller.dart';
+import '../controllers/parent_shell_controller.dart';
 import '../controllers/settings_controller.dart';
 
 class ParentBinding extends Bindings {
   @override
   void dependencies() {
+    Get.lazyPut(() => ParentShellController());
     Get.lazyPut(() => ParentHomeController());
     Get.lazyPut(() => AttendanceController());
     Get.lazyPut(() => FeesController());
