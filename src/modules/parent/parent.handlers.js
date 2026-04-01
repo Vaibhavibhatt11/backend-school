@@ -445,8 +445,7 @@ async function getHome(req, res, next) {
       isMissingTableError(e, "announcement") ||
       isMissingTableError(e, "examresult") ||
       isMissingTableError(e, "exam") ||
-      isMissingTableError(e, "liveclasssession") ||
-      true
+      isMissingTableError(e, "liveclasssession")
     ) {
       return res.status(200).json({
         success: true,
@@ -463,6 +462,7 @@ async function getHome(req, res, next) {
         },
       });
     }
+    return next(e);
   }
 }
 
@@ -681,7 +681,7 @@ async function getInvoiceDetail(req, res, next) {
     if (!invoice) throw notFound("Invoice not found");
 
     // Prevent IDOR: ensure this invoice belongs to a student linked to this parent.
-    await resolveChildForParent(parent.id, invoice.studentId);
+    const child = await resolveChildForParent(parent.id, invoice.studentId);
 
     const paymentHistory = (invoice.payments ?? []).map((p) => ({
       ref: p.receiptNo ?? p.id,
@@ -694,7 +694,11 @@ async function getInvoiceDetail(req, res, next) {
     return res.status(200).json({
       success: true,
       data: {
-        invoice,
+        invoice: {
+          ...invoice,
+          studentName: `${child.firstName ?? ""} ${child.lastName ?? ""}`.trim(),
+          studentClass: `${child.className ?? ""}${child.section ? `-${child.section}` : ""}`.trim(),
+        },
         paymentHistory,
       },
     });
