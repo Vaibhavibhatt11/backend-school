@@ -1,7 +1,7 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/modules/staff/controllers/staff_settings_controller.dart';
-import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:erp_frontend/app/services/app_storage.dart';
+import 'package:erp_frontend/common/routes/common_routes_screens.dart';
 import 'package:erp_frontend/common/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -51,7 +51,7 @@ class StaffSettingsView extends GetView<StaffSettingsController> {
                 await Get.find<AuthService>().logout();
               }
               AppStorage().clearAll();
-              Get.offAllNamed(AppRoutes.LOGIN);
+              Get.offAllNamed(CommonScreenRoutes.loginScreen);
             },
             icon: const Icon(Icons.logout_rounded),
             label: const Text('Logout'),

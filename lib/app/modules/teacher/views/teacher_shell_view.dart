@@ -5,6 +5,7 @@ import 'package:erp_frontend/app/modules/teacher/views/teacher_home_view.dart';
 import 'package:erp_frontend/app/modules/teacher/views/teacher_profile_view.dart';
 import 'package:erp_frontend/app/modules/teacher/views/timetable_view.dart';
 import 'package:erp_frontend/app/navbar/teacher_bottom_nav_bar.dart';
+import 'package:erp_frontend/common/widgets/double_back_exit_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -55,14 +56,16 @@ class _TeacherShellViewState extends State<TeacherShellView> {
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => Scaffold(
-        body: IndexedStack(
-          index: controller.currentIndex.value,
-          children: _tabs,
-        ),
-        bottomNavigationBar: TeacherBottomNavBar(
-          currentIndex: controller.currentIndex.value,
-          onTap: controller.setTab,
+      () => DoubleBackExitScope(
+        child: Scaffold(
+          body: IndexedStack(
+            index: controller.currentIndex.value,
+            children: _tabs,
+          ),
+          bottomNavigationBar: TeacherBottomNavBar(
+            currentIndex: controller.currentIndex.value,
+            onTap: controller.setTab,
+          ),
         ),
       ),
     );

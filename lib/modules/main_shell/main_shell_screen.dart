@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../common/theme/app_color.dart';
 import '../../common/utils/responsive.dart';
+import '../../common/widgets/double_back_exit_scope.dart';
 import '../../widgets/common_app_bar.dart';
 import 'tabs/home_dashboard_tab.dart';
 import 'tabs/learn_tab.dart';
@@ -23,47 +24,49 @@ class MainShellScreen extends GetView<MainShellController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _ShellAppBar(controller: controller, tabTitles: _tabTitles),
-      body: Obx(() {
-        return IndexedStack(
-          index: controller.currentIndex.value,
-          children: const [
-            HomeDashboardTab(),
-            LearnTab(),
-            MessagesTab(),
-            MoreTab(),
-          ],
-        );
-      }),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: AppColor.base,
-          boxShadow: [
-            BoxShadow(
-              color: AppColor.black.withValues(alpha: 0.08),
-              blurRadius: 20,
-              offset: const Offset(0, -4),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: Responsive.w(context, 8),
-              vertical: Responsive.h(context, 8),
-            ),
-            child: Obx(() => Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: List.generate(
-                    _navItems.length,
-                    (index) => _NavBarItem(
-                      item: _navItems[index],
-                      isSelected: controller.currentIndex.value == index,
-                      onTap: () => controller.setIndex(index),
+    return DoubleBackExitScope(
+      child: Scaffold(
+        appBar: _ShellAppBar(controller: controller, tabTitles: _tabTitles),
+        body: Obx(() {
+          return IndexedStack(
+            index: controller.currentIndex.value,
+            children: const [
+              HomeDashboardTab(),
+              LearnTab(),
+              MessagesTab(),
+              MoreTab(),
+            ],
+          );
+        }),
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: AppColor.base,
+            boxShadow: [
+              BoxShadow(
+                color: AppColor.black.withValues(alpha: 0.08),
+                blurRadius: 20,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: Responsive.w(context, 8),
+                vertical: Responsive.h(context, 8),
+              ),
+              child: Obx(() => Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: List.generate(
+                      _navItems.length,
+                      (index) => _NavBarItem(
+                        item: _navItems[index],
+                        isSelected: controller.currentIndex.value == index,
+                        onTap: () => controller.setIndex(index),
+                      ),
                     ),
-                  ),
-                )),
+                  )),
+            ),
           ),
         ),
       ),

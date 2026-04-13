@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/routes/common_routes_screens.dart';
 import 'package:erp_frontend/common/services/auth_service.dart';
 import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
@@ -38,7 +39,7 @@ class RoleController extends GetxController {
       }
     } catch (_) {
       AppToast.show('Session expired. Please sign in again.');
-      _safeOffNamed(AppRoutes.LOGIN, clearStack: true);
+      _safeOffNamed(CommonScreenRoutes.loginScreen, clearStack: true);
       return;
     }
 

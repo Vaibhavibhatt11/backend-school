@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:erp_frontend/app/data/repositories/user_repository.dart';
-import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/routes/common_routes_screens.dart';
 import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:get/get.dart';
@@ -63,7 +63,7 @@ class ResetPasswordController extends GetxController {
       await _userRepository.resetPassword(resetToken, newPassword.value);
       AppToast.show('Password updated');
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Get.offAllNamed(AppRoutes.LOGIN);
+        Get.offAllNamed(CommonScreenRoutes.loginScreen);
       });
     } catch (e) {
       AppToast.show(dioOrApiErrorMessage(e));

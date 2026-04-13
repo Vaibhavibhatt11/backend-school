@@ -1,8 +1,8 @@
-import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:erp_frontend/app/services/app_storage.dart';
 import 'package:erp_frontend/common/services/admin/admin_service.dart';
 import 'package:erp_frontend/common/services/auth_service.dart';
 import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
+import 'package:erp_frontend/common/routes/common_routes_screens.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -83,7 +83,7 @@ class AdminProfileController extends GetxController {
               Get.back();
               await Get.find<AuthService>().logout();
               AppStorage().clearAll();
-              Get.offAllNamed(AppRoutes.LOGIN);
+              Get.offAllNamed(CommonScreenRoutes.loginScreen);
             },
             child: Text('Logout'),
           ),

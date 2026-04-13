@@ -5,6 +5,7 @@ import 'package:erp_frontend/app/modules/admin/views/admin_reports_view.dart';
 import 'package:erp_frontend/app/modules/admin/views/admin_settings_view.dart';
 import 'package:erp_frontend/app/modules/admin/controllers/admin_shell_controller.dart';
 import 'package:erp_frontend/app/navbar/admin_bottom_nav_bar.dart';
+import 'package:erp_frontend/common/widgets/double_back_exit_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -52,14 +53,16 @@ class _AdminShellViewState extends State<AdminShellView> {
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => Scaffold(
-        body: IndexedStack(
-          index: controller.currentIndex.value,
-          children: _tabs,
-        ),
-        bottomNavigationBar: AdminBottomNavBar(
-          currentIndex: controller.currentIndex.value,
-          onTap: controller.setTab,
+      () => DoubleBackExitScope(
+        child: Scaffold(
+          body: IndexedStack(
+            index: controller.currentIndex.value,
+            children: _tabs,
+          ),
+          bottomNavigationBar: AdminBottomNavBar(
+            currentIndex: controller.currentIndex.value,
+            onTap: controller.setTab,
+          ),
         ),
       ),
     );

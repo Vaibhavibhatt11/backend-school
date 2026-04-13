@@ -15,7 +15,6 @@ import 'package:erp_frontend/app/modules/admin/views/admin_students_view.dart';
 import 'package:erp_frontend/app/modules/auth/bindings/auth_binding.dart';
 import 'package:erp_frontend/app/modules/auth/views/branch_selection_view.dart';
 import 'package:erp_frontend/app/modules/auth/views/forgot_password_view.dart';
-import 'package:erp_frontend/app/modules/auth/views/login_view.dart';
 import 'package:erp_frontend/app/modules/auth/views/otp_view.dart';
 import 'package:erp_frontend/app/modules/auth/views/reset_passowrd_view.dart';
 import 'package:erp_frontend/app/modules/auth/views/role_selection_view.dart';
@@ -44,6 +43,8 @@ import 'package:erp_frontend/app/modules/staff/views/staff_module_detail_view.da
 import 'package:erp_frontend/app/modules/staff/views/staff_modules_view.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_shell_view.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_feature_detail_view.dart';
+import 'package:erp_frontend/modules/auth/login/login_binding.dart';
+import 'package:erp_frontend/modules/auth/login/login_screen.dart';
 import 'package:get/get.dart';
 
 import '../modules/admin/bindings/admin_binding.dart';
@@ -64,8 +65,8 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.LOGIN,
-      page: () => const LoginView(),
-      binding: AuthBinding(),
+      page: () => const LoginScreen(),
+      binding: LoginBinding(),
     ),
     GetPage(
       name: AppRoutes.OTP,

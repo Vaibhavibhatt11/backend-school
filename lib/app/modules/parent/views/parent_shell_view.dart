@@ -5,6 +5,7 @@ import 'package:erp_frontend/app/modules/parent/views/fees_management_view.dart'
 import 'package:erp_frontend/app/modules/parent/views/parent_home_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/student_profile_hub_view.dart';
 import 'package:erp_frontend/app/navbar/parent_bottom_nav_bar.dart';
+import 'package:erp_frontend/common/widgets/double_back_exit_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -55,14 +56,16 @@ class _ParentShellViewState extends State<ParentShellView> {
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => Scaffold(
-        body: IndexedStack(
-          index: controller.currentIndex.value,
-          children: _tabs,
-        ),
-        bottomNavigationBar: ParentBottomNavBar(
-          currentIndex: controller.currentIndex.value,
-          onTap: controller.setTab,
+      () => DoubleBackExitScope(
+        child: Scaffold(
+          body: IndexedStack(
+            index: controller.currentIndex.value,
+            children: _tabs,
+          ),
+          bottomNavigationBar: ParentBottomNavBar(
+            currentIndex: controller.currentIndex.value,
+            onTap: controller.setTab,
+          ),
         ),
       ),
     );

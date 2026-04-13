@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 
+import '../routes/common_routes_screens.dart';
+import '../utils/safe_navigation.dart';
 import '../services/session_storage_service.dart';
 import 'api_config.dart';
 import 'api_endpoints.dart';
@@ -142,21 +144,87 @@ class _AuthRefreshInterceptor extends Interceptor {
 
   final SessionStorageService _sessionStorage;
   final Dio _dio;
+  static bool _isForcingLogout = false;
+
+  bool _isAuthPath(String path) {
+    return path.contains(ApiEndpoints.authLogin) ||
+        path.contains(ApiEndpoints.authRefresh) ||
+        path.contains(ApiEndpoints.authForgotPassword) ||
+        path.contains(ApiEndpoints.authVerifyOtp) ||
+        path.contains(ApiEndpoints.authResetPassword);
+  }
+
+  bool _isPublicPath(String path) {
+    return path.contains(ApiEndpoints.health) ||
+        path.contains(ApiEndpoints.ready) ||
+        _isAuthPath(path);
+  }
+
+  bool _isAuthFailure(DioException err) {
+    final code = err.response?.statusCode;
+    if (code == 401) return true;
+
+    final payload = err.response?.data;
+    final text = payload?.toString().toLowerCase() ?? '';
+    return text.contains('token') &&
+        (text.contains('expired') ||
+            text.contains('invalid') ||
+            text.contains('malformed') ||
+            text.contains('missing') ||
+            text.contains('unauthorized'));
+  }
+
+  Future<void> _forceLogoutAndRedirect() async {
+    if (_isForcingLogout) return;
+    _isForcingLogout = true;
+    try {
+      await _sessionStorage.clearSession();
+      SafeNavigation.offAllNamed(CommonScreenRoutes.loginScreen);
+    } finally {
+      _isForcingLogout = false;
+    }
+  }
+
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+    if (_isPublicPath(options.path)) {
+      return handler.next(options);
+    }
+    final token = await _sessionStorage.getToken();
+    if (token == null || token.isEmpty) {
+      await _forceLogoutAndRedirect();
+      return handler.reject(
+        DioException(
+          requestOptions: options,
+          type: DioExceptionType.badResponse,
+          response: Response(
+            requestOptions: options,
+            statusCode: 401,
+            data: {'message': 'Authentication required'},
+          ),
+        ),
+      );
+    }
+    return handler.next(options);
+  }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    if (err.response?.statusCode != 401) {
+    if (!_isAuthFailure(err)) {
       return handler.next(err);
     }
     final path = err.requestOptions.path;
-    if (path.contains(ApiEndpoints.authRefresh) || path.contains(ApiEndpoints.authLogin)) {
+    if (_isAuthPath(path)) {
+      await _forceLogoutAndRedirect();
       return handler.next(err);
     }
     if (err.requestOptions.extra['authRetried'] == true) {
+      await _forceLogoutAndRedirect();
       return handler.next(err);
     }
     final refreshToken = await _sessionStorage.getRefreshToken();
     if (refreshToken == null || refreshToken.isEmpty) {
+      await _forceLogoutAndRedirect();
       return handler.next(err);
     }
     try {
@@ -167,12 +235,14 @@ class _AuthRefreshInterceptor extends Interceptor {
       );
       final body = res.data;
       if (body is! Map<String, dynamic> || body['success'] == false) {
+        await _forceLogoutAndRedirect();
         return handler.next(err);
       }
       await _sessionStorage.saveLoginResponse(body);
       final data = body['data'];
       final access = data is Map<String, dynamic> ? data['accessToken']?.toString() : null;
       if (access == null || access.isEmpty) {
+        await _forceLogoutAndRedirect();
         return handler.next(err);
       }
       await _sessionStorage.saveToken(access);
@@ -182,6 +252,7 @@ class _AuthRefreshInterceptor extends Interceptor {
       final response = await _dio.fetch(ro);
       return handler.resolve(response);
     } catch (_) {
+      await _forceLogoutAndRedirect();
       return handler.next(err);
     }
   }

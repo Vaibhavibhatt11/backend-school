@@ -1,6 +1,6 @@
-import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:erp_frontend/common/services/auth_service.dart';
 import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
+import 'package:erp_frontend/common/routes/common_routes_screens.dart';
 import 'package:erp_frontend/common/services/staff/staff_service.dart';
 import 'package:get/get.dart';
 
@@ -71,6 +71,6 @@ class TeacherProfileController extends GetxController {
 
   Future<void> logout() async {
     await _authService.logout();
-    Get.offAllNamed(AppRoutes.LOGIN);
+    Get.offAllNamed(CommonScreenRoutes.loginScreen);
   }
 }

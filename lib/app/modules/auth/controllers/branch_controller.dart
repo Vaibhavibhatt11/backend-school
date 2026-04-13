@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:erp_frontend/app/data/models/branch_model.dart';
-import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/routes/common_routes_screens.dart';
 import 'package:get/get.dart';
 
 class BranchController extends GetxController {
@@ -64,8 +64,8 @@ class BranchController extends GetxController {
 
   void confirmSelection() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (Get.currentRoute != AppRoutes.LOGIN) {
-        Get.toNamed(AppRoutes.LOGIN);
+      if (Get.currentRoute != CommonScreenRoutes.loginScreen) {
+        Get.toNamed(CommonScreenRoutes.loginScreen);
       }
     });
   }

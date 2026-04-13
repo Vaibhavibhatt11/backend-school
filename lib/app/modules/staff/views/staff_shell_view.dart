@@ -5,6 +5,7 @@ import 'package:erp_frontend/app/modules/staff/views/staff_dashboard_view.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_profile_view.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_reports_view.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_settings_view.dart';
+import 'package:erp_frontend/common/widgets/double_back_exit_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -53,38 +54,40 @@ class _StaffShellViewState extends State<StaffShellView> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Obx(
-      () => Scaffold(
-        backgroundColor: isDark
-            ? AppColors.backgroundDark
-            : AppColors.backgroundLight,
-        body: IndexedStack(
-          index: controller.currentIndex.value,
-          children: _tabs,
-        ),
-        bottomNavigationBar: Container(
-          constraints: const BoxConstraints(minHeight: 76),
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.surfaceDark : Colors.white,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 10,
-              ),
-            ],
+      () => DoubleBackExitScope(
+        child: Scaffold(
+          backgroundColor: isDark
+              ? AppColors.backgroundDark
+              : AppColors.backgroundLight,
+          body: IndexedStack(
+            index: controller.currentIndex.value,
+            children: _tabs,
           ),
-          child: SafeArea(
-            top: false,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _item(Icons.dashboard_rounded, 'Home', 0),
-                _item(Icons.badge_rounded, 'Profile', 1),
-                _item(Icons.chat_rounded, 'Comms', 2),
-                _item(Icons.bar_chart_rounded, 'Reports', 3),
-                _item(Icons.settings_rounded, 'Settings', 4),
+          bottomNavigationBar: Container(
+            constraints: const BoxConstraints(minHeight: 76),
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.surfaceDark : Colors.white,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                ),
               ],
+            ),
+            child: SafeArea(
+              top: false,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _item(Icons.dashboard_rounded, 'Home', 0),
+                  _item(Icons.badge_rounded, 'Profile', 1),
+                  _item(Icons.chat_rounded, 'Comms', 2),
+                  _item(Icons.bar_chart_rounded, 'Reports', 3),
+                  _item(Icons.settings_rounded, 'Settings', 4),
+                ],
+              ),
             ),
           ),
         ),
