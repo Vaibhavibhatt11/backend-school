@@ -247,7 +247,7 @@ class AdminStudentsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<AdminClassOption>(
-                      initialValue: selectedClass,
+                      value: selectedClass,
                       decoration: const InputDecoration(labelText: 'Class'),
                       items: classOptions
                           .map(
@@ -281,7 +281,7 @@ class AdminStudentsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: status,
+                      value: status,
                       decoration: const InputDecoration(labelText: 'Status'),
                       items: const ['ACTIVE', 'INACTIVE']
                           .map(
@@ -525,7 +525,7 @@ class AdminStudentsController extends GetxController {
             content: SizedBox(
               width: 420,
               child: DropdownButtonFormField<AdminClassOption>(
-                initialValue: selectedClass,
+                value: selectedClass,
                 decoration: const InputDecoration(labelText: 'New class'),
                 items: classOptions
                     .map(

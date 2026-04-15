@@ -414,11 +414,15 @@ class AdminService {
     String? dateFrom,
     String? dateTo,
     String type = 'student',
+    String? className,
+    String? section,
   }) async {
     final query = <String, dynamic>{
       'type': type,
       if (dateFrom != null && dateFrom.isNotEmpty) 'dateFrom': dateFrom,
       if (dateTo != null && dateTo.isNotEmpty) 'dateTo': dateTo,
+      if (className != null && className.isNotEmpty) 'className': className,
+      if (section != null && section.isNotEmpty) 'section': section,
     };
     final res = await _apiClient.get(
       ApiEndpoints.schoolReportAttendance,
@@ -430,10 +434,14 @@ class AdminService {
   Future<Map<String, dynamic>> getFeesReport({
     String? dateFrom,
     String? dateTo,
+    String? className,
+    String? section,
   }) async {
     final query = <String, dynamic>{
       if (dateFrom != null && dateFrom.isNotEmpty) 'dateFrom': dateFrom,
       if (dateTo != null && dateTo.isNotEmpty) 'dateTo': dateTo,
+      if (className != null && className.isNotEmpty) 'className': className,
+      if (section != null && section.isNotEmpty) 'section': section,
     };
     final res = await _apiClient.get(
       ApiEndpoints.schoolReportFees,

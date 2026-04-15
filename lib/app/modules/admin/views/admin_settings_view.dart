@@ -92,66 +92,6 @@ class AdminSettingsView extends GetView<AdminSettingsController> {
               ),
             ),
             const SizedBox(height: 24),
-            // Security & Privacy
-            const SizedBox(height: 8),
-            // App Preferences
-            const Text(
-              'APP PREFERENCES',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.surfaceDark : Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.indigo.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.notifications,
-                        color: Colors.indigo,
-                      ),
-                    ),
-                    title: const Text('Push Notifications'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: controller.onPushNotifications,
-                  ),
-                  const Divider(height: 1, indent: 56),
-                  ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.translate, color: Colors.blue),
-                    ),
-                    title: const Text('Language'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Text('English', style: TextStyle(fontSize: 12)),
-                        Icon(Icons.chevron_right, color: Colors.grey),
-                      ],
-                    ),
-                    onTap: controller.onLanguage,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
             // About
             const Text(
               'ABOUT',

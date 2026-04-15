@@ -219,7 +219,7 @@ class AdminAdmissionsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<AdminClassOption>(
-                      initialValue: selectedClass,
+                      value: selectedClass,
                       decoration: const InputDecoration(
                         labelText: 'Applied class',
                       ),

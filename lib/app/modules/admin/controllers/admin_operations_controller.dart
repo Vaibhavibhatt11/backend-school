@@ -638,7 +638,7 @@ class AdminOperationsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: routeId.isEmpty ? null : routeId,
+                      value: routeId,
                       decoration: const InputDecoration(labelText: 'Route'),
                       items: transportRoutes
                           .map(
@@ -726,7 +726,7 @@ class AdminOperationsController extends GetxController {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      initialValue: studentId,
+                      value: studentId,
                       decoration: const InputDecoration(labelText: 'Student'),
                       items: studentOptions
                           .map(
@@ -741,7 +741,7 @@ class AdminOperationsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: routeId,
+                      value: routeId,
                       decoration: const InputDecoration(labelText: 'Route'),
                       items: transportRoutes
                           .map(
@@ -950,7 +950,7 @@ class AdminOperationsController extends GetxController {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      initialValue: studentId,
+                      value: studentId,
                       decoration: const InputDecoration(labelText: 'Student'),
                       items: studentOptions
                           .map(
@@ -965,7 +965,7 @@ class AdminOperationsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: roomId,
+                      value: roomId,
                       decoration: const InputDecoration(labelText: 'Room'),
                       items: hostelRooms
                           .map(
@@ -1049,7 +1049,7 @@ class AdminOperationsController extends GetxController {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      initialValue: studentId,
+                      value: studentId,
                       decoration: const InputDecoration(labelText: 'Student'),
                       items: studentOptions
                           .map(
@@ -1064,7 +1064,7 @@ class AdminOperationsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: status,
+                      value: status,
                       decoration: const InputDecoration(labelText: 'Status'),
                       items: const ['PRESENT', 'ABSENT', 'LEAVE']
                           .map(
@@ -1156,7 +1156,7 @@ class AdminOperationsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: studentId.isEmpty ? null : studentId,
+                      value: studentId.isEmpty ? null : studentId,
                       decoration: const InputDecoration(labelText: 'Student'),
                       items: studentOptions
                           .map(
@@ -1382,7 +1382,7 @@ class AdminOperationsController extends GetxController {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DropdownButtonFormField<String>(
-                    initialValue: studentId,
+                    value: studentId,
                     decoration: const InputDecoration(labelText: 'Student'),
                     items: studentOptions
                         .map(

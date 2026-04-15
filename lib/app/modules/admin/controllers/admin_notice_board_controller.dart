@@ -75,6 +75,31 @@ class AdminNoticeBoardController extends GetxController {
     selectedTab.value = index;
   }
 
+  List<Notice> noticesForTab([int? tabIndex]) {
+    final index = tabIndex ?? selectedTab.value;
+    return notices.where((notice) {
+      if (index == 0) return true;
+      if (index == 1) {
+        return notice.status == 'SENT' || notice.status == 'SCHEDULED';
+      }
+      return notice.status == 'DRAFT';
+    }).toList();
+  }
+
+  List<Notice> searchNotices(String query, {int? tabIndex}) {
+    final trimmed = query.trim().toLowerCase();
+    final source = noticesForTab(tabIndex);
+    if (trimmed.isEmpty) return source;
+    return source.where((notice) {
+      return notice.title.toLowerCase().contains(trimmed) ||
+          notice.description.toLowerCase().contains(trimmed) ||
+          notice.status.toLowerCase().contains(trimmed) ||
+          notice.audiences.any(
+            (audience) => audience.toLowerCase().contains(trimmed),
+          );
+    }).toList();
+  }
+
   void onAddNotice() {
     _openAddNoticeDialog();
   }
@@ -94,45 +119,80 @@ class AdminNoticeBoardController extends GetxController {
     final sendNow = false.obs;
 
     final ok = await Get.dialog<bool>(
-      AlertDialog(
-        title: const Text('Create Notice'),
-        content: Obx(
-          () => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
+      Dialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 720),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Obx(
+              () => SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Create Notice',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: titleController,
+                      decoration: const InputDecoration(labelText: 'Title'),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: contentController,
+                      minLines: 5,
+                      maxLines: 8,
+                      decoration: const InputDecoration(labelText: 'Content'),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: audienceController,
+                      decoration: const InputDecoration(
+                        labelText: 'Audience (e.g. ALL, PARENT, STUDENT)',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    CheckboxListTile(
+                      value: sendNow.value,
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Send immediately'),
+                      onChanged: (v) => sendNow.value = v == true,
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Get.back(result: false),
+                          child: const Text('Cancel'),
+                        ),
+                        const SizedBox(width: 8),
+                        FilledButton(
+                          onPressed: () => Get.back(result: true),
+                          child: const Text('Save'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: contentController,
-                minLines: 2,
-                maxLines: 4,
-                decoration: const InputDecoration(labelText: 'Content'),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: audienceController,
-                decoration: const InputDecoration(labelText: 'Audience (e.g. ALL, PARENT, STUDENT)'),
-              ),
-              CheckboxListTile(
-                value: sendNow.value,
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Send immediately'),
-                onChanged: (v) => sendNow.value = v == true,
-              ),
-            ],
+            ),
           ),
         ),
-        actions: [
-          TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
-        ],
       ),
     );
 
     if (ok != true) return;
+    if (titleController.text.trim().isEmpty || contentController.text.trim().isEmpty) {
+      AppToast.show('Title and content are required.');
+      return;
+    }
     try {
       final created = await _adminService.createAnnouncement(
         title: titleController.text.trim(),

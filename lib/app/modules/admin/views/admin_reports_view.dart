@@ -1,5 +1,6 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/modules/admin/controllers/admin_shell_controller.dart';
+import 'package:erp_frontend/app/modules/admin/models/admin_report_models.dart';
 import 'package:erp_frontend/app/navbar/admin_bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,164 +17,165 @@ class AdminReportsView extends GetView<AdminReportsController> {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
-        return ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            // Header
-            Row(
-              children: [
-                IconButton(
-                  onPressed: () {
-                    if (embedded && Get.isRegistered<AdminShellController>()) {
-                      Get.find<AdminShellController>().setTab(0);
-                      return;
-                    }
-                    if (Get.key.currentState?.canPop() ?? false) {
-                      Get.back();
-                    }
-                  },
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'Reports',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'School Admin Portal',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: Colors.grey, fontSize: 14),
-                      ),
-                    ],
+        return RefreshIndicator(
+          onRefresh: controller.loadReports,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            children: [
+              // Header
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      if (embedded && Get.isRegistered<AdminShellController>()) {
+                        Get.find<AdminShellController>().setTab(0);
+                        return;
+                      }
+                      if (Get.key.currentState?.canPop() ?? false) {
+                        Get.back();
+                      }
+                    },
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Stack(
-                  children: [
-                    const CircleAvatar(
-                      radius: 20,
-                      backgroundColor: AppColors.primary,
-                      child: Text(
-                        'AD',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Reports',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
+                        Text(
+                          'School Admin Portal',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: Colors.grey, fontSize: 14),
+                        ),
+                      ],
                     ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                        width: 12,
-                        height: 12,
-                        decoration: const BoxDecoration(
-                          color: Colors.green,
-                          shape: BoxShape.circle,
-                          border: Border.fromBorderSide(
-                            BorderSide(color: Colors.white, width: 2),
+                  ),
+                  const SizedBox(width: 8),
+                  Stack(
+                    children: [
+                      const CircleAvatar(
+                        radius: 20,
+                        backgroundColor: AppColors.primary,
+                        child: Text(
+                          'AD',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            // Global Filters
-            const Text(
-              'GLOBAL FILTERS',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey,
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          width: 12,
+                          height: 12,
+                          decoration: const BoxDecoration(
+                            color: Colors.green,
+                            shape: BoxShape.circle,
+                            border: Border.fromBorderSide(
+                              BorderSide(color: Colors.white, width: 2),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildFilterButton(
-                    icon: Icons.calendar_today,
-                    label: 'RANGE',
-                    value: controller.selectedRange.value,
-                    onTap: controller.onRangeTap,
+              const SizedBox(height: 24),
+              const Text(
+                'GLOBAL FILTERS',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildFilterButton(
+                      icon: Icons.calendar_today,
+                      label: 'RANGE',
+                      value: controller.selectedRange.value,
+                      onTap: controller.onRangeTap,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildFilterButton(
-                    icon: Icons.school,
-                    label: 'CLASS',
-                    value: controller.selectedClass.value,
-                    onTap: controller.onClassTap,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildFilterButton(
+                      icon: Icons.school,
+                      label: 'CLASS',
+                      value: controller.selectedClass.value,
+                      onTap: controller.onClassTap,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            // Attendance Report Card
-            _buildReportCard(
-              icon: Icons.how_to_reg,
-              iconColor: Colors.blue,
-              title: 'Attendance Report',
-              description:
-                  'Detailed breakdown of student and staff presence logs for the selected period.',
-              badge: controller.attendanceBadge.value,
-              badgeColor: Colors.green,
-              primaryAction: 'View Detailed Log',
-              onPrimary: controller.onViewDetailedLog,
-              secondaryActions: [
-                ReportAction(
-                  'PDF EXPORT',
-                  Icons.picture_as_pdf,
-                  controller.onPDFExport,
-                ),
-                ReportAction(
-                  'EXCEL',
-                  Icons.table_view,
-                  controller.onExcelExport,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            // Fee Collections Card
-            _buildReportCard(
-              icon: Icons.payments,
-              iconColor: Colors.amber,
-              title: 'Fee Collections',
-              description:
-                  'Status of tuition fees, pending invoices, and historical payment collections.',
-              badge: '\$${controller.feeOutstanding.value.toStringAsFixed(2)}',
-              badgeColor: Colors.red,
-              badgePrefix: 'Outstanding',
-              primaryAction: 'Collection Analysis',
-              onPrimary: controller.onCollectionAnalysis,
-              secondaryActions: [
-                ReportAction(
-                  'PDF EXPORT',
-                  Icons.picture_as_pdf,
-                  controller.onPDFExport,
-                ),
-                ReportAction(
-                  'EXCEL',
-                  Icons.table_view,
-                  controller.onExcelExport,
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+              const SizedBox(height: 24),
+              _buildReportCard(
+                icon: Icons.how_to_reg,
+                iconColor: Colors.blue,
+                title: 'Attendance Report',
+                description:
+                    'Detailed breakdown of student and staff presence logs for the selected period.',
+                badge: controller.attendanceBadge.value,
+                badgeColor: Colors.green,
+                primaryAction: 'View Detailed Log',
+                onPrimary: controller.onViewDetailedLog,
+                secondaryActions: [
+                  ReportAction(
+                    'PDF EXPORT',
+                    Icons.picture_as_pdf,
+                    () => controller.onPDFExport(AdminReportKind.attendance),
+                  ),
+                  ReportAction(
+                    'EXCEL',
+                    Icons.table_view,
+                    () => controller.onExcelExport(AdminReportKind.attendance),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildReportCard(
+                icon: Icons.payments,
+                iconColor: Colors.amber,
+                title: 'Fee Collections',
+                description:
+                    'Status of tuition fees, pending invoices, and historical payment collections.',
+                badge: '\$${controller.feeOutstanding.value.toStringAsFixed(2)}',
+                badgeColor: Colors.red,
+                badgePrefix: 'Outstanding',
+                primaryAction: 'Collection Analysis',
+                onPrimary: controller.onCollectionAnalysis,
+                secondaryActions: [
+                  ReportAction(
+                    'PDF EXPORT',
+                    Icons.picture_as_pdf,
+                    () => controller.onPDFExport(AdminReportKind.fees),
+                  ),
+                  ReportAction(
+                    'EXCEL',
+                    Icons.table_view,
+                    () => controller.onExcelExport(AdminReportKind.fees),
+                  ),
+                ],
+              ),
+            ],
+          ),
         );
       }),
     );
@@ -337,7 +339,7 @@ class AdminReportsView extends GetView<AdminReportsController> {
               return SizedBox(
                 width: 140,
                 child: OutlinedButton(
-                  onPressed: () => action.onTap(action.label),
+                  onPressed: action.onTap,
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(
                       color: isPdf ? AppColors.primary : Colors.green,
@@ -382,6 +384,6 @@ class AdminReportsView extends GetView<AdminReportsController> {
 class ReportAction {
   final String label;
   final IconData icon;
-  final Function(String) onTap;
+  final VoidCallback onTap;
   ReportAction(this.label, this.icon, this.onTap);
 }

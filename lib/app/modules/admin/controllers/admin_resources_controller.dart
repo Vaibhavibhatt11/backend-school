@@ -505,7 +505,7 @@ class AdminResourcesController extends GetxController {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      initialValue: bookId,
+                      value: bookId,
                       decoration: const InputDecoration(labelText: 'Book'),
                       items: libraryBooks
                           .map(
@@ -520,7 +520,7 @@ class AdminResourcesController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: borrowerType,
+                      value: borrowerType,
                       decoration: const InputDecoration(
                         labelText: 'Borrower type',
                       ),
@@ -546,9 +546,7 @@ class AdminResourcesController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: borrowerRefId.isEmpty
-                          ? null
-                          : borrowerRefId,
+                      value: borrowerRefId.isEmpty ? null : borrowerRefId,
                       decoration: const InputDecoration(labelText: 'Borrower'),
                       items: borrowerItems
                           .map(
@@ -778,7 +776,7 @@ class AdminResourcesController extends GetxController {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      initialValue: itemId,
+                      value: itemId,
                       decoration: const InputDecoration(labelText: 'Item'),
                       items: inventoryItems
                           .map(
@@ -793,7 +791,7 @@ class AdminResourcesController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: type,
+                      value: type,
                       decoration: const InputDecoration(labelText: 'Type'),
                       items: const ['IN', 'OUT']
                           .map(

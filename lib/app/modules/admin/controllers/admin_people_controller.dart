@@ -434,7 +434,7 @@ class AdminPeopleController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: '',
+                      value: '',
                       decoration: const InputDecoration(
                         labelText: 'Link student (optional)',
                       ),

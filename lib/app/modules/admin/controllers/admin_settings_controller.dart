@@ -59,19 +59,19 @@ class AdminSettingsController extends GetxController {
   }
 
   void onPushNotifications() {
-    loadSettings();
+    AppToast.show('Push notification settings will be available soon.');
   }
 
   void onLanguage() {
-    loadSettings();
+    AppToast.show('Language settings will be available soon.');
   }
 
   void onPrivacyPolicy() {
-    loadSettings();
+    AppToast.show('Privacy Policy page will be available soon.');
   }
 
   void onTerms() {
-    loadSettings();
+    AppToast.show('Terms of Service page will be available soon.');
   }
 
   void onLogout() {

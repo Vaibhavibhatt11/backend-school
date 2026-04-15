@@ -13,33 +13,28 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final content = SafeArea(
-      child: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        return Column(
+      child: Column(
           children: [
             // Header
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          if (embedded && Get.isRegistered<AdminShellController>()) {
-                            Get.find<AdminShellController>().setTab(0);
-                            return;
-                          }
-                          if (Get.key.currentState?.canPop() ?? false) {
-                            Get.back();
-                          }
-                        },
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                      ),
-                      Column(
+                  IconButton(
+                    onPressed: () {
+                      if (embedded && Get.isRegistered<AdminShellController>()) {
+                        Get.find<AdminShellController>().setTab(0);
+                        return;
+                      }
+                      if (Get.key.currentState?.canPop() ?? false) {
+                        Get.back();
+                      }
+                    },
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                  ),
+                  Expanded(
+                    child: Obx(
+                      () => Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
@@ -50,7 +45,7 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                             ),
                           ),
                           Text(
-                            '${controller.requests.length} pending requests',
+                            '${controller.countForTab(0)} pending requests',
                             style: const TextStyle(
                               color: Colors.grey,
                               fontSize: 14,
@@ -58,134 +53,114 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: isDark ? AppColors.surfaceDark : Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey.shade200),
-                        ),
-                        child: IconButton(
-                          icon: const Icon(Icons.tune, size: 20),
-                          onPressed: controller.loadPendingApprovals,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Stack(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color:
-                                  isDark ? AppColors.surfaceDark : Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.grey.shade200),
-                            ),
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.notifications_none,
-                                size: 20,
-                              ),
-                              onPressed: controller.loadPendingApprovals,
-                            ),
-                          ),
-                          Positioned(
-                            top: 8,
-                            right: 8,
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                    ),
                   ),
                 ],
               ),
             ),
             // Segmented control
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.surfaceDark : Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => controller.onTabChanged(0),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            'Pending',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
+            Obx(
+              () => Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.surfaceDark : Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => controller.onTabChanged(0),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            color: controller.selectedTab.value == 0
+                                ? Colors.white
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Pending',
+                              style: TextStyle(
+                                fontWeight: controller.selectedTab.value == 0
+                                    ? FontWeight.w600
+                                    : FontWeight.w500,
+                                color: controller.selectedTab.value == 0
+                                    ? AppColors.primary
+                                    : Colors.grey,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => controller.onTabChanged(1),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: const Center(
-                          child: Text(
-                            'Approved',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey,
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => controller.onTabChanged(1),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            color: controller.selectedTab.value == 1
+                                ? Colors.white
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Approved',
+                              style: TextStyle(
+                                fontWeight: controller.selectedTab.value == 1
+                                    ? FontWeight.w600
+                                    : FontWeight.w500,
+                                color: controller.selectedTab.value == 1
+                                    ? AppColors.primary
+                                    : Colors.grey,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => controller.onTabChanged(2),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: const Center(
-                          child: Text(
-                            'Rejected',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey,
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => controller.onTabChanged(2),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            color: controller.selectedTab.value == 2
+                                ? Colors.white
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Rejected',
+                              style: TextStyle(
+                                fontWeight: controller.selectedTab.value == 2
+                                    ? FontWeight.w600
+                                    : FontWeight.w500,
+                                color: controller.selectedTab.value == 2
+                                    ? AppColors.primary
+                                    : Colors.grey,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 16),
             // List of requests
             Expanded(
               child: Obx(() {
+                if (controller.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
                 if (controller.loadError.value != null && controller.requests.isEmpty) {
                   return Center(
                     child: Padding(
@@ -208,14 +183,36 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                           ),
                         ],
                       ),
+                        ),
+                      );
+                }
+                final visibleRequests = controller.visibleRequests;
+                if (visibleRequests.isEmpty) {
+                  return RefreshIndicator(
+                    onRefresh: controller.loadPendingApprovals,
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(24),
+                      children: const [
+                        SizedBox(height: 48),
+                        Text(
+                          'No approval requests in this section.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
                     ),
                   );
                 }
-                return ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: controller.requests.length,
-                itemBuilder: (context, index) {
-                  final request = controller.requests[index];
+                return RefreshIndicator(
+                  onRefresh: controller.loadPendingApprovals,
+                  child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: visibleRequests.length,
+                  itemBuilder: (context, index) {
+                  final request = visibleRequests[index];
+                  final isPending = request.status.toUpperCase() == 'PENDING';
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
@@ -274,11 +271,11 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                                               12,
                                             ),
                                           ),
-                                          child: Text(
-                                            request.type,
-                                            style: TextStyle(
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.bold,
+                                        child: Text(
+                                          request.type,
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
                                               color: _getTypeColor(
                                                 request.type,
                                               ),
@@ -473,32 +470,35 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                             children: [
                               Expanded(
                                 child: OutlinedButton(
-                                  onPressed: () => controller.onReject(request),
+                                  onPressed: isPending
+                                      ? () => controller.onReject(request)
+                                      : null,
                                   style: OutlinedButton.styleFrom(
                                     side: const BorderSide(color: Colors.grey),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                   ),
-                                  child: const Text(
-                                    'Reject',
-                                    style: TextStyle(color: Colors.grey),
+                                  child: Text(
+                                    isPending ? 'Reject' : request.status,
+                                    style: const TextStyle(color: Colors.grey),
                                   ),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: ElevatedButton(
-                                  onPressed:
-                                      () => controller.onApprove(request),
+                                  onPressed: isPending
+                                      ? () => controller.onApprove(request)
+                                      : null,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColors.primary,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                   ),
-                                  child: const Text(
-                                    'Approve',
+                                  child: Text(
+                                    isPending ? 'Approve' : 'Completed',
                                     style: TextStyle(color: Colors.white),
                                   ),
                                 ),
@@ -510,74 +510,45 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                     ),
                   );
                 },
-              );
+              ),
+                );
               }),
             ),
           ],
-        );
-      }),
+        ),
     );
     if (embedded) {
-      return Scaffold(
-        body: content,
-        floatingActionButton: FloatingActionButton(
-          heroTag: 'admin_approvals_fab_embedded',
-          onPressed: controller.onFloatingAction,
-          backgroundColor: AppColors.primary,
-          child: const Icon(Icons.checklist_rtl),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      );
+      return Scaffold(body: content);
     }
     return Scaffold(
       body: content,
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'admin_approvals_fab',
-        onPressed: controller.onFloatingAction,
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.checklist_rtl),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: AdminBottomNavBar(currentIndex: 1),
     );
   }
 
   IconData _getIcon(String type) {
-    switch (type) {
-      case 'Leave':
-        return Icons.calendar_today;
-      case 'Fee Waiver':
-        return Icons.payments;
-      case 'Profile Edit':
-        return Icons.person_outline;
-      default:
-        return Icons.info;
+    final normalized = type.toLowerCase();
+    if (normalized.contains('leave')) return Icons.calendar_today;
+    if (normalized.contains('fee')) return Icons.payments;
+    if (normalized.contains('profile') || normalized.contains('address')) {
+      return Icons.person_outline;
     }
+    if (normalized.contains('admission')) return Icons.school;
+    return Icons.info;
   }
 
   Color _getIconColor(String type) {
-    switch (type) {
-      case 'Leave':
-        return Colors.blue;
-      case 'Fee Waiver':
-        return Colors.amber;
-      case 'Profile Edit':
-        return Colors.purple;
-      default:
-        return Colors.grey;
+    final normalized = type.toLowerCase();
+    if (normalized.contains('leave')) return Colors.blue;
+    if (normalized.contains('fee')) return Colors.amber;
+    if (normalized.contains('profile') || normalized.contains('address')) {
+      return Colors.purple;
     }
+    if (normalized.contains('admission')) return Colors.green;
+    return Colors.grey;
   }
 
   Color _getTypeColor(String type) {
-    switch (type) {
-      case 'Leave':
-        return Colors.blue;
-      case 'Fee Waiver':
-        return Colors.amber;
-      case 'Profile Edit':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
+    return _getIconColor(type);
   }
 }

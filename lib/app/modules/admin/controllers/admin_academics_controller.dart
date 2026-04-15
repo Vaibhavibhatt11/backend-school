@@ -280,7 +280,7 @@ class AdminAcademicsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: teacherId,
+                      value: teacherId,
                       decoration: const InputDecoration(
                         labelText: 'Class teacher',
                       ),

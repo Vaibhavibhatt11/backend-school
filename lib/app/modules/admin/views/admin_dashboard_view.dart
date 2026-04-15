@@ -16,9 +16,12 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
-        return ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        return RefreshIndicator(
+          onRefresh: controller.loadDashboard,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            children: [
             if (controller.dashboardError.value != null) ...[
               Material(
                 color: Colors.red.shade50,
@@ -305,7 +308,8 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
                       )
                       .toList(),
             ),
-          ],
+            ],
+          ),
         );
       }),
     );

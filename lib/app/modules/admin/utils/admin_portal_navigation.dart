@@ -293,7 +293,7 @@ class AdminPortalNavigation {
           ),
           AdminPortalScreen(
             title: 'Settings',
-            description: 'Manage admin-side system preferences.',
+            description: 'Manage admin-side system configuration.',
             route: AppRoutes.ADMIN_SETTINGS,
             arguments: {'tabIndex': 4},
           ),
@@ -302,7 +302,7 @@ class AdminPortalNavigation {
         return const [
           AdminPortalScreen(
             title: 'Settings',
-            description: 'Manage school configuration and preferences.',
+            description: 'Manage school configuration and controls.',
             route: AppRoutes.ADMIN_SETTINGS,
             arguments: {'tabIndex': 4},
           ),

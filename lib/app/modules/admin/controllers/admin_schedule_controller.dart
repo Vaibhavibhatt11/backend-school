@@ -480,7 +480,7 @@ class AdminScheduleController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: status,
+                      value: status,
                       decoration: const InputDecoration(labelText: 'Status'),
                       items: const ['UPCOMING', 'LIVE', 'ENDED']
                           .map(
@@ -588,7 +588,7 @@ class AdminScheduleController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: classId,
+                      value: classId,
                       decoration: const InputDecoration(labelText: 'Class'),
                       items: [
                         const DropdownMenuItem<String>(
@@ -607,7 +607,7 @@ class AdminScheduleController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: subjectId,
+                      value: subjectId,
                       decoration: const InputDecoration(labelText: 'Subject'),
                       items: [
                         const DropdownMenuItem<String>(
@@ -640,7 +640,7 @@ class AdminScheduleController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: status,
+                      value: status,
                       decoration: const InputDecoration(labelText: 'Status'),
                       items:
                           const ['DRAFT', 'SCHEDULED', 'COMPLETED', 'PUBLISHED']
@@ -1059,7 +1059,7 @@ class AdminScheduleController extends GetxController {
         ),
         const SizedBox(height: 10),
         DropdownButtonFormField<String>(
-          initialValue: classId,
+          value: classId,
           decoration: const InputDecoration(labelText: 'Class'),
           items: [
             const DropdownMenuItem<String>(value: '', child: Text('No class')),
@@ -1074,7 +1074,7 @@ class AdminScheduleController extends GetxController {
         ),
         const SizedBox(height: 10),
         DropdownButtonFormField<String>(
-          initialValue: subjectId,
+          value: subjectId,
           decoration: const InputDecoration(labelText: 'Subject'),
           items: [
             const DropdownMenuItem<String>(
@@ -1092,7 +1092,7 @@ class AdminScheduleController extends GetxController {
         ),
         const SizedBox(height: 10),
         DropdownButtonFormField<String>(
-          initialValue: teacherId,
+          value: teacherId,
           decoration: const InputDecoration(labelText: 'Teacher'),
           items: [
             const DropdownMenuItem<String>(

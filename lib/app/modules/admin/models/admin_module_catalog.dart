@@ -252,7 +252,7 @@ const List<AdminModuleItem> kAdminModules = [
       'System settings',
       'Academic session setup',
       'Notification settings',
-      'Branding and preferences',
+      'School configuration',
     ],
   ),
 ];

@@ -46,53 +46,141 @@ class AdminDashboardController extends GetxController {
     isLoading.value = true;
     dashboardError.value = null;
     try {
-      final data = await _adminService.getSchoolAdminDashboard();
-      dashboardError.value = null;
-      try {
-        final profileData = await _adminService.getProfileMe();
-        final profile = profileData['profile'] as Map<String, dynamic>? ?? const <String, dynamic>{};
-        adminName.value = profile['fullName']?.toString() ?? 'Admin';
-      } catch (_) {
-        adminName.value = 'Admin';
-      }
+      final dashboardData = await _tryLoad(_adminService.getSchoolAdminDashboard());
+      final profileData = await _tryLoad(_adminService.getProfileMe());
+      final approvalsData = await _tryLoad(_adminService.getPendingApprovalsSummary());
+      final feeSnapshotData = await _tryLoad(_adminService.getFeeSnapshot());
+      final attendanceTrendData = await _tryLoad(_adminService.getAttendanceTrend(days: 7));
+      final attendanceOverviewData = await _tryLoad(_adminService.getAttendanceOverview());
 
-      final ui = data['ui'] as Map<String, dynamic>? ?? const <String, dynamic>{};
+      final profile = profileData?['profile'] as Map<String, dynamic>? ?? const <String, dynamic>{};
+      adminName.value = profile['fullName']?.toString() ?? 'Admin';
+
+      final ui = dashboardData?['ui'] as Map<String, dynamic>? ?? const <String, dynamic>{};
+      final overview = attendanceOverviewData ?? const <String, dynamic>{};
+      final feeSnapshot = feeSnapshotData ?? const <String, dynamic>{};
+      final approvals = approvalsData ?? const <String, dynamic>{};
+
       totalStudents.value =
-          (ui['studentsTotal'] as num?)?.toInt() ??
-          (data['students'] as num?)?.toInt() ??
+          _firstInt(
+            [
+              ui['studentsTotal'],
+              dashboardData?['students'],
+              overview['studentsTotal'],
+              overview['totalStudents'],
+            ],
+          ) ??
           0;
-      teacherPresence.value = (ui['teacherPresence'] as num?)?.toDouble() ?? 0;
-      teacherPresent.value = (ui['teacherPresent'] as num?)?.toInt() ?? 0;
-      teacherTotal.value = (ui['teacherTotal'] as num?)?.toInt() ?? 0;
-      pendingApprovals.value = (ui['pendingApprovals'] as num?)?.toInt() ?? 0;
-      feeToday.value = (ui['feeToday'] as num?)?.toDouble() ?? 0;
-      feePending.value = (ui['feePending'] as num?)?.toDouble() ?? 0;
-      feeVsLastWeekPct.value = (ui['feeVsLastWeekPct'] as num?)?.toDouble() ?? 0;
 
-      final trendRows = (ui['attendanceTrend'] as List<dynamic>? ?? const <dynamic>[])
-          .cast<Map<String, dynamic>>();
+      teacherPresent.value =
+          _firstInt(
+            [
+              ui['teacherPresent'],
+              overview['teacherPresent'],
+              overview['presentTeachers'],
+            ],
+          ) ??
+          0;
+      teacherTotal.value =
+          _firstInt(
+            [
+              ui['teacherTotal'],
+              overview['teacherTotal'],
+              overview['totalTeachers'],
+            ],
+          ) ??
+          0;
+      teacherPresence.value =
+          _firstDouble(
+            [
+              ui['teacherPresence'],
+              overview['teacherPresence'],
+              if (teacherTotal.value > 0)
+                (teacherPresent.value / teacherTotal.value) * 100,
+            ],
+          ) ??
+          0;
+      pendingApprovals.value =
+          _firstInt(
+            [
+              ui['pendingApprovals'],
+              approvals['totalPending'],
+              (approvals['topItems'] as List?)?.length,
+            ],
+          ) ??
+          0;
+      feeToday.value =
+          _firstDouble(
+            [
+              ui['feeToday'],
+              feeSnapshot['todayCollected'],
+              feeSnapshot['thisWeekCollected'],
+            ],
+          ) ??
+          0;
+      feePending.value =
+          _firstDouble(
+            [
+              ui['feePending'],
+              feeSnapshot['pendingAmount'],
+            ],
+          ) ??
+          0;
+      feeVsLastWeekPct.value =
+          _firstDouble(
+            [
+              ui['feeVsLastWeekPct'],
+              feeSnapshot['vsLastWeekPct'],
+            ],
+          ) ??
+          0;
+
+      final trendRows = _extractTrendRows(ui, attendanceTrendData);
       final trend = trendRows
-          .map((row) => (row['presentPct'] as num?)?.toDouble() ?? 0)
+          .map(
+            (row) => _firstDouble(
+                  [
+                    row['presentPct'],
+                    row['attendancePct'],
+                    row['studentAttendancePct'],
+                    row['value'],
+                  ],
+                ) ??
+                0,
+          )
           .toList();
       while (trend.length < 7) {
         trend.insert(0, 0);
       }
       attendanceTrend.assignAll(trend.take(7).toList());
       studentAttendancePct.value =
-          (ui['studentAttendancePct'] as num?)?.toDouble() ??
-          (ui['studentAttendance'] as num?)?.toDouble() ??
-          (attendanceTrend.isNotEmpty ? attendanceTrend.last : 0);
+          _firstDouble(
+            [
+              ui['studentAttendancePct'],
+              ui['studentAttendance'],
+              overview['studentAttendancePct'],
+              overview['attendancePct'],
+              if (attendanceTrend.isNotEmpty) attendanceTrend.last,
+            ],
+          ) ??
+          0;
+
+      final hasAnyData =
+          dashboardData != null ||
+          approvalsData != null ||
+          feeSnapshotData != null ||
+          attendanceOverviewData != null ||
+          attendanceTrendData != null;
+      dashboardError.value = hasAnyData ? null : 'Dashboard unavailable.';
+      if (!hasAnyData) {
+        _resetDashboardKpis();
+        AppToast.show('Dashboard unavailable.');
+      }
     } catch (e) {
       dashboardError.value = dioOrApiErrorMessage(e);
       _resetDashboardKpis();
       AppToast.show(dashboardError.value ?? 'Dashboard unavailable.');
-      try {
-        final profileData = await _adminService.getProfileMe();
-        final profile = profileData['profile'] as Map<String, dynamic>? ?? const <String, dynamic>{};
-        adminName.value = profile['fullName']?.toString() ?? 'Admin';
-      } catch (_) {
-        adminName.value = 'Admin';
-      }
+      adminName.value = 'Admin';
     } finally {
       isLoading.value = false;
     }
@@ -109,6 +197,55 @@ class AdminDashboardController extends GetxController {
     feeToday.value = 0;
     feePending.value = 0;
     feeVsLastWeekPct.value = 0;
+  }
+
+  Future<Map<String, dynamic>?> _tryLoad(
+    Future<Map<String, dynamic>> request,
+  ) async {
+    try {
+      return await request;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  int? _firstInt(List<dynamic> values) {
+    for (final value in values) {
+      if (value is num) return value.toInt();
+      final parsed = int.tryParse(value?.toString() ?? '');
+      if (parsed != null) return parsed;
+    }
+    return null;
+  }
+
+  double? _firstDouble(List<dynamic> values) {
+    for (final value in values) {
+      if (value is num) return value.toDouble();
+      final parsed = double.tryParse(value?.toString() ?? '');
+      if (parsed != null) return parsed;
+    }
+    return null;
+  }
+
+  List<Map<String, dynamic>> _extractTrendRows(
+    Map<String, dynamic> ui,
+    Map<String, dynamic>? trendData,
+  ) {
+    final direct = ui['attendanceTrend'];
+    if (direct is List) {
+      return direct
+          .whereType<Map>()
+          .map((row) => Map<String, dynamic>.from(row))
+          .toList();
+    }
+    final fallback = trendData?['trend'] ?? trendData?['items'] ?? trendData?['rows'];
+    if (fallback is List) {
+      return fallback
+          .whereType<Map>()
+          .map((row) => Map<String, dynamic>.from(row))
+          .toList();
+    }
+    return const <Map<String, dynamic>>[];
   }
 
   Future<void> _safeToNamed(String route, {dynamic arguments}) async {
