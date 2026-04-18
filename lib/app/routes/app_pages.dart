@@ -12,6 +12,7 @@ import 'package:erp_frontend/app/modules/admin/views/admin_resources_view.dart';
 import 'package:erp_frontend/app/modules/admin/views/admin_schedule_view.dart';
 import 'package:erp_frontend/app/modules/admin/views/admin_shell_view.dart';
 import 'package:erp_frontend/app/modules/admin/views/admin_students_view.dart';
+import 'package:erp_frontend/app/modules/admin/views/admin_staff_view.dart';
 import 'package:erp_frontend/app/modules/auth/bindings/auth_binding.dart';
 import 'package:erp_frontend/app/modules/auth/views/branch_selection_view.dart';
 import 'package:erp_frontend/app/modules/auth/views/forgot_password_view.dart';
@@ -286,6 +287,11 @@ class AppPages {
     GetPage(
       name: AppRoutes.ADMIN_STUDENTS,
       page: () => const AdminStudentsView(),
+      binding: AdminBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ADMIN_STAFF,
+      page: () => const AdminStaffView(),
       binding: AdminBinding(),
     ),
     GetPage(

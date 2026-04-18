@@ -8,625 +8,257 @@ class AdminAcademicsView extends GetView<AdminAcademicsController> {
 
   @override
   Widget build(BuildContext context) {
-    final rawArgs = Get.arguments as Map?;
-    final args = rawArgs?.cast<String, dynamic>() ?? const {};
-    final initialTab = _tabFromArgs(args);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return DefaultTabController(
-      length: 2,
-      initialIndex: initialTab,
-      child: Scaffold(
-        backgroundColor: isDark
-            ? AppColors.backgroundDark
-            : AppColors.backgroundLight,
-        appBar: AppBar(
-          title: const Text('Academic Setup'),
-          backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: 'Classes'),
-              Tab(text: 'Subjects'),
-            ],
-          ),
-          actions: [
-            IconButton(
-              onPressed: controller.loadInitialData,
-              icon: const Icon(Icons.refresh_rounded),
+    return Scaffold(
+      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      body: CustomScrollView(
+        slivers: [
+          _buildSliverAppBar(context),
+          SliverToBoxAdapter(child: _buildDashboardStats(context)),
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 0.85,
+              ),
+              delegate: SliverChildListDelegate([
+                _CategoryCard(
+                  title: 'Classes & Sections',
+                  subtitle: 'Structure your grades',
+                  icon: Icons.meeting_room_rounded,
+                  color: Colors.blue,
+                  onTap: () => _showTabSheet(context, 0),
+                ),
+                _CategoryCard(
+                  title: 'Subjects & Curriculum',
+                  subtitle: 'Academic framework',
+                  icon: Icons.menu_book_rounded,
+                  color: Colors.purple,
+                  onTap: () => _showTabSheet(context, 1),
+                ),
+                _CategoryCard(
+                  title: 'Syllabus Tracker',
+                  subtitle: 'Course coverage progress',
+                  icon: Icons.track_changes_rounded,
+                  color: Colors.orange,
+                  onTap: () => _showTabSheet(context, 2),
+                ),
+                _CategoryCard(
+                  title: 'Planning & Execution',
+                  subtitle: 'Lesson plans & Notes',
+                  icon: Icons.edit_calendar_rounded,
+                  color: Colors.green,
+                  onTap: () => _showTabSheet(context, 3),
+                ),
+                _CategoryCard(
+                  title: 'Materials Vault',
+                  subtitle: 'Digital study assets',
+                  icon: Icons.cloud_upload_rounded,
+                  color: Colors.teal,
+                  onTap: () => _showTabSheet(context, 4),
+                ),
+                _CategoryCard(
+                  title: 'Academic Reports',
+                  subtitle: 'Performance insights',
+                  icon: Icons.analytics_rounded,
+                  color: Colors.indigo,
+                  onTap: () => Get.toNamed('/admin-reports', arguments: {'tabIndex': 2}),
+                ),
+              ]),
             ),
-          ],
-        ),
-        body: TabBarView(
-          children: [
-            _ClassesTab(controller: controller),
-            _SubjectsTab(controller: controller),
-          ],
-        ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 32)),
+        ],
       ),
     );
   }
-}
 
-class _ClassesTab extends StatelessWidget {
-  const _ClassesTab({required this.controller});
-
-  final AdminAcademicsController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      if (controller.isClassesLoading.value && controller.classes.isEmpty) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      if (controller.classesError.value.isNotEmpty &&
-          controller.classes.isEmpty) {
-        return _ErrorState(
-          message: controller.classesError.value,
-          onRetry: () => controller.loadClasses(),
-        );
-      }
-      return Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Column(
-              children: [
-                TextField(
-                  controller: controller.classesSearchController,
-                  textInputAction: TextInputAction.search,
-                  decoration: InputDecoration(
-                    hintText: 'Search classes by name or section',
-                    prefixIcon: const Icon(Icons.search_rounded),
-                    suffixIcon: IconButton(
-                      onPressed: () => controller.searchClasses(
-                        controller.classesSearchController.text,
-                      ),
-                      icon: const Icon(Icons.arrow_forward_rounded),
-                    ),
-                  ),
-                  onSubmitted: controller.searchClasses,
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _SummaryChip(
-                      label: 'Classes',
-                      value: '${controller.classesTotalItems.value}',
-                    ),
-                    _SummaryChip(
-                      label: 'Teachers',
-                      value: '${controller.staffOptions.length}',
-                    ),
-                    FilledButton.icon(
-                      onPressed: () => controller.openClassDialog(),
-                      icon: const Icon(Icons.add_business_rounded),
-                      label: const Text('Add Class'),
-                    ),
-                  ],
-                ),
+  Widget _buildSliverAppBar(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return SliverAppBar(
+      expandedHeight: 120,
+      pinned: true,
+      backgroundColor: isDark ? AppColors.surfaceDark : AppColors.primary,
+      flexibleSpace: FlexibleSpaceBar(
+        title: const Text('Academic Management', style: TextStyle(fontWeight: FontWeight.w800)),
+        background: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                AppColors.primary,
+                AppColors.primary.withValues(alpha: 0.8),
               ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
           ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: controller.loadInitialData,
-              child: controller.classes.isEmpty
-                  ? ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                      children: const [
-                        _EmptyState(
-                          icon: Icons.meeting_room_rounded,
-                          title: 'No classes found',
-                          message:
-                              'Class records will appear here with real teacher and student counts.',
-                        ),
-                      ],
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                      itemCount: controller.classes.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index == controller.classes.length) {
-                          return _PaginationBar(
-                            page: controller.classesPage.value,
-                            totalPages: controller.classesTotalPages.value,
-                            onPrevious: controller.classesPage.value > 1
-                                ? () => controller.loadClasses(
-                                    nextPage: controller.classesPage.value - 1,
-                                  )
-                                : null,
-                            onNext:
-                                controller.classesPage.value <
-                                    controller.classesTotalPages.value
-                                ? () => controller.loadClasses(
-                                    nextPage: controller.classesPage.value + 1,
-                                  )
-                                : null,
-                          );
-                        }
-                        final item = controller.classes[index];
-                        return _ClassCard(item: item, controller: controller);
-                      },
-                    ),
-            ),
-          ),
-        ],
-      );
-    });
-  }
-}
-
-class _SubjectsTab extends StatelessWidget {
-  const _SubjectsTab({required this.controller});
-
-  final AdminAcademicsController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      if (controller.isSubjectsLoading.value && controller.subjects.isEmpty) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      if (controller.subjectsError.value.isNotEmpty &&
-          controller.subjects.isEmpty) {
-        return _ErrorState(
-          message: controller.subjectsError.value,
-          onRetry: () => controller.loadSubjects(),
-        );
-      }
-      return Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Column(
-              children: [
-                TextField(
-                  controller: controller.subjectsSearchController,
-                  textInputAction: TextInputAction.search,
-                  decoration: InputDecoration(
-                    hintText: 'Search subjects by name or code',
-                    prefixIcon: const Icon(Icons.search_rounded),
-                    suffixIcon: IconButton(
-                      onPressed: () => controller.searchSubjects(
-                        controller.subjectsSearchController.text,
-                      ),
-                      icon: const Icon(Icons.arrow_forward_rounded),
-                    ),
-                  ),
-                  onSubmitted: controller.searchSubjects,
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _SummaryChip(
-                      label: 'Subjects',
-                      value: '${controller.subjectsTotalItems.value}',
-                    ),
-                    FilledButton.icon(
-                      onPressed: () => controller.openSubjectDialog(),
-                      icon: const Icon(Icons.menu_book_rounded),
-                      label: const Text('Add Subject'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: controller.loadInitialData,
-              child: controller.subjects.isEmpty
-                  ? ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                      children: const [
-                        _EmptyState(
-                          icon: Icons.library_books_rounded,
-                          title: 'No subjects found',
-                          message:
-                              'Subject masters will appear here with real active status.',
-                        ),
-                      ],
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                      itemCount: controller.subjects.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index == controller.subjects.length) {
-                          return _PaginationBar(
-                            page: controller.subjectsPage.value,
-                            totalPages: controller.subjectsTotalPages.value,
-                            onPrevious: controller.subjectsPage.value > 1
-                                ? () => controller.loadSubjects(
-                                    nextPage: controller.subjectsPage.value - 1,
-                                  )
-                                : null,
-                            onNext:
-                                controller.subjectsPage.value <
-                                    controller.subjectsTotalPages.value
-                                ? () => controller.loadSubjects(
-                                    nextPage: controller.subjectsPage.value + 1,
-                                  )
-                                : null,
-                          );
-                        }
-                        final item = controller.subjects[index];
-                        return _SubjectCard(item: item, controller: controller);
-                      },
-                    ),
-            ),
-          ),
-        ],
-      );
-    });
-  }
-}
-
-class _ClassCard extends StatelessWidget {
-  const _ClassCard({required this.item, required this.controller});
-
-  final AdminClassRecord item;
-  final AdminAcademicsController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            item.label,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: isDark ? AppColors.textDark : AppColors.textLight,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 12,
-            runSpacing: 8,
-            children: [
-              _MetaText(label: 'Students', value: '${item.studentsCount}'),
-              if (item.capacity != null)
-                _MetaText(label: 'Capacity', value: '${item.capacity}'),
-              if (item.classTeacherName.isNotEmpty)
-                _MetaText(label: 'Teacher', value: item.classTeacherName),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              OutlinedButton(
-                onPressed: () => controller.openClassDialog(existing: item),
-                child: const Text('Edit'),
-              ),
-              FilledButton.tonal(
-                onPressed: () => controller.deleteClass(item),
-                child: const Text('Delete'),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SubjectCard extends StatelessWidget {
-  const _SubjectCard({required this.item, required this.controller});
-
-  final AdminSubjectRecord item;
-  final AdminAcademicsController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+      actions: [
+        IconButton(
+          onPressed: controller.loadInitialData,
+          icon: const Icon(Icons.refresh_rounded, color: Colors.white),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.name,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: isDark
-                            ? AppColors.textDark
-                            : AppColors.textLight,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      item.code,
-                      style: TextStyle(
-                        color: isDark
-                            ? AppColors.textSecondaryDark
-                            : AppColors.textSecondaryLight,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              _StatusChip(
-                label: item.isActive ? 'ACTIVE' : 'INACTIVE',
-                active: item.isActive,
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              OutlinedButton(
-                onPressed: () => controller.openSubjectDialog(existing: item),
-                child: const Text('Edit'),
-              ),
-              OutlinedButton(
-                onPressed: () => controller.toggleSubjectActive(item),
-                child: Text(item.isActive ? 'Deactivate' : 'Activate'),
-              ),
-              FilledButton.tonal(
-                onPressed: () => controller.deleteSubject(item),
-                child: const Text('Delete'),
-              ),
-            ],
-          ),
-        ],
-      ),
+      ],
     );
   }
-}
 
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.label, required this.active});
-
-  final String label;
-  final bool active;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = active ? Colors.green : Colors.red;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-  }
-}
-
-class _MetaText extends StatelessWidget {
-  const _MetaText({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return RichText(
-      text: TextSpan(
-        style: DefaultTextStyle.of(context).style,
-        children: [
-          TextSpan(
-            text: '$label: ',
-            style: const TextStyle(fontWeight: FontWeight.w700),
-          ),
-          TextSpan(text: value),
-        ],
-      ),
-    );
-  }
-}
-
-class _SummaryChip extends StatelessWidget {
-  const _SummaryChip({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
-        ),
-      ),
-      child: Text(
-        '$label: $value',
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          color: isDark ? AppColors.textDark : AppColors.textLight,
-        ),
-      ),
-    );
-  }
-}
-
-class _PaginationBar extends StatelessWidget {
-  const _PaginationBar({
-    required this.page,
-    required this.totalPages,
-    required this.onPrevious,
-    required this.onNext,
-  });
-
-  final int page;
-  final int totalPages;
-  final VoidCallback? onPrevious;
-  final VoidCallback? onNext;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth < 360) {
-            return Column(
-              children: [
-                Text('Page $page of $totalPages'),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  alignment: WrapAlignment.center,
-                  children: [
-                    OutlinedButton(
-                      onPressed: onPrevious,
-                      child: const Text('Previous'),
-                    ),
-                    OutlinedButton(
-                      onPressed: onNext,
-                      child: const Text('Next'),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          }
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              OutlinedButton(
-                onPressed: onPrevious,
-                child: const Text('Previous'),
-              ),
-              Text('Page $page of $totalPages'),
-              OutlinedButton(onPressed: onNext, child: const Text('Next')),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({
-    required this.icon,
-    required this.title,
-    required this.message,
-  });
-
-  final IconData icon;
-  final String title;
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  Widget _buildDashboardStats(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
-        ),
-      ),
-      child: Column(
+      child: Obx(() => Row(
         children: [
-          Icon(
-            icon,
-            size: 36,
-            color: isDark
-                ? AppColors.textSecondaryDark
-                : AppColors.textSecondaryLight,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: isDark ? AppColors.textDark : AppColors.textLight,
+          Expanded(
+            child: _QuickStat(
+              label: 'Classes',
+              value: controller.classes.length.toString(),
+              icon: Icons.business_rounded,
             ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: isDark
-                  ? AppColors.textSecondaryDark
-                  : AppColors.textSecondaryLight,
+          const SizedBox(width: 12),
+          Expanded(
+            child: _QuickStat(
+              label: 'Subjects',
+              value: controller.subjects.length.toString(),
+              icon: Icons.library_books_rounded,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _QuickStat(
+              label: 'Materials',
+              value: controller.materials.length.toString(),
+              icon: Icons.attachment_rounded,
             ),
           ),
         ],
+      )),
+    );
+  }
+
+  void _showTabSheet(BuildContext context, int initialIndex) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    Get.bottomSheet(
+      Container(
+        height: Get.height * 0.9,
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.backgroundDark : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: Column(
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Expanded(
+              child: DefaultTabController(
+                length: 5,
+                initialIndex: initialIndex,
+                child: Column(
+                  children: [
+                    TabBar(
+                      isScrollable: true,
+                      tabAlignment: TabAlignment.start,
+                      indicatorColor: AppColors.primary,
+                      labelColor: AppColors.primary,
+                      unselectedLabelColor: Colors.grey,
+                      tabs: const [
+                        Tab(text: 'Classes'),
+                        Tab(text: 'Subjects'),
+                        Tab(text: 'Syllabus'),
+                        Tab(text: 'Lesson Plans'),
+                        Tab(text: 'Materials'),
+                      ],
+                    ),
+                    Expanded(
+                      child: TabBarView(
+                        children: [
+                          _ClassesTabView(controller: controller),
+                          _SubjectsTabView(controller: controller),
+                          _SyllabusTabView(controller: controller),
+                          _LessonPlanTabView(controller: controller),
+                          _MaterialsTabView(controller: controller),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
+      isScrollControlled: true,
     );
   }
 }
 
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.message, required this.onRetry});
+class _CategoryCard extends StatelessWidget {
+  const _CategoryCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
 
-  final String message;
-  final Future<void> Function() onRetry;
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surfaceDark : Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+          border: Border.all(
+            color: isDark ? AppColors.borderDark : AppColors.borderLight,
+          ),
+        ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(message, textAlign: TextAlign.center),
-            const SizedBox(height: 12),
-            FilledButton(
-              onPressed: () => onRetry(),
-              child: const Text('Retry'),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(icon, color: color, size: 28),
+            ),
+            const Spacer(),
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: TextStyle(color: Colors.grey[600], fontSize: 12),
             ),
           ],
         ),
@@ -635,9 +267,311 @@ class _ErrorState extends StatelessWidget {
   }
 }
 
-int _tabFromArgs(Map<String, dynamic> args) {
-  final value = (args['initialTab'] as num?)?.toInt() ?? 0;
-  if (value < 0) return 0;
-  if (value > 1) return 1;
-  return value;
+class _QuickStat extends StatelessWidget {
+  const _QuickStat({required this.label, required this.value, required this.icon});
+  final String label;
+  final String value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, size: 20, color: AppColors.primary),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          Text(
+            label,
+            style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// --- Tab Views (Detailed Implementations with Actions) ---
+
+class _ClassesTabView extends StatelessWidget {
+  const _ClassesTabView({required this.controller});
+  final AdminAcademicsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: FilledButton.icon(
+            onPressed: () => controller.openClassDialog(),
+            icon: const Icon(Icons.add),
+            label: const Text('Add New Class'),
+            style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
+          ),
+        ),
+        Expanded(
+          child: Obx(() {
+            if (controller.isClassesLoading.value) return const Center(child: CircularProgressIndicator());
+            return ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: controller.classes.length,
+              itemBuilder: (context, index) {
+                final item = controller.classes[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: ListTile(
+                    leading: const CircleAvatar(child: Icon(Icons.meeting_room)),
+                    title: Text(item.label),
+                    subtitle: Text('${item.studentsCount} Students • Teacher: ${item.classTeacherName}'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(icon: const Icon(Icons.edit), onPressed: () => controller.openClassDialog(existing: item)),
+                        IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => controller.deleteClass(item)),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          }),
+        ),
+      ],
+    );
+  }
+}
+
+class _SubjectsTabView extends StatelessWidget {
+  const _SubjectsTabView({required this.controller});
+  final AdminAcademicsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: FilledButton.icon(
+            onPressed: () => controller.openSubjectDialog(),
+            icon: const Icon(Icons.add),
+            label: const Text('Add New Subject'),
+            style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 50), backgroundColor: Colors.purple),
+          ),
+        ),
+        Expanded(
+          child: Obx(() {
+            if (controller.isSubjectsLoading.value) return const Center(child: CircularProgressIndicator());
+            return ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: controller.subjects.length,
+              itemBuilder: (context, index) {
+                final item = controller.subjects[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: ListTile(
+                    leading: const CircleAvatar(backgroundColor: Colors.purple, child: Icon(Icons.book, color: Colors.white)),
+                    title: Text(item.name),
+                    subtitle: Text(item.code),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Switch(
+                          value: item.isActive,
+                          onChanged: (_) => controller.toggleSubjectActive(item),
+                        ),
+                        IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => controller.deleteSubject(item)),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          }),
+        ),
+      ],
+    );
+  }
+}
+
+class _SyllabusTabView extends StatelessWidget {
+  const _SyllabusTabView({required this.controller});
+  final AdminAcademicsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: FilledButton.icon(
+            onPressed: () => controller.openSyllabusDialog(),
+            icon: const Icon(Icons.add),
+            label: const Text('Log Syllabus Progress'),
+            style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 50), backgroundColor: Colors.orange),
+          ),
+        ),
+        Expanded(
+          child: Obx(() {
+            if (controller.isExtraLoading.value) return const Center(child: CircularProgressIndicator());
+            if (controller.syllabuses.isEmpty) return const Center(child: Text('No syllabus records found.'));
+            return ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: controller.syllabuses.length,
+              itemBuilder: (context, index) {
+                final item = controller.syllabuses[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(item.subjectName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                            Row(
+                              children: [
+                                IconButton(icon: const Icon(Icons.edit, size: 20), onPressed: () => controller.openSyllabusDialog(existing: item)),
+                                IconButton(icon: const Icon(Icons.delete, size: 20, color: Colors.red), onPressed: () => controller.deleteSyllabus(item)),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Text(item.classLabel, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                        const SizedBox(height: 8),
+                        Text('Topic: ${item.topic}'),
+                        const SizedBox(height: 12),
+                        LinearProgressIndicator(
+                          value: item.progress / 100,
+                          backgroundColor: Colors.grey[200],
+                          color: Colors.orange,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        const SizedBox(height: 4),
+                        Text('${item.progress.toInt()}% Completed', style: const TextStyle(fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          }),
+        ),
+      ],
+    );
+  }
+}
+
+class _LessonPlanTabView extends StatelessWidget {
+  const _LessonPlanTabView({required this.controller});
+  final AdminAcademicsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: FilledButton.icon(
+            onPressed: () => controller.openLessonPlanDialog(),
+            icon: const Icon(Icons.add),
+            label: const Text('Create Lesson Plan'),
+            style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 50), backgroundColor: Colors.green),
+          ),
+        ),
+        Expanded(
+          child: Obx(() {
+            if (controller.isExtraLoading.value) return const Center(child: CircularProgressIndicator());
+            if (controller.lessonPlans.isEmpty) return const Center(child: Text('No lesson plans found.'));
+            return ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: controller.lessonPlans.length,
+              itemBuilder: (context, index) {
+                final item = controller.lessonPlans[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: ListTile(
+                    leading: const Icon(Icons.event_note_rounded, color: Colors.green),
+                    title: Text(item.title),
+                    subtitle: Text('${item.subject} • ${item.duration} mins'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(icon: const Icon(Icons.edit), onPressed: () => controller.openLessonPlanDialog(existing: item)),
+                        IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => controller.deleteLessonPlan(item)),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          }),
+        ),
+      ],
+    );
+  }
+}
+
+class _MaterialsTabView extends StatelessWidget {
+  const _MaterialsTabView({required this.controller});
+  final AdminAcademicsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: FilledButton.icon(
+            onPressed: () => controller.uploadMaterial(),
+            icon: const Icon(Icons.upload),
+            label: const Text('Upload Material'),
+            style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 50), backgroundColor: Colors.teal),
+          ),
+        ),
+        Expanded(
+          child: Obx(() {
+            if (controller.isExtraLoading.value) return const Center(child: CircularProgressIndicator());
+            if (controller.materials.isEmpty) return const Center(child: Text('No materials found.'));
+            return ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: controller.materials.length,
+              itemBuilder: (context, index) {
+                final item = controller.materials[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: ListTile(
+                    leading: Icon(
+                      item.type.toUpperCase() == 'VIDEO' ? Icons.play_circle_fill_rounded : Icons.picture_as_pdf_rounded,
+                      color: Colors.teal,
+                    ),
+                    title: Text(item.title),
+                    subtitle: Text(item.subject),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => controller.deleteMaterial(item),
+                    ),
+                  ),
+                );
+              },
+            );
+          }),
+        ),
+      ],
+    );
+  }
 }

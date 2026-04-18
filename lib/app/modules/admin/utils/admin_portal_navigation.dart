@@ -90,11 +90,9 @@ class AdminPortalNavigation {
       case 'staff':
         return const [
           AdminPortalScreen(
-            title: 'Staff Directory',
-            description:
-                'Create, update, activate, and remove real staff records.',
-            route: AppRoutes.ADMIN_PEOPLE,
-            arguments: {'initialTab': 1},
+            title: 'Staff Management',
+            description: 'Premium management of teachers, support staff, and administrative personnel.',
+            route: AppRoutes.ADMIN_STAFF,
           ),
           AdminPortalScreen(
             title: 'Attendance Overview',
@@ -371,10 +369,7 @@ class AdminPortalNavigation {
       return;
     }
     if (m == 'staff' || has('staff') || has('teacher') || has('employee')) {
-      SafeNavigation.offNamed(
-        AppRoutes.ADMIN_PEOPLE,
-        arguments: {'initialTab': 1},
-      );
+      SafeNavigation.offNamed(AppRoutes.ADMIN_STAFF);
       return;
     }
     if (m == 'academics' ||

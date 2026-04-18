@@ -1,5 +1,6 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/modules/admin/controllers/admin_admissions_controller.dart';
+import 'package:erp_frontend/app/modules/admin/views/admin_registration_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -9,159 +10,254 @@ class AdminAdmissionsView extends GetView<AdminAdmissionsController> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Scaffold(
-      backgroundColor: isDark
-          ? AppColors.backgroundDark
-          : AppColors.backgroundLight,
-      appBar: AppBar(
-        title: const Text('Admissions Center'),
-        backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
-        actions: [
-          IconButton(
-            onPressed: controller.loadInitialData,
-            icon: const Icon(Icons.refresh_rounded),
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        appBar: AppBar(
+          title: const Text('Admission Management'),
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'Applications'),
+              Tab(text: 'Waitlist'),
+              Tab(text: 'Fees'),
+            ],
+            indicatorColor: AppColors.primary,
+            labelColor: AppColors.primary,
           ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: controller.openCreateDialog,
-        icon: const Icon(Icons.person_add_alt_1_rounded),
-        label: const Text('New Application'),
-      ),
-      body: Obx(() {
-        if (controller.isLoading.value && controller.applications.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (controller.errorMessage.value.isNotEmpty &&
-            controller.applications.isEmpty) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    controller.errorMessage.value,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 12),
-                  FilledButton(
-                    onPressed: controller.loadInitialData,
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-        return Column(
+        ),
+        body: TabBarView(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Column(
-                children: [
-                  TextField(
-                    controller: controller.searchController,
-                    textInputAction: TextInputAction.search,
-                    decoration: InputDecoration(
-                      hintText:
-                          'Search by applicant name, email, or application number',
-                      prefixIcon: const Icon(Icons.search_rounded),
-                      suffixIcon: IconButton(
-                        onPressed: () =>
-                            controller.search(controller.searchController.text),
-                        icon: const Icon(Icons.arrow_forward_rounded),
-                      ),
-                    ),
-                    onSubmitted: controller.search,
-                  ),
-                  const SizedBox(height: 12),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: AdminAdmissionsController.statusOptions
-                          .map(
-                            (status) => Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: ChoiceChip(
-                                label: Text(status == 'ALL' ? 'All' : status),
-                                selected:
-                                    controller.selectedStatus.value == status,
-                                onSelected: (_) =>
-                                    controller.changeStatusFilter(status),
-                              ),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _SummaryChip(
-                        label: 'Applications',
-                        value: '${controller.totalItems.value}',
-                      ),
-                      _SummaryChip(
-                        label: 'Classes',
-                        value: '${controller.classOptions.length}',
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+            RefreshIndicator(
+              onRefresh: controller.loadInitialData,
+              child: _buildApplicationsTab(context),
             ),
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: controller.loadInitialData,
-                child: controller.applications.isEmpty
-                    ? ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                        children: const [
-                          _EmptyState(
-                            title: 'No admissions found',
-                            message:
-                                'New applications will appear here once users start submitting real records.',
-                          ),
-                        ],
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                        itemCount: controller.applications.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index == controller.applications.length) {
-                            return _PaginationBar(
-                              page: controller.page.value,
-                              totalPages: controller.totalPages.value,
-                              onPrevious: controller.page.value > 1
-                                  ? () => controller.loadApplications(
-                                      nextPage: controller.page.value - 1,
-                                    )
-                                  : null,
-                              onNext:
-                                  controller.page.value <
-                                      controller.totalPages.value
-                                  ? () => controller.loadApplications(
-                                      nextPage: controller.page.value + 1,
-                                    )
-                                  : null,
-                            );
-                          }
-                          final item = controller.applications[index];
-                          return _AdmissionCard(
-                            item: item,
-                            controller: controller,
-                          );
-                        },
-                      ),
-              ),
+            RefreshIndicator(
+              onRefresh: controller.loadInitialData,
+              child: _buildWaitingListTab(context),
+            ),
+            RefreshIndicator(
+              onRefresh: controller.loadInitialData,
+              child: _buildFeesTab(context),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildApplicationsTab(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Column(
+      children: [
+        Obx(() => Container(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: AdminAdmissionsController.statusOptions.map((status) {
+                    final isSelected = controller.selectedStatus.value == status;
+                    final label = switch (status) {
+                      'ALL' => 'All',
+                      'UNDER_REVIEW' => 'Pending',
+                      'APPROVED' => 'Approved',
+                      'REJECTED' => 'Rejected',
+                      'WAITING' => 'Waiting',
+                      _ => status,
+                    };
+
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: Text(label),
+                        selected: isSelected,
+                        onSelected: (bool selected) {
+                          if (selected) {
+                            controller.changeStatusFilter(status);
+                          }
+                        },
+                        selectedColor: AppColors.primary,
+                        showCheckmark: false,
+                        labelStyle: TextStyle(
+                          color: isSelected ? Colors.white : (isDark ? Colors.white70 : Colors.black),
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            )),
+        Expanded(
+          child: Obx(() {
+            if (controller.isLoading.value && controller.applications.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (controller.errorMessage.value.isNotEmpty && controller.applications.isEmpty) {
+              return _buildErrorState(context);
+            }
+            return _buildApplicationList(context, controller.applications);
+          }),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWaitingListTab(BuildContext context) {
+    return Obx(() {
+      final waitingList = controller.applications
+          .where((app) => app.status == 'WAITING')
+          .toList();
+
+      if (controller.isLoading.value && controller.applications.isEmpty) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      if (waitingList.isEmpty) {
+        return const _EmptyState(
+          title: 'No one in waiting list',
+          message: 'Students put on "Wait" status will appear here.',
         );
-      }),
+      }
+
+      return _buildApplicationList(context, waitingList);
+    });
+  }
+
+  Widget _buildApplicationList(BuildContext context, List<AdminAdmissionApplication> list) {
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+      itemCount: list.length,
+      itemBuilder: (context, index) {
+        return _AdmissionCard(item: list[index], controller: controller);
+      },
+    );
+  }
+
+  Widget _buildFeesTab(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Admission Fees Management',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Set and manage the fees required for new admission applications.',
+            style: TextStyle(color: Colors.grey),
+          ),
+          const SizedBox(height: 24),
+          Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Current Admission Fee', style: TextStyle(fontSize: 14, color: Colors.grey)),
+                          SizedBox(height: 4),
+                          Text('General Admission', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      Obx(() => Text(
+                            '₹ ${controller.currentAdmissionFee.value}',
+                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.primary),
+                          )),
+                    ],
+                  ),
+                  const Divider(height: 40),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: FilledButton.icon(
+                      onPressed: controller.openSetFeesDialog,
+                      icon: const Icon(Icons.edit_rounded, size: 20),
+                      label: const Text('Update Fees'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Recent Settings',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          _buildFeeHistoryItem('Updated by Admin', 'Today', '₹ 5000'),
+          _buildFeeHistoryItem('Session 2024-25 Init', '15 Apr 2024', '₹ 4500'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeeHistoryItem(String title, String date, String amount) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Get.isDarkMode ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text(date, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            ],
+          ),
+          Text(amount, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              controller.errorMessage.value,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            FilledButton(
+              onPressed: controller.loadInitialData,
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -175,140 +271,180 @@ class _AdmissionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
+    return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
           color: isDark ? AppColors.borderDark : AppColors.borderLight,
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+      child: InkWell(
+        onTap: () => controller.openDetails(item),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.fullName,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: isDark
-                            ? AppColors.textDark
-                            : AppColors.textLight,
-                      ),
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 24,
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                    child: Text(
+                      item.firstName.isNotEmpty ? item.firstName[0].toUpperCase() : '?',
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      item.applicationNo.isEmpty
-                          ? item.classLabel
-                          : item.applicationNo,
-                      style: TextStyle(
-                        color: isDark
-                            ? AppColors.textSecondaryDark
-                            : AppColors.textSecondaryLight,
-                      ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.fullName,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? AppColors.textDark : AppColors.textLight,
+                          ),
+                        ),
+                        Text(
+                          item.applicationNo.isEmpty ? 'Pending App No' : item.applicationNo,
+                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  _StatusPill(label: item.status),
+                ],
               ),
-              _StatusPill(label: item.status),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 12,
-            runSpacing: 8,
-            children: [
-              _MetaText(label: 'Class', value: item.classLabel),
-              _MetaText(label: 'Documents', value: '${item.documentsCount}'),
-              _MetaText(
-                label: 'Fee',
-                value: item.admissionFeePaid ? 'Paid' : 'Pending',
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _MetaInfo(icon: Icons.school_rounded, label: item.classLabel),
+                  _MetaInfo(icon: Icons.calendar_today_rounded, label: _shortDate(item.createdAt)),
+                ],
               ),
-              _MetaText(label: 'Created', value: _shortDate(item.createdAt)),
-              if (item.registrationNo.isNotEmpty)
-                _MetaText(label: 'Reg No', value: item.registrationNo),
-            ],
-          ),
-          if (item.email.isNotEmpty || item.phone.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            Text(
-              [
-                item.email,
-                item.phone,
-              ].where((value) => value.trim().isNotEmpty).join(' | '),
-              style: TextStyle(
-                color: isDark
-                    ? AppColors.textSecondaryDark
-                    : AppColors.textSecondaryLight,
-              ),
-            ),
-          ],
-          const SizedBox(height: 14),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              OutlinedButton(
-                onPressed: () => controller.openDetails(item),
-                child: const Text('View'),
-              ),
-              OutlinedButton(
-                onPressed: () => controller.addDocument(item),
-                child: const Text('Add Document'),
-              ),
-              if (item.canReview) ...[
-                OutlinedButton(
-                  onPressed: () =>
-                      controller.reviewApplication(item, 'REJECTED'),
-                  child: const Text('Reject'),
-                ),
-                FilledButton(
-                  onPressed: () =>
-                      controller.reviewApplication(item, 'APPROVED'),
-                  child: const Text('Approve'),
+              if (item.registrationNo.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                _MetaInfo(
+                  icon: Icons.badge_rounded,
+                  label: 'Reg No: ${item.registrationNo}',
+                  color: AppColors.primary,
                 ),
               ],
-              if (item.canOnboard)
-                FilledButton.tonal(
-                  onPressed: () => controller.onboardApplication(item),
-                  child: const Text('Onboard'),
+              const SizedBox(height: 16),
+              Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => controller.openDetails(item),
+                      icon: const Icon(Icons.visibility_rounded, size: 18),
+                      label: const Text('View Details'),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton.icon(
+                      onPressed: () => controller.addDocument(item),
+                      icon: const Icon(Icons.cloud_upload_rounded, size: 18),
+                      label: const Text('Upload Document'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        backgroundColor: AppColors.primary.withValues(alpha: 0.05),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if (item.canReview || item.canOnboard) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    if (item.canReview)
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: () => controller.reviewApplication(item, 'APPROVED'),
+                          icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
+                          label: const Text('Approve'),
+                          style: FilledButton.styleFrom(backgroundColor: Colors.green),
+                        ),
+                      ),
+                    if (item.canOnboard)
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: () => controller.onboardApplication(item),
+                          icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
+                          label: const Text('Onboard'),
+                        ),
+                      ),
+                    if (item.canReview) ...[
+                      const SizedBox(width: 8),
+                      PopupMenuButton<String>(
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(value: 'REJECTED', child: Text('Reject')),
+                          const PopupMenuItem(value: 'WAITING', child: Text('Move to Waitlist')),
+                          const PopupMenuDivider(),
+                          const PopupMenuItem(
+                            value: 'DELETE',
+                            child: Text('Delete Application', style: TextStyle(color: Colors.red)),
+                          ),
+                        ],
+                        onSelected: (value) {
+                          if (value == 'DELETE') {
+                            controller.deleteApplication(item);
+                          } else {
+                            controller.reviewApplication(item, value);
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(Icons.more_vert, color: AppColors.primary, size: 20),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
+              ],
             ],
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
-class _MetaText extends StatelessWidget {
-  const _MetaText({required this.label, required this.value});
-
+class _MetaInfo extends StatelessWidget {
+  const _MetaInfo({required this.icon, required this.label, this.color});
+  final IconData icon;
   final String label;
-  final String value;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
-    return RichText(
-      text: TextSpan(
-        style: DefaultTextStyle.of(context).style,
-        children: [
-          TextSpan(
-            text: '$label: ',
-            style: const TextStyle(fontWeight: FontWeight.w700),
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: color ?? Colors.grey),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: color ?? Colors.grey,
+            fontWeight: color != null ? FontWeight.bold : FontWeight.normal,
           ),
-          TextSpan(text: value),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -324,109 +460,18 @@ class _StatusPill extends StatelessWidget {
       'APPROVED' => Colors.green,
       'REJECTED' => Colors.red,
       'ONBOARDED' => Colors.blue,
+      'WAITING' => Colors.orange,
       _ => Colors.orange,
     };
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-  }
-}
-
-class _PaginationBar extends StatelessWidget {
-  const _PaginationBar({
-    required this.page,
-    required this.totalPages,
-    required this.onPrevious,
-    required this.onNext,
-  });
-
-  final int page;
-  final int totalPages;
-  final VoidCallback? onPrevious;
-  final VoidCallback? onNext;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth < 360) {
-            return Column(
-              children: [
-                Text('Page $page of $totalPages'),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  alignment: WrapAlignment.center,
-                  children: [
-                    OutlinedButton(
-                      onPressed: onPrevious,
-                      child: const Text('Previous'),
-                    ),
-                    OutlinedButton(
-                      onPressed: onNext,
-                      child: const Text('Next'),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          }
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              OutlinedButton(
-                onPressed: onPrevious,
-                child: const Text('Previous'),
-              ),
-              Text('Page $page of $totalPages'),
-              OutlinedButton(onPressed: onNext, child: const Text('Next')),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _SummaryChip extends StatelessWidget {
-  const _SummaryChip({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
-        ),
-      ),
-      child: Text(
-        '$label: $value',
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          color: isDark ? AppColors.textDark : AppColors.textLight,
-        ),
+        label == 'UNDER_REVIEW' ? 'PENDING' : label,
+        style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -441,43 +486,24 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
-        ),
-      ),
+    return Center(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.inbox_rounded,
-            size: 36,
-            color: isDark
-                ? AppColors.textSecondaryDark
-                : AppColors.textSecondaryLight,
-          ),
-          const SizedBox(height: 12),
+          Icon(Icons.hourglass_empty_rounded, size: 64, color: Colors.grey.withValues(alpha: 0.3)),
+          const SizedBox(height: 16),
           Text(
             title,
-            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: isDark ? AppColors.textDark : AppColors.textLight,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white70 : Colors.black54,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             message,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: isDark
-                  ? AppColors.textSecondaryDark
-                  : AppColors.textSecondaryLight,
-            ),
+            style: const TextStyle(color: Colors.grey),
           ),
         ],
       ),

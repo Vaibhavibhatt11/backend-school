@@ -23,11 +23,6 @@ class AdminStudentsView extends GetView<AdminStudentsController> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: controller.openCreateDialog,
-        icon: const Icon(Icons.person_add_alt_1_rounded),
-        label: const Text('Add Student'),
-      ),
       body: Obx(() {
         if (controller.isLoading.value && controller.students.isEmpty) {
           return const Center(child: CircularProgressIndicator());
@@ -54,148 +49,30 @@ class AdminStudentsView extends GetView<AdminStudentsController> {
             ),
           );
         }
-        final classFilterItems = <String>[
-          'ALL_CLASSES',
-          ...controller.classOptions.map((item) => item.label),
-        ];
-        return Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Column(
-                children: [
-                  TextField(
-                    controller: controller.searchController,
-                    textInputAction: TextInputAction.search,
-                    decoration: InputDecoration(
-                      hintText: 'Search by student name or admission number',
-                      prefixIcon: const Icon(Icons.search_rounded),
-                      suffixIcon: IconButton(
-                        onPressed: () =>
-                            controller.search(controller.searchController.text),
-                        icon: const Icon(Icons.arrow_forward_rounded),
-                      ),
+        return RefreshIndicator(
+          onRefresh: controller.loadInitialData,
+          child: controller.students.isEmpty
+              ? ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                  children: const [
+                    _EmptyState(
+                      title: 'No students found',
+                      message: 'Student records will appear here.',
                     ),
-                    onSubmitted: controller.search,
-                  ),
-                  const SizedBox(height: 12),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: AdminStudentsController.statusOptions
-                          .map(
-                            (status) => Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: ChoiceChip(
-                                label: Text(status == 'ALL' ? 'All' : status),
-                                selected:
-                                    controller.selectedStatus.value == status,
-                                onSelected: (_) =>
-                                    controller.changeStatusFilter(status),
-                              ),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: isDark ? AppColors.surfaceDark : Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: isDark
-                            ? AppColors.borderDark
-                            : AppColors.borderLight,
-                      ),
-                    ),
-                    child: DropdownButton<String>(
-                      value: controller.selectedClassFilter.value,
-                      isExpanded: true,
-                      underline: const SizedBox.shrink(),
-                      items: classFilterItems
-                          .map(
-                            (item) => DropdownMenuItem<String>(
-                              value: item,
-                              child: Text(
-                                item == 'ALL_CLASSES' ? 'All Classes' : item,
-                              ),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          controller.changeClassFilter(value);
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _SummaryChip(
-                        label: 'Students',
-                        value: '${controller.totalItems.value}',
-                      ),
-                      _SummaryChip(
-                        label: 'Classes',
-                        value: '${controller.classOptions.length}',
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: controller.loadInitialData,
-                child: controller.students.isEmpty
-                    ? ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                        children: const [
-                          _EmptyState(
-                            title: 'No students found',
-                            message:
-                                'Create real student records and they will appear here with live actions.',
-                          ),
-                        ],
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                        itemCount: controller.students.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index == controller.students.length) {
-                            return _PaginationBar(
-                              page: controller.page.value,
-                              totalPages: controller.totalPages.value,
-                              onPrevious: controller.page.value > 1
-                                  ? () => controller.loadStudents(
-                                      nextPage: controller.page.value - 1,
-                                    )
-                                  : null,
-                              onNext:
-                                  controller.page.value <
-                                      controller.totalPages.value
-                                  ? () => controller.loadStudents(
-                                      nextPage: controller.page.value + 1,
-                                    )
-                                  : null,
-                            );
-                          }
-                          final item = controller.students[index];
-                          return _StudentCard(
-                            item: item,
-                            controller: controller,
-                          );
-                        },
-                      ),
-              ),
-            ),
-          ],
+                  ],
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                  itemCount: controller.students.length,
+                  itemBuilder: (context, index) {
+                    final item = controller.students[index];
+                    return _StudentCard(
+                      item: item,
+                      controller: controller,
+                    );
+                  },
+                ),
         );
       }),
     );
@@ -211,23 +88,43 @@ class _StudentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final statusColor = item.status == 'ACTIVE' ? Colors.green : Colors.red;
-    return Container(
+    return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
           color: isDark ? AppColors.borderDark : AppColors.borderLight,
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: InkWell(
+        onTap: () => controller.openDetails(item),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
             children: [
+              Hero(
+                tag: 'student_avatar_${item.id}',
+                child: CircleAvatar(
+                  radius: 28,
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                  backgroundImage: item.profilePicUrl != null
+                      ? NetworkImage(item.profilePicUrl!)
+                      : null,
+                  child: item.profilePicUrl == null
+                      ? Text(
+                          item.fullName.isNotEmpty ? item.fullName[0].toUpperCase() : '?',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        )
+                      : null,
+                ),
+              ),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,92 +133,28 @@ class _StudentCard extends StatelessWidget {
                       item.fullName,
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: isDark
-                            ? AppColors.textDark
-                            : AppColors.textLight,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? AppColors.textDark : AppColors.textLight,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      item.admissionNo,
+                      '${item.className} ${item.section.isNotEmpty ? "- ${item.section}" : ""}',
                       style: TextStyle(
-                        color: isDark
-                            ? AppColors.textSecondaryDark
-                            : AppColors.textSecondaryLight,
+                        fontSize: 12,
+                        color: isDark ? Colors.white60 : Colors.black54,
                       ),
                     ),
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  item.status,
-                  style: TextStyle(
-                    color: statusColor,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: isDark ? Colors.white24 : Colors.black12,
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 12,
-            runSpacing: 8,
-            children: [
-              _StudentMeta(label: 'Class', value: item.classLabel),
-              if (item.rollNo != null)
-                _StudentMeta(label: 'Roll No', value: '${item.rollNo}'),
-              if (item.guardianPhone.isNotEmpty)
-                _StudentMeta(label: 'Guardian', value: item.guardianPhone),
-              if (item.gender.isNotEmpty)
-                _StudentMeta(label: 'Gender', value: item.gender),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              OutlinedButton(
-                onPressed: () => controller.openDetails(item),
-                child: const Text('View'),
-              ),
-              OutlinedButton(
-                onPressed: () => controller.openCreateDialog(existing: item),
-                child: const Text('Edit'),
-              ),
-              OutlinedButton(
-                onPressed: () => controller.addDocument(item),
-                child: const Text('Add Document'),
-              ),
-              OutlinedButton(
-                onPressed: () => controller.moveClass(item),
-                child: const Text('Move Class'),
-              ),
-              OutlinedButton(
-                onPressed: () => controller.toggleStatus(item),
-                child: Text(
-                  item.status == 'ACTIVE' ? 'Deactivate' : 'Activate',
-                ),
-              ),
-              FilledButton.tonal(
-                onPressed: () => controller.deleteStudent(item),
-                child: const Text('Delete'),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -345,65 +178,6 @@ class _StudentMeta extends StatelessWidget {
           ),
           TextSpan(text: value),
         ],
-      ),
-    );
-  }
-}
-
-class _PaginationBar extends StatelessWidget {
-  const _PaginationBar({
-    required this.page,
-    required this.totalPages,
-    required this.onPrevious,
-    required this.onNext,
-  });
-
-  final int page;
-  final int totalPages;
-  final VoidCallback? onPrevious;
-  final VoidCallback? onNext;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth < 360) {
-            return Column(
-              children: [
-                Text('Page $page of $totalPages'),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  alignment: WrapAlignment.center,
-                  children: [
-                    OutlinedButton(
-                      onPressed: onPrevious,
-                      child: const Text('Previous'),
-                    ),
-                    OutlinedButton(
-                      onPressed: onNext,
-                      child: const Text('Next'),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          }
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              OutlinedButton(
-                onPressed: onPrevious,
-                child: const Text('Previous'),
-              ),
-              Text('Page $page of $totalPages'),
-              OutlinedButton(onPressed: onNext, child: const Text('Next')),
-            ],
-          );
-        },
       ),
     );
   }

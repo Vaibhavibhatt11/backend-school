@@ -59,6 +59,7 @@ abstract class AppRoutes {
   static const ADMIN_SETTINGS = '/admin-settings';
   static const ADMIN_ADMISSIONS = '/admin-admissions';
   static const ADMIN_STUDENTS = '/admin-students';
+  static const ADMIN_STAFF = '/admin-staff';
   static const ADMIN_PEOPLE = '/admin-people';
   static const ADMIN_ACADEMICS = '/admin-academics';
   static const ADMIN_SCHEDULE = '/admin-schedule';

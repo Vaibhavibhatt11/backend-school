@@ -29,6 +29,7 @@ class AdminDashboardController extends GetxController {
   final feePending = 0.0.obs;
   final feeVsLastWeekPct = 0.0.obs;
   final attendanceTrend = <double>[0, 0, 0, 0, 0, 0, 0].obs;
+
   /// Student attendance % (today / overview), not teacher presence.
   final studentAttendancePct = 0.0.obs;
   bool _isNavigating = false;
@@ -46,106 +47,97 @@ class AdminDashboardController extends GetxController {
     isLoading.value = true;
     dashboardError.value = null;
     try {
-      final dashboardData = await _tryLoad(_adminService.getSchoolAdminDashboard());
+      final dashboardData = await _tryLoad(
+        _adminService.getSchoolAdminDashboard(),
+      );
       final profileData = await _tryLoad(_adminService.getProfileMe());
-      final approvalsData = await _tryLoad(_adminService.getPendingApprovalsSummary());
+      final approvalsData = await _tryLoad(
+        _adminService.getPendingApprovalsSummary(),
+      );
       final feeSnapshotData = await _tryLoad(_adminService.getFeeSnapshot());
-      final attendanceTrendData = await _tryLoad(_adminService.getAttendanceTrend(days: 7));
-      final attendanceOverviewData = await _tryLoad(_adminService.getAttendanceOverview());
+      final attendanceTrendData = await _tryLoad(
+        _adminService.getAttendanceTrend(days: 7),
+      );
+      final attendanceOverviewData = await _tryLoad(
+        _adminService.getAttendanceOverview(),
+      );
 
-      final profile = profileData?['profile'] as Map<String, dynamic>? ?? const <String, dynamic>{};
+      final profile =
+          profileData?['profile'] as Map<String, dynamic>? ??
+          const <String, dynamic>{};
       adminName.value = profile['fullName']?.toString() ?? 'Admin';
 
-      final ui = dashboardData?['ui'] as Map<String, dynamic>? ?? const <String, dynamic>{};
+      final ui =
+          dashboardData?['ui'] as Map<String, dynamic>? ??
+          const <String, dynamic>{};
       final overview = attendanceOverviewData ?? const <String, dynamic>{};
       final feeSnapshot = feeSnapshotData ?? const <String, dynamic>{};
       final approvals = approvalsData ?? const <String, dynamic>{};
 
       totalStudents.value =
-          _firstInt(
-            [
-              ui['studentsTotal'],
-              dashboardData?['students'],
-              overview['studentsTotal'],
-              overview['totalStudents'],
-            ],
-          ) ??
+          _firstInt([
+            ui['studentsTotal'],
+            dashboardData?['students'],
+            overview['studentsTotal'],
+            overview['totalStudents'],
+          ]) ??
           0;
 
       teacherPresent.value =
-          _firstInt(
-            [
-              ui['teacherPresent'],
-              overview['teacherPresent'],
-              overview['presentTeachers'],
-            ],
-          ) ??
+          _firstInt([
+            ui['teacherPresent'],
+            overview['teacherPresent'],
+            overview['presentTeachers'],
+          ]) ??
           0;
       teacherTotal.value =
-          _firstInt(
-            [
-              ui['teacherTotal'],
-              overview['teacherTotal'],
-              overview['totalTeachers'],
-            ],
-          ) ??
+          _firstInt([
+            ui['teacherTotal'],
+            overview['teacherTotal'],
+            overview['totalTeachers'],
+          ]) ??
           0;
       teacherPresence.value =
-          _firstDouble(
-            [
-              ui['teacherPresence'],
-              overview['teacherPresence'],
-              if (teacherTotal.value > 0)
-                (teacherPresent.value / teacherTotal.value) * 100,
-            ],
-          ) ??
+          _firstDouble([
+            ui['teacherPresence'],
+            overview['teacherPresence'],
+            if (teacherTotal.value > 0)
+              (teacherPresent.value / teacherTotal.value) * 100,
+          ]) ??
           0;
       pendingApprovals.value =
-          _firstInt(
-            [
-              ui['pendingApprovals'],
-              approvals['totalPending'],
-              (approvals['topItems'] as List?)?.length,
-            ],
-          ) ??
+          _firstInt([
+            ui['pendingApprovals'],
+            approvals['totalPending'],
+            (approvals['topItems'] as List?)?.length,
+          ]) ??
           0;
       feeToday.value =
-          _firstDouble(
-            [
-              ui['feeToday'],
-              feeSnapshot['todayCollected'],
-              feeSnapshot['thisWeekCollected'],
-            ],
-          ) ??
+          _firstDouble([
+            ui['feeToday'],
+            feeSnapshot['todayCollected'],
+            feeSnapshot['thisWeekCollected'],
+          ]) ??
           0;
       feePending.value =
-          _firstDouble(
-            [
-              ui['feePending'],
-              feeSnapshot['pendingAmount'],
-            ],
-          ) ??
-          0;
+          _firstDouble([ui['feePending'], feeSnapshot['pendingAmount']]) ?? 0;
       feeVsLastWeekPct.value =
-          _firstDouble(
-            [
-              ui['feeVsLastWeekPct'],
-              feeSnapshot['vsLastWeekPct'],
-            ],
-          ) ??
+          _firstDouble([
+            ui['feeVsLastWeekPct'],
+            feeSnapshot['vsLastWeekPct'],
+          ]) ??
           0;
 
       final trendRows = _extractTrendRows(ui, attendanceTrendData);
       final trend = trendRows
           .map(
-            (row) => _firstDouble(
-                  [
-                    row['presentPct'],
-                    row['attendancePct'],
-                    row['studentAttendancePct'],
-                    row['value'],
-                  ],
-                ) ??
+            (row) =>
+                _firstDouble([
+                  row['presentPct'],
+                  row['attendancePct'],
+                  row['studentAttendancePct'],
+                  row['value'],
+                ]) ??
                 0,
           )
           .toList();
@@ -154,15 +146,13 @@ class AdminDashboardController extends GetxController {
       }
       attendanceTrend.assignAll(trend.take(7).toList());
       studentAttendancePct.value =
-          _firstDouble(
-            [
-              ui['studentAttendancePct'],
-              ui['studentAttendance'],
-              overview['studentAttendancePct'],
-              overview['attendancePct'],
-              if (attendanceTrend.isNotEmpty) attendanceTrend.last,
-            ],
-          ) ??
+          _firstDouble([
+            ui['studentAttendancePct'],
+            ui['studentAttendance'],
+            overview['studentAttendancePct'],
+            overview['attendancePct'],
+            if (attendanceTrend.isNotEmpty) attendanceTrend.last,
+          ]) ??
           0;
 
       final hasAnyData =
@@ -238,7 +228,8 @@ class AdminDashboardController extends GetxController {
           .map((row) => Map<String, dynamic>.from(row))
           .toList();
     }
-    final fallback = trendData?['trend'] ?? trendData?['items'] ?? trendData?['rows'];
+    final fallback =
+        trendData?['trend'] ?? trendData?['items'] ?? trendData?['rows'];
     if (fallback is List) {
       return fallback
           .whereType<Map>()
@@ -272,7 +263,7 @@ class AdminDashboardController extends GetxController {
 
   void onQuickActionTap(String action) {
     if (action == 'New Admission') {
-      _goToAdminTab(1);
+      _safeToNamed(AppRoutes.ADMIN_ADMISSIONS);
       return;
     }
     if (action == 'Broadcast') {

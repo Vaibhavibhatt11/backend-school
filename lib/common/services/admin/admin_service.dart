@@ -409,6 +409,78 @@ class AdminService {
     final res = await _apiClient.dio.delete(ApiEndpoints.schoolSubjectById(id));
     return extractApiData(res.data, context: 'delete subject');
   }
+  // --- Academic Features (Curriculum, Syllabus, Lesson Plans) ---
+
+  Future<Map<String, dynamic>> getStudyMaterials({
+    int page = 1,
+    int limit = 50,
+    String? classId,
+    String? subjectId,
+  }) async {
+    final query = <String, dynamic>{
+      'page': page,
+      'limit': limit,
+      if (classId != null) 'classId': classId,
+      if (subjectId != null) 'subjectId': subjectId,
+    };
+    final res = await _apiClient.get(ApiEndpoints.schoolStudyMaterials, query: query);
+    return extractApiData(res.data, context: 'study materials');
+  }
+
+  Future<Map<String, dynamic>> uploadStudyMaterial(Map<String, dynamic> payload) async {
+    final res = await _apiClient.post(ApiEndpoints.schoolStudyMaterials, data: payload);
+    return extractApiData(res.data, context: 'upload study material');
+  }
+
+  Future<Map<String, dynamic>> getSyllabus({String? classId, String? subjectId}) async {
+    final res = await _apiClient.get('/school/academics/syllabus', query: {
+      if (classId != null) 'classId': classId,
+      if (subjectId != null) 'subjectId': subjectId,
+    });
+    return extractApiData(res.data, context: 'syllabus');
+  }
+
+  Future<Map<String, dynamic>> getLessonPlans({String? classId, String? subjectId}
+  Future<Map<String, dynamic>> createSyllabus(Map<String, dynamic> payload) async {
+    final res = await _apiClient.post('/school/academics/syllabus', data: payload);
+    return extractApiData(res.data, context: 'create syllabus');
+  }
+
+  Future<Map<String, dynamic>> updateSyllabus(String id, Map<String, dynamic> payload) async {
+    final res = await _apiClient.put('/school/academics/syllabus/$id', data: payload);
+    return extractApiData(res.data, context: 'update syllabus');
+  }
+
+  Future<Map<String, dynamic>> deleteSyllabus(String id) async {
+    final res = await _apiClient.dio.delete('/school/academics/syllabus/$id');
+    return extractApiData(res.data, context: 'delete syllabus');
+  }
+
+  Future<Map<String, dynamic>> createLessonPlan(Map<String, dynamic> payload) async {
+    final res = await _apiClient.post('/school/academics/lesson-plans', data: payload);
+    return extractApiData(res.data, context: 'create lesson plan');
+  }
+
+  Future<Map<String, dynamic>> updateLessonPlan(String id, Map<String, dynamic> payload) async {
+    final res = await _apiClient.put('/school/academics/lesson-plans/$id', data: payload);
+    return extractApiData(res.data, context: 'update lesson plan');
+  }
+
+  Future<Map<String, dynamic>> deleteLessonPlan(String id) async {
+    final res = await _apiClient.dio.delete('/school/academics/lesson-plans/$id');
+    return extractApiData(res.data, context: 'delete lesson plan');
+  }
+
+  Future<Map<String, dynamic>> deleteStudyMaterial(String id) async {
+    final res = await _apiClient.dio.delete('${ApiEndpoints.schoolStudyMaterials}/$id');
+    return extractApiData(res.data, context: 'delete study material');
+  }) async {
+    final res = await _apiClient.get('/school/academics/lesson-plans', query: {
+      if (classId != null) 'classId': classId,
+      if (subjectId != null) 'subjectId': subjectId,
+    });
+    return extractApiData(res.data, context: 'lesson plans');
+  }
 
   Future<Map<String, dynamic>> getAttendanceReport({
     String? dateFrom,
@@ -1282,5 +1354,29 @@ class AdminService {
       ApiEndpoints.schoolEventGalleryImage(id, imageId),
     );
     return extractApiData(res.data, context: 'delete event gallery image');
+  }
+
+  Future<Map<String, dynamic>> deleteAdmissionApplication(String id) async {
+    final res = await _apiClient.dio.delete(
+      ApiEndpoints.schoolAdmissionApplicationById(id),
+    );
+    return extractApiData(res.data, context: 'delete admission application');
+  }
+
+  Future<Map<String, dynamic>> updateAdmissionFees(double fee) async {
+    // Strategy: Try specific endpoint, then PATCH settings, then PUT settings
+    try {
+      final res = await _apiClient.post(
+        '/school/admissions/fees',
+        data: {'amount': fee, 'admissionFee': fee},
+      );
+      return extractApiData(res.data, context: 'update admission fees');
+    } catch (_) {
+      try {
+        return await patchSchoolSettings({'admissionFee': fee, 'admission_fee': fee});
+      } catch (e) {
+        return await updateSchoolSettings({'admissionFee': fee, 'admission_fee': fee});
+      }
+    }
   }
 }

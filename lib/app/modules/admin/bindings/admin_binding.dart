@@ -16,6 +16,7 @@ import '../controllers/admin_schedule_controller.dart';
 import '../controllers/admin_settings_controller.dart';
 import '../controllers/admin_shell_controller.dart';
 import '../controllers/admin_students_controller.dart';
+import '../controllers/admin_staff_controller.dart';
 import 'package:erp_frontend/common/services/admin/admin_service.dart';
 
 class AdminBinding extends Bindings {
@@ -87,6 +88,12 @@ class AdminBinding extends Bindings {
     if (!Get.isRegistered<AdminStudentsController>()) {
       Get.lazyPut<AdminStudentsController>(
         () => AdminStudentsController(Get.find<AdminService>()),
+        fenix: true,
+      );
+    }
+    if (!Get.isRegistered<AdminStaffController>()) {
+      Get.lazyPut<AdminStaffController>(
+        () => AdminStaffController(Get.find<AdminService>()),
         fenix: true,
       );
     }

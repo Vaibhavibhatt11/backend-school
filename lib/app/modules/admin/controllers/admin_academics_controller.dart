@@ -86,6 +86,94 @@ class AdminSubjectRecord {
   }
 }
 
+class AdminSyllabusRecord {
+  const AdminSyllabusRecord({
+    required this.id,
+    required this.classLabel,
+    required this.subjectName,
+    required this.topic,
+    required this.progress,
+    required this.status,
+  });
+
+  final String id;
+  final String classLabel;
+  final String subjectName;
+  final String topic;
+  final double progress;
+  final String status;
+
+  factory AdminSyllabusRecord.fromJson(Map<String, dynamic> json) {
+    final cls = json['class'] as Map<String, dynamic>? ?? {};
+    final sub = json['subject'] as Map<String, dynamic>? ?? {};
+    return AdminSyllabusRecord(
+      id: json['id']?.toString() ?? '',
+      classLabel: '${cls['name'] ?? ''} - ${cls['section'] ?? ''}',
+      subjectName: sub['name']?.toString() ?? '',
+      topic: json['topic']?.toString() ?? '',
+      progress: (json['progress'] as num?)?.toDouble() ?? 0.0,
+      status: json['status']?.toString() ?? 'PENDING',
+    );
+  }
+}
+
+class AdminLessonPlan {
+  const AdminLessonPlan({
+    required this.id,
+    required this.title,
+    required this.subject,
+    required this.date,
+    required this.objective,
+    required this.duration,
+  });
+
+  final String id;
+  final String title;
+  final String subject;
+  final String date;
+  final String objective;
+  final int duration;
+
+  factory AdminLessonPlan.fromJson(Map<String, dynamic> json) {
+    final sub = json['subject'] as Map<String, dynamic>? ?? {};
+    return AdminLessonPlan(
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      subject: sub['name']?.toString() ?? '',
+      date: json['date']?.toString() ?? '',
+      objective: json['objective']?.toString() ?? '',
+      duration: (json['duration'] as num?)?.toInt() ?? 40,
+    );
+  }
+}
+
+class AdminStudyMaterial {
+  const AdminStudyMaterial({
+    required this.id,
+    required this.title,
+    required this.type,
+    required this.url,
+    required this.subject,
+  });
+
+  final String id;
+  final String title;
+  final String type;
+  final String url;
+  final String subject;
+
+  factory AdminStudyMaterial.fromJson(Map<String, dynamic> json) {
+    final sub = json['subject'] as Map<String, dynamic>? ?? {};
+    return AdminStudyMaterial(
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      type: json['type']?.toString() ?? 'PDF',
+      url: json['url']?.toString() ?? '',
+      subject: sub['name']?.toString() ?? '',
+    );
+  }
+}
+
 class AdminAcademicsController extends GetxController {
   AdminAcademicsController(this._adminService);
 
@@ -112,6 +200,12 @@ class AdminAcademicsController extends GetxController {
   final subjectsTotalPages = 1.obs;
   final subjectsTotalItems = 0.obs;
 
+  // New features
+  final syllabuses = <AdminSyllabusRecord>[].obs;
+  final lessonPlans = <AdminLessonPlan>[].obs;
+  final materials = <AdminStudyMaterial>[].obs;
+  final isExtraLoading = false.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -126,7 +220,40 @@ class AdminAcademicsController extends GetxController {
   }
 
   Future<void> loadInitialData() async {
-    await Future.wait([loadClasses(), loadSubjects(), loadStaffOptions()]);
+    await Future.wait([
+      loadClasses(),
+      loadSubjects(),
+      loadStaffOptions(),
+      loadExtraData(),
+    ]);
+  }
+
+  Future<void> loadExtraData() async {
+    isExtraLoading.value = true;
+    try {
+      final results = await Future.wait([
+        _adminService.getSyllabus(),
+        _adminService.getLessonPlans(),
+        _adminService.getStudyMaterials(),
+      ]);
+
+      syllabuses.assignAll((results[0]['items'] as List? ?? [])
+          .whereType<Map>()
+          .map((e) => AdminSyllabusRecord.fromJson(e.cast<String, dynamic>()))
+          .toList());
+      lessonPlans.assignAll((results[1]['items'] as List? ?? [])
+          .whereType<Map>()
+          .map((e) => AdminLessonPlan.fromJson(e.cast<String, dynamic>()))
+          .toList());
+      materials.assignAll((results[2]['items'] as List? ?? [])
+          .whereType<Map>()
+          .map((e) => AdminStudyMaterial.fromJson(e.cast<String, dynamic>()))
+          .toList());
+    } catch (_) {
+      // Fail silently for extras
+    } finally {
+      isExtraLoading.value = false;
+    }
   }
 
   Future<void> loadStaffOptions() async {
@@ -507,6 +634,134 @@ class AdminAcademicsController extends GetxController {
       await _adminService.deleteSubject(item.id);
       AppToast.show('Subject deleted.');
       await loadSubjects(nextPage: subjectsPage.value);
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    }
+  }
+
+  // --- Live Actions for New Modules ---
+
+  Future<void> openSyllabusDialog({AdminSyllabusRecord? existing}) async {
+    final topicCtrl = TextEditingController(text: existing?.topic ?? '');
+    final progressCtrl = TextEditingController(text: existing?.progress.toString() ?? '0');
+    String classId = ''; // Simplified for this demo, usually would be a dropdown
+    String subjectId = '';
+
+    final ok = await Get.dialog<bool>(
+      AlertDialog(
+        title: Text(existing == null ? 'Add Syllabus Progress' : 'Update Syllabus'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: topicCtrl, decoration: const InputDecoration(labelText: 'Topic Name')),
+            const SizedBox(height: 12),
+            TextField(controller: progressCtrl, decoration: const InputDecoration(labelText: 'Progress %'), keyboardType: TextInputType.number),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+        ],
+      ),
+    );
+
+    if (ok == true) {
+      try {
+        final payload = {
+          'topic': topicCtrl.text,
+          'progress': double.tryParse(progressCtrl.text) ?? 0,
+        };
+        if (existing == null) {
+          await _adminService.createSyllabus(payload);
+        } else {
+          await _adminService.updateSyllabus(existing.id, payload);
+        }
+        await loadExtraData();
+        AppToast.show('Syllabus updated.');
+      } catch (e) {
+        AppToast.show(dioOrApiErrorMessage(e));
+      }
+    }
+  }
+
+  Future<void> deleteSyllabus(AdminSyllabusRecord item) async {
+    try {
+      await _adminService.deleteSyllabus(item.id);
+      await loadExtraData();
+      AppToast.show('Syllabus removed.');
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    }
+  }
+
+  Future<void> openLessonPlanDialog({AdminLessonPlan? existing}) async {
+    final titleCtrl = TextEditingController(text: existing?.title ?? '');
+    final ok = await Get.dialog<bool>(
+      AlertDialog(
+        title: Text(existing == null ? 'New Lesson Plan' : 'Edit Lesson Plan'),
+        content: TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: 'Plan Title')),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+        ],
+      ),
+    );
+
+    if (ok == true) {
+      try {
+        if (existing == null) {
+          await _adminService.createLessonPlan({'title': titleCtrl.text});
+        } else {
+          await _adminService.updateLessonPlan(existing.id, {'title': titleCtrl.text});
+        }
+        await loadExtraData();
+        AppToast.show('Lesson plan saved.');
+      } catch (e) {
+        AppToast.show(dioOrApiErrorMessage(e));
+      }
+    }
+  }
+
+  Future<void> deleteLessonPlan(AdminLessonPlan item) async {
+    try {
+      await _adminService.deleteLessonPlan(item.id);
+      await loadExtraData();
+      AppToast.show('Lesson plan deleted.');
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    }
+  }
+
+  Future<void> uploadMaterial() async {
+    // Simplified upload action
+    final titleCtrl = TextEditingController();
+    final ok = await Get.dialog<bool>(
+      AlertDialog(
+        title: const Text('Upload Study Material'),
+        content: TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: 'Material Title')),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Get.back(result: true), child: const Text('Upload')),
+        ],
+      ),
+    );
+
+    if (ok == true) {
+      try {
+        await _adminService.uploadStudyMaterial({'title': titleCtrl.text, 'type': 'PDF', 'url': 'https://example.com/doc.pdf'});
+        await loadExtraData();
+        AppToast.show('Material uploaded.');
+      } catch (e) {
+        AppToast.show(dioOrApiErrorMessage(e));
+      }
+    }
+  }
+
+  Future<void> deleteMaterial(AdminStudyMaterial item) async {
+    try {
+      await _adminService.deleteStudyMaterial(item.id);
+      await loadExtraData();
+      AppToast.show('Material removed.');
     } catch (e) {
       AppToast.show(dioOrApiErrorMessage(e));
     }

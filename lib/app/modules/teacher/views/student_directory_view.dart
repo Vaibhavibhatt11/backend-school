@@ -52,21 +52,6 @@ class StudentDirectoryView extends GetView<StudentDirectoryController> {
               ),
             ),
             const SizedBox(height: 16),
-            // Search bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: TextField(
-                onChanged: (value) => controller.searchQuery.value = value,
-                decoration: InputDecoration(
-                  hintText: 'Search students by name or ID...',
-                  prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
             // Alphabetical index (vertical on right)
             Expanded(
               child: Obx(() {
@@ -86,54 +71,54 @@ class StudentDirectoryView extends GetView<StudentDirectoryController> {
                     Expanded(
                       child: ListView(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
-                        children:
-                            grouped.entries.map((entry) {
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Section Header
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 8,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 32,
-                                          height: 32,
-                                          decoration: BoxDecoration(
-                                            color: AppColors.primary
-                                                .withValues(alpha: 0.1),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              entry.key,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: AppColors.primary,
-                                              ),
-                                            ),
+                        children: grouped.entries.map((entry) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Section Header
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 32,
+                                      height: 32,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          entry.key,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.primary,
                                           ),
                                         ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Divider(
-                                            color: Colors.grey.shade300,
-                                          ),
-                                        ),
-                                      ],
+                                      ),
                                     ),
-                                  ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Divider(
+                                        color: Colors.grey.shade300,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
 
-                                  ...entry.value.map(
-                                    (student) => _buildStudentTile(student),
-                                  ),
+                              ...entry.value.map(
+                                (student) => _buildStudentTile(student),
+                              ),
 
-                                  const SizedBox(height: 12),
-                                ],
-                              );
-                            }).toList(),
+                              const SizedBox(height: 12),
+                            ],
+                          );
+                        }).toList(),
                       ),
                     ),
 
@@ -158,14 +143,14 @@ class StudentDirectoryView extends GetView<StudentDirectoryController> {
                                     fontSize: 12,
                                     fontWeight:
                                         controller.selectedLetter.value ==
-                                                letter
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
+                                            letter
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
                                     color:
                                         controller.selectedLetter.value ==
-                                                letter
-                                            ? AppColors.primary
-                                            : Colors.grey,
+                                            letter
+                                        ? AppColors.primary
+                                        : Colors.grey,
                                   ),
                                 ),
                               ),
@@ -214,11 +199,8 @@ class StudentDirectoryView extends GetView<StudentDirectoryController> {
     }
 
     return GestureDetector(
-      onTap:
-          () => Get.toNamed(
-            AppRoutes.TEACHER_STUDENT_PROFILE,
-            arguments: student,
-          ),
+      onTap: () =>
+          Get.toNamed(AppRoutes.TEACHER_STUDENT_PROFILE, arguments: student),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
@@ -229,9 +211,7 @@ class StudentDirectoryView extends GetView<StudentDirectoryController> {
         ),
         child: Row(
           children: [
-            CircleAvatar(
-              child: const Icon(Icons.person),
-            ),
+            CircleAvatar(child: const Icon(Icons.person)),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -261,10 +241,7 @@ class StudentDirectoryView extends GetView<StudentDirectoryController> {
                   Icon(statusIcon, size: 14, color: statusColor),
                   const SizedBox(width: 4),
                   Text(
-                    latestStatus
-                        .toString()
-                        .split('.')
-                        .last,
+                    latestStatus.toString().split('.').last,
                     style: TextStyle(fontSize: 10, color: statusColor),
                   ),
                 ],

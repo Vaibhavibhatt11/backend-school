@@ -1,7 +1,9 @@
+import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/modules/admin/models/admin_class_option.dart';
 import 'package:erp_frontend/common/services/admin/admin_service.dart';
 import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
+import 'package:erp_frontend/app/modules/admin/views/admin_student_details_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -18,6 +20,7 @@ class AdminStudentRecord {
     required this.status,
     required this.guardianPhone,
     required this.gender,
+    this.profilePicUrl,
   });
 
   final String id;
@@ -31,6 +34,7 @@ class AdminStudentRecord {
   final String status;
   final String guardianPhone;
   final String gender;
+  final String? profilePicUrl;
 
   String get fullName => '$firstName $lastName'.trim();
   String get classLabel =>
@@ -49,6 +53,7 @@ class AdminStudentRecord {
       status: json['status']?.toString() ?? 'ACTIVE',
       guardianPhone: json['guardianPhone']?.toString() ?? '',
       gender: json['gender']?.toString() ?? '',
+      profilePicUrl: json['profilePicUrl']?.toString() ?? json['image']?.toString(),
     );
   }
 }
@@ -129,7 +134,7 @@ class AdminStudentsController extends GetxController {
       );
       final data = await _adminService.getStudents(
         page: nextPage,
-        limit: 20,
+        limit: 15,
         search: searchText.value.trim().isEmpty
             ? null
             : searchText.value.trim(),
@@ -140,9 +145,6 @@ class AdminStudentsController extends GetxController {
             : classOption?.section,
       );
       final rawItems = data['items'];
-      final pagination =
-          data['pagination'] as Map<String, dynamic>? ??
-          const <String, dynamic>{};
       if (rawItems is List) {
         students.assignAll(
           rawItems
@@ -156,10 +158,7 @@ class AdminStudentsController extends GetxController {
       } else {
         students.clear();
       }
-      totalItems.value =
-          (pagination['total'] as num?)?.toInt() ?? students.length;
-      page.value = (pagination['page'] as num?)?.toInt() ?? nextPage;
-      totalPages.value = (pagination['totalPages'] as num?)?.toInt() ?? 1;
+      totalItems.value = students.length;
     } catch (e) {
       errorMessage.value = dioOrApiErrorMessage(e);
       students.clear();
@@ -374,62 +373,19 @@ class AdminStudentsController extends GetxController {
 
   Future<void> openDetails(AdminStudentRecord item) async {
     try {
+      isLoading.value = true;
       final data = await _adminService.getStudentById(item.id);
-      final student =
+      final studentData =
           data['student'] as Map<String, dynamic>? ?? const <String, dynamic>{};
-      final className = student['className']?.toString() ?? item.className;
-      final section = student['section']?.toString() ?? item.section;
-      await Get.dialog<void>(
-        AlertDialog(
-          title: Text(item.fullName),
-          content: SizedBox(
-            width: 500,
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    student['admissionNo']?.toString() ?? item.admissionNo,
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    section.trim().isEmpty
-                        ? 'Class: $className'
-                        : 'Class: $className - $section',
-                  ),
-                  Text('Status: ${student['status'] ?? item.status}'),
-                  if ((student['rollNo']?.toString() ?? '').isNotEmpty)
-                    Text('Roll no: ${student['rollNo']}'),
-                  if ((student['gender']?.toString() ?? item.gender)
-                      .trim()
-                      .isNotEmpty)
-                    Text('Gender: ${student['gender'] ?? item.gender}'),
-                  if ((student['guardianPhone']?.toString() ??
-                          item.guardianPhone)
-                      .trim()
-                      .isNotEmpty)
-                    Text(
-                      'Guardian phone: ${student['guardianPhone'] ?? item.guardianPhone}',
-                    ),
-                  if ((student['dob']?.toString() ?? '').isNotEmpty)
-                    Text('DOB: ${student['dob'].toString().substring(0, 10)}'),
-                  if ((student['createdAt']?.toString() ?? '').isNotEmpty)
-                    Text(
-                      'Created: ${student['createdAt'].toString().substring(0, 10)}',
-                    ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(onPressed: () => Get.back(), child: const Text('Close')),
-          ],
-        ),
-      );
+      
+      Get.to(() => AdminStudentDetailsView(
+            student: item,
+            rawData: studentData,
+          ));
     } catch (e) {
       AppToast.show(dioOrApiErrorMessage(e));
+    } finally {
+      isLoading.value = false;
     }
   }
 

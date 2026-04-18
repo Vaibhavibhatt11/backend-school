@@ -1,7 +1,10 @@
+import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/modules/admin/models/admin_class_option.dart';
 import 'package:erp_frontend/common/services/admin/admin_service.dart';
 import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
+import 'package:erp_frontend/app/modules/admin/views/admin_add_document_view.dart';
+import 'package:erp_frontend/app/modules/admin/views/admin_document_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -21,6 +24,20 @@ class AdminAdmissionApplication {
     required this.documentsCount,
     required this.createdAt,
     required this.admissionFeePaid,
+    this.middleName = '',
+    this.dob = '',
+    this.gender = '',
+    this.fatherName = '',
+    this.motherName = '',
+    this.fatherOccupation = '',
+    this.motherOccupation = '',
+    this.fatherDob = '',
+    this.motherDob = '',
+    this.contact1 = '',
+    this.contact2 = '',
+    this.address = '',
+    this.permanentAddress = '',
+    this.telephone = '',
   });
 
   final String id;
@@ -37,7 +54,23 @@ class AdminAdmissionApplication {
   final String createdAt;
   final bool admissionFeePaid;
 
-  String get fullName => '$firstName $lastName'.trim();
+  // New fields
+  final String middleName;
+  final String dob;
+  final String gender;
+  final String fatherName;
+  final String motherName;
+  final String fatherOccupation;
+  final String motherOccupation;
+  final String fatherDob;
+  final String motherDob;
+  final String contact1;
+  final String contact2;
+  final String address;
+  final String permanentAddress;
+  final String telephone;
+
+  String get fullName => '$firstName $middleName $lastName'.replaceAll(RegExp(r'\s+'), ' ').trim();
   String get classLabel =>
       appliedSection.isEmpty ? appliedClass : '$appliedClass - $appliedSection';
   bool get canReview => status == 'UNDER_REVIEW';
@@ -60,6 +93,20 @@ class AdminAdmissionApplication {
       documentsCount: (countMap['documents'] as num?)?.toInt() ?? 0,
       createdAt: json['createdAt']?.toString() ?? '',
       admissionFeePaid: json['admissionFeePaid'] == true,
+      middleName: json['middleName']?.toString() ?? '',
+      dob: json['dob']?.toString() ?? '',
+      gender: json['gender']?.toString() ?? '',
+      fatherName: json['fatherName']?.toString() ?? '',
+      motherName: json['motherName']?.toString() ?? '',
+      fatherOccupation: json['fatherOccupation']?.toString() ?? '',
+      motherOccupation: json['motherOccupation']?.toString() ?? '',
+      fatherDob: json['fatherDob']?.toString() ?? '',
+      motherDob: json['motherDob']?.toString() ?? '',
+      contact1: json['contact1']?.toString() ?? '',
+      contact2: json['contact2']?.toString() ?? '',
+      address: json['address']?.toString() ?? '',
+      permanentAddress: json['permanentAddress']?.toString() ?? '',
+      telephone: json['telephone']?.toString() ?? '',
     );
   }
 }
@@ -85,14 +132,89 @@ class AdminAdmissionsController extends GetxController {
     'UNDER_REVIEW',
     'APPROVED',
     'REJECTED',
-    'ONBOARDED',
+    'WAITING',
   ];
+
+  final currentAdmissionFee = 0.0.obs;
 
   @override
   void onInit() {
     super.onInit();
     searchController.text = searchText.value;
     loadInitialData();
+  }
+
+  Future<void> openSetFeesDialog() async {
+    final feeController = TextEditingController(text: currentAdmissionFee.value.toString());
+    final confirmed = await Get.dialog<bool>(
+      AlertDialog(
+        title: const Text('Set Admission Fees'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Enter the fee amount to be accepted for new admissions:'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: feeController,
+              decoration: const InputDecoration(
+                labelText: 'Fee Amount',
+                prefixText: '₹ ',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save Fees')),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final val = double.tryParse(feeController.text.trim()) ?? 0.0;
+      try {
+        isLoading.value = true;
+        await _adminService.updateAdmissionFees(val);
+        currentAdmissionFee.value = val;
+        AppToast.show('Admission fee updated and saved.');
+      } catch (e) {
+        AppToast.show('Failed to save fee: ${dioOrApiErrorMessage(e)}');
+      } finally {
+        isLoading.value = false;
+      }
+    }
+  }
+
+  Future<void> deleteApplication(AdminAdmissionApplication item) async {
+    final confirmed = await Get.dialog<bool>(
+      AlertDialog(
+        title: const Text('Delete Application'),
+        content: Text('Are you sure you want to permanently delete the application for ${item.fullName}?'),
+        actions: [
+          TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () => Get.back(result: true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        isLoading.value = true;
+        await _adminService.deleteAdmissionApplication(item.id);
+        AppToast.show('Application deleted successfully.');
+        await loadApplications(nextPage: page.value);
+      } catch (e) {
+        AppToast.show('Failed to delete: ${dioOrApiErrorMessage(e)}');
+      } finally {
+        isLoading.value = false;
+      }
+    }
   }
 
   @override
@@ -102,8 +224,33 @@ class AdminAdmissionsController extends GetxController {
   }
 
   Future<void> loadInitialData() async {
-    await loadClassOptions();
-    await loadApplications();
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+      
+      // Fetch classes, applications, and school settings
+      final results = await Future.wait([
+        loadClassOptions(),
+        loadApplications(),
+        _adminService.getSchoolSettings(),
+      ]);
+
+      // Handle settings data
+      final rawData = results[2] as Map<String, dynamic>;
+      final settings = (rawData['settings'] as Map<String, dynamic>?) ?? rawData;
+      
+      if (settings.containsKey('admissionFee')) {
+        currentAdmissionFee.value = double.tryParse(settings['admissionFee'].toString()) ?? 0.0;
+      } else if (settings.containsKey('admission_fee')) {
+        currentAdmissionFee.value = double.tryParse(settings['admission_fee'].toString()) ?? 0.0;
+      } else if (settings.containsKey('admission_fees')) {
+        currentAdmissionFee.value = double.tryParse(settings['admission_fees'].toString()) ?? 0.0;
+      }
+    } catch (e) {
+      errorMessage.value = dioOrApiErrorMessage(e);
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> loadClassOptions() async {
@@ -183,18 +330,12 @@ class AdminAdmissionsController extends GetxController {
   }
 
   Future<void> openCreateDialog() async {
-    if (classOptions.isEmpty) {
-      AppToast.show('Create classes first, then add admission applications.');
-      return;
-    }
     final firstNameController = TextEditingController();
     final lastNameController = TextEditingController();
     final emailController = TextEditingController();
     final phoneController = TextEditingController();
     final genderController = TextEditingController();
-    AdminClassOption? selectedClass = classOptions.isNotEmpty
-        ? classOptions.first
-        : null;
+    AdminClassOption? selectedClass;
     final ok = await Get.dialog<bool>(
       StatefulBuilder(
         builder: (context, setState) {
@@ -269,29 +410,30 @@ class AdminAdmissionsController extends GetxController {
         },
       ),
     );
-    if (ok != true) return;
-    if (firstNameController.text.trim().isEmpty ||
-        lastNameController.text.trim().isEmpty ||
-        selectedClass == null) {
-      AppToast.show('First name, last name, and class are required.');
-      return;
-    }
-    try {
-      await _adminService.createAdmissionApplication(
-        firstName: firstNameController.text.trim(),
-        lastName: lastNameController.text.trim(),
-        appliedClass: selectedClass!.name,
-        appliedSection: selectedClass!.section.trim().isEmpty
-            ? null
-            : selectedClass!.section,
-        email: emailController.text.trim(),
-        phone: phoneController.text.trim(),
-        gender: genderController.text.trim(),
-      );
-      AppToast.show('Admission application created.');
-      await loadApplications();
-    } catch (e) {
-      AppToast.show(dioOrApiErrorMessage(e));
+    if (ok == true) {
+      if (firstNameController.text.trim().isEmpty ||
+          lastNameController.text.trim().isEmpty ||
+          selectedClass == null) {
+        AppToast.show('First name, last name, and class are required.');
+        return;
+      }
+      try {
+        await _adminService.createAdmissionApplication(
+          firstName: firstNameController.text.trim(),
+          lastName: lastNameController.text.trim(),
+          appliedClass: selectedClass!.name,
+          appliedSection: selectedClass!.section.trim().isEmpty
+              ? null
+              : selectedClass!.section,
+          email: emailController.text.trim(),
+          phone: phoneController.text.trim(),
+          gender: genderController.text.trim(),
+        );
+        AppToast.show('Admission application created.');
+        await loadApplications();
+      } catch (e) {
+        AppToast.show(dioOrApiErrorMessage(e));
+      }
     }
   }
 
@@ -345,133 +487,256 @@ class AdminAdmissionsController extends GetxController {
   }
 
   Future<void> addDocument(AdminAdmissionApplication item) async {
-    final nameController = TextEditingController();
-    final urlController = TextEditingController();
-    final typeController = TextEditingController(text: 'document');
-    final ok = await Get.dialog<bool>(
-      AlertDialog(
-        title: Text('Add Document for ${item.applicationNo}'),
-        content: SizedBox(
-          width: 420,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nameController,
-                  decoration: const InputDecoration(labelText: 'Document name'),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: urlController,
-                  decoration: const InputDecoration(labelText: 'Document URL'),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: typeController,
-                  decoration: const InputDecoration(labelText: 'Type'),
-                ),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Get.back(result: true),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
-    if (ok != true) return;
-    if (nameController.text.trim().isEmpty ||
-        urlController.text.trim().isEmpty) {
-      AppToast.show('Document name and URL are required.');
-      return;
-    }
+    Get.to(() => AdminAddDocumentView(item: item));
+  }
+
+  Future<void> submitDocument({
+    required String id,
+    required String name,
+    required String url,
+    required String type,
+  }) async {
     try {
+      isLoading.value = true;
       await _adminService.addAdmissionApplicationDocument(
-        id: item.id,
-        name: nameController.text.trim(),
-        url: urlController.text.trim(),
-        type: typeController.text.trim(),
+        id: id,
+        name: name,
+        url: url,
+        type: type,
       );
       AppToast.show('Document added.');
+      Get.back(); // Return to previous screen
       await loadApplications(nextPage: page.value);
     } catch (e) {
       AppToast.show(dioOrApiErrorMessage(e));
+    } finally {
+      isLoading.value = false;
     }
   }
 
   Future<void> openDetails(AdminAdmissionApplication item) async {
     try {
       final data = await _adminService.getAdmissionApplicationById(item.id);
-      final documents =
-          (data['documents'] as List<dynamic>? ?? const <dynamic>[])
-              .whereType<Map>()
-              .map((doc) => doc.cast<String, dynamic>())
-              .toList();
-      await Get.dialog<void>(
-        AlertDialog(
-          title: Text(
-            item.applicationNo.isEmpty ? item.fullName : item.applicationNo,
-          ),
-          content: SizedBox(
-            width: 520,
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    item.fullName,
-                    style: const TextStyle(fontWeight: FontWeight.w700),
+      final documents = (data['documents'] as List<dynamic>? ?? const <dynamic>[])
+          .whereType<Map>()
+          .map((doc) => doc.cast<String, dynamic>())
+          .toList();
+
+      final fullItem = AdminAdmissionApplication.fromJson(data);
+      final isDark = Get.isDarkMode;
+
+      await Get.to(() => Scaffold(
+        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        body: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              expandedHeight: 200,
+              pinned: true,
+              flexibleSpace: FlexibleSpaceBar(
+                title: Text(
+                  fullItem.fullName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
                   ),
-                  const SizedBox(height: 8),
-                  Text('Applied class: ${item.classLabel}'),
-                  Text('Status: ${item.status}'),
-                  if (item.email.isNotEmpty) Text('Email: ${item.email}'),
-                  if (item.phone.isNotEmpty) Text('Phone: ${item.phone}'),
-                  if (item.registrationNo.isNotEmpty)
-                    Text('Registration no: ${item.registrationNo}'),
-                  const SizedBox(height: 14),
-                  const Text(
-                    'Documents',
-                    style: TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 8),
-                  if (documents.isEmpty)
-                    const Text('No documents uploaded yet.')
-                  else
-                    ...documents.map(
-                      (doc) => ListTile(
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(doc['name']?.toString() ?? 'Document'),
-                        subtitle: Text(doc['type']?.toString() ?? 'document'),
-                        trailing: TextButton(
-                          onPressed: () =>
-                              _openDocumentUrl(doc['url']?.toString() ?? ''),
-                          child: const Text('Open'),
-                        ),
-                      ),
+                ),
+                background: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [AppColors.primary, AppColors.primaryDark],
                     ),
-                ],
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.person_add_alt_1_rounded,
+                      size: 80,
+                      color: Colors.white.withValues(alpha: 0.2),
+                    ),
+                  ),
+                ),
+              ),
+              actions: [
+                _buildStatusPill(fullItem.status),
+                const SizedBox(width: 16),
+              ],
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildPremiumSection(context: Get.context!, title: 'Admission Info', children: [
+                      _buildPremiumRow(Icons.tag_rounded, 'App No', fullItem.applicationNo.isEmpty ? 'Pending' : fullItem.applicationNo),
+                      _buildPremiumRow(Icons.school_rounded, 'Applied Class', fullItem.classLabel),
+                      if (fullItem.registrationNo.isNotEmpty)
+                        _buildPremiumRow(Icons.badge_rounded, 'Reg No', fullItem.registrationNo, color: AppColors.primary),
+                    ]),
+                    const SizedBox(height: 24),
+                    _buildPremiumSection(context: Get.context!, title: 'Student Details', children: [
+                      _buildPremiumRow(Icons.person_rounded, 'Full Name', fullItem.fullName),
+                      _buildPremiumRow(Icons.email_rounded, 'Email', fullItem.email),
+                      _buildPremiumRow(Icons.phone_rounded, 'Phone', fullItem.phone),
+                      _buildPremiumRow(Icons.wc_rounded, 'Gender', fullItem.gender),
+                      _buildPremiumRow(Icons.cake_rounded, 'Date of Birth', fullItem.dob),
+                    ]),
+                    const SizedBox(height: 24),
+                    _buildPremiumSection(context: Get.context!, title: 'Parent Details', children: [
+                      _buildPremiumRow(Icons.man_rounded, 'Father\'s Name', fullItem.fatherName),
+                      _buildPremiumRow(Icons.woman_rounded, 'Mother\'s Name', fullItem.motherName),
+                      _buildPremiumRow(Icons.work_rounded, 'Father\'s Job', fullItem.fatherOccupation),
+                      _buildPremiumRow(Icons.work_outline_rounded, 'Mother\'s Job', fullItem.motherOccupation),
+                      _buildPremiumRow(Icons.contact_phone_rounded, 'Contact 1', fullItem.contact1),
+                      _buildPremiumRow(Icons.contact_phone_rounded, 'Contact 2', fullItem.contact2),
+                    ]),
+                    const SizedBox(height: 24),
+                    _buildPremiumSection(context: Get.context!, title: 'Address', children: [
+                      _buildPremiumRow(Icons.home_rounded, 'Current', fullItem.address),
+                      _buildPremiumRow(Icons.location_on_rounded, 'Permanent', fullItem.permanentAddress),
+                    ]),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Documents',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        TextButton.icon(
+                          onPressed: () => addDocument(fullItem),
+                          icon: const Icon(Icons.add_circle_outline_rounded, size: 20),
+                          label: const Text('Upload Document'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    if (documents.isEmpty)
+                      const Center(child: Text('No documents uploaded yet.'))
+                    else
+                      ...documents.map((doc) => _buildDocumentCard(doc)),
+                    const SizedBox(height: 100),
+                  ],
+                ),
               ),
             ),
-          ),
-          actions: [
-            TextButton(onPressed: () => Get.back(), child: const Text('Close')),
           ],
         ),
-      );
+        bottomNavigationBar: fullItem.status != 'ONBOARDED' ? _buildActionBar(fullItem) : null,
+      ));
     } catch (e) {
       AppToast.show(dioOrApiErrorMessage(e));
     }
+  }
+
+  Widget _buildActionBar(AdminAdmissionApplication item) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Get.isDarkMode ? AppColors.surfaceDark : Colors.white,
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, -2)),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: OutlinedButton(
+              onPressed: () => reviewApplication(item, 'REJECTED'),
+              style: OutlinedButton.styleFrom(foregroundColor: Colors.red, side: const BorderSide(color: Colors.red)),
+              child: const Text('Reject'),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: OutlinedButton(
+              onPressed: () => reviewApplication(item, 'WAITING'),
+              style: OutlinedButton.styleFrom(foregroundColor: Colors.orange, side: const BorderSide(color: Colors.orange)),
+              child: const Text('Waitlist'),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: FilledButton(
+              onPressed: () => reviewApplication(item, 'APPROVED'),
+              style: FilledButton.styleFrom(backgroundColor: Colors.green),
+              child: const Text('Approve'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPremiumSection({required BuildContext context, required String title, required List<Widget> children}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary)),
+          const SizedBox(height: 16),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPremiumRow(IconData icon, String label, String value, {Color? color}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: color ?? Colors.grey),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                Text(
+                  value.isEmpty ? 'N/A' : value,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: color),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDocumentCard(Map<String, dynamic> doc) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: const Icon(Icons.description_outlined, color: AppColors.primary),
+        title: Text(doc['name']?.toString() ?? 'Document', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+        subtitle: Text(doc['type']?.toString() ?? 'document', style: const TextStyle(fontSize: 12)),
+        trailing: IconButton(
+          icon: const Icon(Icons.open_in_new_rounded),
+          onPressed: () => _viewDocument(doc['url']?.toString() ?? '', doc['name']?.toString() ?? 'Document'),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _viewDocument(String url, String title) async {
+    final normalizedUrl = url.trim();
+    if (normalizedUrl.isEmpty) {
+      AppToast.show('Document URL is missing.');
+      return;
+    }
+    Get.to(() => AdminDocumentView(url: normalizedUrl, title: title));
   }
 
   Future<void> _openDocumentUrl(String url) async {
@@ -490,9 +755,10 @@ class AdminAdmissionsController extends GetxController {
         AppToast.show('Unable to open this document.');
         return;
       }
+      // Use inAppBrowserView for a full-screen integrated experience
       final launched = await launchUrl(
         uri,
-        mode: LaunchMode.externalApplication,
+        mode: LaunchMode.inAppBrowserView,
       );
       if (!launched) {
         AppToast.show('Unable to open this document.');
@@ -500,5 +766,26 @@ class AdminAdmissionsController extends GetxController {
     } catch (_) {
       AppToast.show('Unable to open this document.');
     }
+  }
+
+  Widget _buildStatusPill(String label) {
+    final color = switch (label) {
+      'APPROVED' => Colors.green,
+      'REJECTED' => Colors.red,
+      'ONBOARDED' => Colors.blue,
+      'WAITING' => Colors.orange,
+      _ => Colors.orange,
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label == 'UNDER_REVIEW' ? 'PENDING' : label,
+        style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
+      ),
+    );
   }
 }
