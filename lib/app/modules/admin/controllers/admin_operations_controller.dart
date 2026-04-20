@@ -129,6 +129,8 @@ class AdminHostelRoomRecord {
 class AdminHostelAllocationRecord {
   const AdminHostelAllocationRecord({
     required this.id,
+    required this.studentId,
+    required this.roomId,
     required this.studentLabel,
     required this.roomLabel,
     required this.fromDate,
@@ -136,6 +138,8 @@ class AdminHostelAllocationRecord {
   });
 
   final String id;
+  final String studentId;
+  final String roomId;
   final String studentLabel;
   final String roomLabel;
   final DateTime? fromDate;
@@ -154,6 +158,8 @@ class AdminHostelAllocationRecord {
             .trim();
     return AdminHostelAllocationRecord(
       id: json['id']?.toString() ?? '',
+      studentId: json['studentId']?.toString() ?? '',
+      roomId: json['roomId']?.toString() ?? '',
       studentLabel: studentLabel,
       roomLabel: roomLabel,
       fromDate: _opsDate(json['fromDate']),
@@ -168,12 +174,14 @@ class AdminHostelAttendanceRecord {
     required this.studentId,
     required this.status,
     required this.remark,
+    required this.date,
   });
 
   final String id;
   final String studentId;
   final String status;
   final String remark;
+  final DateTime? date;
 
   factory AdminHostelAttendanceRecord.fromJson(Map<String, dynamic> json) {
     return AdminHostelAttendanceRecord(
@@ -181,6 +189,7 @@ class AdminHostelAttendanceRecord {
       studentId: json['studentId']?.toString() ?? '',
       status: json['status']?.toString() ?? '',
       remark: json['remark']?.toString() ?? '',
+      date: _opsDate(json['date']),
     );
   }
 }
@@ -193,6 +202,7 @@ class AdminHostelVisitorRecord {
     required this.purpose,
     required this.idProof,
     required this.inTime,
+    required this.outTime,
   });
 
   final String id;
@@ -201,6 +211,7 @@ class AdminHostelVisitorRecord {
   final String purpose;
   final String idProof;
   final DateTime? inTime;
+  final DateTime? outTime;
 
   factory AdminHostelVisitorRecord.fromJson(Map<String, dynamic> json) {
     return AdminHostelVisitorRecord(
@@ -210,6 +221,91 @@ class AdminHostelVisitorRecord {
       purpose: json['purpose']?.toString() ?? '',
       idProof: json['idProof']?.toString() ?? '',
       inTime: _opsDate(json['inTime']),
+      outTime: _opsDate(json['outTime']),
+    );
+  }
+}
+
+class AdminHostelFeeStructureRecord {
+  const AdminHostelFeeStructureRecord({
+    required this.id,
+    required this.name,
+    required this.amount,
+    required this.frequency,
+    required this.dueDay,
+    required this.isActive,
+  });
+
+  final String id;
+  final String name;
+  final double amount;
+  final String frequency;
+  final int dueDay;
+  final bool isActive;
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'amount': amount,
+        'frequency': frequency,
+        'dueDay': dueDay,
+        'isActive': isActive,
+      };
+
+  factory AdminHostelFeeStructureRecord.fromJson(Map<String, dynamic> json) {
+    return AdminHostelFeeStructureRecord(
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      amount: (json['amount'] as num?)?.toDouble() ?? 0,
+      frequency: json['frequency']?.toString() ?? 'MONTHLY',
+      dueDay: (json['dueDay'] as num?)?.toInt() ?? 5,
+      isActive: json['isActive'] != false,
+    );
+  }
+}
+
+class AdminHostelFeePaymentRecord {
+  const AdminHostelFeePaymentRecord({
+    required this.id,
+    required this.studentId,
+    required this.studentLabel,
+    required this.structureId,
+    required this.structureLabel,
+    required this.amount,
+    required this.paidOn,
+    required this.status,
+  });
+
+  final String id;
+  final String studentId;
+  final String studentLabel;
+  final String structureId;
+  final String structureLabel;
+  final double amount;
+  final String paidOn;
+  final String status;
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'studentId': studentId,
+        'studentLabel': studentLabel,
+        'structureId': structureId,
+        'structureLabel': structureLabel,
+        'amount': amount,
+        'paidOn': paidOn,
+        'status': status,
+      };
+
+  factory AdminHostelFeePaymentRecord.fromJson(Map<String, dynamic> json) {
+    return AdminHostelFeePaymentRecord(
+      id: json['id']?.toString() ?? '',
+      studentId: json['studentId']?.toString() ?? '',
+      studentLabel: json['studentLabel']?.toString() ?? '',
+      structureId: json['structureId']?.toString() ?? '',
+      structureLabel: json['structureLabel']?.toString() ?? '',
+      amount: (json['amount'] as num?)?.toDouble() ?? 0,
+      paidOn: json['paidOn']?.toString() ?? '',
+      status: json['status']?.toString() ?? 'PAID',
     );
   }
 }
@@ -251,6 +347,109 @@ class AdminEventRecord {
   }
 }
 
+class AdminEventRegistrationRecord {
+  const AdminEventRegistrationRecord({
+    required this.id,
+    required this.eventId,
+    required this.participantLabel,
+    required this.email,
+    required this.createdAt,
+  });
+
+  final String id;
+  final String eventId;
+  final String participantLabel;
+  final String email;
+  final String createdAt;
+
+  factory AdminEventRegistrationRecord.fromJson(
+    Map<String, dynamic> json, {
+    required String eventId,
+  }) {
+    return AdminEventRegistrationRecord(
+      id: json['id']?.toString() ?? '',
+      eventId: eventId,
+      participantLabel: json['email']?.toString() ??
+          json['studentId']?.toString() ??
+          json['userId']?.toString() ??
+          'Registrant',
+      email: json['email']?.toString() ?? '',
+      createdAt: json['createdAt']?.toString() ?? '',
+    );
+  }
+}
+
+class AdminEventGalleryRecord {
+  const AdminEventGalleryRecord({
+    required this.id,
+    required this.eventId,
+    required this.url,
+    required this.caption,
+    required this.createdAt,
+  });
+
+  final String id;
+  final String eventId;
+  final String url;
+  final String caption;
+  final String createdAt;
+
+  factory AdminEventGalleryRecord.fromJson(
+    Map<String, dynamic> json, {
+    required String eventId,
+  }) {
+    return AdminEventGalleryRecord(
+      id: json['id']?.toString() ?? '',
+      eventId: eventId,
+      url: json['url']?.toString() ?? '',
+      caption: json['caption']?.toString() ?? '',
+      createdAt: json['createdAt']?.toString() ?? '',
+    );
+  }
+}
+
+class AdminCompetitionRecord {
+  const AdminCompetitionRecord({
+    required this.id,
+    required this.title,
+    required this.category,
+    required this.eventId,
+    required this.eventTitle,
+    required this.status,
+    required this.participantsCount,
+  });
+
+  final String id;
+  final String title;
+  final String category;
+  final String eventId;
+  final String eventTitle;
+  final String status;
+  final int participantsCount;
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'category': category,
+        'eventId': eventId,
+        'eventTitle': eventTitle,
+        'status': status,
+        'participantsCount': participantsCount,
+      };
+
+  factory AdminCompetitionRecord.fromJson(Map<String, dynamic> json) {
+    return AdminCompetitionRecord(
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      category: json['category']?.toString() ?? '',
+      eventId: json['eventId']?.toString() ?? '',
+      eventTitle: json['eventTitle']?.toString() ?? '',
+      status: json['status']?.toString() ?? 'PLANNED',
+      participantsCount: (json['participantsCount'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
 class AdminOperationsController extends GetxController {
   AdminOperationsController(this._adminService);
 
@@ -266,10 +465,18 @@ class AdminOperationsController extends GetxController {
   final hostelAllocations = <AdminHostelAllocationRecord>[].obs;
   final hostelAttendance = <AdminHostelAttendanceRecord>[].obs;
   final hostelVisitors = <AdminHostelVisitorRecord>[].obs;
+  final hostelAllocationStatusById = <String, String>{}.obs;
+  final hostelVisitorCheckoutById = <String, String>{}.obs;
+  final hostelFeeStructures = <AdminHostelFeeStructureRecord>[].obs;
+  final hostelFeePayments = <AdminHostelFeePaymentRecord>[].obs;
+  final hostelAttendanceDate = ''.obs;
   final events = <AdminEventRecord>[].obs;
+  final eventRegistrations = <AdminEventRegistrationRecord>[].obs;
+  final eventGallery = <AdminEventGalleryRecord>[].obs;
+  final competitions = <AdminCompetitionRecord>[].obs;
+  final selectedEventId = ''.obs;
   final studentOptions = <Map<String, String>>[].obs;
 
-  bool _transportLoaded = false;
   bool _hostelLoaded = false;
   bool _eventsLoaded = false;
 
@@ -298,27 +505,19 @@ class AdminOperationsController extends GetxController {
         await loadStudentOptions();
       }
       if (currentTab.value == 0) {
-        if (force || !_transportLoaded) {
-          await Future.wait([
-            loadTransportRoutes(),
-            loadTransportDrivers(),
-            loadTransportAllocations(),
-          ]);
-          _transportLoaded = true;
-        }
-      } else if (currentTab.value == 1) {
         if (force || !_hostelLoaded) {
           await Future.wait([
             loadHostelRooms(),
             loadHostelAllocations(),
             loadHostelAttendance(),
             loadHostelVisitors(),
+            loadHostelManagementSettings(),
           ]);
           _hostelLoaded = true;
         }
       } else {
         if (force || !_eventsLoaded) {
-          await loadEvents();
+          await Future.wait([loadEvents(), loadEventsWorkbenchSettings()]);
           _eventsLoaded = true;
         }
       }
@@ -460,7 +659,11 @@ class AdminOperationsController extends GetxController {
   }
 
   Future<void> loadHostelAttendance() async {
-    final data = await _adminService.getHostelAttendance();
+    final data = await _adminService.getHostelAttendance(
+      date: hostelAttendanceDate.value.trim().isEmpty
+          ? null
+          : hostelAttendanceDate.value.trim(),
+    );
     final rawItems = data['items'];
     if (rawItems is! List) {
       hostelAttendance.clear();
@@ -496,6 +699,59 @@ class AdminOperationsController extends GetxController {
     );
   }
 
+  Future<void> loadHostelManagementSettings() async {
+    final data = await _adminService.getSchoolSettings();
+    final raw = data['hostelManagement'];
+    if (raw is! Map) {
+      hostelAllocationStatusById.clear();
+      hostelVisitorCheckoutById.clear();
+      hostelFeeStructures.clear();
+      hostelFeePayments.clear();
+      return;
+    }
+    final map = Map<String, dynamic>.from(raw);
+    final allocationStatus = map['allocationStatusById'];
+    hostelAllocationStatusById.assignAll(
+      allocationStatus is Map
+          ? Map<String, String>.fromEntries(
+              allocationStatus.entries.map(
+                (e) => MapEntry(e.key.toString(), e.value.toString()),
+              ),
+            )
+          : const <String, String>{},
+    );
+    final visitorCheckout = map['visitorCheckoutById'];
+    hostelVisitorCheckoutById.assignAll(
+      visitorCheckout is Map
+          ? Map<String, String>.fromEntries(
+              visitorCheckout.entries.map(
+                (e) => MapEntry(e.key.toString(), e.value.toString()),
+              ),
+            )
+          : const <String, String>{},
+    );
+    hostelFeeStructures.assignAll(
+      (map['feeStructures'] as List<dynamic>? ?? const <dynamic>[])
+          .whereType<Map>()
+          .map(
+            (item) => AdminHostelFeeStructureRecord.fromJson(
+              item.cast<String, dynamic>(),
+            ),
+          )
+          .toList(),
+    );
+    hostelFeePayments.assignAll(
+      (map['feePayments'] as List<dynamic>? ?? const <dynamic>[])
+          .whereType<Map>()
+          .map(
+            (item) => AdminHostelFeePaymentRecord.fromJson(
+              item.cast<String, dynamic>(),
+            ),
+          )
+          .toList(),
+    );
+  }
+
   Future<void> loadEvents() async {
     final data = await _adminService.getEvents(page: 1, limit: 50);
     final rawItems = data['items'];
@@ -511,6 +767,214 @@ class AdminOperationsController extends GetxController {
           )
           .toList(),
     );
+    if (selectedEventId.value.isEmpty && events.isNotEmpty) {
+      selectedEventId.value = events.first.id;
+    }
+    if (selectedEventId.value.isNotEmpty) {
+      await loadEventInsights(selectedEventId.value);
+    }
+  }
+
+  Future<void> loadEventInsights(String eventId) async {
+    if (eventId.trim().isEmpty) {
+      eventRegistrations.clear();
+      eventGallery.clear();
+      return;
+    }
+    selectedEventId.value = eventId;
+    try {
+      final data = await _adminService.getEventById(eventId);
+      final rawRegs = data['registrations'];
+      final rawGallery = data['gallery'];
+      if (rawRegs is List) {
+        eventRegistrations.assignAll(
+          rawRegs
+              .whereType<Map>()
+              .map(
+                (item) => AdminEventRegistrationRecord.fromJson(
+                  item.cast<String, dynamic>(),
+                  eventId: eventId,
+                ),
+              )
+              .toList(),
+        );
+      } else {
+        eventRegistrations.clear();
+      }
+      if (rawGallery is List) {
+        eventGallery.assignAll(
+          rawGallery
+              .whereType<Map>()
+              .map(
+                (item) => AdminEventGalleryRecord.fromJson(
+                  item.cast<String, dynamic>(),
+                  eventId: eventId,
+                ),
+              )
+              .toList(),
+        );
+      } else {
+        eventGallery.clear();
+      }
+    } catch (_) {
+      eventRegistrations.clear();
+      eventGallery.clear();
+    }
+  }
+
+  Future<void> loadEventsWorkbenchSettings() async {
+    final data = await _adminService.getSchoolSettings();
+    final raw = data['eventsWorkbench'];
+    if (raw is! Map) {
+      competitions.clear();
+      return;
+    }
+    final map = Map<String, dynamic>.from(raw);
+    competitions.assignAll(
+      (map['competitions'] as List<dynamic>? ?? const <dynamic>[])
+          .whereType<Map>()
+          .map((e) => AdminCompetitionRecord.fromJson(e.cast<String, dynamic>()))
+          .toList(),
+    );
+  }
+
+  Future<void> openCompetitionDialog({AdminCompetitionRecord? existing}) async {
+    if (events.isEmpty) {
+      AppToast.show('Create an event first.');
+      return;
+    }
+    String eventId = existing?.eventId.isNotEmpty == true
+        ? existing!.eventId
+        : events.first.id;
+    final titleController = TextEditingController(text: existing?.title ?? '');
+    final categoryController = TextEditingController(
+      text: existing?.category ?? '',
+    );
+    String status = existing?.status ?? 'PLANNED';
+    final participantsController = TextEditingController(
+      text: (existing?.participantsCount ?? 0).toString(),
+    );
+
+    final ok = await Get.dialog<bool>(
+      StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text(
+              existing == null ? 'Add Competition' : 'Update Competition',
+            ),
+            content: SizedBox(
+              width: 480,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      initialValue: eventId,
+                      decoration: const InputDecoration(labelText: 'Event'),
+                      items: events
+                          .map(
+                            (item) => DropdownMenuItem<String>(
+                              value: item.id,
+                              child: Text(item.title),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) =>
+                          setState(() => eventId = value ?? ''),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: titleController,
+                      decoration: const InputDecoration(
+                        labelText: 'Competition title',
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: categoryController,
+                      decoration: const InputDecoration(labelText: 'Category'),
+                    ),
+                    const SizedBox(height: 10),
+                    DropdownButtonFormField<String>(
+                      initialValue: status,
+                      decoration: const InputDecoration(labelText: 'Status'),
+                      items: const ['PLANNED', 'ONGOING', 'COMPLETED', 'CANCELLED']
+                          .map(
+                            (item) => DropdownMenuItem<String>(
+                              value: item,
+                              child: Text(item),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) =>
+                          setState(() => status = value ?? 'PLANNED'),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: participantsController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Participants count',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(result: false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Get.back(result: true),
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    final participants = int.tryParse(participantsController.text.trim());
+    if (ok != true ||
+        eventId.isEmpty ||
+        titleController.text.trim().isEmpty ||
+        participants == null) {
+      if (ok == true) {
+        AppToast.show('Event, title, and participants are required.');
+      }
+      return;
+    }
+    final event = events.firstWhereOrNull((e) => e.id == eventId);
+    competitions.assignAll([
+      ...competitions.where((e) => e.id != existing?.id),
+      AdminCompetitionRecord(
+        id: existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        title: titleController.text.trim(),
+        category: categoryController.text.trim(),
+        eventId: eventId,
+        eventTitle: event?.title ?? 'Event',
+        status: status,
+        participantsCount: participants,
+      ),
+    ]);
+    await _saveEventsWorkbench();
+    AppToast.show('Competition saved.');
+  }
+
+  Future<void> deleteCompetition(AdminCompetitionRecord item) async {
+    if (!await _confirm('Delete ${item.title}?')) return;
+    competitions.removeWhere((e) => e.id == item.id);
+    await _saveEventsWorkbench();
+    AppToast.show('Competition deleted.');
+  }
+
+  Future<void> _saveEventsWorkbench() async {
+    await _adminService.patchSchoolSettings({
+      'eventsWorkbench': {
+        'competitions': competitions.map((e) => e.toJson()).toList(),
+      },
+    });
   }
 
   Future<void> openRouteDialog({AdminTransportRouteRecord? existing}) async {
@@ -638,7 +1102,7 @@ class AdminOperationsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: routeId,
+                      initialValue: routeId,
                       decoration: const InputDecoration(labelText: 'Route'),
                       items: transportRoutes
                           .map(
@@ -726,7 +1190,7 @@ class AdminOperationsController extends GetxController {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      value: studentId,
+                      initialValue: studentId,
                       decoration: const InputDecoration(labelText: 'Student'),
                       items: studentOptions
                           .map(
@@ -741,7 +1205,7 @@ class AdminOperationsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: routeId,
+                      initialValue: routeId,
                       decoration: const InputDecoration(labelText: 'Route'),
                       items: transportRoutes
                           .map(
@@ -928,13 +1392,19 @@ class AdminOperationsController extends GetxController {
     }
   }
 
-  Future<void> openHostelAllocationDialog() async {
+  Future<void> openHostelAllocationDialog({
+    AdminHostelAllocationRecord? existing,
+  }) async {
     if (studentOptions.isEmpty || hostelRooms.isEmpty) {
       AppToast.show('Add students and rooms first.');
       return;
     }
-    String studentId = studentOptions.first['id']!;
-    String roomId = hostelRooms.first.id;
+    String studentId = existing?.studentId.isNotEmpty == true
+        ? existing!.studentId
+        : studentOptions.first['id']!;
+    String roomId = existing?.roomId.isNotEmpty == true
+        ? existing!.roomId
+        : hostelRooms.first.id;
     final fromDateController = TextEditingController();
     final toDateController = TextEditingController();
 
@@ -942,7 +1412,7 @@ class AdminOperationsController extends GetxController {
       StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: const Text('Allocate Hostel Room'),
+            title: Text(existing == null ? 'Allocate Hostel Room' : 'Reassign Room'),
             content: SizedBox(
               width: 480,
               child: SingleChildScrollView(
@@ -950,7 +1420,7 @@ class AdminOperationsController extends GetxController {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      value: studentId,
+                      initialValue: studentId,
                       decoration: const InputDecoration(labelText: 'Student'),
                       items: studentOptions
                           .map(
@@ -965,7 +1435,7 @@ class AdminOperationsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: roomId,
+                      initialValue: roomId,
                       decoration: const InputDecoration(labelText: 'Room'),
                       items: hostelRooms
                           .map(
@@ -1005,7 +1475,7 @@ class AdminOperationsController extends GetxController {
               ),
               FilledButton(
                 onPressed: () => Get.back(result: true),
-                child: const Text('Create'),
+                child: Text(existing == null ? 'Create' : 'Reassign'),
               ),
             ],
           );
@@ -1020,7 +1490,12 @@ class AdminOperationsController extends GetxController {
         'fromDate': _opsInputDate(fromDateController.text)?.toIso8601String(),
         'toDate': _opsInputDate(toDateController.text)?.toIso8601String(),
       });
-      AppToast.show('Hostel allocation created.');
+      if (existing != null) {
+        await setHostelAllocationStatus(existing, 'VACATED');
+      }
+      AppToast.show(existing == null
+          ? 'Hostel allocation created.'
+          : 'Hostel allocation reassigned.');
       await loadHostelAllocations();
     } catch (e) {
       AppToast.show(dioOrApiErrorMessage(e));
@@ -1049,7 +1524,7 @@ class AdminOperationsController extends GetxController {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      value: studentId,
+                      initialValue: studentId,
                       decoration: const InputDecoration(labelText: 'Student'),
                       items: studentOptions
                           .map(
@@ -1064,7 +1539,7 @@ class AdminOperationsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: status,
+                      initialValue: status,
                       decoration: const InputDecoration(labelText: 'Status'),
                       items: const ['PRESENT', 'ABSENT', 'LEAVE']
                           .map(
@@ -1129,6 +1604,11 @@ class AdminOperationsController extends GetxController {
     }
   }
 
+  Future<void> setHostelAttendanceDate(String value) async {
+    hostelAttendanceDate.value = value;
+    await loadHostelAttendance();
+  }
+
   Future<void> openVisitorDialog() async {
     String studentId = studentOptions.isNotEmpty
         ? studentOptions.first['id']!
@@ -1156,7 +1636,7 @@ class AdminOperationsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: studentId.isEmpty ? null : studentId,
+                      initialValue: studentId.isEmpty ? null : studentId,
                       decoration: const InputDecoration(labelText: 'Student'),
                       items: studentOptions
                           .map(
@@ -1214,6 +1694,276 @@ class AdminOperationsController extends GetxController {
     } catch (e) {
       AppToast.show(dioOrApiErrorMessage(e));
     }
+  }
+
+  String allocationStatus(AdminHostelAllocationRecord item) =>
+      hostelAllocationStatusById[item.id] ?? 'ACTIVE';
+
+  Future<void> setHostelAllocationStatus(
+    AdminHostelAllocationRecord item,
+    String status,
+  ) async {
+    hostelAllocationStatusById[item.id] = status;
+    await _saveHostelManagementSettings();
+    AppToast.show('Allocation status updated.');
+  }
+
+  Future<void> markVisitorCheckout(AdminHostelVisitorRecord item) async {
+    hostelVisitorCheckoutById[item.id] =
+        DateTime.now().toIso8601String().substring(0, 16);
+    await _saveHostelManagementSettings();
+    AppToast.show('Visitor checkout marked.');
+  }
+
+  Future<void> openHostelFeeStructureDialog({
+    AdminHostelFeeStructureRecord? existing,
+  }) async {
+    final nameController = TextEditingController(text: existing?.name ?? '');
+    final amountController = TextEditingController(
+      text: existing?.amount.toStringAsFixed(0) ?? '',
+    );
+    String frequency = existing?.frequency ?? 'MONTHLY';
+    final dueDayController = TextEditingController(
+      text: (existing?.dueDay ?? 5).toString(),
+    );
+    bool isActive = existing?.isActive ?? true;
+
+    final ok = await Get.dialog<bool>(
+      StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text(existing == null ? 'Add Hostel Fee' : 'Edit Hostel Fee'),
+            content: SizedBox(
+              width: 460,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(labelText: 'Fee name'),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: amountController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: 'Amount'),
+                  ),
+                  const SizedBox(height: 10),
+                  DropdownButtonFormField<String>(
+                    initialValue: frequency,
+                    decoration: const InputDecoration(labelText: 'Frequency'),
+                    items: const ['MONTHLY', 'QUARTERLY', 'YEARLY']
+                        .map(
+                          (item) => DropdownMenuItem<String>(
+                            value: item,
+                            child: Text(item),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) =>
+                        setState(() => frequency = value ?? 'MONTHLY'),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: dueDayController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: 'Due day'),
+                  ),
+                  const SizedBox(height: 8),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: isActive,
+                    onChanged: (value) => setState(() => isActive = value),
+                    title: const Text('Active'),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(result: false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Get.back(result: true),
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    final amount = double.tryParse(amountController.text.trim());
+    final dueDay = int.tryParse(dueDayController.text.trim());
+    if (ok != true ||
+        nameController.text.trim().isEmpty ||
+        amount == null ||
+        dueDay == null) {
+      if (ok == true) {
+        AppToast.show('Valid fee name, amount, and due day are required.');
+      }
+      return;
+    }
+    final next = [
+      ...hostelFeeStructures.where((e) => e.id != existing?.id),
+      AdminHostelFeeStructureRecord(
+        id: existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        name: nameController.text.trim(),
+        amount: amount,
+        frequency: frequency,
+        dueDay: dueDay,
+        isActive: isActive,
+      ),
+    ];
+    hostelFeeStructures.assignAll(next);
+    await _saveHostelManagementSettings();
+    AppToast.show('Hostel fee structure saved.');
+  }
+
+  Future<void> deleteHostelFeeStructure(AdminHostelFeeStructureRecord item) async {
+    if (!await _confirm('Delete ${item.name}?')) return;
+    hostelFeeStructures.removeWhere((e) => e.id == item.id);
+    await _saveHostelManagementSettings();
+    AppToast.show('Hostel fee structure deleted.');
+  }
+
+  Future<void> recordHostelFeePayment() async {
+    if (studentOptions.isEmpty || hostelFeeStructures.isEmpty) {
+      AppToast.show('Add students and fee structures first.');
+      return;
+    }
+    String studentId = studentOptions.first['id']!;
+    String structureId = hostelFeeStructures.first.id;
+    String status = 'PAID';
+    final amountController = TextEditingController();
+    final paidOnController = TextEditingController(
+      text: DateTime.now().toIso8601String().substring(0, 10),
+    );
+    final ok = await Get.dialog<bool>(
+      StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Record Hostel Fee Payment'),
+            content: SizedBox(
+              width: 480,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      initialValue: studentId,
+                      decoration: const InputDecoration(labelText: 'Student'),
+                      items: studentOptions
+                          .map(
+                            (item) => DropdownMenuItem<String>(
+                              value: item['id'],
+                              child: Text(item['label'] ?? ''),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) => setState(() => studentId = value ?? ''),
+                    ),
+                    const SizedBox(height: 10),
+                    DropdownButtonFormField<String>(
+                      initialValue: structureId,
+                      decoration: const InputDecoration(labelText: 'Fee'),
+                      items: hostelFeeStructures
+                          .map(
+                            (item) => DropdownMenuItem<String>(
+                              value: item.id,
+                              child: Text(item.name),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) =>
+                          setState(() => structureId = value ?? ''),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: amountController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: 'Amount'),
+                    ),
+                    const SizedBox(height: 10),
+                    DropdownButtonFormField<String>(
+                      initialValue: status,
+                      decoration:
+                          const InputDecoration(labelText: 'Payment status'),
+                      items: const ['PAID', 'PARTIAL', 'PENDING', 'WAIVED']
+                          .map(
+                            (item) => DropdownMenuItem<String>(
+                              value: item,
+                              child: Text(item),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) =>
+                          setState(() => status = value ?? 'PAID'),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: paidOnController,
+                      decoration: const InputDecoration(
+                        labelText: 'Paid on',
+                        helperText: 'YYYY-MM-DD',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(result: false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Get.back(result: true),
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    final amount = double.tryParse(amountController.text.trim());
+    if (ok != true || amount == null) {
+      if (ok == true) AppToast.show('Valid amount is required.');
+      return;
+    }
+    final studentLabel = studentOptions
+            .firstWhereOrNull((item) => item['id'] == studentId)?['label'] ??
+        studentId;
+    final structure = hostelFeeStructures.firstWhereOrNull(
+      (item) => item.id == structureId,
+    );
+    final next = [
+      ...hostelFeePayments,
+      AdminHostelFeePaymentRecord(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        studentId: studentId,
+        studentLabel: studentLabel,
+        structureId: structureId,
+        structureLabel: structure?.name ?? 'Fee',
+        amount: amount,
+        paidOn: paidOnController.text.trim(),
+        status: status,
+      ),
+    ];
+    hostelFeePayments.assignAll(next);
+    await _saveHostelManagementSettings();
+    AppToast.show('Hostel fee payment recorded.');
+  }
+
+  Future<void> _saveHostelManagementSettings() async {
+    await _adminService.patchSchoolSettings({
+      'hostelManagement': {
+        'allocationStatusById': hostelAllocationStatusById,
+        'visitorCheckoutById': hostelVisitorCheckoutById,
+        'feeStructures': hostelFeeStructures.map((e) => e.toJson()).toList(),
+        'feePayments': hostelFeePayments.map((e) => e.toJson()).toList(),
+      },
+    });
   }
 
   Future<void> openEventDialog({AdminEventRecord? existing}) async {
@@ -1382,7 +2132,7 @@ class AdminOperationsController extends GetxController {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DropdownButtonFormField<String>(
-                    value: studentId,
+                    initialValue: studentId,
                     decoration: const InputDecoration(labelText: 'Student'),
                     items: studentOptions
                         .map(
@@ -1577,7 +2327,7 @@ class AdminOperationsController extends GetxController {
 
   int _opsTab(int value) {
     if (value < 0) return 0;
-    if (value > 2) return 2;
+    if (value > 1) return 1;
     return value;
   }
 }

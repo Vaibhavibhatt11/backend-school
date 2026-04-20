@@ -273,6 +273,86 @@ class AdminReportCardRecord {
   }
 }
 
+class AdminRoomAllocationRecord {
+  const AdminRoomAllocationRecord({
+    required this.id,
+    required this.roomName,
+    required this.classLabel,
+    required this.subjectLabel,
+    required this.teacherName,
+    required this.timeLabel,
+  });
+
+  final String id;
+  final String roomName;
+  final String classLabel;
+  final String subjectLabel;
+  final String teacherName;
+  final String timeLabel;
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'roomName': roomName,
+        'classLabel': classLabel,
+        'subjectLabel': subjectLabel,
+        'teacherName': teacherName,
+        'timeLabel': timeLabel,
+      };
+
+  factory AdminRoomAllocationRecord.fromJson(Map<String, dynamic> json) {
+    return AdminRoomAllocationRecord(
+      id: json['id']?.toString() ?? '',
+      roomName: json['roomName']?.toString() ?? '',
+      classLabel: json['classLabel']?.toString() ?? '',
+      subjectLabel: json['subjectLabel']?.toString() ?? '',
+      teacherName: json['teacherName']?.toString() ?? '',
+      timeLabel: json['timeLabel']?.toString() ?? '',
+    );
+  }
+}
+
+class AdminSubstituteTeacherRecord {
+  const AdminSubstituteTeacherRecord({
+    required this.id,
+    required this.classLabel,
+    required this.subjectLabel,
+    required this.originalTeacherName,
+    required this.substituteTeacherName,
+    required this.dateLabel,
+    required this.reason,
+  });
+
+  final String id;
+  final String classLabel;
+  final String subjectLabel;
+  final String originalTeacherName;
+  final String substituteTeacherName;
+  final String dateLabel;
+  final String reason;
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'classLabel': classLabel,
+        'subjectLabel': subjectLabel,
+        'originalTeacherName': originalTeacherName,
+        'substituteTeacherName': substituteTeacherName,
+        'dateLabel': dateLabel,
+        'reason': reason,
+      };
+
+  factory AdminSubstituteTeacherRecord.fromJson(Map<String, dynamic> json) {
+    return AdminSubstituteTeacherRecord(
+      id: json['id']?.toString() ?? '',
+      classLabel: json['classLabel']?.toString() ?? '',
+      subjectLabel: json['subjectLabel']?.toString() ?? '',
+      originalTeacherName: json['originalTeacherName']?.toString() ?? '',
+      substituteTeacherName: json['substituteTeacherName']?.toString() ?? '',
+      dateLabel: json['dateLabel']?.toString() ?? '',
+      reason: json['reason']?.toString() ?? '',
+    );
+  }
+}
+
 class AdminScheduleController extends GetxController {
   AdminScheduleController(this._adminService);
 
@@ -292,6 +372,8 @@ class AdminScheduleController extends GetxController {
   final classOptions = <AdminClassOption>[].obs;
   final subjectOptions = <Map<String, String>>[].obs;
   final staffOptions = <Map<String, String>>[].obs;
+  final roomAllocations = <AdminRoomAllocationRecord>[].obs;
+  final substituteTeachers = <AdminSubstituteTeacherRecord>[].obs;
 
   bool _scheduleLoaded = false;
   bool _examLoaded = false;
@@ -384,7 +466,11 @@ class AdminScheduleController extends GetxController {
     try {
       if (currentTab.value == 0) {
         if (force || !_scheduleLoaded) {
-          await Future.wait([loadTimetableSlots(), loadLiveSessions()]);
+          await Future.wait([
+            loadTimetableSlots(),
+            loadLiveSessions(),
+            loadTimetableWorkbench(),
+          ]);
           _scheduleLoaded = true;
         }
       } else {
@@ -975,6 +1061,203 @@ class AdminScheduleController extends GetxController {
     } catch (e) {
       AppToast.show(dioOrApiErrorMessage(e));
     }
+  }
+
+  Future<void> loadTimetableWorkbench() async {
+    final settings = await _adminService.getSchoolSettings();
+    final config = settings['timetableManagement'];
+    if (config is! Map) {
+      roomAllocations.clear();
+      substituteTeachers.clear();
+      return;
+    }
+    final map = Map<String, dynamic>.from(config);
+    roomAllocations.assignAll(
+      (map['roomAllocations'] as List<dynamic>? ?? const <dynamic>[])
+          .whereType<Map>()
+          .map((e) => AdminRoomAllocationRecord.fromJson(Map<String, dynamic>.from(e)))
+          .toList(),
+    );
+    substituteTeachers.assignAll(
+      (map['substituteTeachers'] as List<dynamic>? ?? const <dynamic>[])
+          .whereType<Map>()
+          .map((e) => AdminSubstituteTeacherRecord.fromJson(Map<String, dynamic>.from(e)))
+          .toList(),
+    );
+  }
+
+  Future<void> openRoomAllocationDialog({
+    AdminRoomAllocationRecord? existing,
+  }) async {
+    final roomCtrl = TextEditingController(text: existing?.roomName ?? '');
+    final classCtrl = TextEditingController(text: existing?.classLabel ?? '');
+    final subjectCtrl = TextEditingController(text: existing?.subjectLabel ?? '');
+    final teacherCtrl = TextEditingController(text: existing?.teacherName ?? '');
+    final timeCtrl = TextEditingController(text: existing?.timeLabel ?? '');
+    final ok = await Get.dialog<bool>(
+      AlertDialog(
+        title: Text(existing == null ? 'Add Room Allocation' : 'Edit Room Allocation'),
+        content: SizedBox(
+          width: 460,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: roomCtrl, decoration: const InputDecoration(labelText: 'Room name')),
+                const SizedBox(height: 10),
+                TextField(controller: classCtrl, decoration: const InputDecoration(labelText: 'Class label')),
+                const SizedBox(height: 10),
+                TextField(controller: subjectCtrl, decoration: const InputDecoration(labelText: 'Subject label')),
+                const SizedBox(height: 10),
+                TextField(controller: teacherCtrl, decoration: const InputDecoration(labelText: 'Teacher')),
+                const SizedBox(height: 10),
+                TextField(controller: timeCtrl, decoration: const InputDecoration(labelText: 'Time slot')),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    if (roomCtrl.text.trim().isEmpty || classCtrl.text.trim().isEmpty) {
+      AppToast.show('Room and class are required.');
+      return;
+    }
+    final next = [
+      ...roomAllocations.where((e) => e.id != existing?.id),
+      AdminRoomAllocationRecord(
+        id: existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        roomName: roomCtrl.text.trim(),
+        classLabel: classCtrl.text.trim(),
+        subjectLabel: subjectCtrl.text.trim(),
+        teacherName: teacherCtrl.text.trim(),
+        timeLabel: timeCtrl.text.trim(),
+      ),
+    ];
+    await _saveTimetableWorkbench(
+      roomData: next.map((e) => e.toJson()).toList(),
+    );
+    roomAllocations.assignAll(next);
+    AppToast.show('Room allocation saved.');
+  }
+
+  Future<void> deleteRoomAllocation(AdminRoomAllocationRecord item) async {
+    final confirmed = await _confirm(
+      title: 'Delete Room Allocation',
+      message: 'Delete allocation for ${item.classLabel}?',
+    );
+    if (!confirmed) return;
+    final next = roomAllocations.where((e) => e.id != item.id).toList();
+    await _saveTimetableWorkbench(roomData: next.map((e) => e.toJson()).toList());
+    roomAllocations.assignAll(next);
+    AppToast.show('Room allocation deleted.');
+  }
+
+  Future<void> openSubstituteTeacherDialog({
+    AdminSubstituteTeacherRecord? existing,
+  }) async {
+    final classCtrl = TextEditingController(text: existing?.classLabel ?? '');
+    final subjectCtrl = TextEditingController(text: existing?.subjectLabel ?? '');
+    final originalCtrl = TextEditingController(text: existing?.originalTeacherName ?? '');
+    final substituteCtrl = TextEditingController(text: existing?.substituteTeacherName ?? '');
+    final dateCtrl = TextEditingController(text: existing?.dateLabel ?? '');
+    final reasonCtrl = TextEditingController(text: existing?.reason ?? '');
+    final ok = await Get.dialog<bool>(
+      AlertDialog(
+        title: Text(existing == null ? 'Assign Substitute' : 'Edit Substitute Assignment'),
+        content: SizedBox(
+          width: 480,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: classCtrl, decoration: const InputDecoration(labelText: 'Class label')),
+                const SizedBox(height: 10),
+                TextField(controller: subjectCtrl, decoration: const InputDecoration(labelText: 'Subject label')),
+                const SizedBox(height: 10),
+                TextField(controller: originalCtrl, decoration: const InputDecoration(labelText: 'Original teacher')),
+                const SizedBox(height: 10),
+                TextField(controller: substituteCtrl, decoration: const InputDecoration(labelText: 'Substitute teacher')),
+                const SizedBox(height: 10),
+                TextField(controller: dateCtrl, decoration: const InputDecoration(labelText: 'Date (YYYY-MM-DD)')),
+                const SizedBox(height: 10),
+                TextField(controller: reasonCtrl, decoration: const InputDecoration(labelText: 'Reason')),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    if (classCtrl.text.trim().isEmpty ||
+        originalCtrl.text.trim().isEmpty ||
+        substituteCtrl.text.trim().isEmpty) {
+      AppToast.show('Class, original teacher, and substitute teacher are required.');
+      return;
+    }
+    final next = [
+      ...substituteTeachers.where((e) => e.id != existing?.id),
+      AdminSubstituteTeacherRecord(
+        id: existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        classLabel: classCtrl.text.trim(),
+        subjectLabel: subjectCtrl.text.trim(),
+        originalTeacherName: originalCtrl.text.trim(),
+        substituteTeacherName: substituteCtrl.text.trim(),
+        dateLabel: dateCtrl.text.trim(),
+        reason: reasonCtrl.text.trim(),
+      ),
+    ];
+    await _saveTimetableWorkbench(
+      substituteData: next.map((e) => e.toJson()).toList(),
+    );
+    substituteTeachers.assignAll(next);
+    AppToast.show('Substitute assignment saved.');
+  }
+
+  Future<void> deleteSubstituteTeacher(AdminSubstituteTeacherRecord item) async {
+    final confirmed = await _confirm(
+      title: 'Delete Substitute Assignment',
+      message: 'Delete assignment for ${item.classLabel}?',
+    );
+    if (!confirmed) return;
+    final next = substituteTeachers.where((e) => e.id != item.id).toList();
+    await _saveTimetableWorkbench(
+      substituteData: next.map((e) => e.toJson()).toList(),
+    );
+    substituteTeachers.assignAll(next);
+    AppToast.show('Substitute assignment deleted.');
+  }
+
+  List<AdminScheduleSessionRecord> get teacherTimetableView {
+    final sorted = [...timetableSlots];
+    sorted.sort((a, b) {
+      final t1 = a.teacherName.toLowerCase();
+      final t2 = b.teacherName.toLowerCase();
+      return t1.compareTo(t2);
+    });
+    return sorted;
+  }
+
+  Future<void> _saveTimetableWorkbench({
+    List<Map<String, dynamic>>? roomData,
+    List<Map<String, dynamic>>? substituteData,
+  }) async {
+    final settings = await _adminService.getSchoolSettings();
+    final existing = settings['timetableManagement'];
+    final map = existing is Map<String, dynamic>
+        ? Map<String, dynamic>.from(existing)
+        : <String, dynamic>{};
+    if (roomData != null) map['roomAllocations'] = roomData;
+    if (substituteData != null) map['substituteTeachers'] = substituteData;
+    await _adminService.patchSchoolSettings({'timetableManagement': map});
   }
 
   Future<void> openExamDialog({AdminExamRecord? existing}) async {

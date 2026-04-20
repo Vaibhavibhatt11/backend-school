@@ -34,6 +34,14 @@ class _AdminReportDetailViewState extends State<AdminReportDetailView> {
         return controller.loadAttendanceDetail(force: true);
       case AdminReportKind.fees:
         return controller.loadFeesDetail(force: true);
+      case AdminReportKind.academic:
+        return controller.loadAcademicDetail(force: true);
+      case AdminReportKind.staff:
+        return controller.loadStaffDetail(force: true);
+      case AdminReportKind.transport:
+        return controller.loadTransportDetail(force: true);
+      case AdminReportKind.all:
+        return controller.loadAllDetail(force: true);
     }
   }
 
@@ -57,15 +65,30 @@ class _AdminReportDetailViewState extends State<AdminReportDetailView> {
         ],
       ),
       body: Obx(() {
-        final loading = widget.kind == AdminReportKind.attendance
-            ? controller.isAttendanceDetailLoading.value
-            : controller.isFeesDetailLoading.value;
-        final error = widget.kind == AdminReportKind.attendance
-            ? controller.attendanceDetailError.value
-            : controller.feesDetailError.value;
-        final payload = widget.kind == AdminReportKind.attendance
-            ? controller.attendanceDetail.value
-            : controller.feesDetail.value;
+        final loading = switch (widget.kind) {
+          AdminReportKind.attendance => controller.isAttendanceDetailLoading.value,
+          AdminReportKind.fees => controller.isFeesDetailLoading.value,
+          AdminReportKind.academic => controller.isAcademicDetailLoading.value,
+          AdminReportKind.staff => controller.isStaffDetailLoading.value,
+          AdminReportKind.transport => controller.isTransportDetailLoading.value,
+          AdminReportKind.all => controller.isAllDetailLoading.value,
+        };
+        final error = switch (widget.kind) {
+          AdminReportKind.attendance => controller.attendanceDetailError.value,
+          AdminReportKind.fees => controller.feesDetailError.value,
+          AdminReportKind.academic => '',
+          AdminReportKind.staff => '',
+          AdminReportKind.transport => '',
+          AdminReportKind.all => '',
+        };
+        final payload = switch (widget.kind) {
+          AdminReportKind.attendance => controller.attendanceDetail.value,
+          AdminReportKind.fees => controller.feesDetail.value,
+          AdminReportKind.academic => controller.academicDetail.value,
+          AdminReportKind.staff => controller.staffDetail.value,
+          AdminReportKind.transport => controller.transportDetail.value,
+          AdminReportKind.all => controller.allDetail.value,
+        };
 
         if (loading && payload == null) {
           return const Center(child: CircularProgressIndicator());

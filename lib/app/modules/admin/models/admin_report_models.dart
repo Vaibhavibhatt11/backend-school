@@ -1,4 +1,11 @@
-enum AdminReportKind { attendance, fees }
+enum AdminReportKind {
+  attendance,
+  fees,
+  academic,
+  staff,
+  transport,
+  all,
+}
 
 extension AdminReportKindLabel on AdminReportKind {
   String get title {
@@ -7,6 +14,14 @@ extension AdminReportKindLabel on AdminReportKind {
         return 'Attendance Report';
       case AdminReportKind.fees:
         return 'Fee Collections';
+      case AdminReportKind.academic:
+        return 'Academic Report';
+      case AdminReportKind.staff:
+        return 'Staff Report';
+      case AdminReportKind.transport:
+        return 'Transport Report';
+      case AdminReportKind.all:
+        return 'All Reports Dashboard';
     }
   }
 
@@ -16,6 +31,14 @@ extension AdminReportKindLabel on AdminReportKind {
         return 'attendance-report';
       case AdminReportKind.fees:
         return 'fee-report';
+      case AdminReportKind.academic:
+        return 'academic-report';
+      case AdminReportKind.staff:
+        return 'staff-report';
+      case AdminReportKind.transport:
+        return 'transport-report';
+      case AdminReportKind.all:
+        return 'all-reports-dashboard';
     }
   }
 }

@@ -91,7 +91,8 @@ class AdminPortalNavigation {
         return const [
           AdminPortalScreen(
             title: 'Staff Management',
-            description: 'Premium management of teachers, support staff, and administrative personnel.',
+            description:
+                'Premium management of teachers, support staff, and administrative personnel.',
             route: AppRoutes.ADMIN_STAFF,
           ),
           AdminPortalScreen(
@@ -207,7 +208,7 @@ class AdminPortalNavigation {
             title: 'Library Desk',
             description: 'Manage books, issue flows, and returns.',
             route: AppRoutes.ADMIN_RESOURCES,
-            arguments: {'initialTab': 0},
+            arguments: {'initialTab': 0, 'scope': 'library'},
           ),
           AdminPortalScreen(
             title: 'Reports',
@@ -232,7 +233,7 @@ class AdminPortalNavigation {
             title: 'Hostel Desk',
             description: 'Manage rooms, allocations, attendance, and visitors.',
             route: AppRoutes.ADMIN_OPERATIONS,
-            arguments: {'initialTab': 1},
+            arguments: {'initialTab': 0, 'scope': 'hostel'},
           ),
         ];
       case 'inventory':
@@ -241,7 +242,7 @@ class AdminPortalNavigation {
             title: 'Inventory Desk',
             description: 'Manage stock items and transaction movements.',
             route: AppRoutes.ADMIN_RESOURCES,
-            arguments: {'initialTab': 1},
+            arguments: {'initialTab': 1, 'scope': 'inventory'},
           ),
         ];
       case 'communication':
@@ -264,7 +265,7 @@ class AdminPortalNavigation {
             title: 'Event Desk',
             description: 'Create events, registrations, and gallery updates.',
             route: AppRoutes.ADMIN_OPERATIONS,
-            arguments: {'initialTab': 2},
+            arguments: {'initialTab': 1, 'scope': 'events'},
           ),
         ];
       case 'reports':
@@ -400,14 +401,14 @@ class AdminPortalNavigation {
     if (m == 'library' || has('library') || has('book')) {
       SafeNavigation.toNamed(
         AppRoutes.ADMIN_RESOURCES,
-        arguments: {'initialTab': 0},
+        arguments: {'initialTab': 0, 'scope': 'library'},
       );
       return;
     }
     if (m == 'inventory' || has('inventory') || has('asset') || has('stock')) {
       SafeNavigation.toNamed(
         AppRoutes.ADMIN_RESOURCES,
-        arguments: {'initialTab': 1},
+        arguments: {'initialTab': 1, 'scope': 'inventory'},
       );
       return;
     }
@@ -421,14 +422,14 @@ class AdminPortalNavigation {
     if (m == 'hostel' || has('hostel') || has('room') || has('visitor')) {
       SafeNavigation.toNamed(
         AppRoutes.ADMIN_OPERATIONS,
-        arguments: {'initialTab': 1},
+        arguments: {'initialTab': 0, 'scope': 'hostel'},
       );
       return;
     }
     if (m == 'events' || has('event') || has('activity') || has('gallery')) {
       SafeNavigation.toNamed(
         AppRoutes.ADMIN_OPERATIONS,
-        arguments: {'initialTab': 2},
+        arguments: {'initialTab': 1, 'scope': 'events'},
       );
       return;
     }

@@ -154,18 +154,18 @@ const List<AdminModuleItem> kAdminModules = [
       'Late fine management',
     ],
   ),
-  AdminModuleItem(
-    id: 'transport',
-    title: 'Transport Management',
-    icon: Icons.directions_bus_rounded,
-    description: 'Transport routes, allocation, and fees',
-    features: [
-      'Bus routes',
-      'Driver details',
-      'Student bus allocation',
-      'Transport fees',
-    ],
-  ),
+  // AdminModuleItem(
+  //   id: 'transport',
+  //   title: 'Transport Management',
+  //   icon: Icons.directions_bus_rounded,
+  //   description: 'Transport routes, allocation, and fees',
+  //   features: [
+  //     'Bus routes',
+  //     'Driver details',
+  //     'Student bus allocation',
+  //     'Transport fees',
+  //   ],
+  // ),
   AdminModuleItem(
     id: 'hostel',
     title: 'Hostel Management',

@@ -65,9 +65,9 @@ class AdminScheduleView extends GetView<AdminScheduleController> {
             const SizedBox(height: 10),
             Expanded(
               child: TabBarView(
-                children: [
-                  _ScheduleTab(controller: controller),
-                  _ExamsTab(controller: controller),
+          children: [
+            _ScheduleTab(controller: controller),
+            _ExamsTab(controller: controller),
                 ],
               ),
             ),
@@ -141,7 +141,45 @@ class _ScheduleTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
+    return DefaultTabController(
+      length: 4,
+      child: Column(
+        children: [
+          Container(
+            margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.surfaceDark
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.borderDark
+                    : AppColors.borderLight,
+              ),
+            ),
+            child: TabBar(
+              isScrollable: true,
+              indicator: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              indicatorPadding: const EdgeInsets.all(6),
+              dividerColor: Colors.transparent,
+              labelColor: AppColors.primary,
+              unselectedLabelColor: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight,
+              tabs: const [
+                Tab(text: 'Class Timetable'),
+                Tab(text: 'Teacher Timetable'),
+                Tab(text: 'Room Allocation'),
+                Tab(text: 'Substitute Teachers'),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Obx(() {
       if (controller.isLoading.value &&
           controller.timetableSlots.isEmpty &&
           controller.liveSessions.isEmpty) {
@@ -155,6 +193,28 @@ class _ScheduleTab extends StatelessWidget {
           onRetry: controller.refreshCurrentTab,
         );
       }
+              return TabBarView(
+                children: [
+                  _ClassTimetableSubTab(controller: controller),
+                  _TeacherTimetableSubTab(controller: controller),
+                  _RoomAllocationSubTab(controller: controller),
+                  _SubstituteTeachersSubTab(controller: controller),
+                ],
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ClassTimetableSubTab extends StatelessWidget {
+  const _ClassTimetableSubTab({required this.controller});
+  final AdminScheduleController controller;
+
+  @override
+  Widget build(BuildContext context) {
       return RefreshIndicator(
         onRefresh: controller.refreshCurrentTab,
         child: ListView(
@@ -165,66 +225,67 @@ class _ScheduleTab extends StatelessWidget {
               runSpacing: 8,
               children: [
                 _SummaryChip(
-                  label: 'Timetable Slots',
+                label: 'Class Slots',
                   value: '${controller.timetableSlots.length}',
-                ),
-                _SummaryChip(
-                  label: 'Live Sessions',
-                  value: '${controller.liveSessions.length}',
                 ),
                 FilledButton.icon(
                   onPressed: () => controller.openTimetableDialog(),
                   icon: const Icon(Icons.add_alarm_rounded),
                   label: const Text('Add Slot'),
                 ),
-                FilledButton.icon(
-                  onPressed: () => controller.openLiveSessionDialog(),
-                  icon: const Icon(Icons.video_call_rounded),
-                  label: const Text('Add Live'),
-                ),
                 OutlinedButton.icon(
                   onPressed: controller.publishTimetable,
                   icon: const Icon(Icons.publish_rounded),
-                  label: const Text('Publish'),
+                label: const Text('Publish Timetable'),
                 ),
               ],
             ),
             const SizedBox(height: 20),
-            const _SectionTitle(title: 'Timetable Slots'),
-            const SizedBox(height: 12),
             if (controller.timetableSlots.isEmpty)
               const _EmptyState(
                 icon: Icons.schedule_rounded,
-                title: 'No timetable slots',
-                message:
-                    'Create live timetable entries and they will appear here.',
+              title: 'No class timetable slots',
+              message: 'Create class timetable slots to build weekly schedule.',
               )
             else
               ...controller.timetableSlots.map(
                 (item) => _SessionCard(
                   item: item,
-                  primaryAction: () =>
-                      controller.openTimetableDialog(existing: item),
+                primaryAction: () => controller.openTimetableDialog(existing: item),
                   secondaryAction: () => controller.deleteTimetableSlot(item),
                   primaryLabel: 'Edit',
                   secondaryLabel: 'Delete',
                 ),
               ),
-            const SizedBox(height: 20),
-            const _SectionTitle(title: 'Live Sessions'),
-            const SizedBox(height: 12),
-            if (controller.liveSessions.isEmpty)
+        ],
+      ),
+    );
+  }
+}
+
+class _TeacherTimetableSubTab extends StatelessWidget {
+  const _TeacherTimetableSubTab({required this.controller});
+  final AdminScheduleController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final slots = controller.teacherTimetableView;
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      children: [
+        _SummaryChip(label: 'Teacher Slots', value: '${slots.length}'),
+        const SizedBox(height: 14),
+        if (slots.isEmpty)
               const _EmptyState(
-                icon: Icons.wifi_tethering_rounded,
-                title: 'No live sessions',
-                message: 'Create real live classes and they will appear here.',
+            icon: Icons.person_search_rounded,
+            title: 'No teacher timetable entries',
+            message: 'Create timetable slots to populate teacher timetable.',
               )
             else
-              ...controller.liveSessions.map(
+          ...slots.map(
                 (item) => _SessionCard(
                   item: item,
-                  primaryAction: () =>
-                      controller.openLiveSessionDialog(existing: item),
+              primaryAction: () => controller.openTimetableDialog(existing: item),
                   secondaryAction: item.status == 'ENDED'
                       ? null
                       : () => controller.endLiveSession(item),
@@ -233,9 +294,163 @@ class _ScheduleTab extends StatelessWidget {
                 ),
               ),
           ],
+    );
+  }
+}
+
+class _RoomAllocationSubTab extends StatelessWidget {
+  const _RoomAllocationSubTab({required this.controller});
+  final AdminScheduleController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _SummaryChip(
+              label: 'Room Allocations',
+              value: '${controller.roomAllocations.length}',
+            ),
+            FilledButton.icon(
+              onPressed: () => controller.openRoomAllocationDialog(),
+              icon: const Icon(Icons.meeting_room_rounded),
+              label: const Text('Assign Room'),
+            ),
+          ],
         ),
-      );
-    });
+        const SizedBox(height: 16),
+        if (controller.roomAllocations.isEmpty)
+          const _EmptyState(
+            icon: Icons.meeting_room_rounded,
+            title: 'No room allocations',
+            message: 'Assign rooms for timetable slots and classes.',
+          )
+        else
+          ...controller.roomAllocations.map(
+            (item) => Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.surfaceDark
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? AppColors.borderDark
+                      : AppColors.borderLight,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(item.roomName, style: const TextStyle(fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 4),
+                  Text('${item.classLabel} • ${item.subjectLabel}'),
+                  Text('${item.teacherName} • ${item.timeLabel}'),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      OutlinedButton(
+                        onPressed: () => controller.openRoomAllocationDialog(existing: item),
+                        child: const Text('Edit'),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton.tonal(
+                        onPressed: () => controller.deleteRoomAllocation(item),
+                        child: const Text('Delete'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _SubstituteTeachersSubTab extends StatelessWidget {
+  const _SubstituteTeachersSubTab({required this.controller});
+  final AdminScheduleController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _SummaryChip(
+              label: 'Substitute Assignments',
+              value: '${controller.substituteTeachers.length}',
+            ),
+            FilledButton.icon(
+              onPressed: () => controller.openSubstituteTeacherDialog(),
+              icon: const Icon(Icons.swap_horiz_rounded),
+              label: const Text('Assign Substitute'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        if (controller.substituteTeachers.isEmpty)
+          const _EmptyState(
+            icon: Icons.swap_horiz_rounded,
+            title: 'No substitute assignments',
+            message: 'Assign substitute teachers for absent faculty.',
+          )
+        else
+          ...controller.substituteTeachers.map(
+            (item) => Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.surfaceDark
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? AppColors.borderDark
+                      : AppColors.borderLight,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(item.classLabel, style: const TextStyle(fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 4),
+                  Text('${item.subjectLabel} • ${item.dateLabel}'),
+                  Text('Original: ${item.originalTeacherName}'),
+                  Text('Substitute: ${item.substituteTeacherName}'),
+                  if (item.reason.trim().isNotEmpty) Text('Reason: ${item.reason}'),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      OutlinedButton(
+                        onPressed: () => controller.openSubstituteTeacherDialog(existing: item),
+                        child: const Text('Edit'),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton.tonal(
+                        onPressed: () => controller.deleteSubstituteTeacher(item),
+                        child: const Text('Delete'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
   }
 }
 
@@ -288,16 +503,16 @@ class _ExamsTab extends StatelessWidget {
           ),
           Expanded(
             child: Obx(() {
-              if (controller.isLoading.value && controller.exams.isEmpty) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (controller.errorMessage.value.isNotEmpty &&
-                  controller.exams.isEmpty) {
-                return _ErrorState(
-                  message: controller.errorMessage.value,
-                  onRetry: controller.refreshCurrentTab,
-                );
-              }
+      if (controller.isLoading.value && controller.exams.isEmpty) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (controller.errorMessage.value.isNotEmpty &&
+          controller.exams.isEmpty) {
+        return _ErrorState(
+          message: controller.errorMessage.value,
+          onRetry: controller.refreshCurrentTab,
+        );
+      }
               return TabBarView(
                 children: [
                   _ExamScheduleSubTab(controller: controller),
@@ -323,28 +538,28 @@ class _ExamScheduleSubTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: controller.refreshCurrentTab,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        children: [
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
+      return RefreshIndicator(
+        onRefresh: controller.refreshCurrentTab,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          children: [
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
               _SummaryChip(label: 'Exams', value: '${controller.exams.length}'),
-              FilledButton.icon(
-                onPressed: () => controller.openExamDialog(),
-                icon: const Icon(Icons.add_box_rounded),
-                label: const Text('Create Exam'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          if (controller.exams.isEmpty)
-            const _EmptyState(
-              icon: Icons.quiz_rounded,
-              title: 'No exams found',
+                FilledButton.icon(
+                  onPressed: () => controller.openExamDialog(),
+                  icon: const Icon(Icons.add_box_rounded),
+                  label: const Text('Create Exam'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            if (controller.exams.isEmpty)
+              const _EmptyState(
+                icon: Icons.quiz_rounded,
+                title: 'No exams found',
               message: 'Create real exams, publish them, and enter marks here.',
             )
           else
@@ -445,9 +660,9 @@ class _MarksEntrySubTab extends StatelessWidget {
             icon: Icons.edit_note_rounded,
             title: 'No exams available',
             message: 'Create an exam first to start marks entry.',
-          )
-        else
-          ...controller.exams.map(
+              )
+            else
+              ...controller.exams.map(
             (exam) => Container(
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(16),

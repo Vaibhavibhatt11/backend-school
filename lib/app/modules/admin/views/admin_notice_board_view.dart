@@ -13,141 +13,123 @@ class AdminNoticeBoardView extends GetView<AdminNoticeBoardController> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final content = SafeArea(
-      child: Column(
-        children: [
-          // Header with search/tune
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        if (embedded &&
-                            Get.isRegistered<AdminShellController>()) {
-                          Get.find<AdminShellController>().setTab(0);
-                          return;
-                        }
-                        if (Get.key.currentState?.canPop() ?? false) {
-                          Get.back();
-                        }
-                      },
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text(
-                            'Notice Board',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            'Manage school communications',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: Colors.grey, fontSize: 12),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  alignment: WrapAlignment.end,
-                  children: [
-                    _HeaderActionButton(
-                      icon: Icons.search,
-                      tooltip: 'Search',
-                      onTap: () {
-                        showSearch<Notice?>(
-                          context: context,
-                          delegate: _NoticeSearchDelegate(controller),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          // Segmented control
-          Obx(
-            () => Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.surfaceDark : Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(30),
-              ),
+      child: DefaultTabController(
+        length: 6,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  _buildSegment('All', 0, controller.selectedTab.value),
-                  _buildSegment('Recent', 1, controller.selectedTab.value),
-                  _buildSegment('Drafts', 2, controller.selectedTab.value),
+                  IconButton(
+                    onPressed: () {
+                      if (embedded && Get.isRegistered<AdminShellController>()) {
+                        Get.find<AdminShellController>().setTab(0);
+                        return;
+                      }
+                      if (Get.key.currentState?.canPop() ?? false) {
+                        Get.back();
+                      }
+                    },
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                  ),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Communication Center',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'Staff chat, broadcasts, notifications, and circulars',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _HeaderActionButton(
+                    icon: Icons.search,
+                    tooltip: 'Search Circulars',
+                    onTap: () {
+                      showSearch<Notice?>(
+                        context: context,
+                        delegate: _NoticeSearchDelegate(controller),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          // Notice list
-          Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              final filtered = controller.noticesForTab();
-              return RefreshIndicator(
-                onRefresh: controller.loadAnnouncements,
-                child: filtered.isEmpty
-                    ? ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.only(top: 48),
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? AppColors.surfaceDark
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.grey.shade200),
-                            ),
-                            child: const Text(
-                              'No notices found for this section yet.',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          ),
-                        ],
-                      )
-                    : ListView.builder(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: filtered.length,
-                        itemBuilder: (context, index) {
-                          final notice = filtered[index];
-                          return _NoticeCard(
-                            notice: notice,
-                            isDark: isDark,
-                            onTap: () => controller.onNoticeTap(notice),
-                          );
-                        },
-                      ),
-              );
-            }),
-          ),
-        ],
+            Container(
+              margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.surfaceDark : Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                ),
+              ),
+              child: TabBar(
+                isScrollable: true,
+                indicator: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                indicatorPadding: const EdgeInsets.all(6),
+                dividerColor: Colors.transparent,
+                labelColor: AppColors.primary,
+                unselectedLabelColor: isDark
+                    ? AppColors.textSecondaryDark
+                    : AppColors.textSecondaryLight,
+                tabs: const [
+                  Tab(text: 'Staff Chat'),
+                  Tab(text: 'SMS/WhatsApp'),
+                  Tab(text: 'Email'),
+                  Tab(text: 'App Notifications'),
+                  Tab(text: 'Parent Communication'),
+                  Tab(text: 'Circulars'),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                return TabBarView(
+                  children: [
+                    _StaffChatTab(controller: controller, isDark: isDark),
+                    _ChannelCampaignTab(
+                      controller: controller,
+                      isDark: isDark,
+                      channel: 'SMS/WHATSAPP',
+                    ),
+                    _ChannelCampaignTab(
+                      controller: controller,
+                      isDark: isDark,
+                      channel: 'EMAIL',
+                    ),
+                    _ChannelCampaignTab(
+                      controller: controller,
+                      isDark: isDark,
+                      channel: 'APP',
+                    ),
+                    _ParentCommunicationTab(controller: controller, isDark: isDark),
+                    _CircularAnnouncementsTab(controller: controller, isDark: isDark),
+                  ],
+                );
+              }),
+            ),
+          ],
+        ),
       ),
     );
     if (embedded) {
@@ -175,32 +157,353 @@ class AdminNoticeBoardView extends GetView<AdminNoticeBoardController> {
     );
   }
 
-  Widget _buildSegment(String label, int index, int selectedIndex) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => controller.onTabChanged(index),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            color: selectedIndex == index ? Colors.white : Colors.transparent,
-            borderRadius: BorderRadius.circular(30),
+}
+
+class _StaffChatTab extends StatelessWidget {
+  const _StaffChatTab({required this.controller, required this.isDark});
+
+  final AdminNoticeBoardController controller;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: controller.refreshAll,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        children: [
+          FilledButton.icon(
+            onPressed: () => controller.openStaffChatDialog(),
+            icon: const Icon(Icons.chat_rounded),
+            label: const Text('Start Staff Chat'),
           ),
-          child: Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontWeight: selectedIndex == index
-                    ? FontWeight.bold
-                    : FontWeight.normal,
-                color: selectedIndex == index ? AppColors.primary : Colors.grey,
+          const SizedBox(height: 12),
+          if (controller.staffChats.isEmpty)
+            _CommEmpty(
+              isDark: isDark,
+              title: 'No staff chats',
+              message: 'Create staff chat threads for internal communication.',
+            )
+          else
+            ...controller.staffChats.map(
+              (item) => _CommCard(
+                isDark: isDark,
+                title: item.staffName,
+                subtitle: item.topic,
+                details: [
+                  'Last message: ${item.lastMessage.isEmpty ? '-' : item.lastMessage}',
+                  'Updated: ${item.updatedAt}',
+                ],
+                actions: [
+                  OutlinedButton(
+                    onPressed: () => controller.openStaffChatDialog(existing: item),
+                    child: const Text('Edit'),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: () => controller.deleteStaffChat(item),
+                    child: const Text('Delete'),
+                  ),
+                ],
               ),
             ),
-          ),
-        ),
+        ],
       ),
     );
   }
+}
 
+class _ChannelCampaignTab extends StatelessWidget {
+  const _ChannelCampaignTab({
+    required this.controller,
+    required this.isDark,
+    required this.channel,
+  });
+
+  final AdminNoticeBoardController controller;
+  final bool isDark;
+  final String channel;
+
+  @override
+  Widget build(BuildContext context) {
+    final campaigns = channel == 'SMS/WHATSAPP'
+        ? controller.smsCampaigns
+        : channel == 'EMAIL'
+            ? controller.emailCampaigns
+            : controller.appNotifications;
+    final sentCount = campaigns.where((e) => e.status == 'SENT').length;
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _StatPill(label: 'Total', value: '${campaigns.length}'),
+            _StatPill(label: 'Sent', value: '$sentCount'),
+            FilledButton.icon(
+              onPressed: () => controller.openChannelCampaignDialog(channel: channel),
+              icon: const Icon(Icons.add_alert_rounded),
+              label: Text('Create ${channel == 'APP' ? 'App' : channel}'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (campaigns.isEmpty)
+          _CommEmpty(
+            isDark: isDark,
+            title: 'No campaigns',
+            message: 'Create channel campaigns and send to target audience.',
+          )
+        else
+          ...campaigns.map(
+            (item) => _CommCard(
+              isDark: isDark,
+              title: item.title,
+              subtitle: item.audience,
+              details: [
+                item.message,
+                'Status: ${item.status}',
+                'Created: ${item.createdAt}',
+              ],
+              actions: [
+                OutlinedButton(
+                  onPressed: () => controller.openChannelCampaignDialog(
+                    channel: channel,
+                    existing: item,
+                  ),
+                  child: const Text('Edit'),
+                ),
+                if (item.status != 'SENT')
+                  OutlinedButton(
+                    onPressed: () =>
+                        controller.sendChannelCampaign(channel: channel, item: item),
+                    child: const Text('Send'),
+                  ),
+                FilledButton.tonal(
+                  onPressed: () => controller.deleteChannelCampaign(
+                    channel: channel,
+                    item: item,
+                  ),
+                  child: const Text('Delete'),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _ParentCommunicationTab extends StatelessWidget {
+  const _ParentCommunicationTab({required this.controller, required this.isDark});
+
+  final AdminNoticeBoardController controller;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      children: [
+        FilledButton.icon(
+          onPressed: () => controller.openParentCommunicationDialog(),
+          icon: const Icon(Icons.family_restroom_rounded),
+          label: const Text('New Parent Communication'),
+        ),
+        const SizedBox(height: 12),
+        if (controller.parentCommunications.isEmpty)
+          _CommEmpty(
+            isDark: isDark,
+            title: 'No parent communications',
+            message: 'Start direct parent communication and track replies.',
+          )
+        else
+          ...controller.parentCommunications.map(
+            (item) => _CommCard(
+              isDark: isDark,
+              title: item.parentName,
+              subtitle: item.subject,
+              details: [
+                item.message,
+                'Status: ${item.status}',
+                'Updated: ${item.updatedAt}',
+              ],
+              actions: [
+                OutlinedButton(
+                  onPressed: () =>
+                      controller.openParentCommunicationDialog(existing: item),
+                  child: const Text('Update'),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _CircularAnnouncementsTab extends StatelessWidget {
+  const _CircularAnnouncementsTab({
+    required this.controller,
+    required this.isDark,
+  });
+
+  final AdminNoticeBoardController controller;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _StatPill(label: 'All', value: '${controller.notices.length}'),
+            _StatPill(
+              label: 'Draft',
+              value:
+                  '${controller.notices.where((e) => e.status == 'DRAFT').length}',
+            ),
+            FilledButton.icon(
+              onPressed: controller.onAddNotice,
+              icon: const Icon(Icons.campaign_rounded),
+              label: const Text('Create Circular'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (controller.notices.isEmpty)
+          _CommEmpty(
+            isDark: isDark,
+            title: 'No circular announcements',
+            message: 'Create circulars and publish them to selected audience.',
+          )
+        else
+          ...controller.notices.map(
+            (notice) => _NoticeCard(
+              notice: notice,
+              isDark: isDark,
+              onTap: () => controller.onNoticeTap(notice),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _CommCard extends StatelessWidget {
+  const _CommCard({
+    required this.isDark,
+    required this.title,
+    required this.subtitle,
+    required this.details,
+    required this.actions,
+  });
+
+  final bool isDark;
+  final String title;
+  final String subtitle;
+  final List<String> details;
+  final List<Widget> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          ),
+          if (subtitle.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(subtitle, style: const TextStyle(color: Colors.grey)),
+          ],
+          const SizedBox(height: 10),
+          ...details
+              .where((e) => e.trim().isNotEmpty)
+              .map((e) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(e),
+                  )),
+          if (actions.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Wrap(spacing: 8, runSpacing: 8, children: actions),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _CommEmpty extends StatelessWidget {
+  const _CommEmpty({
+    required this.isDark,
+    required this.title,
+    required this.message,
+  });
+
+  final bool isDark;
+  final String title;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 6),
+          Text(message, style: const TextStyle(color: Colors.grey)),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatPill extends StatelessWidget {
+  const _StatPill({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
+      ),
+      child: Text('$label: $value'),
+    );
+  }
 }
 
 class _NoticeCard extends StatelessWidget {

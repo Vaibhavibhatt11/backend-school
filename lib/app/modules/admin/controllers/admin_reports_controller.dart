@@ -27,10 +27,18 @@ class AdminReportsController extends GetxController {
   final collectionTotal = 0.0.obs;
   final attendanceDetail = Rxn<AdminReportPayload>();
   final feesDetail = Rxn<AdminReportPayload>();
+  final academicDetail = Rxn<AdminReportPayload>();
+  final staffDetail = Rxn<AdminReportPayload>();
+  final transportDetail = Rxn<AdminReportPayload>();
+  final allDetail = Rxn<AdminReportPayload>();
   final attendanceDetailError = ''.obs;
   final feesDetailError = ''.obs;
   final isAttendanceDetailLoading = false.obs;
   final isFeesDetailLoading = false.obs;
+  final isAcademicDetailLoading = false.obs;
+  final isStaffDetailLoading = false.obs;
+  final isTransportDetailLoading = false.obs;
+  final isAllDetailLoading = false.obs;
 
   @override
   void onInit() {
@@ -42,11 +50,13 @@ class AdminReportsController extends GetxController {
     isLoading.value = true;
     errorMessage.value = '';
     try {
-      await Future.wait([
-        _loadClasses(),
-        _refreshAttendanceData(),
-        _refreshFeesData(),
-      ]);
+      await _loadClasses();
+      await _refreshAttendanceData();
+      await _refreshFeesData();
+      await _refreshAcademicData();
+      await _refreshStaffData();
+      await _refreshTransportData();
+      await _refreshAllData();
     } catch (e) {
       errorMessage.value = dioOrApiErrorMessage(e);
       AppToast.show(errorMessage.value);
@@ -135,12 +145,64 @@ class AdminReportsController extends GetxController {
     }
   }
 
+  Future<void> loadAcademicDetail({bool force = false}) async {
+    if (!force && academicDetail.value != null) return;
+    isAcademicDetailLoading.value = true;
+    try {
+      await _refreshAcademicData();
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    } finally {
+      isAcademicDetailLoading.value = false;
+    }
+  }
+
+  Future<void> loadStaffDetail({bool force = false}) async {
+    if (!force && staffDetail.value != null) return;
+    isStaffDetailLoading.value = true;
+    try {
+      await _refreshStaffData();
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    } finally {
+      isStaffDetailLoading.value = false;
+    }
+  }
+
+  Future<void> loadTransportDetail({bool force = false}) async {
+    if (!force && transportDetail.value != null) return;
+    isTransportDetailLoading.value = true;
+    try {
+      await _refreshTransportData();
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    } finally {
+      isTransportDetailLoading.value = false;
+    }
+  }
+
+  Future<void> loadAllDetail({bool force = false}) async {
+    if (!force && allDetail.value != null) return;
+    isAllDetailLoading.value = true;
+    try {
+      await _refreshAllData();
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    } finally {
+      isAllDetailLoading.value = false;
+    }
+  }
+
   void onViewDetailedLog() {
     Get.to(() => const AdminReportDetailView(kind: AdminReportKind.attendance));
   }
 
   void onCollectionAnalysis() {
     Get.to(() => const AdminReportDetailView(kind: AdminReportKind.fees));
+  }
+
+  void openReport(AdminReportKind kind) {
+    Get.to(() => AdminReportDetailView(kind: kind));
   }
 
   void onRangeTap() {
@@ -247,6 +309,18 @@ class AdminReportsController extends GetxController {
         case AdminReportKind.fees:
           await loadFeesDetail(force: feesDetail.value == null);
           return feesDetail.value;
+        case AdminReportKind.academic:
+          await loadAcademicDetail(force: academicDetail.value == null);
+          return academicDetail.value;
+        case AdminReportKind.staff:
+          await loadStaffDetail(force: staffDetail.value == null);
+          return staffDetail.value;
+        case AdminReportKind.transport:
+          await loadTransportDetail(force: transportDetail.value == null);
+          return transportDetail.value;
+        case AdminReportKind.all:
+          await loadAllDetail(force: allDetail.value == null);
+          return allDetail.value;
       }
     } catch (e) {
       AppToast.show(dioOrApiErrorMessage(e));
@@ -863,6 +937,179 @@ class AdminReportsController extends GetxController {
         ? 'All Classes'
         : selectedClass.value.trim();
     return '${selectedRange.value} • $classLabel';
+  }
+
+  Future<void> _refreshAcademicData() async {
+    final classesData = await _adminService.getClasses(page: 1, limit: 200);
+    final subjectsData = await _adminService.getSubjects(page: 1, limit: 200);
+    final classes = (classesData['items'] as List<dynamic>? ?? const <dynamic>[])
+        .whereType<Map>()
+        .map((e) => e.cast<String, dynamic>())
+        .toList();
+    final subjects = (subjectsData['items'] as List<dynamic>? ?? const <dynamic>[])
+        .whereType<Map>()
+        .map((e) => e.cast<String, dynamic>())
+        .toList();
+    final metrics = <AdminReportMetric>[
+      AdminReportMetric(label: 'Classes', value: '${classes.length}'),
+      AdminReportMetric(label: 'Subjects', value: '${subjects.length}'),
+      AdminReportMetric(label: 'Filters', value: selectedClass.value, helper: selectedRange.value),
+    ];
+    final classRows = classes
+        .map((e) => [
+              _firstText(e, const ['name']),
+              _firstText(e, const ['section']),
+              _firstText(e, const ['classTeacherId', 'id']),
+            ])
+        .toList();
+    final subjectRows = subjects
+        .map((e) => [
+              _firstText(e, const ['name', 'title']),
+              _firstText(e, const ['code']),
+              _firstText(e, const ['classId']),
+            ])
+        .toList();
+    academicDetail.value = AdminReportPayload(
+      kind: AdminReportKind.academic,
+      title: AdminReportKind.academic.title,
+      subtitle: _reportSubtitle(),
+      generatedAt: DateTime.now(),
+      metrics: metrics,
+      sections: [
+        AdminReportSection(
+          title: 'Class Structure',
+          columns: const ['Class', 'Section', 'Reference'],
+          rows: classRows,
+        ),
+        AdminReportSection(
+          title: 'Subject Catalog',
+          columns: const ['Subject', 'Code', 'Class Ref'],
+          rows: subjectRows,
+        ),
+      ],
+    );
+  }
+
+  Future<void> _refreshStaffData() async {
+    final data = await _adminService.getStaff(page: 1, limit: 200, isActive: true);
+    final rows = (data['items'] as List<dynamic>? ?? const <dynamic>[])
+        .whereType<Map>()
+        .map((e) => e.cast<String, dynamic>())
+        .toList();
+    staffDetail.value = AdminReportPayload(
+      kind: AdminReportKind.staff,
+      title: AdminReportKind.staff.title,
+      subtitle: _reportSubtitle(),
+      generatedAt: DateTime.now(),
+      metrics: [
+        AdminReportMetric(label: 'Active Staff', value: '${rows.length}'),
+        AdminReportMetric(label: 'Filters', value: selectedClass.value, helper: selectedRange.value),
+      ],
+      sections: [
+        AdminReportSection(
+          title: 'Staff Directory Snapshot',
+          columns: const ['Name', 'Employee Code', 'Role', 'Phone'],
+          rows: rows
+              .map((e) => [
+                    _firstText(e, const ['fullName', 'name']),
+                    _firstText(e, const ['employeeCode', 'id']),
+                    _firstText(e, const ['role', 'designation']),
+                    _firstText(e, const ['phone']),
+                  ])
+              .toList(),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _refreshTransportData() async {
+    final routesData = await _adminService.getTransportRoutes(page: 1, limit: 200);
+    final allocationsData = await _adminService.getTransportAllocations(page: 1, limit: 200);
+    final routes = (routesData['items'] as List<dynamic>? ?? const <dynamic>[])
+        .whereType<Map>()
+        .map((e) => e.cast<String, dynamic>())
+        .toList();
+    final allocations = (allocationsData['items'] as List<dynamic>? ?? const <dynamic>[])
+        .whereType<Map>()
+        .map((e) => e.cast<String, dynamic>())
+        .toList();
+    transportDetail.value = AdminReportPayload(
+      kind: AdminReportKind.transport,
+      title: AdminReportKind.transport.title,
+      subtitle: _reportSubtitle(),
+      generatedAt: DateTime.now(),
+      metrics: [
+        AdminReportMetric(label: 'Routes', value: '${routes.length}'),
+        AdminReportMetric(label: 'Allocations', value: '${allocations.length}'),
+      ],
+      sections: [
+        AdminReportSection(
+          title: 'Transport Routes',
+          columns: const ['Route', 'Code', 'Status'],
+          rows: routes
+              .map((e) => [
+                    _firstText(e, const ['name']),
+                    _firstText(e, const ['routeCode']),
+                    _firstText(e, const ['isActive']),
+                  ])
+              .toList(),
+        ),
+        AdminReportSection(
+          title: 'Transport Allocations',
+          columns: const ['Student', 'Route', 'Stop', 'Fee'],
+          rows: allocations
+              .map((e) => [
+                    _firstText(e, const ['studentId']),
+                    _firstText(e, const ['routeId']),
+                    _firstText(e, const ['stopName']),
+                    _firstText(e, const ['feeAmount']),
+                  ])
+              .toList(),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _refreshAllData() async {
+    final attendance = attendanceDetail.value;
+    final fees = feesDetail.value;
+    final academic = academicDetail.value;
+    final staff = staffDetail.value;
+    final transport = transportDetail.value;
+    allDetail.value = AdminReportPayload(
+      kind: AdminReportKind.all,
+      title: AdminReportKind.all.title,
+      subtitle: _reportSubtitle(),
+      generatedAt: DateTime.now(),
+      metrics: [
+        AdminReportMetric(label: 'Attendance', value: attendanceBadge.value),
+        AdminReportMetric(label: 'Outstanding Fees', value: _currency(feeOutstanding.value)),
+        AdminReportMetric(label: 'Collections', value: _currency(collectionTotal.value)),
+        AdminReportMetric(
+          label: 'Modules Covered',
+          value: '${[
+            attendance,
+            fees,
+            academic,
+            staff,
+            transport,
+          ].where((e) => e != null).length}/5',
+        ),
+      ],
+      sections: [
+        AdminReportSection(
+          title: 'Cross Module Snapshot',
+          columns: const ['Module', 'Status', 'Highlights'],
+          rows: [
+            ['Attendance', attendance == null ? 'Pending' : 'Ready', attendanceBadge.value],
+            ['Fees', fees == null ? 'Pending' : 'Ready', _currency(feeOutstanding.value)],
+            ['Academic', academic == null ? 'Pending' : 'Ready', 'Classes + subjects'],
+            ['Staff', staff == null ? 'Pending' : 'Ready', 'Active staff directory'],
+            ['Transport', transport == null ? 'Pending' : 'Ready', 'Routes + allocations'],
+          ],
+        ),
+      ],
+    );
   }
 
   Map<String, dynamic>? _asMap(dynamic value) {

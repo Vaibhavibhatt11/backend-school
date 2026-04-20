@@ -134,8 +134,8 @@ class AdminReportsView extends GetView<AdminReportsController> {
                     'Detailed breakdown of student and staff presence logs for the selected period.',
                 badge: controller.attendanceBadge.value,
                 badgeColor: Colors.green,
-                primaryAction: 'View Detailed Log',
-                onPrimary: controller.onViewDetailedLog,
+                primaryAction: 'Open Report',
+                onPrimary: () => controller.openReport(AdminReportKind.attendance),
                 secondaryActions: [
                   ReportAction(
                     'PDF EXPORT',
@@ -159,8 +159,8 @@ class AdminReportsView extends GetView<AdminReportsController> {
                 badge: '\$${controller.feeOutstanding.value.toStringAsFixed(2)}',
                 badgeColor: Colors.red,
                 badgePrefix: 'Outstanding',
-                primaryAction: 'Collection Analysis',
-                onPrimary: controller.onCollectionAnalysis,
+                primaryAction: 'Open Report',
+                onPrimary: () => controller.openReport(AdminReportKind.fees),
                 secondaryActions: [
                   ReportAction(
                     'PDF EXPORT',
@@ -171,6 +171,102 @@ class AdminReportsView extends GetView<AdminReportsController> {
                     'EXCEL',
                     Icons.table_view,
                     () => controller.onExcelExport(AdminReportKind.fees),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildReportCard(
+                icon: Icons.menu_book_rounded,
+                iconColor: Colors.deepPurple,
+                title: 'Academic Reports',
+                description:
+                    'Class structure, subject mapping, and academic setup analytics.',
+                badge: 'Classes & Subjects',
+                badgeColor: Colors.deepPurple,
+                primaryAction: 'Open Report',
+                onPrimary: () => controller.openReport(AdminReportKind.academic),
+                secondaryActions: [
+                  ReportAction(
+                    'PDF EXPORT',
+                    Icons.picture_as_pdf,
+                    () => controller.onPDFExport(AdminReportKind.academic),
+                  ),
+                  ReportAction(
+                    'EXCEL',
+                    Icons.table_view,
+                    () => controller.onExcelExport(AdminReportKind.academic),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildReportCard(
+                icon: Icons.groups_rounded,
+                iconColor: Colors.teal,
+                title: 'Staff Reports',
+                description:
+                    'Active staff summary with role-wise and contact directory insights.',
+                badge: 'Staff Insights',
+                badgeColor: Colors.teal,
+                primaryAction: 'Open Report',
+                onPrimary: () => controller.openReport(AdminReportKind.staff),
+                secondaryActions: [
+                  ReportAction(
+                    'PDF EXPORT',
+                    Icons.picture_as_pdf,
+                    () => controller.onPDFExport(AdminReportKind.staff),
+                  ),
+                  ReportAction(
+                    'EXCEL',
+                    Icons.table_view,
+                    () => controller.onExcelExport(AdminReportKind.staff),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildReportCard(
+                icon: Icons.directions_bus_rounded,
+                iconColor: Colors.orange,
+                title: 'Transport Reports',
+                description:
+                    'Route and allocation analytics for transport operations.',
+                badge: 'Route Analytics',
+                badgeColor: Colors.orange,
+                primaryAction: 'Open Report',
+                onPrimary: () => controller.openReport(AdminReportKind.transport),
+                secondaryActions: [
+                  ReportAction(
+                    'PDF EXPORT',
+                    Icons.picture_as_pdf,
+                    () => controller.onPDFExport(AdminReportKind.transport),
+                  ),
+                  ReportAction(
+                    'EXCEL',
+                    Icons.table_view,
+                    () => controller.onExcelExport(AdminReportKind.transport),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildReportCard(
+                icon: Icons.dashboard_customize_rounded,
+                iconColor: AppColors.primary,
+                title: 'All Reports Dashboard',
+                description:
+                    'Unified analytics across attendance, fees, academics, staff, and transport.',
+                badge: 'Cross Module',
+                badgeColor: AppColors.primary,
+                primaryAction: 'Open Report',
+                onPrimary: () => controller.openReport(AdminReportKind.all),
+                secondaryActions: [
+                  ReportAction(
+                    'PDF EXPORT',
+                    Icons.picture_as_pdf,
+                    () => controller.onPDFExport(AdminReportKind.all),
+                  ),
+                  ReportAction(
+                    'EXCEL',
+                    Icons.table_view,
+                    () => controller.onExcelExport(AdminReportKind.all),
                   ),
                 ],
               ),
