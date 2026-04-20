@@ -1,7 +1,7 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
+import 'package:erp_frontend/app/modules/admin/controllers/admin_fee_snapshot_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/admin_fee_snapshot_controller.dart';
 
 class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
   const AdminFeeSnapshotView({super.key});
@@ -9,463 +9,748 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Scaffold(
-      body: SafeArea(
-        child: Obx(() {
+    return DefaultTabController(
+      length: 8,
+      child: Scaffold(
+        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        appBar: AppBar(
+          title: const Text('Fee Management'),
+          backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
+        ),
+        body: Obx(() {
           if (controller.isLoading.value) {
             return const Center(child: CircularProgressIndicator());
           }
-          return ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        if (Get.key.currentState?.canPop() ?? false) {
-                          Get.back();
-                        }
-                      },
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Fee Snapshot',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          'Live Finance Overview',
-                          style: const TextStyle(color: Colors.grey, fontSize: 12),
-                        ),
-                      ],
-                    ),
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                child: _FeeHeaderCard(controller: controller),
+              ),
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.surfaceDark : Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+                ),
+                child: TabBar(
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
+                  indicator: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  indicatorPadding: const EdgeInsets.all(6),
+                  dividerColor: Colors.transparent,
+                  labelColor: AppColors.primary,
+                  unselectedLabelColor: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                  tabs: const [
+                    Tab(text: 'Structure'),
+                    Tab(text: 'Installments'),
+                    Tab(text: 'Categories'),
+                    Tab(text: 'Gateway'),
+                    Tab(text: 'Receipts'),
+                    Tab(text: 'Late Fee'),
+                    Tab(text: 'Reminders'),
+                    Tab(text: 'Reports'),
                   ],
                 ),
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.calendar_today,
-                      color: AppColors.primary,
-                    ),
-                    onPressed: controller.loadFeeSnapshot,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            // Summary cards
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: isDark ? AppColors.surfaceDark : Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'TOTAL DUES',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '\$${(controller.totalDues.value / 1000000).toStringAsFixed(1)}M',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.red.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                controller.weekVsLastWeekPct.value >= 0
-                                    ? Icons.trending_up
-                                    : Icons.trending_down,
-                                size: 12,
-                                color: controller.weekVsLastWeekPct.value >= 0
-                                    ? Colors.red
-                                    : Colors.green,
-                              ),
-                              const SizedBox(width: 2),
-                              Text(
-                                '${controller.weekVsLastWeekPct.value >= 0 ? '+' : ''}${controller.weekVsLastWeekPct.value.toStringAsFixed(1)}% vs last week',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: controller.weekVsLastWeekPct.value >= 0
-                                      ? Colors.red
-                                      : Colors.green,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [AppColors.primary, AppColors.primaryDark],
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'COLLECTED',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white70,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '\$${(controller.collected.value / 1000).toStringAsFixed(0)}K',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            '${controller.overallPercent.value.toInt()}% Done',
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            // Collection Status with donut chart
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.surfaceDark : Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade200),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Collection Status',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        'This Month',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        SizedBox(
-                          width: 160,
-                          height: 160,
-                          child: CircularProgressIndicator(
-                            value: controller.overallPercent.value / 100,
-                            strokeWidth: 12,
-                            backgroundColor: Colors.grey.shade200,
-                            valueColor: const AlwaysStoppedAnimation<Color>(
-                              AppColors.primary,
-                            ),
-                          ),
-                        ),
-                        Column(
-                          children: [
-                            Text(
-                              '${controller.overallPercent.value.toInt()}%',
-                              style: const TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const Text(
-                              'Overall',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 12,
-                            height: 12,
-                            decoration: const BoxDecoration(
-                              color: AppColors.primary,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Collected',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              Text(
-                                '\$${(controller.collected.value / 1000).toStringAsFixed(0)}K',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Container(
-                            width: 12,
-                            height: 12,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade300,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Pending',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              Text(
-                                '\$${(controller.pending.value / 1000).toStringAsFixed(0)}K',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Category Breakdown
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Category Breakdown',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                TextButton(
-                  onPressed: controller.onViewDetails,
-                  child: const Text('View Details'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Obx(() {
-              if (controller.categories.isEmpty) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Center(
-                    child: Text(
-                      'No category breakdown from API (summary may be empty).',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                    ),
-                  ),
-                );
-              }
-              return Column(
-                children: controller.categories
-                    .map((c) => _buildCategoryItem(c, isDark))
-                    .toList(),
-              );
-            }),
-            const SizedBox(height: 16),
-            // Send Reminders button
-            ElevatedButton(
-              onPressed: controller.onSendReminders,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 10),
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    _StructureTab(controller: controller),
+                    _InstallmentsTab(controller: controller),
+                    _CategoriesTab(controller: controller),
+                    _GatewayTab(controller: controller),
+                    _ReceiptsTab(controller: controller),
+                    _LateFeeTab(controller: controller),
+                    _RemindersTab(controller: controller),
+                    _ReportsTab(controller: controller),
+                  ],
                 ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Icon(Icons.notifications_active, color: Colors.white),
-                  SizedBox(width: 8),
-                  Text(
-                    'Send Reminders to Defaulters',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
           );
         }),
       ),
     );
   }
+}
 
-  Widget _buildCategoryItem(FeeCategory category, bool isDark) {
-    final due = category.due <= 0 ? 1.0 : category.due;
-    final percent = (category.collected / due * 100).clamp(0, 100).toInt();
+class _FeeHeaderCard extends StatelessWidget {
+  const _FeeHeaderCard({required this.controller});
+  final AdminFeeSnapshotController controller;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        gradient: const LinearGradient(colors: [AppColors.primary, AppColors.primaryDark]),
+        borderRadius: BorderRadius.circular(18),
       ),
-      child: Column(
+      child: Row(
         children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: category.color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  category.name.contains('Tuition')
-                      ? Icons.school
-                      : category.name.contains('Transport')
-                      ? Icons.directions_bus
-                      : Icons.science,
-                  color: category.color,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      category.name,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      'Due: \$${(category.due / 1000).toStringAsFixed(0)}K',
-                      style: const TextStyle(fontSize: 10, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.payments_rounded, color: Colors.white),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Obx(
+              () => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '\$${(category.collected / 1000).toStringAsFixed(0)}K',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  const Text(
+                    'Fee Management Workspace',
+                    style: TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.w800),
                   ),
+                  const SizedBox(height: 4),
                   Text(
-                    '$percent%',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: percent >= 80 ? Colors.green : Colors.amber,
-                    ),
+                    'Due \$${controller.totalDues.value.toStringAsFixed(0)} • '
+                    'Collected \$${controller.collected.value.toStringAsFixed(0)} • '
+                    '${controller.overallPercent.value.toStringAsFixed(1)}%',
+                    style: const TextStyle(color: Colors.white70),
                   ),
                 ],
               ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          LinearProgressIndicator(
-            value: category.due > 0 ? (category.collected / category.due).clamp(0, 1) : 0,
-            backgroundColor: Colors.grey.shade200,
-            valueColor: AlwaysStoppedAnimation<Color>(category.color),
+            ),
           ),
         ],
       ),
     );
   }
+}
+
+class _StructureTab extends StatelessWidget {
+  const _StructureTab({required this.controller});
+  final AdminFeeSnapshotController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return _CommonTabShell(
+      title: 'Fee Structure Setup',
+      actionLabel: 'Add Structure',
+      onAction: () => _openStructureDialog(context, controller),
+      child: Obx(() {
+        if (controller.structures.isEmpty) return const _EmptyState(text: 'No fee structures configured.');
+        return Column(
+          children: controller.structures
+              .map((item) => _DataTile(
+                    title: item.name,
+                    subtitle: '${item.className} • ${item.category}',
+                    trailingText: '\$${item.amount.toStringAsFixed(2)}',
+                    onEdit: () => _openStructureDialog(context, controller, existing: item),
+                    onDelete: () => controller.deleteStructure(item.id),
+                  ))
+              .toList(),
+        );
+      }),
+    );
+  }
+}
+
+class _InstallmentsTab extends StatelessWidget {
+  const _InstallmentsTab({required this.controller});
+  final AdminFeeSnapshotController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return _CommonTabShell(
+      title: 'Installment System',
+      actionLabel: 'Add Installment Plan',
+      onAction: () => _openInstallmentDialog(context, controller),
+      child: Obx(() {
+        if (controller.installmentPlans.isEmpty) return const _EmptyState(text: 'No installment plans configured.');
+        return Column(
+          children: controller.installmentPlans
+              .map((item) => _DataTile(
+                    title: item.title,
+                    subtitle: '${item.className} • ${item.installments} installments',
+                    trailingText: '\$${item.totalAmount.toStringAsFixed(2)}',
+                    onEdit: () => _openInstallmentDialog(context, controller, existing: item),
+                    onDelete: () => controller.deleteInstallmentPlan(item.id),
+                  ))
+              .toList(),
+        );
+      }),
+    );
+  }
+}
+
+class _CategoriesTab extends StatelessWidget {
+  const _CategoriesTab({required this.controller});
+  final AdminFeeSnapshotController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return _CommonTabShell(
+      title: 'Fee Categories',
+      actionLabel: 'Add Category',
+      onAction: () => _openCategoryDialog(context, controller),
+      child: Obx(() {
+        if (controller.categoryConfigs.isEmpty) return const _EmptyState(text: 'No fee categories configured.');
+        return Column(
+          children: controller.categoryConfigs
+              .map((item) => _DataTile(
+                    title: item.name,
+                    subtitle: item.description,
+                    onEdit: () => _openCategoryDialog(context, controller, existing: item),
+                    onDelete: () => controller.deleteCategoryConfig(item.id),
+                  ))
+              .toList(),
+        );
+      }),
+    );
+  }
+}
+
+class _GatewayTab extends StatelessWidget {
+  const _GatewayTab({required this.controller});
+  final AdminFeeSnapshotController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _SectionTitle(title: 'Online Payment Gateway'),
+        const SizedBox(height: 10),
+        _ThemedBox(
+          child: Obx(
+            () => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Provider: ${controller.gatewayProvider.value.isEmpty ? 'Not configured' : controller.gatewayProvider.value}',
+                  style: TextStyle(color: isDark ? AppColors.textDark : AppColors.textLight),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Merchant ID: ${controller.gatewayMerchantId.value.isEmpty ? 'Not configured' : controller.gatewayMerchantId.value}',
+                  style: TextStyle(color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    const Text('Gateway Active'),
+                    const Spacer(),
+                    Switch(
+                      value: controller.gatewayActive.value,
+                      onChanged: (v) => controller.saveGatewayConfig(
+                        provider: controller.gatewayProvider.value,
+                        merchantId: controller.gatewayMerchantId.value,
+                        active: v,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                FilledButton.icon(
+                  onPressed: () => _openGatewayDialog(context, controller),
+                  icon: const Icon(Icons.settings_rounded),
+                  label: const Text('Configure Gateway'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ReceiptsTab extends StatelessWidget {
+  const _ReceiptsTab({required this.controller});
+  final AdminFeeSnapshotController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _SectionTitle(title: 'Fee Receipts'),
+        const SizedBox(height: 12),
+        Obx(() {
+          if (controller.receipts.isEmpty) return const _EmptyState(text: 'No receipts found for current range.');
+          return Column(
+            children: controller.receipts
+                .map((item) => _DataTile(
+                      title: item.receiptNo,
+                      subtitle: '${item.studentName} • ${item.mode}',
+                      trailingText: '\$${item.amount.toStringAsFixed(2)}',
+                      infoText: item.date,
+                    ))
+                .toList(),
+          );
+        }),
+      ],
+    );
+  }
+}
+
+class _LateFeeTab extends StatelessWidget {
+  const _LateFeeTab({required this.controller});
+  final AdminFeeSnapshotController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _SectionTitle(title: 'Late Fee Calculation'),
+        const SizedBox(height: 10),
+        _ThemedBox(
+          child: Obx(
+            () => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Type: ${controller.lateFeeType.value}'),
+                const SizedBox(height: 4),
+                Text('Value: ${controller.lateFeeValue.value}'),
+                const SizedBox(height: 4),
+                Text('Grace days: ${controller.lateFeeGraceDays.value}'),
+                const SizedBox(height: 12),
+                FilledButton.icon(
+                  onPressed: () => _openLateFeeDialog(context, controller),
+                  icon: const Icon(Icons.calculate_rounded),
+                  label: const Text('Configure Late Fee Rules'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RemindersTab extends StatelessWidget {
+  const _RemindersTab({required this.controller});
+  final AdminFeeSnapshotController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return _CommonTabShell(
+      title: 'Fee Reminders',
+      actionLabel: 'Send Reminder',
+      onAction: () => _openReminderDialog(context, controller),
+      child: Obx(() {
+        if (controller.reminderLogs.isEmpty) return const _EmptyState(text: 'No reminder logs found.');
+        return Column(
+          children: controller.reminderLogs
+              .map((item) => _DataTile(title: item.title, subtitle: item.status, infoText: item.createdAt))
+              .toList(),
+        );
+      }),
+    );
+  }
+}
+
+class _ReportsTab extends StatelessWidget {
+  const _ReportsTab({required this.controller});
+  final AdminFeeSnapshotController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _SectionTitle(title: 'Fee Reports'),
+        const SizedBox(height: 10),
+        _ThemedBox(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Open detailed fee reports for outstanding balances, collections, exports, and operational finance analysis.',
+              ),
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                onPressed: controller.openFeeReports,
+                icon: const Icon(Icons.bar_chart_rounded),
+                label: const Text('Open Fee Reports'),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CommonTabShell extends StatelessWidget {
+  const _CommonTabShell({
+    required this.title,
+    required this.actionLabel,
+    required this.onAction,
+    required this.child,
+  });
+
+  final String title;
+  final String actionLabel;
+  final VoidCallback onAction;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _SectionTitle(title: title),
+        const SizedBox(height: 10),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: FilledButton.icon(
+            onPressed: onAction,
+            icon: const Icon(Icons.add_rounded),
+            label: Text(actionLabel),
+          ),
+        ),
+        const SizedBox(height: 12),
+        child,
+      ],
+    );
+  }
+}
+
+class _ThemedBox extends StatelessWidget {
+  const _ThemedBox({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+      ),
+      child: child,
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({required this.title});
+  final String title;
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Text(
+      title,
+      style: TextStyle(
+        fontWeight: FontWeight.w800,
+        fontSize: 16,
+        color: isDark ? AppColors.textDark : AppColors.textLight,
+      ),
+    );
+  }
+}
+
+class _DataTile extends StatelessWidget {
+  const _DataTile({
+    required this.title,
+    required this.subtitle,
+    this.trailingText,
+    this.infoText,
+    this.onEdit,
+    this.onDelete,
+  });
+
+  final String title;
+  final String subtitle;
+  final String? trailingText;
+  final String? infoText;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+      ),
+      child: ListTile(
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+        subtitle: Text([subtitle, if (infoText != null && infoText!.isNotEmpty) infoText!].join('\n')),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (trailingText != null) Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Text(trailingText!, style: const TextStyle(fontWeight: FontWeight.w700)),
+            ),
+            if (onEdit != null) IconButton(onPressed: onEdit, icon: const Icon(Icons.edit_rounded)),
+            if (onDelete != null) IconButton(onPressed: onDelete, icon: const Icon(Icons.delete_outline_rounded, color: Colors.red)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({required this.text});
+  final String text;
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+      ),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+      ),
+    );
+  }
+}
+
+Future<void> _openStructureDialog(
+  BuildContext context,
+  AdminFeeSnapshotController controller, {
+  FeeStructureItem? existing,
+}) async {
+  final name = TextEditingController(text: existing?.name ?? '');
+  final className = TextEditingController(text: existing?.className ?? '');
+  final amount = TextEditingController(text: existing == null ? '' : existing.amount.toString());
+  final category = TextEditingController(text: existing?.category ?? '');
+  final ok = await Get.dialog<bool>(
+    AlertDialog(
+      title: Text(existing == null ? 'Add Fee Structure' : 'Edit Fee Structure'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: name, decoration: const InputDecoration(labelText: 'Structure name')),
+            TextField(controller: className, decoration: const InputDecoration(labelText: 'Class')),
+            TextField(controller: category, decoration: const InputDecoration(labelText: 'Category')),
+            TextField(controller: amount, decoration: const InputDecoration(labelText: 'Amount'), keyboardType: TextInputType.number),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
+        FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+      ],
+    ),
+  );
+  if (ok != true) return;
+  await controller.saveStructure(
+    FeeStructureItem(
+      id: existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      name: name.text.trim(),
+      className: className.text.trim(),
+      amount: double.tryParse(amount.text.trim()) ?? 0,
+      category: category.text.trim(),
+    ),
+  );
+}
+
+Future<void> _openInstallmentDialog(
+  BuildContext context,
+  AdminFeeSnapshotController controller, {
+  InstallmentPlan? existing,
+}) async {
+  final title = TextEditingController(text: existing?.title ?? '');
+  final className = TextEditingController(text: existing?.className ?? '');
+  final total = TextEditingController(text: existing == null ? '' : existing.totalAmount.toString());
+  final count = TextEditingController(text: existing == null ? '3' : existing.installments.toString());
+  final ok = await Get.dialog<bool>(
+    AlertDialog(
+      title: Text(existing == null ? 'Add Installment Plan' : 'Edit Installment Plan'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: title, decoration: const InputDecoration(labelText: 'Plan title')),
+            TextField(controller: className, decoration: const InputDecoration(labelText: 'Class')),
+            TextField(controller: total, decoration: const InputDecoration(labelText: 'Total amount'), keyboardType: TextInputType.number),
+            TextField(controller: count, decoration: const InputDecoration(labelText: 'Installments count'), keyboardType: TextInputType.number),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
+        FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+      ],
+    ),
+  );
+  if (ok != true) return;
+  await controller.saveInstallmentPlan(
+    InstallmentPlan(
+      id: existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      title: title.text.trim(),
+      className: className.text.trim(),
+      totalAmount: double.tryParse(total.text.trim()) ?? 0,
+      installments: int.tryParse(count.text.trim()) ?? 1,
+    ),
+  );
+}
+
+Future<void> _openCategoryDialog(
+  BuildContext context,
+  AdminFeeSnapshotController controller, {
+  FeeCategoryConfig? existing,
+}) async {
+  final name = TextEditingController(text: existing?.name ?? '');
+  final desc = TextEditingController(text: existing?.description ?? '');
+  final ok = await Get.dialog<bool>(
+    AlertDialog(
+      title: Text(existing == null ? 'Add Fee Category' : 'Edit Fee Category'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: name, decoration: const InputDecoration(labelText: 'Category name')),
+            TextField(controller: desc, decoration: const InputDecoration(labelText: 'Description')),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
+        FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+      ],
+    ),
+  );
+  if (ok != true) return;
+  await controller.saveCategoryConfig(
+    FeeCategoryConfig(
+      id: existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      name: name.text.trim(),
+      description: desc.text.trim(),
+    ),
+  );
+}
+
+Future<void> _openGatewayDialog(BuildContext context, AdminFeeSnapshotController controller) async {
+  final provider = TextEditingController(text: controller.gatewayProvider.value);
+  final merchant = TextEditingController(text: controller.gatewayMerchantId.value);
+  bool active = controller.gatewayActive.value;
+  final ok = await Get.dialog<bool>(
+    StatefulBuilder(
+      builder: (context, setState) {
+        return AlertDialog(
+          title: const Text('Configure Payment Gateway'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: provider, decoration: const InputDecoration(labelText: 'Provider')),
+                TextField(controller: merchant, decoration: const InputDecoration(labelText: 'Merchant ID')),
+                const SizedBox(height: 8),
+                SwitchListTile(
+                  value: active,
+                  onChanged: (value) => setState(() => active = value),
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Active'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
+            FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+          ],
+        );
+      },
+    ),
+  );
+  if (ok != true) return;
+  await controller.saveGatewayConfig(
+    provider: provider.text.trim(),
+    merchantId: merchant.text.trim(),
+    active: active,
+  );
+}
+
+Future<void> _openLateFeeDialog(BuildContext context, AdminFeeSnapshotController controller) async {
+  String type = controller.lateFeeType.value;
+  final value = TextEditingController(text: controller.lateFeeValue.value.toString());
+  final grace = TextEditingController(text: controller.lateFeeGraceDays.value.toString());
+  final ok = await Get.dialog<bool>(
+    StatefulBuilder(
+      builder: (context, setState) {
+        return AlertDialog(
+          title: const Text('Configure Late Fee'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<String>(
+                  initialValue: type,
+                  decoration: const InputDecoration(labelText: 'Calculation type'),
+                  items: const [
+                    DropdownMenuItem(value: 'percent', child: Text('Percent')),
+                    DropdownMenuItem(value: 'fixed', child: Text('Fixed amount')),
+                  ],
+                  onChanged: (v) => setState(() => type = v ?? 'percent'),
+                ),
+                TextField(controller: value, decoration: const InputDecoration(labelText: 'Value'), keyboardType: TextInputType.number),
+                TextField(controller: grace, decoration: const InputDecoration(labelText: 'Grace days'), keyboardType: TextInputType.number),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
+            FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+          ],
+        );
+      },
+    ),
+  );
+  if (ok != true) return;
+  await controller.saveLateFeeConfig(
+    type: type,
+    value: double.tryParse(value.text.trim()) ?? 0,
+    graceDays: int.tryParse(grace.text.trim()) ?? 0,
+  );
+}
+
+Future<void> _openReminderDialog(BuildContext context, AdminFeeSnapshotController controller) async {
+  final title = TextEditingController(text: 'Fee Payment Reminder');
+  final content = TextEditingController(text: 'Please clear your pending fees to avoid late charges.');
+  final ok = await Get.dialog<bool>(
+    AlertDialog(
+      title: const Text('Send Fee Reminder'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: title, decoration: const InputDecoration(labelText: 'Title')),
+            TextField(controller: content, decoration: const InputDecoration(labelText: 'Message'), maxLines: 3),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
+        FilledButton(
+          onPressed: () => Get.back(result: true),
+          child: const Text('Send'),
+        ),
+      ],
+    ),
+  );
+  if (ok != true) return;
+  await controller.sendFeeReminder(title: title.text.trim(), content: content.text.trim());
 }

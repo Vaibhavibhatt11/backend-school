@@ -149,6 +149,130 @@ class AdminExamRecord {
   }
 }
 
+class AdminQuestionPaperRecord {
+  const AdminQuestionPaperRecord({
+    required this.id,
+    required this.examId,
+    required this.examName,
+    required this.title,
+    required this.fileUrl,
+    required this.uploadedAt,
+  });
+
+  final String id;
+  final String examId;
+  final String examName;
+  final String title;
+  final String fileUrl;
+  final DateTime uploadedAt;
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'examId': examId,
+        'examName': examName,
+        'title': title,
+        'fileUrl': fileUrl,
+        'uploadedAt': uploadedAt.toIso8601String(),
+      };
+
+  factory AdminQuestionPaperRecord.fromJson(Map<String, dynamic> json) {
+    return AdminQuestionPaperRecord(
+      id: json['id']?.toString() ?? '',
+      examId: json['examId']?.toString() ?? '',
+      examName: json['examName']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      fileUrl: json['fileUrl']?.toString() ?? '',
+      uploadedAt: _parseDate(json['uploadedAt']) ?? DateTime.now(),
+    );
+  }
+}
+
+class AdminGradingBand {
+  const AdminGradingBand({
+    required this.id,
+    required this.label,
+    required this.minPercent,
+    required this.maxPercent,
+    required this.gpa,
+  });
+
+  final String id;
+  final String label;
+  final double minPercent;
+  final double maxPercent;
+  final double gpa;
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'label': label,
+        'minPercent': minPercent,
+        'maxPercent': maxPercent,
+        'gpa': gpa,
+      };
+
+  factory AdminGradingBand.fromJson(Map<String, dynamic> json) {
+    return AdminGradingBand(
+      id: json['id']?.toString() ?? '',
+      label: json['label']?.toString() ?? '',
+      minPercent: (json['minPercent'] as num?)?.toDouble() ?? 0,
+      maxPercent: (json['maxPercent'] as num?)?.toDouble() ?? 0,
+      gpa: (json['gpa'] as num?)?.toDouble() ?? 0,
+    );
+  }
+}
+
+class AdminReportCardRecord {
+  const AdminReportCardRecord({
+    required this.id,
+    required this.examId,
+    required this.examName,
+    required this.studentId,
+    required this.studentName,
+    required this.obtainedMarks,
+    required this.maxMarks,
+    required this.grade,
+    required this.isPublished,
+  });
+
+  final String id;
+  final String examId;
+  final String examName;
+  final String studentId;
+  final String studentName;
+  final double obtainedMarks;
+  final double maxMarks;
+  final String grade;
+  final bool isPublished;
+
+  double get percent => maxMarks > 0 ? (obtainedMarks / maxMarks) * 100 : 0;
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'examId': examId,
+        'examName': examName,
+        'studentId': studentId,
+        'studentName': studentName,
+        'obtainedMarks': obtainedMarks,
+        'maxMarks': maxMarks,
+        'grade': grade,
+        'isPublished': isPublished,
+      };
+
+  factory AdminReportCardRecord.fromJson(Map<String, dynamic> json) {
+    return AdminReportCardRecord(
+      id: json['id']?.toString() ?? '',
+      examId: json['examId']?.toString() ?? '',
+      examName: json['examName']?.toString() ?? '',
+      studentId: json['studentId']?.toString() ?? '',
+      studentName: json['studentName']?.toString() ?? '',
+      obtainedMarks: (json['obtainedMarks'] as num?)?.toDouble() ?? 0,
+      maxMarks: (json['maxMarks'] as num?)?.toDouble() ?? 0,
+      grade: json['grade']?.toString() ?? '',
+      isPublished: json['isPublished'] == true,
+    );
+  }
+}
+
 class AdminScheduleController extends GetxController {
   AdminScheduleController(this._adminService);
 
@@ -160,6 +284,11 @@ class AdminScheduleController extends GetxController {
   final timetableSlots = <AdminScheduleSessionRecord>[].obs;
   final liveSessions = <AdminScheduleSessionRecord>[].obs;
   final exams = <AdminExamRecord>[].obs;
+  final questionPapers = <AdminQuestionPaperRecord>[].obs;
+  final gradingBands = <AdminGradingBand>[].obs;
+  final reportCards = <AdminReportCardRecord>[].obs;
+  final selectedExamIdForInsights = ''.obs;
+  final examInsightsGeneratedAt = ''.obs;
   final classOptions = <AdminClassOption>[].obs;
   final subjectOptions = <Map<String, String>>[].obs;
   final staffOptions = <Map<String, String>>[].obs;
@@ -260,7 +389,7 @@ class AdminScheduleController extends GetxController {
         }
       } else {
         if (force || !_examLoaded) {
-          await loadExams();
+          await Future.wait([loadExams(), loadExamWorkbench()]);
           _examLoaded = true;
         }
       }
@@ -323,7 +452,297 @@ class AdminScheduleController extends GetxController {
           .map((item) => AdminExamRecord.fromJson(item.cast<String, dynamic>()))
           .toList(),
     );
+    if (selectedExamIdForInsights.value.isEmpty && exams.isNotEmpty) {
+      selectedExamIdForInsights.value = exams.first.id;
+    }
   }
+
+  Future<void> loadExamWorkbench() async {
+    await Future.wait([
+      _loadExamWorkbenchSettings(),
+      _rebuildReportCardsFromExamData(),
+    ]);
+  }
+
+  Future<void> _loadExamWorkbenchSettings() async {
+    final settings = await _adminService.getSchoolSettings();
+    final examConfig = settings['examManagement'];
+    if (examConfig is! Map) return;
+    final map = Map<String, dynamic>.from(examConfig);
+    questionPapers.assignAll(
+      (map['questionPapers'] as List<dynamic>? ?? const <dynamic>[])
+          .whereType<Map>()
+          .map((e) => AdminQuestionPaperRecord.fromJson(Map<String, dynamic>.from(e)))
+          .toList(),
+    );
+    gradingBands.assignAll(
+      (map['gradingBands'] as List<dynamic>? ?? const <dynamic>[])
+          .whereType<Map>()
+          .map((e) => AdminGradingBand.fromJson(Map<String, dynamic>.from(e)))
+          .toList(),
+    );
+    if (gradingBands.isEmpty) {
+      gradingBands.assignAll(_defaultGradingBands());
+    }
+  }
+
+  Future<void> _rebuildReportCardsFromExamData() async {
+    final records = <AdminReportCardRecord>[];
+    for (final exam in exams) {
+      try {
+        final status = await _adminService.getExamMarksStatus(exam.id);
+        final results = (status['results'] as List<dynamic>? ?? const <dynamic>[])
+            .whereType<Map>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
+        for (final row in results) {
+          final studentId = row['studentId']?.toString() ?? '';
+          final student = row['student'] as Map<String, dynamic>?;
+          final obtained = (row['marks'] as num?)?.toDouble() ?? 0;
+          final studentName = student == null
+              ? (row['studentName']?.toString() ?? '')
+              : '${student['firstName'] ?? ''} ${student['lastName'] ?? ''}'.trim();
+          final grade = row['grade']?.toString().trim().isNotEmpty == true
+              ? row['grade']!.toString()
+              : _gradeFromPercent(
+                  maxMarks: exam.maxMarks,
+                  marks: obtained,
+                );
+          records.add(
+            AdminReportCardRecord(
+              id: '${exam.id}::$studentId',
+              examId: exam.id,
+              examName: exam.name,
+              studentId: studentId,
+              studentName: studentName.isEmpty ? 'Student' : studentName,
+              obtainedMarks: obtained,
+              maxMarks: exam.maxMarks,
+              grade: grade,
+              isPublished: exam.isPublished,
+            ),
+          );
+        }
+      } catch (_) {}
+    }
+    reportCards.assignAll(records);
+    examInsightsGeneratedAt.value = DateTime.now().toIso8601String();
+  }
+
+  Future<void> openQuestionPaperDialog({
+    AdminQuestionPaperRecord? existing,
+  }) async {
+    final titleCtrl = TextEditingController(text: existing?.title ?? '');
+    final urlCtrl = TextEditingController(text: existing?.fileUrl ?? '');
+    String examId = existing?.examId ?? '';
+    final ok = await Get.dialog<bool>(
+      StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text(existing == null ? 'Upload Question Paper' : 'Edit Question Paper'),
+            content: SizedBox(
+              width: 520,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      initialValue: examId,
+                      decoration: const InputDecoration(labelText: 'Exam'),
+                      items: [
+                        const DropdownMenuItem<String>(value: '', child: Text('Select exam')),
+                        ...exams.map(
+                          (exam) => DropdownMenuItem<String>(
+                            value: exam.id,
+                            child: Text(exam.name),
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) => setState(() => examId = value ?? ''),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: titleCtrl,
+                      decoration: const InputDecoration(labelText: 'Paper title'),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: urlCtrl,
+                      decoration: const InputDecoration(labelText: 'File URL'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
+              FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+            ],
+          );
+        },
+      ),
+    );
+    if (ok != true) return;
+    if (examId.isEmpty || titleCtrl.text.trim().isEmpty || urlCtrl.text.trim().isEmpty) {
+      AppToast.show('Exam, title, and file URL are required.');
+      return;
+    }
+    final examName = exams.firstWhereOrNull((e) => e.id == examId)?.name ?? 'Exam';
+    final next = [
+      ...questionPapers.where((p) => p.id != existing?.id),
+      AdminQuestionPaperRecord(
+        id: existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        examId: examId,
+        examName: examName,
+        title: titleCtrl.text.trim(),
+        fileUrl: urlCtrl.text.trim(),
+        uploadedAt: DateTime.now(),
+      ),
+    ];
+    await _saveExamWorkbenchSettings(questionPapersData: next.map((e) => e.toJson()).toList());
+    questionPapers.assignAll(next);
+    AppToast.show('Question paper saved.');
+  }
+
+  Future<void> deleteQuestionPaper(AdminQuestionPaperRecord paper) async {
+    final confirmed = await _confirm(
+      title: 'Delete Question Paper',
+      message: 'Delete ${paper.title}?',
+    );
+    if (!confirmed) return;
+    final next = questionPapers.where((item) => item.id != paper.id).toList();
+    await _saveExamWorkbenchSettings(questionPapersData: next.map((e) => e.toJson()).toList());
+    questionPapers.assignAll(next);
+    AppToast.show('Question paper deleted.');
+  }
+
+  Future<void> openGradingBandDialog({AdminGradingBand? existing}) async {
+    final labelCtrl = TextEditingController(text: existing?.label ?? '');
+    final minCtrl = TextEditingController(text: existing?.minPercent.toString() ?? '');
+    final maxCtrl = TextEditingController(text: existing?.maxPercent.toString() ?? '');
+    final gpaCtrl = TextEditingController(text: existing?.gpa.toString() ?? '');
+    final ok = await Get.dialog<bool>(
+      AlertDialog(
+        title: Text(existing == null ? 'Add Grade Band' : 'Edit Grade Band'),
+        content: SizedBox(
+          width: 420,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: labelCtrl, decoration: const InputDecoration(labelText: 'Grade label')),
+                const SizedBox(height: 10),
+                TextField(controller: minCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Min %')),
+                const SizedBox(height: 10),
+                TextField(controller: maxCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Max %')),
+                const SizedBox(height: 10),
+                TextField(controller: gpaCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'GPA value')),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    final min = double.tryParse(minCtrl.text.trim());
+    final max = double.tryParse(maxCtrl.text.trim());
+    final gpa = double.tryParse(gpaCtrl.text.trim());
+    if (labelCtrl.text.trim().isEmpty || min == null || max == null || gpa == null || min > max) {
+      AppToast.show('Enter valid grading band details.');
+      return;
+    }
+    final next = [
+      ...gradingBands.where((b) => b.id != existing?.id),
+      AdminGradingBand(
+        id: existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        label: labelCtrl.text.trim(),
+        minPercent: min,
+        maxPercent: max,
+        gpa: gpa,
+      ),
+    ]..sort((a, b) => b.maxPercent.compareTo(a.maxPercent));
+    await _saveExamWorkbenchSettings(gradingBandsData: next.map((e) => e.toJson()).toList());
+    gradingBands.assignAll(next);
+    await _rebuildReportCardsFromExamData();
+    AppToast.show('Grading band saved.');
+  }
+
+  Future<void> deleteGradingBand(AdminGradingBand band) async {
+    final confirmed = await _confirm(
+      title: 'Delete Grade Band',
+      message: 'Delete grade ${band.label}?',
+    );
+    if (!confirmed) return;
+    final next = gradingBands.where((item) => item.id != band.id).toList();
+    await _saveExamWorkbenchSettings(gradingBandsData: next.map((e) => e.toJson()).toList());
+    gradingBands.assignAll(next);
+    await _rebuildReportCardsFromExamData();
+    AppToast.show('Grading band deleted.');
+  }
+
+  Future<void> publishResults(AdminExamRecord exam) async {
+    try {
+      if (!exam.isPublished) {
+        await _adminService.publishExam(exam.id);
+      }
+      await loadExams();
+      await _rebuildReportCardsFromExamData();
+      AppToast.show('Results published for ${exam.name}.');
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    }
+  }
+
+  Future<void> _saveExamWorkbenchSettings({
+    List<Map<String, dynamic>>? questionPapersData,
+    List<Map<String, dynamic>>? gradingBandsData,
+  }) async {
+    final settings = await _adminService.getSchoolSettings();
+    final existing = settings['examManagement'];
+    final map = existing is Map<String, dynamic>
+        ? Map<String, dynamic>.from(existing)
+        : <String, dynamic>{};
+    if (questionPapersData != null) map['questionPapers'] = questionPapersData;
+    if (gradingBandsData != null) map['gradingBands'] = gradingBandsData;
+    await _adminService.patchSchoolSettings({'examManagement': map});
+  }
+
+  List<AdminGradingBand> _defaultGradingBands() {
+    return const [
+      AdminGradingBand(id: 'A1', label: 'A+', minPercent: 90, maxPercent: 100, gpa: 4.0),
+      AdminGradingBand(id: 'A2', label: 'A', minPercent: 80, maxPercent: 89.99, gpa: 3.7),
+      AdminGradingBand(id: 'B1', label: 'B+', minPercent: 70, maxPercent: 79.99, gpa: 3.3),
+      AdminGradingBand(id: 'B2', label: 'B', minPercent: 60, maxPercent: 69.99, gpa: 3.0),
+      AdminGradingBand(id: 'C1', label: 'C', minPercent: 50, maxPercent: 59.99, gpa: 2.5),
+      AdminGradingBand(id: 'D1', label: 'D', minPercent: 40, maxPercent: 49.99, gpa: 2.0),
+      AdminGradingBand(id: 'F1', label: 'F', minPercent: 0, maxPercent: 39.99, gpa: 0),
+    ];
+  }
+
+  String _gradeFromPercent({required double maxMarks, required double marks}) {
+    final pct = maxMarks > 0 ? (marks / maxMarks) * 100 : 0;
+    final match = gradingBands.firstWhereOrNull(
+      (band) => pct >= band.minPercent && pct <= band.maxPercent,
+    );
+    return match?.label ?? 'N/A';
+  }
+
+  double get examPassRate {
+    if (reportCards.isEmpty) return 0;
+    final passed = reportCards.where((card) => card.percent >= 40).length;
+    return (passed / reportCards.length) * 100;
+  }
+
+  double get averageScore {
+    if (reportCards.isEmpty) return 0;
+    final total = reportCards.fold<double>(0, (sum, card) => sum + card.percent);
+    return total / reportCards.length;
+  }
+
+  int get publishedResultsCount => exams.where((e) => e.isPublished).length;
 
   Future<void> openTimetableDialog({
     AdminScheduleSessionRecord? existing,
@@ -480,7 +899,7 @@ class AdminScheduleController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: status,
+                      initialValue: status,
                       decoration: const InputDecoration(labelText: 'Status'),
                       items: const ['UPCOMING', 'LIVE', 'ENDED']
                           .map(
@@ -588,7 +1007,7 @@ class AdminScheduleController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: classId,
+                      initialValue: classId,
                       decoration: const InputDecoration(labelText: 'Class'),
                       items: [
                         const DropdownMenuItem<String>(
@@ -607,7 +1026,7 @@ class AdminScheduleController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: subjectId,
+                      initialValue: subjectId,
                       decoration: const InputDecoration(labelText: 'Subject'),
                       items: [
                         const DropdownMenuItem<String>(
@@ -640,7 +1059,7 @@ class AdminScheduleController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: status,
+                      initialValue: status,
                       decoration: const InputDecoration(labelText: 'Status'),
                       items:
                           const ['DRAFT', 'SCHEDULED', 'COMPLETED', 'PUBLISHED']
@@ -1059,7 +1478,7 @@ class AdminScheduleController extends GetxController {
         ),
         const SizedBox(height: 10),
         DropdownButtonFormField<String>(
-          value: classId,
+          initialValue: classId,
           decoration: const InputDecoration(labelText: 'Class'),
           items: [
             const DropdownMenuItem<String>(value: '', child: Text('No class')),
@@ -1074,7 +1493,7 @@ class AdminScheduleController extends GetxController {
         ),
         const SizedBox(height: 10),
         DropdownButtonFormField<String>(
-          value: subjectId,
+          initialValue: subjectId,
           decoration: const InputDecoration(labelText: 'Subject'),
           items: [
             const DropdownMenuItem<String>(
@@ -1092,7 +1511,7 @@ class AdminScheduleController extends GetxController {
         ),
         const SizedBox(height: 10),
         DropdownButtonFormField<String>(
-          value: teacherId,
+          initialValue: teacherId,
           decoration: const InputDecoration(labelText: 'Teacher'),
           items: [
             const DropdownMenuItem<String>(

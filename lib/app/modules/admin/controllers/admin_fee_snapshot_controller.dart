@@ -1,38 +1,159 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:erp_frontend/common/services/admin/admin_service.dart';
 import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
+import 'package:get/get.dart';
 
 class FeeCategory {
+  FeeCategory(this.name, this.due, this.collected, this.colorValue);
   final String name;
   final double due;
   final double collected;
-  final Color color;
-  FeeCategory(this.name, this.due, this.collected, this.color);
+  final int colorValue;
+}
+
+class FeeStructureItem {
+  FeeStructureItem({
+    required this.id,
+    required this.name,
+    required this.className,
+    required this.amount,
+    required this.category,
+  });
+
+  final String id;
+  final String name;
+  final String className;
+  final double amount;
+  final String category;
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'className': className,
+        'amount': amount,
+        'category': category,
+      };
+
+  factory FeeStructureItem.fromJson(Map<String, dynamic> json) => FeeStructureItem(
+        id: (json['id'] ?? '').toString(),
+        name: (json['name'] ?? '').toString(),
+        className: (json['className'] ?? '').toString(),
+        amount: (json['amount'] as num?)?.toDouble() ?? 0,
+        category: (json['category'] ?? '').toString(),
+      );
+}
+
+class InstallmentPlan {
+  InstallmentPlan({
+    required this.id,
+    required this.title,
+    required this.className,
+    required this.totalAmount,
+    required this.installments,
+  });
+
+  final String id;
+  final String title;
+  final String className;
+  final double totalAmount;
+  final int installments;
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'className': className,
+        'totalAmount': totalAmount,
+        'installments': installments,
+      };
+
+  factory InstallmentPlan.fromJson(Map<String, dynamic> json) => InstallmentPlan(
+        id: (json['id'] ?? '').toString(),
+        title: (json['title'] ?? '').toString(),
+        className: (json['className'] ?? '').toString(),
+        totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0,
+        installments: (json['installments'] as num?)?.toInt() ?? 1,
+      );
+}
+
+class FeeCategoryConfig {
+  FeeCategoryConfig({
+    required this.id,
+    required this.name,
+    required this.description,
+  });
+
+  final String id;
+  final String name;
+  final String description;
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'description': description,
+      };
+
+  factory FeeCategoryConfig.fromJson(Map<String, dynamic> json) => FeeCategoryConfig(
+        id: (json['id'] ?? '').toString(),
+        name: (json['name'] ?? '').toString(),
+        description: (json['description'] ?? '').toString(),
+      );
+}
+
+class FeeReceiptItem {
+  FeeReceiptItem({
+    required this.receiptNo,
+    required this.studentName,
+    required this.amount,
+    required this.mode,
+    required this.date,
+  });
+
+  final String receiptNo;
+  final String studentName;
+  final double amount;
+  final String mode;
+  final String date;
+}
+
+class ReminderLogItem {
+  ReminderLogItem({
+    required this.title,
+    required this.createdAt,
+    required this.status,
+  });
+
+  final String title;
+  final String createdAt;
+  final String status;
 }
 
 class AdminFeeSnapshotController extends GetxController {
   AdminFeeSnapshotController(this._adminService);
 
   final AdminService _adminService;
+
   final isLoading = false.obs;
+  final isSaving = false.obs;
   final totalDues = 0.0.obs;
   final collected = 0.0.obs;
   final pending = 0.0.obs;
   final overallPercent = 0.0.obs;
   final weekVsLastWeekPct = 0.0.obs;
   final categories = <FeeCategory>[].obs;
-  /// From `GET /school/fees/summary` (`docs/.../get-school-fees-summary.response.schema.json`).
   final feesSummarySchemaVersion = RxnString();
 
-  static const List<Color> _categoryColors = [
-    Color(0xFF137FEC),
-    Colors.amber,
-    Colors.purple,
-    Colors.teal,
-    Colors.deepOrange,
-  ];
+  final structures = <FeeStructureItem>[].obs;
+  final installmentPlans = <InstallmentPlan>[].obs;
+  final categoryConfigs = <FeeCategoryConfig>[].obs;
+  final receipts = <FeeReceiptItem>[].obs;
+  final reminderLogs = <ReminderLogItem>[].obs;
+
+  final gatewayProvider = ''.obs;
+  final gatewayActive = false.obs;
+  final gatewayMerchantId = ''.obs;
+  final lateFeeType = 'percent'.obs;
+  final lateFeeValue = 0.0.obs;
+  final lateFeeGraceDays = 0.obs;
 
   @override
   void onInit() {
@@ -50,31 +171,241 @@ class AdminFeeSnapshotController extends GetxController {
       collected.value = (data['todayCollected'] as num?)?.toDouble() ?? 0;
       pending.value = weekPending;
       weekVsLastWeekPct.value = (data['vsLastWeekPct'] as num?)?.toDouble() ?? 0;
-      final total = totalDues.value;
-      overallPercent.value = total > 0 ? (collected.value / total) * 100 : 0;
+      overallPercent.value = totalDues.value > 0 ? (collected.value / totalDues.value) * 100 : 0;
 
-      try {
-        final summary = await _adminService.getFeesSummary();
-        feesSummarySchemaVersion.value = summary['schemaVersion']?.toString();
-        categories.assignAll(_parseCategoriesFromSummary(summary));
-      } catch (e) {
-        feesSummarySchemaVersion.value = null;
-        categories.clear();
-        AppToast.show(dioOrApiErrorMessage(e));
-      }
+      await Future.wait([
+        _loadCategoriesFromSummary(),
+        _loadFeeManagementSettings(),
+        _loadFeeReceipts(),
+        _loadReminderLogs(),
+      ]);
     } catch (e) {
       AppToast.show(dioOrApiErrorMessage(e));
-      categories.clear();
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Prefer stable `data.categories` from fees summary schema.
+  Future<void> _loadCategoriesFromSummary() async {
+    try {
+      final summary = await _adminService.getFeesSummary();
+      feesSummarySchemaVersion.value = summary['schemaVersion']?.toString();
+      categories.assignAll(_parseCategoriesFromSummary(summary));
+    } catch (_) {
+      categories.clear();
+    }
+  }
+
+  Future<void> _loadFeeManagementSettings() async {
+    final settings = await _adminService.getSchoolSettings();
+    final feeConfig = settings['feeManagement'];
+    if (feeConfig is! Map) return;
+    final map = Map<String, dynamic>.from(feeConfig);
+    structures.assignAll(
+      (map['structures'] as List<dynamic>? ?? const <dynamic>[])
+          .whereType<Map>()
+          .map((e) => FeeStructureItem.fromJson(Map<String, dynamic>.from(e)))
+          .toList(),
+    );
+    installmentPlans.assignAll(
+      (map['installments'] as List<dynamic>? ?? const <dynamic>[])
+          .whereType<Map>()
+          .map((e) => InstallmentPlan.fromJson(Map<String, dynamic>.from(e)))
+          .toList(),
+    );
+    categoryConfigs.assignAll(
+      (map['categories'] as List<dynamic>? ?? const <dynamic>[])
+          .whereType<Map>()
+          .map((e) => FeeCategoryConfig.fromJson(Map<String, dynamic>.from(e)))
+          .toList(),
+    );
+    final gateway = map['gateway'];
+    if (gateway is Map) {
+      final g = Map<String, dynamic>.from(gateway);
+      gatewayProvider.value = (g['provider'] ?? '').toString();
+      gatewayActive.value = g['active'] == true;
+      gatewayMerchantId.value = (g['merchantId'] ?? '').toString();
+    }
+    final lateFee = map['lateFee'];
+    if (lateFee is Map) {
+      final lf = Map<String, dynamic>.from(lateFee);
+      lateFeeType.value = (lf['type'] ?? 'percent').toString();
+      lateFeeValue.value = (lf['value'] as num?)?.toDouble() ?? 0;
+      lateFeeGraceDays.value = (lf['graceDays'] as num?)?.toInt() ?? 0;
+    }
+  }
+
+  Future<void> _loadFeeReceipts() async {
+    final now = DateTime.now();
+    final from = DateTime(now.year, now.month, 1).toIso8601String();
+    final to = now.toIso8601String();
+    final data = await _adminService.getFeesReport(dateFrom: from, dateTo: to);
+    final collections = (data['collections'] is Map)
+        ? Map<String, dynamic>.from(data['collections'] as Map)
+        : <String, dynamic>{};
+    final items = (collections['items'] ?? collections['records'] ?? collections['rows']) as List<dynamic>? ?? const <dynamic>[];
+    receipts.assignAll(
+      items.whereType<Map>().map((raw) {
+        final row = Map<String, dynamic>.from(raw);
+        final student = (row['studentName'] ?? row['student']?['name'] ?? '').toString();
+        final amount = (row['amount'] ?? row['paidAmount'] ?? 0 as num).toDouble();
+        return FeeReceiptItem(
+          receiptNo: (row['receiptNo'] ?? row['receiptNumber'] ?? row['id'] ?? 'N/A').toString(),
+          studentName: student.isEmpty ? 'Student' : student,
+          amount: amount,
+          mode: (row['paymentMode'] ?? row['mode'] ?? 'Unknown').toString(),
+          date: (row['date'] ?? row['paidAt'] ?? row['createdAt'] ?? '').toString(),
+        );
+      }).toList(),
+    );
+  }
+
+  Future<void> _loadReminderLogs() async {
+    final data = await _adminService.getAnnouncements(page: 1, limit: 20);
+    final items = (data['items'] as List<dynamic>? ?? const <dynamic>[]);
+    reminderLogs.assignAll(
+      items.whereType<Map>().map((raw) {
+        final row = Map<String, dynamic>.from(raw);
+        return ReminderLogItem(
+          title: (row['title'] ?? '').toString(),
+          createdAt: (row['createdAt'] ?? '').toString(),
+          status: (row['status'] ?? '').toString(),
+        );
+      }).toList(),
+    );
+  }
+
+  Future<void> saveStructure(FeeStructureItem item) async {
+    final next = [...structures.where((e) => e.id != item.id), item];
+    await _saveFeeManagementSettings(structuresData: next.map((e) => e.toJson()).toList());
+    structures.assignAll(next);
+    AppToast.show('Fee structure saved.');
+  }
+
+  Future<void> deleteStructure(String id) async {
+    final next = structures.where((e) => e.id != id).toList();
+    await _saveFeeManagementSettings(structuresData: next.map((e) => e.toJson()).toList());
+    structures.assignAll(next);
+    AppToast.show('Fee structure removed.');
+  }
+
+  Future<void> saveInstallmentPlan(InstallmentPlan item) async {
+    final next = [...installmentPlans.where((e) => e.id != item.id), item];
+    await _saveFeeManagementSettings(installmentsData: next.map((e) => e.toJson()).toList());
+    installmentPlans.assignAll(next);
+    AppToast.show('Installment plan saved.');
+  }
+
+  Future<void> deleteInstallmentPlan(String id) async {
+    final next = installmentPlans.where((e) => e.id != id).toList();
+    await _saveFeeManagementSettings(installmentsData: next.map((e) => e.toJson()).toList());
+    installmentPlans.assignAll(next);
+    AppToast.show('Installment plan removed.');
+  }
+
+  Future<void> saveCategoryConfig(FeeCategoryConfig item) async {
+    final next = [...categoryConfigs.where((e) => e.id != item.id), item];
+    await _saveFeeManagementSettings(categoriesData: next.map((e) => e.toJson()).toList());
+    categoryConfigs.assignAll(next);
+    AppToast.show('Fee category saved.');
+  }
+
+  Future<void> deleteCategoryConfig(String id) async {
+    final next = categoryConfigs.where((e) => e.id != id).toList();
+    await _saveFeeManagementSettings(categoriesData: next.map((e) => e.toJson()).toList());
+    categoryConfigs.assignAll(next);
+    AppToast.show('Fee category removed.');
+  }
+
+  Future<void> saveGatewayConfig({
+    required String provider,
+    required String merchantId,
+    required bool active,
+  }) async {
+    gatewayProvider.value = provider;
+    gatewayMerchantId.value = merchantId;
+    gatewayActive.value = active;
+    await _saveFeeManagementSettings(
+      gatewayData: {
+        'provider': provider,
+        'merchantId': merchantId,
+        'active': active,
+      },
+    );
+    AppToast.show('Payment gateway settings updated.');
+  }
+
+  Future<void> saveLateFeeConfig({
+    required String type,
+    required double value,
+    required int graceDays,
+  }) async {
+    lateFeeType.value = type;
+    lateFeeValue.value = value;
+    lateFeeGraceDays.value = graceDays;
+    await _saveFeeManagementSettings(
+      lateFeeData: {
+        'type': type,
+        'value': value,
+        'graceDays': graceDays,
+      },
+    );
+    AppToast.show('Late fee settings updated.');
+  }
+
+  Future<void> sendFeeReminder({
+    required String title,
+    required String content,
+  }) async {
+    isSaving.value = true;
+    try {
+      final created = await _adminService.createAnnouncement(
+        title: title,
+        content: content,
+        audience: 'PARENTS',
+        status: 'DRAFT',
+      );
+      final id = (created['id'] ?? '').toString();
+      if (id.isNotEmpty) {
+        await _adminService.sendAnnouncement(id);
+      }
+      await _loadReminderLogs();
+      AppToast.show('Fee reminder sent.');
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    } finally {
+      isSaving.value = false;
+    }
+  }
+
+  Future<void> openFeeReports() async {
+    await Get.toNamed('/admin-reports', arguments: {'tabIndex': 2});
+  }
+
+  Future<void> _saveFeeManagementSettings({
+    List<Map<String, dynamic>>? structuresData,
+    List<Map<String, dynamic>>? installmentsData,
+    List<Map<String, dynamic>>? categoriesData,
+    Map<String, dynamic>? gatewayData,
+    Map<String, dynamic>? lateFeeData,
+  }) async {
+    final existingSettings = await _adminService.getSchoolSettings();
+    final feeManagement = existingSettings['feeManagement'];
+    final current = feeManagement is Map<String, dynamic>
+        ? Map<String, dynamic>.from(feeManagement)
+        : <String, dynamic>{};
+    if (structuresData != null) current['structures'] = structuresData;
+    if (installmentsData != null) current['installments'] = installmentsData;
+    if (categoriesData != null) current['categories'] = categoriesData;
+    if (gatewayData != null) current['gateway'] = gatewayData;
+    if (lateFeeData != null) current['lateFee'] = lateFeeData;
+    await _adminService.patchSchoolSettings({'feeManagement': current});
+  }
+
   List<FeeCategory> _parseCategoriesFromSummary(Map<String, dynamic> summary) {
     final raw = summary['categories'];
     if (raw is! List) return [];
-
+    const colors = <int>[0xFF137FEC, 0xFFFFC107, 0xFF9C27B0, 0xFF009688, 0xFFFF5722];
     final out = <FeeCategory>[];
     var i = 0;
     for (final item in raw) {
@@ -84,9 +415,8 @@ class AdminFeeSnapshotController extends GetxController {
       final due = _asDouble(m['amountDue']);
       final coll = _asDouble(m['amountPaid']);
       if (due <= 0 && coll <= 0) continue;
-      final color = _categoryColors[i % _categoryColors.length];
+      out.add(FeeCategory(name, due > 0 ? due : coll, coll, colors[i % colors.length]));
       i++;
-      out.add(FeeCategory(name, due > 0 ? due : coll, coll, color));
     }
     return out;
   }
@@ -96,6 +426,7 @@ class AdminFeeSnapshotController extends GetxController {
     return double.tryParse(v?.toString() ?? '') ?? 0;
   }
 
+  // Backward compatibility with older view code.
   void onViewDetails() {
     loadFeeSnapshot();
   }

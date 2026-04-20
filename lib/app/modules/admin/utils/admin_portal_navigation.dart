@@ -330,7 +330,7 @@ class AdminPortalNavigation {
   }
 
   static void openScreen(AdminPortalScreen screen) {
-    SafeNavigation.offNamed(screen.route, arguments: screen.arguments);
+    SafeNavigation.toNamed(screen.route, arguments: screen.arguments);
   }
 
   static void openFromCatalog({
@@ -343,33 +343,33 @@ class AdminPortalNavigation {
     bool has(String s) => m.contains(s) || f.contains(s);
 
     if (m == 'fees' || has('fee') && !has('feedback')) {
-      SafeNavigation.offNamed(AppRoutes.ADMIN_FEE_SNAPSHOT);
+      SafeNavigation.toNamed(AppRoutes.ADMIN_FEE_SNAPSHOT);
       return;
     }
     if (m == 'attendance' || has('attendance') || has('leave')) {
-      SafeNavigation.offNamed(AppRoutes.ADMIN_ATTENDANCE);
+      SafeNavigation.toNamed(AppRoutes.ADMIN_ATTENDANCE);
       return;
     }
     if (m == 'admissions' ||
         has('admission') ||
         has('approv') ||
         has('waiting')) {
-      SafeNavigation.offNamed(AppRoutes.ADMIN_ADMISSIONS);
+      SafeNavigation.toNamed(AppRoutes.ADMIN_ADMISSIONS);
       return;
     }
     if (has('parent') || has('guardian')) {
-      SafeNavigation.offNamed(
+      SafeNavigation.toNamed(
         AppRoutes.ADMIN_PEOPLE,
         arguments: {'initialTab': 0},
       );
       return;
     }
     if (m == 'students' || has('student') || has('enroll')) {
-      SafeNavigation.offNamed(AppRoutes.ADMIN_STUDENTS);
+      SafeNavigation.toNamed(AppRoutes.ADMIN_STUDENTS);
       return;
     }
     if (m == 'staff' || has('staff') || has('teacher') || has('employee')) {
-      SafeNavigation.offNamed(AppRoutes.ADMIN_STAFF);
+      SafeNavigation.toNamed(AppRoutes.ADMIN_STAFF);
       return;
     }
     if (m == 'academics' ||
@@ -377,56 +377,56 @@ class AdminPortalNavigation {
         has('subject') ||
         has('curriculum') ||
         has('syllabus')) {
-      SafeNavigation.offNamed(
+      SafeNavigation.toNamed(
         AppRoutes.ADMIN_ACADEMICS,
         arguments: {'initialTab': has('subject') ? 1 : 0},
       );
       return;
     }
     if (m == 'timetable' || has('timetable') || has('schedule')) {
-      SafeNavigation.offNamed(
+      SafeNavigation.toNamed(
         AppRoutes.ADMIN_SCHEDULE,
         arguments: {'initialTab': 0},
       );
       return;
     }
     if (m == 'exams' || has('exam') || has('marks') || has('result')) {
-      SafeNavigation.offNamed(
+      SafeNavigation.toNamed(
         AppRoutes.ADMIN_SCHEDULE,
         arguments: {'initialTab': 1},
       );
       return;
     }
     if (m == 'library' || has('library') || has('book')) {
-      SafeNavigation.offNamed(
+      SafeNavigation.toNamed(
         AppRoutes.ADMIN_RESOURCES,
         arguments: {'initialTab': 0},
       );
       return;
     }
     if (m == 'inventory' || has('inventory') || has('asset') || has('stock')) {
-      SafeNavigation.offNamed(
+      SafeNavigation.toNamed(
         AppRoutes.ADMIN_RESOURCES,
         arguments: {'initialTab': 1},
       );
       return;
     }
     if (m == 'transport' || has('transport') || has('route') || has('bus')) {
-      SafeNavigation.offNamed(
+      SafeNavigation.toNamed(
         AppRoutes.ADMIN_OPERATIONS,
         arguments: {'initialTab': 0},
       );
       return;
     }
     if (m == 'hostel' || has('hostel') || has('room') || has('visitor')) {
-      SafeNavigation.offNamed(
+      SafeNavigation.toNamed(
         AppRoutes.ADMIN_OPERATIONS,
         arguments: {'initialTab': 1},
       );
       return;
     }
     if (m == 'events' || has('event') || has('activity') || has('gallery')) {
-      SafeNavigation.offNamed(
+      SafeNavigation.toNamed(
         AppRoutes.ADMIN_OPERATIONS,
         arguments: {'initialTab': 2},
       );
@@ -439,36 +439,36 @@ class AdminPortalNavigation {
         has('notif') ||
         has('sms') ||
         has('whatsapp')) {
-      SafeNavigation.offNamed(
+      SafeNavigation.toNamed(
         AppRoutes.ADMIN_NOTICE_BOARD,
         arguments: {'tabIndex': 3},
       );
       return;
     }
     if (m == 'reports' || has('report') || has('analytic')) {
-      SafeNavigation.offNamed(
+      SafeNavigation.toNamed(
         AppRoutes.ADMIN_REPORTS,
         arguments: {'tabIndex': 2},
       );
       return;
     }
     if (m == 'security' || has('audit') || has('permission')) {
-      SafeNavigation.offNamed(AppRoutes.ADMIN_AUDIT_LOGS);
+      SafeNavigation.toNamed(AppRoutes.ADMIN_AUDIT_LOGS);
       return;
     }
     if (m == 'settings' || has('setting') || has('privacy')) {
-      SafeNavigation.offNamed(
+      SafeNavigation.toNamed(
         AppRoutes.ADMIN_SETTINGS,
         arguments: {'tabIndex': 4},
       );
       return;
     }
     if (m == 'dashboard') {
-      SafeNavigation.offNamed(AppRoutes.ADMIN_HOME, arguments: {'tabIndex': 0});
+      SafeNavigation.toNamed(AppRoutes.ADMIN_HOME, arguments: {'tabIndex': 0});
       return;
     }
     if (m == 'payroll') {
-      SafeNavigation.offNamed(
+      SafeNavigation.toNamed(
         AppRoutes.ADMIN_REPORTS,
         arguments: {'tabIndex': 2},
       );
@@ -481,7 +481,7 @@ class AdminPortalNavigation {
       return;
     }
 
-    SafeNavigation.offNamed(
+    SafeNavigation.toNamed(
       AppRoutes.ADMIN_FEATURE_DETAIL,
       arguments: {'moduleId': moduleId, 'feature': feature},
     );

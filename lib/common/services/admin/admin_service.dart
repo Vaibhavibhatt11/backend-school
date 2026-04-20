@@ -86,6 +86,45 @@ class AdminService {
     return extractApiData(res.data, context: 'attendance overview');
   }
 
+  Future<Map<String, dynamic>> getAttendanceRecords({
+    required String type,
+    String? date,
+    String? className,
+    String? section,
+    int page = 1,
+    int limit = 200,
+  }) async {
+    final query = <String, dynamic>{
+      'type': type,
+      'page': page,
+      'limit': limit,
+      if (date != null && date.isNotEmpty) 'date': date,
+      if (className != null && className.isNotEmpty) 'className': className,
+      if (section != null && section.isNotEmpty) 'section': section,
+    };
+    final res = await _apiClient.get(
+      ApiEndpoints.schoolAttendanceRecords,
+      query: query,
+    );
+    return extractApiData(res.data, context: 'attendance records');
+  }
+
+  Future<Map<String, dynamic>> markAttendanceBulk({
+    required String type,
+    required String date,
+    required List<Map<String, dynamic>> records,
+  }) async {
+    final res = await _apiClient.post(
+      ApiEndpoints.schoolAttendanceBulkMark,
+      data: {
+        'type': type,
+        'date': date,
+        'records': records,
+      },
+    );
+    return extractApiData(res.data, context: 'mark attendance bulk');
+  }
+
   Future<Map<String, dynamic>> getProfileMe() async {
     final res = await _apiClient.get(ApiEndpoints.schoolProfileMe);
     return extractApiData(res.data, context: 'admin profile me');
@@ -440,7 +479,14 @@ class AdminService {
     return extractApiData(res.data, context: 'syllabus');
   }
 
-  Future<Map<String, dynamic>> getLessonPlans({String? classId, String? subjectId}
+  Future<Map<String, dynamic>> getLessonPlans({String? classId, String? subjectId}) async {
+    final res = await _apiClient.get('/school/academics/lesson-plans', query: {
+      if (classId != null) 'classId': classId,
+      if (subjectId != null) 'subjectId': subjectId,
+    });
+    return extractApiData(res.data, context: 'lesson plans');
+  }
+
   Future<Map<String, dynamic>> createSyllabus(Map<String, dynamic> payload) async {
     final res = await _apiClient.post('/school/academics/syllabus', data: payload);
     return extractApiData(res.data, context: 'create syllabus');
@@ -474,12 +520,6 @@ class AdminService {
   Future<Map<String, dynamic>> deleteStudyMaterial(String id) async {
     final res = await _apiClient.dio.delete('${ApiEndpoints.schoolStudyMaterials}/$id');
     return extractApiData(res.data, context: 'delete study material');
-  }) async {
-    final res = await _apiClient.get('/school/academics/lesson-plans', query: {
-      if (classId != null) 'classId': classId,
-      if (subjectId != null) 'subjectId': subjectId,
-    });
-    return extractApiData(res.data, context: 'lesson plans');
   }
 
   Future<Map<String, dynamic>> getAttendanceReport({

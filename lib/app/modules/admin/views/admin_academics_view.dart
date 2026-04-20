@@ -10,132 +10,163 @@ class AdminAcademicsView extends GetView<AdminAcademicsController> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
-      body: CustomScrollView(
-        slivers: [
-          _buildSliverAppBar(context),
-          SliverToBoxAdapter(child: _buildDashboardStats(context)),
-          SliverPadding(
-            padding: const EdgeInsets.all(16),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 0.85,
-              ),
-              delegate: SliverChildListDelegate([
+      backgroundColor: isDark
+          ? AppColors.backgroundDark
+          : AppColors.backgroundLight,
+      appBar: AppBar(
+        title: const Text('Academic Management'),
+        backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
+      ),
+      body: RefreshIndicator(
+        onRefresh: controller.loadInitialData,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          children: [
+            _buildHeaderCard(context),
+            const SizedBox(height: 14),
+            _buildDashboardStats(context),
+            const SizedBox(height: 20),
+            const _SectionTitle(title: 'Academic Workflows'),
+            const SizedBox(height: 10),
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.88,
+              children: [
                 _CategoryCard(
                   title: 'Classes & Sections',
                   subtitle: 'Structure your grades',
                   icon: Icons.meeting_room_rounded,
-                  color: Colors.blue,
                   onTap: () => _showTabSheet(context, 0),
                 ),
                 _CategoryCard(
                   title: 'Subjects & Curriculum',
                   subtitle: 'Academic framework',
                   icon: Icons.menu_book_rounded,
-                  color: Colors.purple,
                   onTap: () => _showTabSheet(context, 1),
                 ),
                 _CategoryCard(
                   title: 'Syllabus Tracker',
                   subtitle: 'Course coverage progress',
                   icon: Icons.track_changes_rounded,
-                  color: Colors.orange,
                   onTap: () => _showTabSheet(context, 2),
                 ),
                 _CategoryCard(
                   title: 'Planning & Execution',
-                  subtitle: 'Lesson plans & Notes',
+                  subtitle: 'Lesson plans & notes',
                   icon: Icons.edit_calendar_rounded,
-                  color: Colors.green,
                   onTap: () => _showTabSheet(context, 3),
                 ),
                 _CategoryCard(
                   title: 'Materials Vault',
                   subtitle: 'Digital study assets',
                   icon: Icons.cloud_upload_rounded,
-                  color: Colors.teal,
                   onTap: () => _showTabSheet(context, 4),
                 ),
                 _CategoryCard(
                   title: 'Academic Reports',
                   subtitle: 'Performance insights',
                   icon: Icons.analytics_rounded,
-                  color: Colors.indigo,
-                  onTap: () => Get.toNamed('/admin-reports', arguments: {'tabIndex': 2}),
+                  onTap: () =>
+                      Get.toNamed('/admin-reports', arguments: {'tabIndex': 2}),
                 ),
-              ]),
+              ],
             ),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 32)),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildSliverAppBar(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return SliverAppBar(
-      expandedHeight: 120,
-      pinned: true,
-      backgroundColor: isDark ? AppColors.surfaceDark : AppColors.primary,
-      flexibleSpace: FlexibleSpaceBar(
-        title: const Text('Academic Management', style: TextStyle(fontWeight: FontWeight.w800)),
-        background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                AppColors.primary,
-                AppColors.primary.withValues(alpha: 0.8),
+  Widget _buildHeaderCard(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColors.primary, AppColors.primaryDark],
+        ),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.menu_book_rounded, color: Colors.white),
+          ),
+          const SizedBox(width: 14),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Academic Management',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 19,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Manage classes, syllabus, lesson plans and resources.',
+                  style: TextStyle(color: Colors.white70),
+                ),
               ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
             ),
           ),
-        ),
+        ],
       ),
-      actions: [
-        IconButton(
-          onPressed: controller.loadInitialData,
-          icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-        ),
-      ],
     );
   }
 
   Widget _buildDashboardStats(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.all(20),
-      child: Obx(() => Row(
-        children: [
-          Expanded(
-            child: _QuickStat(
-              label: 'Classes',
-              value: controller.classes.length.toString(),
-              icon: Icons.business_rounded,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
+      ),
+      child: Obx(
+        () => Row(
+          children: [
+            Expanded(
+              child: _QuickStat(
+                label: 'Classes',
+                value: controller.classes.length.toString(),
+                icon: Icons.business_rounded,
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _QuickStat(
-              label: 'Subjects',
-              value: controller.subjects.length.toString(),
-              icon: Icons.library_books_rounded,
+            const SizedBox(width: 12),
+            Expanded(
+              child: _QuickStat(
+                label: 'Subjects',
+                value: controller.subjects.length.toString(),
+                icon: Icons.library_books_rounded,
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _QuickStat(
-              label: 'Materials',
-              value: controller.materials.length.toString(),
-              icon: Icons.attachment_rounded,
+            const SizedBox(width: 12),
+            Expanded(
+              child: _QuickStat(
+                label: 'Materials',
+                value: controller.materials.length.toString(),
+                icon: Icons.attachment_rounded,
+              ),
             ),
-          ),
-        ],
-      )),
+          ],
+        ),
+      ),
     );
   }
 
@@ -145,7 +176,7 @@ class AdminAcademicsView extends GetView<AdminAcademicsController> {
       Container(
         height: Get.height * 0.9,
         decoration: BoxDecoration(
-          color: isDark ? AppColors.backgroundDark : Colors.white,
+          color: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         ),
         child: Column(
@@ -159,25 +190,50 @@ class AdminAcademicsView extends GetView<AdminAcademicsController> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
+            const SizedBox(height: 10),
+            const Text(
+              'Academic Workbench',
+              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+            ),
+            const SizedBox(height: 10),
             Expanded(
               child: DefaultTabController(
                 length: 5,
                 initialIndex: initialIndex,
                 child: Column(
                   children: [
-                    TabBar(
-                      isScrollable: true,
-                      tabAlignment: TabAlignment.start,
-                      indicatorColor: AppColors.primary,
-                      labelColor: AppColors.primary,
-                      unselectedLabelColor: Colors.grey,
-                      tabs: const [
-                        Tab(text: 'Classes'),
-                        Tab(text: 'Subjects'),
-                        Tab(text: 'Syllabus'),
-                        Tab(text: 'Lesson Plans'),
-                        Tab(text: 'Materials'),
-                      ],
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: isDark ? AppColors.surfaceDark : Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isDark
+                              ? AppColors.borderDark
+                              : AppColors.borderLight,
+                        ),
+                      ),
+                      child: TabBar(
+                        isScrollable: true,
+                        tabAlignment: TabAlignment.start,
+                        indicator: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        indicatorPadding: const EdgeInsets.all(6),
+                        dividerColor: Colors.transparent,
+                        labelColor: AppColors.primary,
+                        unselectedLabelColor: isDark
+                            ? AppColors.textSecondaryDark
+                            : AppColors.textSecondaryLight,
+                        tabs: const [
+                          Tab(text: 'Classes'),
+                          Tab(text: 'Subjects'),
+                          Tab(text: 'Syllabus'),
+                          Tab(text: 'Lesson Plans'),
+                          Tab(text: 'Materials'),
+                        ],
+                      ),
                     ),
                     Expanded(
                       child: TabBarView(
@@ -207,14 +263,12 @@ class _CategoryCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.icon,
-    required this.color,
     required this.onTap,
   });
 
   final String title;
   final String subtitle;
   final IconData icon;
-  final Color color;
   final VoidCallback onTap;
 
   @override
@@ -224,43 +278,46 @@ class _CategoryCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(24),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isDark ? AppColors.surfaceDark : Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: isDark ? AppColors.borderDark : AppColors.borderLight,
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(16),
+        child: SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: AppColors.primary, size: 22),
               ),
-              child: Icon(icon, color: color, size: 28),
-            ),
-            const Spacer(),
-            Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: TextStyle(color: Colors.grey[600], fontSize: 12),
-            ),
-          ],
+              const SizedBox(height: 12),
+              Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 15,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -268,7 +325,11 @@ class _CategoryCard extends StatelessWidget {
 }
 
 class _QuickStat extends StatelessWidget {
-  const _QuickStat({required this.label, required this.value, required this.icon});
+  const _QuickStat({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
   final String label;
   final String value;
   final IconData icon;
@@ -291,13 +352,41 @@ class _QuickStat extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             value,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: isDark ? AppColors.textDark : AppColors.textLight,
+            ),
           ),
           Text(
             label,
-            style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+            style: TextStyle(
+              fontSize: 11,
+              color: isDark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight,
+            ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Text(
+      title,
+      style: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w800,
+        color: isDark ? AppColors.textDark : AppColors.textLight,
       ),
     );
   }
@@ -319,12 +408,16 @@ class _ClassesTabView extends StatelessWidget {
             onPressed: () => controller.openClassDialog(),
             icon: const Icon(Icons.add),
             label: const Text('Add New Class'),
-            style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(double.infinity, 50),
+            ),
           ),
         ),
         Expanded(
           child: Obx(() {
-            if (controller.isClassesLoading.value) return const Center(child: CircularProgressIndicator());
+            if (controller.isClassesLoading.value) {
+              return const Center(child: CircularProgressIndicator());
+            }
             return ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: controller.classes.length,
@@ -333,14 +426,25 @@ class _ClassesTabView extends StatelessWidget {
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
                   child: ListTile(
-                    leading: const CircleAvatar(child: Icon(Icons.meeting_room)),
+                    leading: const CircleAvatar(
+                      child: Icon(Icons.meeting_room),
+                    ),
                     title: Text(item.label),
-                    subtitle: Text('${item.studentsCount} Students • Teacher: ${item.classTeacherName}'),
+                    subtitle: Text(
+                      '${item.studentsCount} Students • Teacher: ${item.classTeacherName}',
+                    ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        IconButton(icon: const Icon(Icons.edit), onPressed: () => controller.openClassDialog(existing: item)),
-                        IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => controller.deleteClass(item)),
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () =>
+                              controller.openClassDialog(existing: item),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => controller.deleteClass(item),
+                        ),
                       ],
                     ),
                   ),
@@ -368,12 +472,16 @@ class _SubjectsTabView extends StatelessWidget {
             onPressed: () => controller.openSubjectDialog(),
             icon: const Icon(Icons.add),
             label: const Text('Add New Subject'),
-            style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 50), backgroundColor: Colors.purple),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(double.infinity, 50),
+            ),
           ),
         ),
         Expanded(
           child: Obx(() {
-            if (controller.isSubjectsLoading.value) return const Center(child: CircularProgressIndicator());
+            if (controller.isSubjectsLoading.value) {
+              return const Center(child: CircularProgressIndicator());
+            }
             return ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: controller.subjects.length,
@@ -382,7 +490,12 @@ class _SubjectsTabView extends StatelessWidget {
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
                   child: ListTile(
-                    leading: const CircleAvatar(backgroundColor: Colors.purple, child: Icon(Icons.book, color: Colors.white)),
+                    leading: CircleAvatar(
+                      backgroundColor: AppColors.primary.withValues(
+                        alpha: 0.12,
+                      ),
+                      child: const Icon(Icons.book, color: AppColors.primary),
+                    ),
                     title: Text(item.name),
                     subtitle: Text(item.code),
                     trailing: Row(
@@ -390,9 +503,13 @@ class _SubjectsTabView extends StatelessWidget {
                       children: [
                         Switch(
                           value: item.isActive,
-                          onChanged: (_) => controller.toggleSubjectActive(item),
+                          onChanged: (_) =>
+                              controller.toggleSubjectActive(item),
                         ),
-                        IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => controller.deleteSubject(item)),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => controller.deleteSubject(item),
+                        ),
                       ],
                     ),
                   ),
@@ -420,13 +537,19 @@ class _SyllabusTabView extends StatelessWidget {
             onPressed: () => controller.openSyllabusDialog(),
             icon: const Icon(Icons.add),
             label: const Text('Log Syllabus Progress'),
-            style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 50), backgroundColor: Colors.orange),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(double.infinity, 50),
+            ),
           ),
         ),
         Expanded(
           child: Obx(() {
-            if (controller.isExtraLoading.value) return const Center(child: CircularProgressIndicator());
-            if (controller.syllabuses.isEmpty) return const Center(child: Text('No syllabus records found.'));
+            if (controller.isExtraLoading.value) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (controller.syllabuses.isEmpty) {
+              return const _EmptyState(message: 'No syllabus records found.');
+            }
             return ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: controller.syllabuses.length,
@@ -442,27 +565,53 @@ class _SyllabusTabView extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(item.subjectName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                            Text(
+                              item.subjectName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             Row(
                               children: [
-                                IconButton(icon: const Icon(Icons.edit, size: 20), onPressed: () => controller.openSyllabusDialog(existing: item)),
-                                IconButton(icon: const Icon(Icons.delete, size: 20, color: Colors.red), onPressed: () => controller.deleteSyllabus(item)),
+                                IconButton(
+                                  icon: const Icon(Icons.edit, size: 20),
+                                  onPressed: () => controller
+                                      .openSyllabusDialog(existing: item),
+                                ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    size: 20,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () =>
+                                      controller.deleteSyllabus(item),
+                                ),
                               ],
                             ),
                           ],
                         ),
-                        Text(item.classLabel, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                        Text(
+                          item.classLabel,
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                          ),
+                        ),
                         const SizedBox(height: 8),
                         Text('Topic: ${item.topic}'),
                         const SizedBox(height: 12),
                         LinearProgressIndicator(
                           value: item.progress / 100,
                           backgroundColor: Colors.grey[200],
-                          color: Colors.orange,
+                          color: AppColors.primary,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         const SizedBox(height: 4),
-                        Text('${item.progress.toInt()}% Completed', style: const TextStyle(fontSize: 12)),
+                        Text(
+                          '${item.progress.toInt()}% Completed',
+                          style: const TextStyle(fontSize: 12),
+                        ),
                       ],
                     ),
                   ),
@@ -490,13 +639,19 @@ class _LessonPlanTabView extends StatelessWidget {
             onPressed: () => controller.openLessonPlanDialog(),
             icon: const Icon(Icons.add),
             label: const Text('Create Lesson Plan'),
-            style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 50), backgroundColor: Colors.green),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(double.infinity, 50),
+            ),
           ),
         ),
         Expanded(
           child: Obx(() {
-            if (controller.isExtraLoading.value) return const Center(child: CircularProgressIndicator());
-            if (controller.lessonPlans.isEmpty) return const Center(child: Text('No lesson plans found.'));
+            if (controller.isExtraLoading.value) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (controller.lessonPlans.isEmpty) {
+              return const _EmptyState(message: 'No lesson plans found.');
+            }
             return ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: controller.lessonPlans.length,
@@ -505,14 +660,24 @@ class _LessonPlanTabView extends StatelessWidget {
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
                   child: ListTile(
-                    leading: const Icon(Icons.event_note_rounded, color: Colors.green),
+                    leading: const Icon(
+                      Icons.event_note_rounded,
+                      color: AppColors.primary,
+                    ),
                     title: Text(item.title),
                     subtitle: Text('${item.subject} • ${item.duration} mins'),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        IconButton(icon: const Icon(Icons.edit), onPressed: () => controller.openLessonPlanDialog(existing: item)),
-                        IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => controller.deleteLessonPlan(item)),
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () =>
+                              controller.openLessonPlanDialog(existing: item),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => controller.deleteLessonPlan(item),
+                        ),
                       ],
                     ),
                   ),
@@ -540,13 +705,19 @@ class _MaterialsTabView extends StatelessWidget {
             onPressed: () => controller.uploadMaterial(),
             icon: const Icon(Icons.upload),
             label: const Text('Upload Material'),
-            style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 50), backgroundColor: Colors.teal),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(double.infinity, 50),
+            ),
           ),
         ),
         Expanded(
           child: Obx(() {
-            if (controller.isExtraLoading.value) return const Center(child: CircularProgressIndicator());
-            if (controller.materials.isEmpty) return const Center(child: Text('No materials found.'));
+            if (controller.isExtraLoading.value) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (controller.materials.isEmpty) {
+              return const _EmptyState(message: 'No materials found.');
+            }
             return ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: controller.materials.length,
@@ -556,8 +727,10 @@ class _MaterialsTabView extends StatelessWidget {
                   margin: const EdgeInsets.only(bottom: 12),
                   child: ListTile(
                     leading: Icon(
-                      item.type.toUpperCase() == 'VIDEO' ? Icons.play_circle_fill_rounded : Icons.picture_as_pdf_rounded,
-                      color: Colors.teal,
+                      item.type.toUpperCase() == 'VIDEO'
+                          ? Icons.play_circle_fill_rounded
+                          : Icons.picture_as_pdf_rounded,
+                      color: AppColors.primary,
                     ),
                     title: Text(item.title),
                     subtitle: Text(item.subject),
@@ -572,6 +745,40 @@ class _MaterialsTabView extends StatelessWidget {
           }),
         ),
       ],
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.surfaceDark : Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isDark ? AppColors.borderDark : AppColors.borderLight,
+            ),
+          ),
+          child: Text(
+            message,
+            style: TextStyle(
+              color: isDark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

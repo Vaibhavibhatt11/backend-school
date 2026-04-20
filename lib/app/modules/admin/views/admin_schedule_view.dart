@@ -22,13 +22,6 @@ class AdminScheduleView extends GetView<AdminScheduleController> {
         appBar: AppBar(
           title: const Text('Schedule & Exams'),
           backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
-          bottom: TabBar(
-            onTap: (value) => controller.changeTab(value),
-            tabs: const [
-              Tab(text: 'Schedule'),
-              Tab(text: 'Exams'),
-            ],
-          ),
           actions: [
             IconButton(
               onPressed: controller.refreshCurrentTab,
@@ -36,12 +29,106 @@ class AdminScheduleView extends GetView<AdminScheduleController> {
             ),
           ],
         ),
-        body: TabBarView(
+        body: Column(
           children: [
-            _ScheduleTab(controller: controller),
-            _ExamsTab(controller: controller),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+              child: _ScheduleHeaderCard(controller: controller),
+            ),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.surfaceDark : Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                ),
+              ),
+              child: TabBar(
+                onTap: (value) => controller.changeTab(value),
+                indicator: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                indicatorPadding: const EdgeInsets.all(6),
+                dividerColor: Colors.transparent,
+                labelColor: AppColors.primary,
+                unselectedLabelColor: isDark
+                    ? AppColors.textSecondaryDark
+                    : AppColors.textSecondaryLight,
+                tabs: const [
+                  Tab(text: 'Schedule'),
+                  Tab(text: 'Exams'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  _ScheduleTab(controller: controller),
+                  _ExamsTab(controller: controller),
+                ],
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ScheduleHeaderCard extends StatelessWidget {
+  const _ScheduleHeaderCard({required this.controller});
+
+  final AdminScheduleController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColors.primary, AppColors.primaryDark],
+        ),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.event_note_rounded, color: Colors.white),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Obx(
+              () => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Examination System',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 19,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${controller.exams.length} exams • '
+                    '${controller.publishedResultsCount} published • '
+                    '${controller.averageScore.toStringAsFixed(1)}% avg',
+                    style: const TextStyle(color: Colors.white70),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -159,53 +246,454 @@ class _ExamsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      if (controller.isLoading.value && controller.exams.isEmpty) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      if (controller.errorMessage.value.isNotEmpty &&
-          controller.exams.isEmpty) {
-        return _ErrorState(
-          message: controller.errorMessage.value,
-          onRetry: controller.refreshCurrentTab,
-        );
-      }
-      return RefreshIndicator(
-        onRefresh: controller.refreshCurrentTab,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-          children: [
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _SummaryChip(
-                  label: 'Exams',
-                  value: '${controller.exams.length}',
-                ),
-                FilledButton.icon(
-                  onPressed: () => controller.openExamDialog(),
-                  icon: const Icon(Icons.add_box_rounded),
-                  label: const Text('Create Exam'),
-                ),
+    return DefaultTabController(
+      length: 7,
+      child: Column(
+        children: [
+          Container(
+            margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.surfaceDark
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.borderDark
+                    : AppColors.borderLight,
+              ),
+            ),
+            child: TabBar(
+              isScrollable: true,
+              indicator: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              indicatorPadding: const EdgeInsets.all(6),
+              dividerColor: Colors.transparent,
+              labelColor: AppColors.primary,
+              unselectedLabelColor: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight,
+              tabs: const [
+                Tab(text: 'Exam Schedule'),
+                Tab(text: 'Question Papers'),
+                Tab(text: 'Marks Entry'),
+                Tab(text: 'Grading'),
+                Tab(text: 'Report Cards'),
+                Tab(text: 'Analytics'),
+                Tab(text: 'Results'),
               ],
             ),
-            const SizedBox(height: 20),
-            if (controller.exams.isEmpty)
-              const _EmptyState(
-                icon: Icons.quiz_rounded,
-                title: 'No exams found',
-                message:
-                    'Create real exams, publish them, and enter marks here.',
-              )
-            else
-              ...controller.exams.map(
-                (item) => _ExamCard(item: item, controller: controller),
+          ),
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading.value && controller.exams.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (controller.errorMessage.value.isNotEmpty &&
+                  controller.exams.isEmpty) {
+                return _ErrorState(
+                  message: controller.errorMessage.value,
+                  onRetry: controller.refreshCurrentTab,
+                );
+              }
+              return TabBarView(
+                children: [
+                  _ExamScheduleSubTab(controller: controller),
+                  _QuestionPapersSubTab(controller: controller),
+                  _MarksEntrySubTab(controller: controller),
+                  _GradingSubTab(controller: controller),
+                  _ReportCardsSubTab(controller: controller),
+                  _ExamAnalyticsSubTab(controller: controller),
+                  _ResultPublishingSubTab(controller: controller),
+                ],
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ExamScheduleSubTab extends StatelessWidget {
+  const _ExamScheduleSubTab({required this.controller});
+  final AdminScheduleController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: controller.refreshCurrentTab,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        children: [
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _SummaryChip(label: 'Exams', value: '${controller.exams.length}'),
+              FilledButton.icon(
+                onPressed: () => controller.openExamDialog(),
+                icon: const Icon(Icons.add_box_rounded),
+                label: const Text('Create Exam'),
               ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          if (controller.exams.isEmpty)
+            const _EmptyState(
+              icon: Icons.quiz_rounded,
+              title: 'No exams found',
+              message: 'Create real exams, publish them, and enter marks here.',
+            )
+          else
+            ...controller.exams.map((item) => _ExamCard(item: item, controller: controller)),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuestionPapersSubTab extends StatelessWidget {
+  const _QuestionPapersSubTab({required this.controller});
+  final AdminScheduleController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _SummaryChip(
+              label: 'Uploaded Papers',
+              value: '${controller.questionPapers.length}',
+            ),
+            FilledButton.icon(
+              onPressed: () => controller.openQuestionPaperDialog(),
+              icon: const Icon(Icons.upload_file_rounded),
+              label: const Text('Upload Paper'),
+            ),
           ],
         ),
-      );
-    });
+        const SizedBox(height: 20),
+        if (controller.questionPapers.isEmpty)
+          const _EmptyState(
+            icon: Icons.description_rounded,
+            title: 'No question papers',
+            message: 'Upload exam question papers to organize distribution.',
+          )
+        else
+          ...controller.questionPapers.map(
+            (paper) => Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).brightness == Brightness.dark ? AppColors.surfaceDark : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Theme.of(context).brightness == Brightness.dark ? AppColors.borderDark : AppColors.borderLight,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(paper.title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 4),
+                  Text('Exam: ${paper.examName}'),
+                  const SizedBox(height: 4),
+                  SelectableText(paper.fileUrl),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      OutlinedButton(
+                        onPressed: () => controller.openQuestionPaperDialog(existing: paper),
+                        child: const Text('Edit'),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton.tonal(
+                        onPressed: () => controller.deleteQuestionPaper(paper),
+                        child: const Text('Delete'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _MarksEntrySubTab extends StatelessWidget {
+  const _MarksEntrySubTab({required this.controller});
+  final AdminScheduleController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      children: [
+        const _SectionTitle(title: 'Marks Entry Workflow'),
+        const SizedBox(height: 12),
+        if (controller.exams.isEmpty)
+          const _EmptyState(
+            icon: Icons.edit_note_rounded,
+            title: 'No exams available',
+            message: 'Create an exam first to start marks entry.',
+          )
+        else
+          ...controller.exams.map(
+            (exam) => Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).brightness == Brightness.dark ? AppColors.surfaceDark : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Theme.of(context).brightness == Brightness.dark ? AppColors.borderDark : AppColors.borderLight,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(exam.name, style: const TextStyle(fontWeight: FontWeight.w700)),
+                        Text('${exam.classLabel} • ${exam.subjectLabel}'),
+                      ],
+                    ),
+                  ),
+                  FilledButton.icon(
+                    onPressed: () => controller.openMarksStatus(exam),
+                    icon: const Icon(Icons.score_rounded),
+                    label: const Text('Enter Marks'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _GradingSubTab extends StatelessWidget {
+  const _GradingSubTab({required this.controller});
+  final AdminScheduleController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _SummaryChip(
+              label: 'Grading Bands',
+              value: '${controller.gradingBands.length}',
+            ),
+            FilledButton.icon(
+              onPressed: () => controller.openGradingBandDialog(),
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Add Grade Band'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        if (controller.gradingBands.isEmpty)
+          const _EmptyState(
+            icon: Icons.rule_rounded,
+            title: 'No grading bands',
+            message: 'Define grading thresholds to automate grade assignment.',
+          )
+        else
+          ...controller.gradingBands.map(
+            (band) => ListTile(
+              tileColor: Theme.of(context).brightness == Brightness.dark ? AppColors.surfaceDark : Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark ? AppColors.borderDark : AppColors.borderLight,
+                ),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              title: Text('Grade ${band.label}', style: const TextStyle(fontWeight: FontWeight.w700)),
+              subtitle: Text('${band.minPercent.toStringAsFixed(0)}% - ${band.maxPercent.toStringAsFixed(0)}% • GPA ${band.gpa.toStringAsFixed(2)}'),
+              trailing: Wrap(
+                spacing: 6,
+                children: [
+                  IconButton(
+                    onPressed: () => controller.openGradingBandDialog(existing: band),
+                    icon: const Icon(Icons.edit_rounded),
+                  ),
+                  IconButton(
+                    onPressed: () => controller.deleteGradingBand(band),
+                    icon: const Icon(Icons.delete_outline_rounded, color: Colors.red),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _ReportCardsSubTab extends StatelessWidget {
+  const _ReportCardsSubTab({required this.controller});
+  final AdminScheduleController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      children: [
+        _SummaryChip(label: 'Report Cards', value: '${controller.reportCards.length}'),
+        const SizedBox(height: 16),
+        if (controller.reportCards.isEmpty)
+          const _EmptyState(
+            icon: Icons.badge_rounded,
+            title: 'No report cards',
+            message: 'Enter marks and generate report cards from exam results.',
+          )
+        else
+          ...controller.reportCards.map(
+            (card) => ListTile(
+              tileColor: Theme.of(context).brightness == Brightness.dark ? AppColors.surfaceDark : Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark ? AppColors.borderDark : AppColors.borderLight,
+                ),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              title: Text(card.studentName, style: const TextStyle(fontWeight: FontWeight.w700)),
+              subtitle: Text('${card.examName} • ${card.obtainedMarks.toStringAsFixed(1)}/${card.maxMarks.toStringAsFixed(1)} • ${card.percent.toStringAsFixed(1)}%'),
+              trailing: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(card.grade, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700)),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _ExamAnalyticsSubTab extends StatelessWidget {
+  const _ExamAnalyticsSubTab({required this.controller});
+  final AdminScheduleController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _SummaryChip(label: 'Avg Score', value: '${controller.averageScore.toStringAsFixed(1)}%'),
+            _SummaryChip(label: 'Pass Rate', value: '${controller.examPassRate.toStringAsFixed(1)}%'),
+            _SummaryChip(label: 'Published Results', value: '${controller.publishedResultsCount}/${controller.exams.length}'),
+          ],
+        ),
+        const SizedBox(height: 16),
+        if (controller.reportCards.isEmpty)
+          const _EmptyState(
+            icon: Icons.analytics_rounded,
+            title: 'No analytics yet',
+            message: 'Enter marks and report cards to unlock exam analytics.',
+          )
+        else
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark ? AppColors.surfaceDark : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Theme.of(context).brightness == Brightness.dark ? AppColors.borderDark : AppColors.borderLight,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Analytics Summary', style: TextStyle(fontWeight: FontWeight.w700)),
+                const SizedBox(height: 8),
+                Text('Insights generated at: ${controller.examInsightsGeneratedAt.value}'),
+                const SizedBox(height: 8),
+                Text('Top performers and subject analysis can be extended from this baseline.'),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _ResultPublishingSubTab extends StatelessWidget {
+  const _ResultPublishingSubTab({required this.controller});
+  final AdminScheduleController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      children: [
+        const _SectionTitle(title: 'Result Publishing'),
+        const SizedBox(height: 12),
+        if (controller.exams.isEmpty)
+          const _EmptyState(
+            icon: Icons.publish_rounded,
+            title: 'No exams available',
+            message: 'Create exams and enter marks before publishing results.',
+          )
+        else
+          ...controller.exams.map(
+            (exam) => Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).brightness == Brightness.dark ? AppColors.surfaceDark : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Theme.of(context).brightness == Brightness.dark ? AppColors.borderDark : AppColors.borderLight,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(exam.name, style: const TextStyle(fontWeight: FontWeight.w700)),
+                        Text(exam.isPublished ? 'Published' : 'Draft'),
+                      ],
+                    ),
+                  ),
+                  FilledButton.icon(
+                    onPressed: exam.isPublished ? null : () => controller.publishResults(exam),
+                    icon: const Icon(Icons.publish_rounded),
+                    label: Text(exam.isPublished ? 'Published' : 'Publish'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
   }
 }
 
