@@ -20,6 +20,9 @@ class ApiClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          if (options.method.toUpperCase() != 'GET') {
+            _invalidateGetCache();
+          }
           final token = await _sessionStorage.getToken();
           if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
@@ -54,7 +57,10 @@ class ApiClient {
       return Future.value(
         Response<dynamic>(
           data: cached.data,
-          requestOptions: RequestOptions(path: path, queryParameters: query ?? const {}),
+          requestOptions: RequestOptions(
+            path: path,
+            queryParameters: query ?? const {},
+          ),
           statusCode: cached.statusCode,
         ),
       );
@@ -87,7 +93,12 @@ class ApiClient {
     Options? options,
   }) {
     _invalidateGetCache();
-    return _dio.post(path, data: data, queryParameters: query, options: options);
+    return _dio.post(
+      path,
+      data: data,
+      queryParameters: query,
+      options: options,
+    );
   }
 
   Future<Response<dynamic>> put(
@@ -107,7 +118,12 @@ class ApiClient {
     Options? options,
   }) {
     _invalidateGetCache();
-    return _dio.patch(path, data: data, queryParameters: query, options: options);
+    return _dio.patch(
+      path,
+      data: data,
+      queryParameters: query,
+      options: options,
+    );
   }
 
   void _invalidateGetCache() {
@@ -186,7 +202,10 @@ class _AuthRefreshInterceptor extends Interceptor {
   }
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     if (_isPublicPath(options.path)) {
       return handler.next(options);
     }
@@ -240,7 +259,9 @@ class _AuthRefreshInterceptor extends Interceptor {
       }
       await _sessionStorage.saveLoginResponse(body);
       final data = body['data'];
-      final access = data is Map<String, dynamic> ? data['accessToken']?.toString() : null;
+      final access = data is Map<String, dynamic>
+          ? data['accessToken']?.toString()
+          : null;
       if (access == null || access.isEmpty) {
         await _forceLogoutAndRedirect();
         return handler.next(err);
@@ -257,4 +278,3 @@ class _AuthRefreshInterceptor extends Interceptor {
     }
   }
 }
-

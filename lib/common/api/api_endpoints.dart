@@ -44,14 +44,89 @@ class ApiEndpoints {
   static String schoolApprovalDecision(String approvalType, String id) =>
       '/school/approvals/$approvalType/$id/decision';
   static const String schoolNotifications = '/school/notifications';
+  static const String schoolNotificationTemplates =
+      '/school/notifications/templates';
+  static String schoolNotificationTemplateById(String id) =>
+      '/school/notifications/templates/$id';
+  static const String schoolNotificationLogs = '/school/notifications/logs';
   static const String schoolFeesSnapshot = '/school/fees/snapshot';
   static const String schoolFeesSummary = '/school/fees/summary';
+  static const String schoolFeeStructures = '/school/fees/structures';
+  static String schoolFeeStructureById(String id) =>
+      '/school/fees/structures/$id';
+  static const String schoolFeeDiscountRules = '/school/fees/discount-rules';
+  static String schoolFeeDiscountRuleById(String id) =>
+      '/school/fees/discount-rules/$id';
+  static const String schoolFeesDueList = '/school/fees/due-list';
+  static const String schoolFeeCollectionReport =
+      '/school/fees/reports/collection';
+  static const String schoolFeePendingDuesReport =
+      '/school/fees/reports/pending-dues';
+  static String schoolFeeStudentLedger(String studentId) =>
+      '/school/fees/reports/student-ledger/$studentId';
+  static const String schoolInvoices = '/school/invoices';
+  static String schoolInvoiceById(String id) => '/school/invoices/$id';
+  static String schoolInvoiceStatus(String id) => '/school/invoices/$id/status';
+  static const String schoolInvoicesBulkGenerate =
+      '/school/invoices/bulk-generate';
+  static const String schoolPayments = '/school/payments';
+  static String schoolPaymentReceipt(String id) =>
+      '/school/payments/$id/receipt';
+  static String schoolPaymentRefunds(String id) =>
+      '/school/payments/$id/refunds';
+  static const String schoolAcademicYears = '/school/academic-years';
+  static String schoolAcademicYearById(String id) =>
+      '/school/academic-years/$id';
+  static String schoolAcademicYearActivate(String id) =>
+      '/school/academic-years/$id/activate';
+  static const String schoolTerms = '/school/terms';
+  static String schoolTermById(String id) => '/school/terms/$id';
+  static const String schoolSections = '/school/sections';
+  static String schoolSectionById(String id) => '/school/sections/$id';
+  static const String schoolHolidays = '/school/holidays';
+  static String schoolHolidayById(String id) => '/school/holidays/$id';
+  static const String schoolAdminUsers = '/school/admin-users';
+  static String schoolAdminUserById(String id) => '/school/admin-users/$id';
+  static const String schoolRoles = '/school/roles';
+  static String schoolRoleById(String id) => '/school/roles/$id';
+  static const String schoolPermissions = '/school/permissions';
+  static const String schoolPermissionsMatrix = '/school/permissions/matrix';
+  static const String schoolDocumentCategories = '/school/document-categories';
+  static String schoolDocumentCategoryById(String id) =>
+      '/school/document-categories/$id';
+  static const String schoolAchievements = '/school/achievements';
+  static String schoolAchievementById(String id) => '/school/achievements/$id';
+  static const String schoolAiFaqs = '/school/ai/faqs';
+  static String schoolAiFaqById(String id) => '/school/ai/faqs/$id';
+  static const String schoolHomework = '/school/homework';
+  static String schoolHomeworkById(String id) => '/school/homework/$id';
+  static String schoolHomeworkSubmit(String id) =>
+      '/school/homework/$id/submit';
+  static const String schoolFaceCheckins = '/school/face-checkins';
+  static String schoolFaceCheckinApprove(String id) =>
+      '/school/face-checkins/$id/approve';
+  static String schoolFaceCheckinReject(String id) =>
+      '/school/face-checkins/$id/reject';
+  static const String schoolBackupExports = '/school/backups/exports';
+  static const String schoolOfflineSyncRecords = '/school/offline-sync/records';
+  static String schoolOfflineSyncRecordById(String id) =>
+      '/school/offline-sync/records/$id';
+  static const String schoolReportCardTemplates =
+      '/school/report-cards/templates';
+  static String schoolReportCardTemplateById(String id) =>
+      '/school/report-cards/templates/$id';
   static const String schoolAttendanceTrend = '/school/attendance/trend';
   static const String schoolAttendanceOverview = '/school/attendance/overview';
+  static const String schoolAttendanceMark = '/school/attendance/mark';
+  static const String schoolAttendanceExport = '/school/attendance/export';
+  static String schoolAttendanceRecordById(String id) =>
+      '/school/attendance/records/$id';
   static const String schoolProfile = '/school/profile';
   static const String schoolProfileMe = '/school/profile/me';
   static const String schoolSettings = '/school/settings';
   static const String schoolAnnouncements = '/school/announcements';
+  static String schoolAnnouncementById(String id) =>
+      '/school/announcements/$id';
   static String schoolAnnouncementSend(String id) =>
       '/school/announcements/$id/send';
   static const String schoolStudyMaterials = '/school/study-materials';
@@ -68,6 +143,12 @@ class ApiEndpoints {
   static const String schoolSubjects = '/school/subjects';
   static String schoolSubjectById(String id) => '/school/subjects/$id';
   static const String schoolTimetable = '/school/timetable';
+  static String schoolTimetableClass(String classId) =>
+      '/school/timetable/class/$classId';
+  static const String schoolTimetableConflicts = '/school/timetable/conflicts';
+  static const String schoolTimetablePeriods = '/school/timetable/periods';
+  static String schoolTimetablePeriodById(String id) =>
+      '/school/timetable/periods/$id';
   static String schoolTimetableSlotById(String id) =>
       '/school/timetable/slots/$id';
   static const String schoolTimetablePublish = '/school/timetable/publish';
@@ -114,6 +195,11 @@ class ApiEndpoints {
       '/school/events/$id/gallery/$imageId';
   static const String schoolReportAttendance = '/school/reports/attendance';
   static const String schoolReportFees = '/school/reports/fees';
+  static const String schoolReportExamPerformance =
+      '/school/reports/exam-performance';
+  static const String schoolReportGenerate = '/school/reports/generate';
+  static const String schoolReportJobs = '/school/reports/jobs';
+  static const String schoolReportStudents = '/school/reports/students';
   static const String schoolAdmissionsApplications =
       '/school/admissions/applications';
   static String schoolAdmissionApplicationById(String id) =>
@@ -135,6 +221,14 @@ class ApiEndpoints {
       '/school/students/$id/move-class';
   static String schoolStudentDocuments(String id) =>
       '/school/students/$id/documents';
+  static String schoolStudentDocumentById(String id, String docId) =>
+      '/school/students/$id/documents/$docId';
+  static const String schoolStudentsExport = '/school/students/export';
+  static const String schoolStudentsImport = '/school/students/import';
+  static String schoolStaffDocuments(String id) =>
+      '/school/staff/$id/documents';
+  static String schoolStaffDocumentById(String id, String docId) =>
+      '/school/staff/$id/documents/$docId';
   static const String schoolAttendanceRecords = '/school/attendance/records';
   static const String schoolAttendanceBulkMark = '/school/attendance/bulk-mark';
 

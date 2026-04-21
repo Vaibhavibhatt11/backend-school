@@ -7,6 +7,50 @@ class AdminService {
 
   final ApiClient _apiClient;
 
+  Future<Map<String, dynamic>> _get(
+    String path, {
+    Map<String, dynamic>? query,
+    required String context,
+  }) async {
+    final res = await _apiClient.get(path, query: query);
+    return extractApiData(res.data, context: context);
+  }
+
+  Future<Map<String, dynamic>> _post(
+    String path, {
+    Map<String, dynamic>? payload,
+    required String context,
+  }) async {
+    final res = await _apiClient.post(path, data: payload);
+    return extractApiData(res.data, context: context);
+  }
+
+  Future<Map<String, dynamic>> _put(
+    String path, {
+    required Map<String, dynamic> payload,
+    required String context,
+  }) async {
+    final res = await _apiClient.put(path, data: payload);
+    return extractApiData(res.data, context: context);
+  }
+
+  Future<Map<String, dynamic>> _patch(
+    String path, {
+    Map<String, dynamic>? payload,
+    required String context,
+  }) async {
+    final res = await _apiClient.patch(path, data: payload);
+    return extractApiData(res.data, context: context);
+  }
+
+  Future<Map<String, dynamic>> _delete(
+    String path, {
+    required String context,
+  }) async {
+    final res = await _apiClient.dio.delete(path);
+    return extractApiData(res.data, context: context);
+  }
+
   Future<Map<String, dynamic>> getSchoolAdminDashboard() async {
     final res = await _apiClient.get(ApiEndpoints.dashboardSchoolAdmin);
     return extractApiData(res.data, context: 'admin dashboard');
@@ -53,6 +97,56 @@ class AdminService {
     return extractApiData(res.data, context: 'notifications');
   }
 
+  Future<Map<String, dynamic>> getNotificationTemplates({
+    int page = 1,
+    int limit = 50,
+  }) {
+    return _get(
+      ApiEndpoints.schoolNotificationTemplates,
+      query: {'page': page, 'limit': limit},
+      context: 'notification templates',
+    );
+  }
+
+  Future<Map<String, dynamic>> createNotificationTemplate(
+    Map<String, dynamic> payload,
+  ) {
+    return _post(
+      ApiEndpoints.schoolNotificationTemplates,
+      payload: payload,
+      context: 'create notification template',
+    );
+  }
+
+  Future<Map<String, dynamic>> updateNotificationTemplate({
+    required String id,
+    required Map<String, dynamic> payload,
+  }) {
+    return _put(
+      ApiEndpoints.schoolNotificationTemplateById(id),
+      payload: payload,
+      context: 'update notification template',
+    );
+  }
+
+  Future<Map<String, dynamic>> deleteNotificationTemplate(String id) {
+    return _delete(
+      ApiEndpoints.schoolNotificationTemplateById(id),
+      context: 'delete notification template',
+    );
+  }
+
+  Future<Map<String, dynamic>> getNotificationLogs({
+    int page = 1,
+    int limit = 50,
+  }) {
+    return _get(
+      ApiEndpoints.schoolNotificationLogs,
+      query: {'page': page, 'limit': limit},
+      context: 'notification logs',
+    );
+  }
+
   Future<Map<String, dynamic>> getFeeSnapshot() async {
     final res = await _apiClient.get(ApiEndpoints.schoolFeesSnapshot);
     return extractApiData(res.data, context: 'fee snapshot');
@@ -62,6 +156,574 @@ class AdminService {
   Future<Map<String, dynamic>> getFeesSummary() async {
     final res = await _apiClient.get(ApiEndpoints.schoolFeesSummary);
     return extractApiData(res.data, context: 'fees summary');
+  }
+
+  Future<Map<String, dynamic>> getFeeDiscountRules({
+    int page = 1,
+    int limit = 50,
+  }) {
+    return _get(
+      ApiEndpoints.schoolFeeDiscountRules,
+      query: {'page': page, 'limit': limit},
+      context: 'fee discount rules',
+    );
+  }
+
+  Future<Map<String, dynamic>> createFeeDiscountRule(
+    Map<String, dynamic> payload,
+  ) {
+    return _post(
+      ApiEndpoints.schoolFeeDiscountRules,
+      payload: payload,
+      context: 'create fee discount rule',
+    );
+  }
+
+  Future<Map<String, dynamic>> updateFeeDiscountRule({
+    required String id,
+    required Map<String, dynamic> payload,
+  }) {
+    return _put(
+      ApiEndpoints.schoolFeeDiscountRuleById(id),
+      payload: payload,
+      context: 'update fee discount rule',
+    );
+  }
+
+  Future<Map<String, dynamic>> deleteFeeDiscountRule(String id) {
+    return _delete(
+      ApiEndpoints.schoolFeeDiscountRuleById(id),
+      context: 'delete fee discount rule',
+    );
+  }
+
+  Future<Map<String, dynamic>> getFeeStructures({
+    int page = 1,
+    int limit = 100,
+    String? classId,
+    String? className,
+    String? search,
+  }) async {
+    final res = await _apiClient.get(
+      ApiEndpoints.schoolFeeStructures,
+      query: {
+        'page': page,
+        'limit': limit,
+        if (classId != null && classId.trim().isNotEmpty)
+          'classId': classId.trim(),
+        if (className != null && className.trim().isNotEmpty)
+          'className': className.trim(),
+        if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+      },
+    );
+    return extractApiData(res.data, context: 'fee structures');
+  }
+
+  Future<Map<String, dynamic>> createFeeStructure(
+    Map<String, dynamic> payload,
+  ) async {
+    final res = await _apiClient.post(
+      ApiEndpoints.schoolFeeStructures,
+      data: payload,
+    );
+    return extractApiData(res.data, context: 'create fee structure');
+  }
+
+  Future<Map<String, dynamic>> updateFeeStructure({
+    required String id,
+    required Map<String, dynamic> payload,
+  }) async {
+    final res = await _apiClient.put(
+      ApiEndpoints.schoolFeeStructureById(id),
+      data: payload,
+    );
+    return extractApiData(res.data, context: 'update fee structure');
+  }
+
+  Future<Map<String, dynamic>> deleteFeeStructure(String id) async {
+    final res = await _apiClient.dio.delete(
+      ApiEndpoints.schoolFeeStructureById(id),
+    );
+    return extractApiData(res.data, context: 'delete fee structure');
+  }
+
+  Future<Map<String, dynamic>> getFeeDueList({
+    int page = 1,
+    int limit = 50,
+    String? classId,
+    String? status,
+  }) async {
+    final res = await _apiClient.get(
+      ApiEndpoints.schoolFeesDueList,
+      query: {
+        'page': page,
+        'limit': limit,
+        if (classId != null && classId.trim().isNotEmpty)
+          'classId': classId.trim(),
+        if (status != null && status.trim().isNotEmpty) 'status': status.trim(),
+      },
+    );
+    return extractApiData(res.data, context: 'fee due list');
+  }
+
+  Future<Map<String, dynamic>> getFeeCollectionReport({
+    String? dateFrom,
+    String? dateTo,
+  }) {
+    return _get(
+      ApiEndpoints.schoolFeeCollectionReport,
+      query: {
+        if (dateFrom != null && dateFrom.trim().isNotEmpty)
+          'dateFrom': dateFrom.trim(),
+        if (dateTo != null && dateTo.trim().isNotEmpty) 'dateTo': dateTo.trim(),
+      },
+      context: 'fee collection report',
+    );
+  }
+
+  Future<Map<String, dynamic>> getFeePendingDuesReport({
+    String? classId,
+    String? status,
+  }) {
+    return _get(
+      ApiEndpoints.schoolFeePendingDuesReport,
+      query: {
+        if (classId != null && classId.trim().isNotEmpty)
+          'classId': classId.trim(),
+        if (status != null && status.trim().isNotEmpty) 'status': status.trim(),
+      },
+      context: 'fee pending dues report',
+    );
+  }
+
+  Future<Map<String, dynamic>> getFeeStudentLedger(String studentId) {
+    return _get(
+      ApiEndpoints.schoolFeeStudentLedger(studentId),
+      context: 'student fee ledger',
+    );
+  }
+
+  Future<Map<String, dynamic>> getPayments({
+    int page = 1,
+    int limit = 50,
+    String? studentId,
+  }) async {
+    final res = await _apiClient.get(
+      ApiEndpoints.schoolPayments,
+      query: {
+        'page': page,
+        'limit': limit,
+        if (studentId != null && studentId.trim().isNotEmpty)
+          'studentId': studentId.trim(),
+      },
+    );
+    return extractApiData(res.data, context: 'payments');
+  }
+
+  Future<Map<String, dynamic>> createPayment(
+    Map<String, dynamic> payload,
+  ) async {
+    final res = await _apiClient.post(
+      ApiEndpoints.schoolPayments,
+      data: payload,
+    );
+    return extractApiData(res.data, context: 'create payment');
+  }
+
+  Future<Map<String, dynamic>> getInvoices({
+    int page = 1,
+    int limit = 50,
+    String? studentId,
+    String? status,
+  }) async {
+    final res = await _apiClient.get(
+      ApiEndpoints.schoolInvoices,
+      query: {
+        'page': page,
+        'limit': limit,
+        if (studentId != null && studentId.trim().isNotEmpty)
+          'studentId': studentId.trim(),
+        if (status != null && status.trim().isNotEmpty) 'status': status.trim(),
+      },
+    );
+    return extractApiData(res.data, context: 'invoices');
+  }
+
+  Future<Map<String, dynamic>> getInvoiceById(String id) {
+    return _get(ApiEndpoints.schoolInvoiceById(id), context: 'invoice');
+  }
+
+  Future<Map<String, dynamic>> createInvoice(
+    Map<String, dynamic> payload,
+  ) async {
+    final res = await _apiClient.post(
+      ApiEndpoints.schoolInvoices,
+      data: payload,
+    );
+    return extractApiData(res.data, context: 'create invoice');
+  }
+
+  Future<Map<String, dynamic>> bulkGenerateInvoices(
+    Map<String, dynamic> payload,
+  ) {
+    return _post(
+      ApiEndpoints.schoolInvoicesBulkGenerate,
+      payload: payload,
+      context: 'bulk generate invoices',
+    );
+  }
+
+  Future<Map<String, dynamic>> updateInvoiceStatus({
+    required String id,
+    required String status,
+  }) async {
+    final res = await _apiClient.patch(
+      ApiEndpoints.schoolInvoiceStatus(id),
+      data: {'status': status},
+    );
+    return extractApiData(res.data, context: 'update invoice status');
+  }
+
+  Future<Map<String, dynamic>> getPaymentReceipt(String id) {
+    return _get(
+      ApiEndpoints.schoolPaymentReceipt(id),
+      context: 'payment receipt',
+    );
+  }
+
+  Future<Map<String, dynamic>> getPaymentRefunds(String id) {
+    return _get(
+      ApiEndpoints.schoolPaymentRefunds(id),
+      context: 'payment refunds',
+    );
+  }
+
+  Future<Map<String, dynamic>> createPaymentRefund({
+    required String id,
+    required Map<String, dynamic> payload,
+  }) {
+    return _post(
+      ApiEndpoints.schoolPaymentRefunds(id),
+      payload: payload,
+      context: 'create payment refund',
+    );
+  }
+
+  Future<Map<String, dynamic>> getAcademicYears({
+    int page = 1,
+    int limit = 50,
+  }) {
+    return _get(
+      ApiEndpoints.schoolAcademicYears,
+      query: {'page': page, 'limit': limit},
+      context: 'academic years',
+    );
+  }
+
+  Future<Map<String, dynamic>> createAcademicYear(
+    Map<String, dynamic> payload,
+  ) {
+    return _post(
+      ApiEndpoints.schoolAcademicYears,
+      payload: payload,
+      context: 'create academic year',
+    );
+  }
+
+  Future<Map<String, dynamic>> updateAcademicYear({
+    required String id,
+    required Map<String, dynamic> payload,
+  }) {
+    return _put(
+      ApiEndpoints.schoolAcademicYearById(id),
+      payload: payload,
+      context: 'update academic year',
+    );
+  }
+
+  Future<Map<String, dynamic>> deleteAcademicYear(String id) {
+    return _delete(
+      ApiEndpoints.schoolAcademicYearById(id),
+      context: 'delete academic year',
+    );
+  }
+
+  Future<Map<String, dynamic>> activateAcademicYear(String id) {
+    return _patch(
+      ApiEndpoints.schoolAcademicYearActivate(id),
+      context: 'activate academic year',
+    );
+  }
+
+  Future<Map<String, dynamic>> getTerms({int page = 1, int limit = 50}) {
+    return _get(
+      ApiEndpoints.schoolTerms,
+      query: {'page': page, 'limit': limit},
+      context: 'terms',
+    );
+  }
+
+  Future<Map<String, dynamic>> createTerm(Map<String, dynamic> payload) {
+    return _post(
+      ApiEndpoints.schoolTerms,
+      payload: payload,
+      context: 'create term',
+    );
+  }
+
+  Future<Map<String, dynamic>> updateTerm({
+    required String id,
+    required Map<String, dynamic> payload,
+  }) {
+    return _put(
+      ApiEndpoints.schoolTermById(id),
+      payload: payload,
+      context: 'update term',
+    );
+  }
+
+  Future<Map<String, dynamic>> deleteTerm(String id) {
+    return _delete(ApiEndpoints.schoolTermById(id), context: 'delete term');
+  }
+
+  Future<Map<String, dynamic>> getSections({int page = 1, int limit = 50}) {
+    return _get(
+      ApiEndpoints.schoolSections,
+      query: {'page': page, 'limit': limit},
+      context: 'sections',
+    );
+  }
+
+  Future<Map<String, dynamic>> createSection(Map<String, dynamic> payload) {
+    return _post(
+      ApiEndpoints.schoolSections,
+      payload: payload,
+      context: 'create section',
+    );
+  }
+
+  Future<Map<String, dynamic>> updateSection({
+    required String id,
+    required Map<String, dynamic> payload,
+  }) {
+    return _put(
+      ApiEndpoints.schoolSectionById(id),
+      payload: payload,
+      context: 'update section',
+    );
+  }
+
+  Future<Map<String, dynamic>> deleteSection(String id) {
+    return _delete(
+      ApiEndpoints.schoolSectionById(id),
+      context: 'delete section',
+    );
+  }
+
+  Future<Map<String, dynamic>> getHolidays({int page = 1, int limit = 50}) {
+    return _get(
+      ApiEndpoints.schoolHolidays,
+      query: {'page': page, 'limit': limit},
+      context: 'holidays',
+    );
+  }
+
+  Future<Map<String, dynamic>> createHoliday(Map<String, dynamic> payload) {
+    return _post(
+      ApiEndpoints.schoolHolidays,
+      payload: payload,
+      context: 'create holiday',
+    );
+  }
+
+  Future<Map<String, dynamic>> updateHoliday({
+    required String id,
+    required Map<String, dynamic> payload,
+  }) {
+    return _put(
+      ApiEndpoints.schoolHolidayById(id),
+      payload: payload,
+      context: 'update holiday',
+    );
+  }
+
+  Future<Map<String, dynamic>> deleteHoliday(String id) {
+    return _delete(
+      ApiEndpoints.schoolHolidayById(id),
+      context: 'delete holiday',
+    );
+  }
+
+  Future<Map<String, dynamic>> getAdminUsers({int page = 1, int limit = 50}) {
+    return _get(
+      ApiEndpoints.schoolAdminUsers,
+      query: {'page': page, 'limit': limit},
+      context: 'admin users',
+    );
+  }
+
+  Future<Map<String, dynamic>> createAdminUser(Map<String, dynamic> payload) {
+    return _post(
+      ApiEndpoints.schoolAdminUsers,
+      payload: payload,
+      context: 'create admin user',
+    );
+  }
+
+  Future<Map<String, dynamic>> updateAdminUser({
+    required String id,
+    required Map<String, dynamic> payload,
+  }) {
+    return _put(
+      ApiEndpoints.schoolAdminUserById(id),
+      payload: payload,
+      context: 'update admin user',
+    );
+  }
+
+  Future<Map<String, dynamic>> getRoles({int page = 1, int limit = 50}) {
+    return _get(
+      ApiEndpoints.schoolRoles,
+      query: {'page': page, 'limit': limit},
+      context: 'roles',
+    );
+  }
+
+  Future<Map<String, dynamic>> createRole(Map<String, dynamic> payload) {
+    return _post(
+      ApiEndpoints.schoolRoles,
+      payload: payload,
+      context: 'create role',
+    );
+  }
+
+  Future<Map<String, dynamic>> updateRole({
+    required String id,
+    required Map<String, dynamic> payload,
+  }) {
+    return _put(
+      ApiEndpoints.schoolRoleById(id),
+      payload: payload,
+      context: 'update role',
+    );
+  }
+
+  Future<Map<String, dynamic>> deleteRole(String id) {
+    return _delete(ApiEndpoints.schoolRoleById(id), context: 'delete role');
+  }
+
+  Future<Map<String, dynamic>> getPermissions() {
+    return _get(ApiEndpoints.schoolPermissions, context: 'permissions');
+  }
+
+  Future<Map<String, dynamic>> getPermissionsMatrix() {
+    return _get(
+      ApiEndpoints.schoolPermissionsMatrix,
+      context: 'permissions matrix',
+    );
+  }
+
+  Future<Map<String, dynamic>> updatePermissionsMatrix(
+    Map<String, dynamic> payload,
+  ) {
+    return _put(
+      ApiEndpoints.schoolPermissionsMatrix,
+      payload: payload,
+      context: 'update permissions matrix',
+    );
+  }
+
+  Future<Map<String, dynamic>> getDocumentCategories({
+    int page = 1,
+    int limit = 50,
+  }) {
+    return _get(
+      ApiEndpoints.schoolDocumentCategories,
+      query: {'page': page, 'limit': limit},
+      context: 'document categories',
+    );
+  }
+
+  Future<Map<String, dynamic>> createDocumentCategory(
+    Map<String, dynamic> payload,
+  ) {
+    return _post(
+      ApiEndpoints.schoolDocumentCategories,
+      payload: payload,
+      context: 'create document category',
+    );
+  }
+
+  Future<Map<String, dynamic>> updateDocumentCategory({
+    required String id,
+    required Map<String, dynamic> payload,
+  }) {
+    return _put(
+      ApiEndpoints.schoolDocumentCategoryById(id),
+      payload: payload,
+      context: 'update document category',
+    );
+  }
+
+  Future<Map<String, dynamic>> deleteDocumentCategory(String id) {
+    return _delete(
+      ApiEndpoints.schoolDocumentCategoryById(id),
+      context: 'delete document category',
+    );
+  }
+
+  Future<Map<String, dynamic>> getAchievements({int page = 1, int limit = 50}) {
+    return _get(
+      ApiEndpoints.schoolAchievements,
+      query: {'page': page, 'limit': limit},
+      context: 'achievements',
+    );
+  }
+
+  Future<Map<String, dynamic>> createAchievement(Map<String, dynamic> payload) {
+    return _post(
+      ApiEndpoints.schoolAchievements,
+      payload: payload,
+      context: 'create achievement',
+    );
+  }
+
+  Future<Map<String, dynamic>> deleteAchievement(String id) {
+    return _delete(
+      ApiEndpoints.schoolAchievementById(id),
+      context: 'delete achievement',
+    );
+  }
+
+  Future<Map<String, dynamic>> getAiFaqs({int page = 1, int limit = 50}) {
+    return _get(
+      ApiEndpoints.schoolAiFaqs,
+      query: {'page': page, 'limit': limit},
+      context: 'AI FAQs',
+    );
+  }
+
+  Future<Map<String, dynamic>> createAiFaq(Map<String, dynamic> payload) {
+    return _post(
+      ApiEndpoints.schoolAiFaqs,
+      payload: payload,
+      context: 'create AI FAQ',
+    );
+  }
+
+  Future<Map<String, dynamic>> updateAiFaq({
+    required String id,
+    required Map<String, dynamic> payload,
+  }) {
+    return _put(
+      ApiEndpoints.schoolAiFaqById(id),
+      payload: payload,
+      context: 'update AI FAQ',
+    );
+  }
+
+  Future<Map<String, dynamic>> deleteAiFaq(String id) {
+    return _delete(ApiEndpoints.schoolAiFaqById(id), context: 'delete AI FAQ');
   }
 
   Future<Map<String, dynamic>> getAttendanceTrend({
@@ -109,6 +771,48 @@ class AdminService {
     return extractApiData(res.data, context: 'attendance records');
   }
 
+  Future<Map<String, dynamic>> updateAttendanceRecord({
+    required String id,
+    required Map<String, dynamic> payload,
+  }) {
+    return _put(
+      ApiEndpoints.schoolAttendanceRecordById(id),
+      payload: payload,
+      context: 'update attendance record',
+    );
+  }
+
+  Future<Map<String, dynamic>> markAttendance(Map<String, dynamic> payload) {
+    return _post(
+      ApiEndpoints.schoolAttendanceMark,
+      payload: payload,
+      context: 'mark attendance',
+    );
+  }
+
+  Future<Map<String, dynamic>> exportAttendance({
+    required String type,
+    String? dateFrom,
+    String? dateTo,
+    String? className,
+    String? section,
+  }) {
+    return _get(
+      ApiEndpoints.schoolAttendanceExport,
+      query: {
+        'type': type,
+        if (dateFrom != null && dateFrom.trim().isNotEmpty)
+          'dateFrom': dateFrom.trim(),
+        if (dateTo != null && dateTo.trim().isNotEmpty) 'dateTo': dateTo.trim(),
+        if (className != null && className.trim().isNotEmpty)
+          'className': className.trim(),
+        if (section != null && section.trim().isNotEmpty)
+          'section': section.trim(),
+      },
+      context: 'export attendance',
+    );
+  }
+
   Future<Map<String, dynamic>> markAttendanceBulk({
     required String type,
     required String date,
@@ -116,11 +820,7 @@ class AdminService {
   }) async {
     final res = await _apiClient.post(
       ApiEndpoints.schoolAttendanceBulkMark,
-      data: {
-        'type': type,
-        'date': date,
-        'records': records,
-      },
+      data: {'type': type, 'date': date, 'records': records},
     );
     return extractApiData(res.data, context: 'mark attendance bulk');
   }
@@ -177,6 +877,13 @@ class AdminService {
     return extractApiData(res.data, context: 'announcements');
   }
 
+  Future<Map<String, dynamic>> getAnnouncementById(String id) {
+    return _get(
+      ApiEndpoints.schoolAnnouncementById(id),
+      context: 'announcement',
+    );
+  }
+
   Future<Map<String, dynamic>> createAnnouncement({
     required String title,
     required String content,
@@ -195,8 +902,26 @@ class AdminService {
     return extractApiData(res.data, context: 'create announcement');
   }
 
+  Future<Map<String, dynamic>> updateAnnouncement({
+    required String id,
+    required Map<String, dynamic> payload,
+  }) {
+    return _put(
+      ApiEndpoints.schoolAnnouncementById(id),
+      payload: payload,
+      context: 'update announcement',
+    );
+  }
+
+  Future<Map<String, dynamic>> deleteAnnouncement(String id) {
+    return _delete(
+      ApiEndpoints.schoolAnnouncementById(id),
+      context: 'delete announcement',
+    );
+  }
+
   Future<Map<String, dynamic>> sendAnnouncement(String id) async {
-    final res = await _apiClient.post('/school/announcements/$id/send');
+    final res = await _apiClient.post(ApiEndpoints.schoolAnnouncementSend(id));
     return extractApiData(res.data, context: 'send announcement');
   }
 
@@ -356,6 +1081,34 @@ class AdminService {
     return extractApiData(res.data, context: 'delete staff');
   }
 
+  Future<Map<String, dynamic>> getStaffDocuments(String id) {
+    return _get(
+      ApiEndpoints.schoolStaffDocuments(id),
+      context: 'staff documents',
+    );
+  }
+
+  Future<Map<String, dynamic>> addStaffDocument({
+    required String id,
+    required Map<String, dynamic> payload,
+  }) {
+    return _post(
+      ApiEndpoints.schoolStaffDocuments(id),
+      payload: payload,
+      context: 'add staff document',
+    );
+  }
+
+  Future<Map<String, dynamic>> deleteStaffDocument({
+    required String id,
+    required String docId,
+  }) {
+    return _delete(
+      ApiEndpoints.schoolStaffDocumentById(id, docId),
+      context: 'delete staff document',
+    );
+  }
+
   Future<Map<String, dynamic>> getClasses({
     int page = 1,
     int limit = 100,
@@ -462,64 +1215,336 @@ class AdminService {
       if (classId != null) 'classId': classId,
       if (subjectId != null) 'subjectId': subjectId,
     };
-    final res = await _apiClient.get(ApiEndpoints.schoolStudyMaterials, query: query);
+    final res = await _apiClient.get(
+      ApiEndpoints.schoolStudyMaterials,
+      query: query,
+    );
     return extractApiData(res.data, context: 'study materials');
   }
 
-  Future<Map<String, dynamic>> uploadStudyMaterial(Map<String, dynamic> payload) async {
-    final res = await _apiClient.post(ApiEndpoints.schoolStudyMaterials, data: payload);
+  Future<Map<String, dynamic>> uploadStudyMaterial(
+    Map<String, dynamic> payload,
+  ) async {
+    final res = await _apiClient.post(
+      ApiEndpoints.schoolStudyMaterials,
+      data: payload,
+    );
     return extractApiData(res.data, context: 'upload study material');
   }
 
-  Future<Map<String, dynamic>> getSyllabus({String? classId, String? subjectId}) async {
-    final res = await _apiClient.get('/school/academics/syllabus', query: {
-      if (classId != null) 'classId': classId,
-      if (subjectId != null) 'subjectId': subjectId,
-    });
-    return extractApiData(res.data, context: 'syllabus');
+  Future<Map<String, dynamic>> getSyllabus({
+    String? classId,
+    String? subjectId,
+  }) async {
+    final settings = await _academicManagementSettings();
+    return {'items': _academicItems(settings, 'syllabus')};
   }
 
-  Future<Map<String, dynamic>> getLessonPlans({String? classId, String? subjectId}) async {
-    final res = await _apiClient.get('/school/academics/lesson-plans', query: {
-      if (classId != null) 'classId': classId,
-      if (subjectId != null) 'subjectId': subjectId,
-    });
-    return extractApiData(res.data, context: 'lesson plans');
+  Future<Map<String, dynamic>> getLessonPlans({
+    String? classId,
+    String? subjectId,
+  }) async {
+    final settings = await _academicManagementSettings();
+    return {'items': _academicItems(settings, 'lessonPlans')};
   }
 
-  Future<Map<String, dynamic>> createSyllabus(Map<String, dynamic> payload) async {
-    final res = await _apiClient.post('/school/academics/syllabus', data: payload);
-    return extractApiData(res.data, context: 'create syllabus');
+  Future<Map<String, dynamic>> createSyllabus(
+    Map<String, dynamic> payload,
+  ) async {
+    return _upsertAcademicItem(collectionKey: 'syllabus', payload: payload);
   }
 
-  Future<Map<String, dynamic>> updateSyllabus(String id, Map<String, dynamic> payload) async {
-    final res = await _apiClient.put('/school/academics/syllabus/$id', data: payload);
-    return extractApiData(res.data, context: 'update syllabus');
+  Future<Map<String, dynamic>> updateSyllabus(
+    String id,
+    Map<String, dynamic> payload,
+  ) async {
+    return _upsertAcademicItem(
+      collectionKey: 'syllabus',
+      id: id,
+      payload: payload,
+    );
   }
 
   Future<Map<String, dynamic>> deleteSyllabus(String id) async {
-    final res = await _apiClient.dio.delete('/school/academics/syllabus/$id');
-    return extractApiData(res.data, context: 'delete syllabus');
+    return _deleteAcademicItem(collectionKey: 'syllabus', id: id);
   }
 
-  Future<Map<String, dynamic>> createLessonPlan(Map<String, dynamic> payload) async {
-    final res = await _apiClient.post('/school/academics/lesson-plans', data: payload);
-    return extractApiData(res.data, context: 'create lesson plan');
+  Future<Map<String, dynamic>> createLessonPlan(
+    Map<String, dynamic> payload,
+  ) async {
+    return _upsertAcademicItem(collectionKey: 'lessonPlans', payload: payload);
   }
 
-  Future<Map<String, dynamic>> updateLessonPlan(String id, Map<String, dynamic> payload) async {
-    final res = await _apiClient.put('/school/academics/lesson-plans/$id', data: payload);
-    return extractApiData(res.data, context: 'update lesson plan');
+  Future<Map<String, dynamic>> updateLessonPlan(
+    String id,
+    Map<String, dynamic> payload,
+  ) async {
+    return _upsertAcademicItem(
+      collectionKey: 'lessonPlans',
+      id: id,
+      payload: payload,
+    );
   }
 
   Future<Map<String, dynamic>> deleteLessonPlan(String id) async {
-    final res = await _apiClient.dio.delete('/school/academics/lesson-plans/$id');
-    return extractApiData(res.data, context: 'delete lesson plan');
+    return _deleteAcademicItem(collectionKey: 'lessonPlans', id: id);
   }
 
   Future<Map<String, dynamic>> deleteStudyMaterial(String id) async {
-    final res = await _apiClient.dio.delete('${ApiEndpoints.schoolStudyMaterials}/$id');
+    final res = await _apiClient.dio.delete(
+      '${ApiEndpoints.schoolStudyMaterials}/$id',
+    );
     return extractApiData(res.data, context: 'delete study material');
+  }
+
+  Future<Map<String, dynamic>> getHomework({
+    int page = 1,
+    int limit = 50,
+    String? classId,
+    String? subjectId,
+  }) {
+    return _get(
+      ApiEndpoints.schoolHomework,
+      query: {
+        'page': page,
+        'limit': limit,
+        if (classId != null && classId.trim().isNotEmpty)
+          'classId': classId.trim(),
+        if (subjectId != null && subjectId.trim().isNotEmpty)
+          'subjectId': subjectId.trim(),
+      },
+      context: 'homework',
+    );
+  }
+
+  Future<Map<String, dynamic>> getHomeworkById(String id) {
+    return _get(ApiEndpoints.schoolHomeworkById(id), context: 'homework');
+  }
+
+  Future<Map<String, dynamic>> createHomework(Map<String, dynamic> payload) {
+    return _post(
+      ApiEndpoints.schoolHomework,
+      payload: payload,
+      context: 'create homework',
+    );
+  }
+
+  Future<Map<String, dynamic>> updateHomework({
+    required String id,
+    required Map<String, dynamic> payload,
+  }) {
+    return _put(
+      ApiEndpoints.schoolHomeworkById(id),
+      payload: payload,
+      context: 'update homework',
+    );
+  }
+
+  Future<Map<String, dynamic>> deleteHomework(String id) {
+    return _delete(
+      ApiEndpoints.schoolHomeworkById(id),
+      context: 'delete homework',
+    );
+  }
+
+  Future<Map<String, dynamic>> submitHomework({
+    required String id,
+    required Map<String, dynamic> payload,
+  }) {
+    return _post(
+      ApiEndpoints.schoolHomeworkSubmit(id),
+      payload: payload,
+      context: 'submit homework',
+    );
+  }
+
+  Future<Map<String, dynamic>> getReportCardTemplates({
+    int page = 1,
+    int limit = 50,
+  }) {
+    return _get(
+      ApiEndpoints.schoolReportCardTemplates,
+      query: {'page': page, 'limit': limit},
+      context: 'report card templates',
+    );
+  }
+
+  Future<Map<String, dynamic>> createReportCardTemplate(
+    Map<String, dynamic> payload,
+  ) {
+    return _post(
+      ApiEndpoints.schoolReportCardTemplates,
+      payload: payload,
+      context: 'create report card template',
+    );
+  }
+
+  Future<Map<String, dynamic>> updateReportCardTemplate({
+    required String id,
+    required Map<String, dynamic> payload,
+  }) {
+    return _put(
+      ApiEndpoints.schoolReportCardTemplateById(id),
+      payload: payload,
+      context: 'update report card template',
+    );
+  }
+
+  Future<Map<String, dynamic>> deleteReportCardTemplate(String id) {
+    return _delete(
+      ApiEndpoints.schoolReportCardTemplateById(id),
+      context: 'delete report card template',
+    );
+  }
+
+  Future<Map<String, dynamic>> getFaceCheckins({
+    int page = 1,
+    int limit = 50,
+    String? status,
+  }) {
+    return _get(
+      ApiEndpoints.schoolFaceCheckins,
+      query: {
+        'page': page,
+        'limit': limit,
+        if (status != null && status.trim().isNotEmpty) 'status': status.trim(),
+      },
+      context: 'face check-ins',
+    );
+  }
+
+  Future<Map<String, dynamic>> approveFaceCheckin(String id) {
+    return _patch(
+      ApiEndpoints.schoolFaceCheckinApprove(id),
+      context: 'approve face check-in',
+    );
+  }
+
+  Future<Map<String, dynamic>> rejectFaceCheckin({
+    required String id,
+    String? reason,
+  }) {
+    return _patch(
+      ApiEndpoints.schoolFaceCheckinReject(id),
+      payload: {
+        if (reason != null && reason.trim().isNotEmpty) 'reason': reason.trim(),
+      },
+      context: 'reject face check-in',
+    );
+  }
+
+  Future<Map<String, dynamic>> getBackupExports({
+    int page = 1,
+    int limit = 50,
+  }) {
+    return _get(
+      ApiEndpoints.schoolBackupExports,
+      query: {'page': page, 'limit': limit},
+      context: 'backup exports',
+    );
+  }
+
+  Future<Map<String, dynamic>> createBackupExport(
+    Map<String, dynamic> payload,
+  ) {
+    return _post(
+      ApiEndpoints.schoolBackupExports,
+      payload: payload,
+      context: 'create backup export',
+    );
+  }
+
+  Future<Map<String, dynamic>> getOfflineSyncRecords({
+    int page = 1,
+    int limit = 50,
+    String? status,
+  }) {
+    return _get(
+      ApiEndpoints.schoolOfflineSyncRecords,
+      query: {
+        'page': page,
+        'limit': limit,
+        if (status != null && status.trim().isNotEmpty) 'status': status.trim(),
+      },
+      context: 'offline sync records',
+    );
+  }
+
+  Future<Map<String, dynamic>> createOfflineSyncRecord(
+    Map<String, dynamic> payload,
+  ) {
+    return _post(
+      ApiEndpoints.schoolOfflineSyncRecords,
+      payload: payload,
+      context: 'create offline sync record',
+    );
+  }
+
+  Future<Map<String, dynamic>> patchOfflineSyncRecord({
+    required String id,
+    required Map<String, dynamic> payload,
+  }) {
+    return _patch(
+      ApiEndpoints.schoolOfflineSyncRecordById(id),
+      payload: payload,
+      context: 'patch offline sync record',
+    );
+  }
+
+  Future<Map<String, dynamic>> _academicManagementSettings() async {
+    final settings = await getSchoolSettings();
+    final raw = settings['academicManagement'];
+    if (raw is Map) return Map<String, dynamic>.from(raw);
+    return <String, dynamic>{};
+  }
+
+  List<Map<String, dynamic>> _academicItems(
+    Map<String, dynamic> settings,
+    String key,
+  ) {
+    final raw = settings[key];
+    if (raw is! List) return <Map<String, dynamic>>[];
+    return raw
+        .whereType<Map>()
+        .map((item) => Map<String, dynamic>.from(item))
+        .toList();
+  }
+
+  Future<Map<String, dynamic>> _upsertAcademicItem({
+    required String collectionKey,
+    String? id,
+    required Map<String, dynamic> payload,
+  }) async {
+    final settings = await _academicManagementSettings();
+    final items = _academicItems(settings, collectionKey);
+    final itemId = (id == null || id.trim().isEmpty)
+        ? DateTime.now().millisecondsSinceEpoch.toString()
+        : id.trim();
+    final nextItem = {
+      ...payload,
+      'id': itemId,
+      'updatedAt': DateTime.now().toIso8601String(),
+    };
+    final next = [
+      ...items.where((item) => item['id']?.toString() != itemId),
+      nextItem,
+    ];
+    settings[collectionKey] = next;
+    await patchSchoolSettings({'academicManagement': settings});
+    return nextItem;
+  }
+
+  Future<Map<String, dynamic>> _deleteAcademicItem({
+    required String collectionKey,
+    required String id,
+  }) async {
+    final settings = await _academicManagementSettings();
+    final items = _academicItems(settings, collectionKey);
+    settings[collectionKey] = items
+        .where((item) => item['id']?.toString() != id)
+        .toList();
+    await patchSchoolSettings({'academicManagement': settings});
+    return {'id': id};
   }
 
   Future<Map<String, dynamic>> getAttendanceReport({
@@ -560,6 +1585,55 @@ class AdminService {
       query: query.isEmpty ? null : query,
     );
     return extractApiData(res.data, context: 'fees report');
+  }
+
+  Future<Map<String, dynamic>> getExamPerformanceReport({
+    String? examId,
+    String? classId,
+    String? subjectId,
+  }) {
+    return _get(
+      ApiEndpoints.schoolReportExamPerformance,
+      query: {
+        if (examId != null && examId.trim().isNotEmpty) 'examId': examId.trim(),
+        if (classId != null && classId.trim().isNotEmpty)
+          'classId': classId.trim(),
+        if (subjectId != null && subjectId.trim().isNotEmpty)
+          'subjectId': subjectId.trim(),
+      },
+      context: 'exam performance report',
+    );
+  }
+
+  Future<Map<String, dynamic>> getStudentsReport({
+    String? classId,
+    String? status,
+  }) {
+    return _get(
+      ApiEndpoints.schoolReportStudents,
+      query: {
+        if (classId != null && classId.trim().isNotEmpty)
+          'classId': classId.trim(),
+        if (status != null && status.trim().isNotEmpty) 'status': status.trim(),
+      },
+      context: 'students report',
+    );
+  }
+
+  Future<Map<String, dynamic>> getReportJobs({int page = 1, int limit = 50}) {
+    return _get(
+      ApiEndpoints.schoolReportJobs,
+      query: {'page': page, 'limit': limit},
+      context: 'report jobs',
+    );
+  }
+
+  Future<Map<String, dynamic>> generateReport(Map<String, dynamic> payload) {
+    return _post(
+      ApiEndpoints.schoolReportGenerate,
+      payload: payload,
+      context: 'generate report',
+    );
   }
 
   Future<Map<String, dynamic>> getAdmissionApplications({
@@ -674,6 +1748,32 @@ class AdminService {
     return extractApiData(res.data, context: 'students');
   }
 
+  Future<Map<String, dynamic>> exportStudents({
+    String? status,
+    String? className,
+    String? section,
+  }) {
+    return _get(
+      ApiEndpoints.schoolStudentsExport,
+      query: {
+        if (status != null && status.trim().isNotEmpty) 'status': status.trim(),
+        if (className != null && className.trim().isNotEmpty)
+          'className': className.trim(),
+        if (section != null && section.trim().isNotEmpty)
+          'section': section.trim(),
+      },
+      context: 'export students',
+    );
+  }
+
+  Future<Map<String, dynamic>> importStudents(Map<String, dynamic> payload) {
+    return _post(
+      ApiEndpoints.schoolStudentsImport,
+      payload: payload,
+      context: 'import students',
+    );
+  }
+
   Future<Map<String, dynamic>> getStudentById(String id) async {
     final res = await _apiClient.get(ApiEndpoints.schoolStudentById(id));
     return extractApiData(res.data, context: 'student');
@@ -773,6 +1873,16 @@ class AdminService {
     return extractApiData(res.data, context: 'add student document');
   }
 
+  Future<Map<String, dynamic>> deleteStudentDocument({
+    required String id,
+    required String docId,
+  }) {
+    return _delete(
+      ApiEndpoints.schoolStudentDocumentById(id, docId),
+      context: 'delete student document',
+    );
+  }
+
   Future<Map<String, dynamic>> getTimetable({
     String? classId,
     String? dateFrom,
@@ -788,6 +1898,95 @@ class AdminService {
       query: query.isEmpty ? null : query,
     );
     return extractApiData(res.data, context: 'timetable');
+  }
+
+  Future<Map<String, dynamic>> getClassTimetable({
+    required String classId,
+    String? dateFrom,
+    String? dateTo,
+  }) {
+    return _get(
+      ApiEndpoints.schoolTimetableClass(classId),
+      query: {
+        if (dateFrom != null && dateFrom.trim().isNotEmpty)
+          'dateFrom': dateFrom.trim(),
+        if (dateTo != null && dateTo.trim().isNotEmpty) 'dateTo': dateTo.trim(),
+      },
+      context: 'class timetable',
+    );
+  }
+
+  Future<Map<String, dynamic>> getTeacherTimetable({
+    required String staffId,
+    String? dateFrom,
+    String? dateTo,
+  }) {
+    return _get(
+      ApiEndpoints.schoolTimetableTeacher(staffId),
+      query: {
+        if (dateFrom != null && dateFrom.trim().isNotEmpty)
+          'dateFrom': dateFrom.trim(),
+        if (dateTo != null && dateTo.trim().isNotEmpty) 'dateTo': dateTo.trim(),
+      },
+      context: 'teacher timetable',
+    );
+  }
+
+  Future<Map<String, dynamic>> getTimetableConflicts({
+    String? classId,
+    String? staffId,
+    String? date,
+  }) {
+    return _get(
+      ApiEndpoints.schoolTimetableConflicts,
+      query: {
+        if (classId != null && classId.trim().isNotEmpty)
+          'classId': classId.trim(),
+        if (staffId != null && staffId.trim().isNotEmpty)
+          'staffId': staffId.trim(),
+        if (date != null && date.trim().isNotEmpty) 'date': date.trim(),
+      },
+      context: 'timetable conflicts',
+    );
+  }
+
+  Future<Map<String, dynamic>> getTimetablePeriods({
+    int page = 1,
+    int limit = 50,
+  }) {
+    return _get(
+      ApiEndpoints.schoolTimetablePeriods,
+      query: {'page': page, 'limit': limit},
+      context: 'timetable periods',
+    );
+  }
+
+  Future<Map<String, dynamic>> createTimetablePeriod(
+    Map<String, dynamic> payload,
+  ) {
+    return _post(
+      ApiEndpoints.schoolTimetablePeriods,
+      payload: payload,
+      context: 'create timetable period',
+    );
+  }
+
+  Future<Map<String, dynamic>> updateTimetablePeriod({
+    required String id,
+    required Map<String, dynamic> payload,
+  }) {
+    return _put(
+      ApiEndpoints.schoolTimetablePeriodById(id),
+      payload: payload,
+      context: 'update timetable period',
+    );
+  }
+
+  Future<Map<String, dynamic>> deleteTimetablePeriod(String id) {
+    return _delete(
+      ApiEndpoints.schoolTimetablePeriodById(id),
+      context: 'delete timetable period',
+    );
   }
 
   Future<Map<String, dynamic>> createTimetableSlot({
@@ -1413,9 +2612,15 @@ class AdminService {
       return extractApiData(res.data, context: 'update admission fees');
     } catch (_) {
       try {
-        return await patchSchoolSettings({'admissionFee': fee, 'admission_fee': fee});
+        return await patchSchoolSettings({
+          'admissionFee': fee,
+          'admission_fee': fee,
+        });
       } catch (e) {
-        return await updateSchoolSettings({'admissionFee': fee, 'admission_fee': fee});
+        return await updateSchoolSettings({
+          'admissionFee': fee,
+          'admission_fee': fee,
+        });
       }
     }
   }

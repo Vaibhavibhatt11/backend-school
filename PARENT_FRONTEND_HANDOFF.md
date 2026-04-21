@@ -4,7 +4,7 @@ This guide is for integrating the parent app against production backend without 
 
 ## Base URL
 
-- Production: `https://backend-school-app.onrender.com/api/v1`
+- Production: `https://backend-school-hqkl.onrender.com/api/v1`
 - Local: `http://localhost:5000/api/v1`
 
 All parent endpoints are under: `{BASE_URL}/parent/*`
@@ -204,7 +204,7 @@ If omitted, backend uses the first child linked to that parent.
 ## Quick Postman Check
 
 - Import: `postman/School-ERP-Parent.postman_collection.json`
-- Set env `base_url = https://backend-school-app.onrender.com/api/v1`
+- Set env `base_url = https://backend-school-hqkl.onrender.com/api/v1`
 - Run:
   1. `POST /auth/login (PARENT user)`
   2. `GET /parent/children`

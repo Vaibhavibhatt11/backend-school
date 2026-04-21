@@ -237,18 +237,24 @@ class AdminAcademicsController extends GetxController {
         _adminService.getStudyMaterials(),
       ]);
 
-      syllabuses.assignAll((results[0]['items'] as List? ?? [])
-          .whereType<Map>()
-          .map((e) => AdminSyllabusRecord.fromJson(e.cast<String, dynamic>()))
-          .toList());
-      lessonPlans.assignAll((results[1]['items'] as List? ?? [])
-          .whereType<Map>()
-          .map((e) => AdminLessonPlan.fromJson(e.cast<String, dynamic>()))
-          .toList());
-      materials.assignAll((results[2]['items'] as List? ?? [])
-          .whereType<Map>()
-          .map((e) => AdminStudyMaterial.fromJson(e.cast<String, dynamic>()))
-          .toList());
+      syllabuses.assignAll(
+        (results[0]['items'] as List? ?? [])
+            .whereType<Map>()
+            .map((e) => AdminSyllabusRecord.fromJson(e.cast<String, dynamic>()))
+            .toList(),
+      );
+      lessonPlans.assignAll(
+        (results[1]['items'] as List? ?? [])
+            .whereType<Map>()
+            .map((e) => AdminLessonPlan.fromJson(e.cast<String, dynamic>()))
+            .toList(),
+      );
+      materials.assignAll(
+        (results[2]['items'] as List? ?? [])
+            .whereType<Map>()
+            .map((e) => AdminStudyMaterial.fromJson(e.cast<String, dynamic>()))
+            .toList(),
+      );
     } catch (_) {
       // Fail silently for extras
     } finally {
@@ -643,24 +649,36 @@ class AdminAcademicsController extends GetxController {
 
   Future<void> openSyllabusDialog({AdminSyllabusRecord? existing}) async {
     final topicCtrl = TextEditingController(text: existing?.topic ?? '');
-    final progressCtrl = TextEditingController(text: existing?.progress.toString() ?? '0');
-    String classId = ''; // Simplified for this demo, usually would be a dropdown
-    String subjectId = '';
+    final progressCtrl = TextEditingController(
+      text: existing?.progress.toString() ?? '0',
+    );
 
     final ok = await Get.dialog<bool>(
       AlertDialog(
-        title: Text(existing == null ? 'Add Syllabus Progress' : 'Update Syllabus'),
+        title: Text(
+          existing == null ? 'Add Syllabus Progress' : 'Update Syllabus',
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: topicCtrl, decoration: const InputDecoration(labelText: 'Topic Name')),
+            TextField(
+              controller: topicCtrl,
+              decoration: const InputDecoration(labelText: 'Topic Name'),
+            ),
             const SizedBox(height: 12),
-            TextField(controller: progressCtrl, decoration: const InputDecoration(labelText: 'Progress %'), keyboardType: TextInputType.number),
+            TextField(
+              controller: progressCtrl,
+              decoration: const InputDecoration(labelText: 'Progress %'),
+              keyboardType: TextInputType.number,
+            ),
           ],
         ),
         actions: [
           TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+          FilledButton(
+            onPressed: () => Get.back(result: true),
+            child: const Text('Save'),
+          ),
         ],
       ),
     );
@@ -668,8 +686,9 @@ class AdminAcademicsController extends GetxController {
     if (ok == true) {
       try {
         final payload = {
-          'topic': topicCtrl.text,
+          'topic': topicCtrl.text.trim(),
           'progress': double.tryParse(progressCtrl.text) ?? 0,
+          'status': 'IN_PROGRESS',
         };
         if (existing == null) {
           await _adminService.createSyllabus(payload);
@@ -699,10 +718,16 @@ class AdminAcademicsController extends GetxController {
     final ok = await Get.dialog<bool>(
       AlertDialog(
         title: Text(existing == null ? 'New Lesson Plan' : 'Edit Lesson Plan'),
-        content: TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: 'Plan Title')),
+        content: TextField(
+          controller: titleCtrl,
+          decoration: const InputDecoration(labelText: 'Plan Title'),
+        ),
         actions: [
           TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+          FilledButton(
+            onPressed: () => Get.back(result: true),
+            child: const Text('Save'),
+          ),
         ],
       ),
     );
@@ -712,7 +737,9 @@ class AdminAcademicsController extends GetxController {
         if (existing == null) {
           await _adminService.createLessonPlan({'title': titleCtrl.text});
         } else {
-          await _adminService.updateLessonPlan(existing.id, {'title': titleCtrl.text});
+          await _adminService.updateLessonPlan(existing.id, {
+            'title': titleCtrl.text,
+          });
         }
         await loadExtraData();
         AppToast.show('Lesson plan saved.');
@@ -733,22 +760,52 @@ class AdminAcademicsController extends GetxController {
   }
 
   Future<void> uploadMaterial() async {
-    // Simplified upload action
     final titleCtrl = TextEditingController();
+    final urlCtrl = TextEditingController();
+    final typeCtrl = TextEditingController(text: 'PDF');
     final ok = await Get.dialog<bool>(
       AlertDialog(
         title: const Text('Upload Study Material'),
-        content: TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: 'Material Title')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: titleCtrl,
+              decoration: const InputDecoration(labelText: 'Material Title'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: urlCtrl,
+              decoration: const InputDecoration(labelText: 'File URL'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: typeCtrl,
+              decoration: const InputDecoration(labelText: 'Type'),
+            ),
+          ],
+        ),
         actions: [
           TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Get.back(result: true), child: const Text('Upload')),
+          FilledButton(
+            onPressed: () => Get.back(result: true),
+            child: const Text('Upload'),
+          ),
         ],
       ),
     );
 
     if (ok == true) {
+      if (titleCtrl.text.trim().isEmpty || urlCtrl.text.trim().isEmpty) {
+        AppToast.show('Material title and file URL are required.');
+        return;
+      }
       try {
-        await _adminService.uploadStudyMaterial({'title': titleCtrl.text, 'type': 'PDF', 'url': 'https://example.com/doc.pdf'});
+        await _adminService.uploadStudyMaterial({
+          'title': titleCtrl.text.trim(),
+          'type': typeCtrl.text.trim().isEmpty ? 'PDF' : typeCtrl.text.trim(),
+          'url': urlCtrl.text.trim(),
+        });
         await loadExtraData();
         AppToast.show('Material uploaded.');
       } catch (e) {
