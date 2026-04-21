@@ -86,6 +86,10 @@ const {
   listFaceCheckins,
   approveFaceCheckin,
   rejectFaceCheckin,
+  listAiFaqs,
+  createAiFaq,
+  updateAiFaq,
+  deleteAiFaq,
 } = require("./school.misc.handlers");
 const {
   getProfileMe,
@@ -363,6 +367,11 @@ router.delete("/roles/:id", deleteRole);
 router.get("/face-checkins", listFaceCheckins);
 router.patch("/face-checkins/:id/approve", approveFaceCheckin);
 router.patch("/face-checkins/:id/reject", rejectFaceCheckin);
+
+router.get("/ai/faqs", listAiFaqs);
+router.post("/ai/faqs", createAiFaq);
+router.put("/ai/faqs/:id", updateAiFaq);
+router.delete("/ai/faqs/:id", deleteAiFaq);
 
 router.get("/notifications/templates", listNotificationTemplates);
 router.post("/notifications/templates", createNotificationTemplate);
