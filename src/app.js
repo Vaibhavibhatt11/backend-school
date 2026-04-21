@@ -31,30 +31,45 @@ function normalizeOrigin(origin) {
 
 const corsOrigins = env.CORS_ORIGIN
   ? env.CORS_ORIGIN.split(",").map(normalizeOrigin).filter(Boolean)
-  : null;
+  : [];
 
 function buildCorsOriginHandler(allowedOrigins) {
-  if (!allowedOrigins || allowedOrigins.length === 0) {
-    return true;
-  }
+  // Common local development patterns (localhost, 127.0.0.1, 0.0.0.0 with any port)
+  const localOriginPattern = /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?$/i;
 
-  // Allow quick dev/test setup via `CORS_ORIGIN=*`.
-  if (allowedOrigins.includes("*")) {
-    return true;
-  }
+  // Trusted hosted patterns (GitHub Pages, Render)
+  const trustedHostedPattern = /(^https:\/\/[a-z0-9-]+\.github\.io$)|(^https:\/\/[a-z0-9-]+\.onrender\.com$)/i;
 
   const allowedSet = new Set(allowedOrigins);
-  const trustedHostedOrigin = /(^https:\/\/[a-z0-9-]+\.github\.io$)|(^https:\/\/[a-z0-9-]+\.onrender\.com$)/i;
 
   return (origin, callback) => {
-    // Allow non-browser callers (curl, Postman, server-to-server).
+    // 1. Allow non-browser callers (curl, Postman, server-to-server)
     if (!origin) return callback(null, true);
 
     const normalized = normalizeOrigin(origin);
-    if (allowedSet.has(normalized) || trustedHostedOrigin.test(normalized)) {
+
+    // 2. Allow if explicitly whitelisted or if wildcard is used
+    if (allowedSet.has(normalized) || allowedOrigins.includes("*")) {
       return callback(null, true);
     }
 
+    // 3. Always allow localhost and common development origins for better DX
+    if (localOriginPattern.test(normalized)) {
+      return callback(null, true);
+    }
+
+    // 4. Allow trusted production domains
+    if (trustedHostedPattern.test(normalized)) {
+      return callback(null, true);
+    }
+
+    // 5. Fallback: if no CORS_ORIGIN is defined and not in strict production, allow all
+    if (allowedOrigins.length === 0 && env.NODE_ENV !== "production") {
+      return callback(null, true);
+    }
+
+    // Log rejected origins to help debugging
+    console.warn(`[CORS] Request from blocked origin: ${origin}`);
     return callback(null, false);
   };
 }
@@ -78,13 +93,16 @@ const trustProxy = resolveTrustProxy(env.TRUST_PROXY, env.NODE_ENV);
 if (trustProxy !== false) {
   app.set("trust proxy", trustProxy);
 }
-app.use(helmet());
+
+// Apply CORS before Helmet to ensure preflight requests (OPTIONS) are handled correctly
 app.use(
   cors({
     origin: buildCorsOriginHandler(corsOrigins),
     credentials: true,
   })
 );
+
+app.use(helmet());
 app.use(compression());
 app.use(morgan(env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(express.json({ limit: env.REQUEST_BODY_LIMIT }));
