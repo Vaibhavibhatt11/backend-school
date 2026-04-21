@@ -12,10 +12,13 @@ Future<bool> downloadExportBytes({
   final url = html.Url.createObjectUrlFromBlob(blob);
   final anchor = html.AnchorElement(href: url)
     ..download = fileName
+    ..target = '_blank'
     ..style.display = 'none';
 
   html.document.body?.append(anchor);
   anchor.click();
+
+  await Future<void>.delayed(const Duration(seconds: 1));
   anchor.remove();
   html.Url.revokeObjectUrl(url);
   return true;
