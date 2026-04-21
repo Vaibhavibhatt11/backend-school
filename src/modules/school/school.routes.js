@@ -429,6 +429,8 @@ router.get("/admissions/applications", listApplications);
 router.get("/admissions/applications/:id", getApplicationById);
 router.post("/admissions/applications", createApplication);
 router.patch("/admissions/applications/:id/status", updateApplicationStatus);
+router.patch("/admissions/applications/:id/fees", updateAdmissionFeeStatus);
+
 router.post("/admissions/applications/:id/documents", addApplicationDocument);
 router.post("/admissions/applications/:id/onboard", onboardApplication);
 

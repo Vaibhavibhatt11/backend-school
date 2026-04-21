@@ -27,7 +27,11 @@ const createSchema = z.object({
 });
 
 const updateStatusSchema = z.object({
-  status: z.enum(["UNDER_REVIEW", "APPROVED", "REJECTED"]),
+  status: z.enum(["UNDER_REVIEW", "APPROVED", "REJECTED", "WAITING"]),
+});
+
+const updateFeeSchema = z.object({
+  paid: z.boolean(),
 });
 
 function hashForCache(s) {
@@ -202,6 +206,22 @@ async function generateRegistrationNo(schoolId) {
   return `${prefix}${String(nextNum).padStart(5, "0")}`;
 }
 
+async function updateAdmissionFeeStatus(req, res, next) {
+  try {
+    const schoolId = scopedSchoolId(req, undefined, true);
+    const { paid } = updateFeeSchema.parse(req.body);
+    await findScopedOrThrow("admissionApplication", req.params.id, schoolId, "Application", "APPLICATION_NOT_FOUND");
+    const updated = await prisma.admissionApplication.update({
+      where: { id: req.params.id },
+      data: { admissionFeePaid: paid },
+    });
+    invalidateAdmissionsList(schoolId);
+    return res.status(200).json({ success: true, data: updated });
+  } catch (e) {
+    return next(e);
+  }
+}
+
 async function onboardApplication(req, res, next) {
   try {
     const schoolId = scopedSchoolId(req, undefined, true);
@@ -244,6 +264,7 @@ module.exports = {
   getApplicationById,
   createApplication,
   updateApplicationStatus,
+  updateAdmissionFeeStatus,
   addApplicationDocument,
   onboardApplication,
 };

@@ -1327,6 +1327,7 @@ enum AdmissionStatus {
   UNDER_REVIEW
   APPROVED
   REJECTED
+  WAITING
   ONBOARDED
 }
 
