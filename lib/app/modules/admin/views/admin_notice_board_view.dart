@@ -15,58 +15,58 @@ class AdminNoticeBoardView extends GetView<AdminNoticeBoardController> {
     final content = SafeArea(
       child: DefaultTabController(
         length: 6,
-        child: Column(
-          children: [
-            Padding(
+      child: Column(
+        children: [
+          Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
+                  children: [
+                    IconButton(
+                      onPressed: () {
                       if (embedded && Get.isRegistered<AdminShellController>()) {
-                        Get.find<AdminShellController>().setTab(0);
-                        return;
-                      }
-                      if (Get.key.currentState?.canPop() ?? false) {
-                        Get.back();
-                      }
-                    },
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                  ),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Communication Center',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          'Staff chat, broadcasts, notifications, and circulars',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: Colors.grey, fontSize: 12),
-                        ),
-                      ],
+                          Get.find<AdminShellController>().setTab(0);
+                          return;
+                        }
+                        if (Get.key.currentState?.canPop() ?? false) {
+                          Get.back();
+                        }
+                      },
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded),
                     ),
-                  ),
-                  _HeaderActionButton(
-                    icon: Icons.search,
+                  const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                          Text(
+                          'Communication Center',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                          'Staff chat, broadcasts, notifications, and circulars',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                    _HeaderActionButton(
+                      icon: Icons.search,
                     tooltip: 'Search Circulars',
-                    onTap: () {
-                      showSearch<Notice?>(
-                        context: context,
-                        delegate: _NoticeSearchDelegate(controller),
-                      );
-                    },
-                  ),
-                ],
-              ),
+                      onTap: () {
+                        showSearch<Notice?>(
+                          context: context,
+                          delegate: _NoticeSearchDelegate(controller),
+                        );
+                      },
+                    ),
+                  ],
+                ),
             ),
             Container(
               margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -99,13 +99,13 @@ class AdminNoticeBoardView extends GetView<AdminNoticeBoardController> {
                 ],
               ),
             ),
-            Expanded(
-              child: Obx(() {
-                if (controller.isLoading.value) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
                 return TabBarView(
-                  children: [
+                        children: [
                     _StaffChatTab(controller: controller, isDark: isDark),
                     _ChannelCampaignTab(
                       controller: controller,
@@ -125,10 +125,10 @@ class AdminNoticeBoardView extends GetView<AdminNoticeBoardController> {
                     _ParentCommunicationTab(controller: controller, isDark: isDark),
                     _CircularAnnouncementsTab(controller: controller, isDark: isDark),
                   ],
-                );
-              }),
-            ),
-          ],
+              );
+            }),
+          ),
+        ],
         ),
       ),
     );

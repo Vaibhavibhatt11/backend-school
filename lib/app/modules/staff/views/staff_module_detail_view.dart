@@ -1,7 +1,13 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/core/widgets/custom_app_bar.dart';
 import 'package:erp_frontend/app/modules/staff/controllers/staff_communication_controller.dart';
+import 'package:erp_frontend/app/modules/staff/controllers/staff_attendance_leave_controller.dart';
+import 'package:erp_frontend/app/modules/staff/controllers/staff_class_teaching_controller.dart';
 import 'package:erp_frontend/app/modules/staff/controllers/staff_dashboard_controller.dart';
+import 'package:erp_frontend/app/modules/staff/controllers/staff_homework_assignment_controller.dart';
+import 'package:erp_frontend/app/modules/staff/controllers/staff_lesson_planning_controller.dart';
+import 'package:erp_frontend/app/modules/staff/controllers/staff_exam_assessment_controller.dart';
+import 'package:erp_frontend/app/modules/staff/controllers/staff_performance_monitoring_controller.dart';
 import 'package:erp_frontend/app/modules/staff/controllers/staff_profile_controller.dart';
 import 'package:erp_frontend/app/modules/staff/controllers/staff_reports_controller.dart';
 import 'package:erp_frontend/app/modules/staff/controllers/staff_settings_controller.dart';
@@ -302,9 +308,39 @@ Future<void> _refreshStaffModule(String moduleId) async {
   final reports = Get.find<StaffReportsController>();
   final communication = Get.find<StaffCommunicationController>();
   final settings = Get.find<StaffSettingsController>();
+  final attendanceLeave = Get.find<StaffAttendanceLeaveController>();
+  final classTeaching = Get.find<StaffClassTeachingController>();
+  final lessonPlanning = Get.find<StaffLessonPlanningController>();
+  final homeworkAssignment = Get.find<StaffHomeworkAssignmentController>();
+  final examAssessment = Get.find<StaffExamAssessmentController>();
+  final performanceMonitoring = Get.find<StaffPerformanceMonitoringController>();
 
   switch (moduleId) {
     case 'dashboard':
+      await Future.wait([dashboard.loadDashboard(), reports.loadReports()]);
+      return;
+    case 'attendance_leave':
+      attendanceLeave.setTab(0);
+      await Future.wait([dashboard.loadDashboard(), reports.loadReports()]);
+      return;
+    case 'class_teaching':
+      classTeaching.setTab(0);
+      await Future.wait([dashboard.loadDashboard(), reports.loadReports()]);
+      return;
+    case 'lesson_planning':
+      lessonPlanning.setTab(0);
+      await Future.wait([dashboard.loadDashboard(), reports.loadReports()]);
+      return;
+    case 'homework_assignment':
+      homeworkAssignment.setTab(0);
+      await Future.wait([dashboard.loadDashboard(), reports.loadReports()]);
+      return;
+    case 'exam_assessment':
+      examAssessment.setTab(0);
+      await Future.wait([dashboard.loadDashboard(), reports.loadReports()]);
+      return;
+    case 'performance':
+      performanceMonitoring.setTab(0);
       await Future.wait([dashboard.loadDashboard(), reports.loadReports()]);
       return;
     case 'profile':
@@ -358,6 +394,12 @@ List<_StaffMetric> _buildStaffMetrics(String moduleId) {
   final reports = Get.find<StaffReportsController>();
   final communication = Get.find<StaffCommunicationController>();
   final settings = Get.find<StaffSettingsController>();
+  final attendanceLeave = Get.find<StaffAttendanceLeaveController>();
+  final classTeaching = Get.find<StaffClassTeachingController>();
+  final lessonPlanning = Get.find<StaffLessonPlanningController>();
+  final homeworkAssignment = Get.find<StaffHomeworkAssignmentController>();
+  final examAssessment = Get.find<StaffExamAssessmentController>();
+  final performanceMonitoring = Get.find<StaffPerformanceMonitoringController>();
 
   final documentsCount = profile.documentRows.isNotEmpty
       ? profile.documentRows.length
@@ -417,55 +459,121 @@ List<_StaffMetric> _buildStaffMetrics(String moduleId) {
         ),
       ];
     case 'attendance_leave':
+      final metrics = attendanceLeave.reportMetrics();
       return [
         _StaffMetric(
-          label: 'Today Schedule',
-          value: '${dashboard.todayScheduleItems.length}',
-          caption: 'Current attendance-linked sessions',
+          label: 'Attendance Entries',
+          value: '${metrics['total'] ?? 0}',
+          caption: 'Staff attendance records',
         ),
         _StaffMetric(
-          label: 'Pending Tasks',
-          value: '${dashboard.pendingTasks.length}',
-          caption: 'Follow-up workload items',
+          label: 'Pending Leaves',
+          value: '${metrics['leavePending'] ?? 0}',
+          caption: 'Applications awaiting approval',
         ),
         _StaffMetric(
-          label: 'Reports',
-          value: '${reports.reportTiles.length}',
-          caption: 'Live report cards available',
+          label: 'Late Arrivals',
+          value: '${metrics['late'] ?? 0}',
+          caption: 'Late marks captured in records',
         ),
         _StaffMetric(
-          label: 'Notifications',
-          value: '${dashboard.notifications.length}',
-          caption: 'Alerts to review before marking attendance',
+          label: 'Approved Leave',
+          value: '${metrics['leaveApproved'] ?? 0}',
+          caption: 'Approved leave applications',
         ),
       ];
     case 'class_teaching':
+      final m = classTeaching.metrics();
       return [
         _StaffMetric(
-          label: 'Assigned Classes',
-          value: '${dashboard.assignedClasses.length}',
-          caption: 'Classes visible in dashboard',
+          label: 'Class List',
+          value: '${m['classes'] ?? 0}',
+          caption: 'Total active classes',
         ),
         _StaffMetric(
-          label: 'Today Sessions',
-          value: '${dashboard.todayScheduleItems.length}',
-          caption: 'Live timetable coverage',
+          label: 'Student List',
+          value: '${m['students'] ?? 0}',
+          caption: 'Students mapped to classes',
         ),
         _StaffMetric(
-          label: 'Student Alerts',
-          value: '${dashboard.studentAlerts.length}',
-          caption: 'Classroom attention items',
+          label: 'Subject Assignments',
+          value: '${m['assignments'] ?? 0}',
+          caption: 'Subject allocation entries',
         ),
         _StaffMetric(
-          label: 'Reports',
-          value: '${reports.reportTiles.length}',
-          caption: 'Teaching analytics cards',
+          label: 'Schedules',
+          value: '${m['schedules'] ?? 0}',
+          caption: 'Classroom schedule slots',
         ),
       ];
     case 'lesson_planning':
+      final l = lessonPlanning.metrics();
+      return [
+        _StaffMetric(
+          label: 'Lesson Plans',
+          value: '${l['plans'] ?? 0}',
+          caption: 'Lesson plans created',
+        ),
+        _StaffMetric(
+          label: 'Topic Schedules',
+          value: '${l['topics'] ?? 0}',
+          caption: 'Scheduled lesson topics',
+        ),
+        _StaffMetric(
+          label: 'Lesson Notes',
+          value: '${l['notes'] ?? 0}',
+          caption: 'Saved teaching notes',
+        ),
+      ];
     case 'homework_assignment':
-    case 'study_material':
+      final h = homeworkAssignment.metrics();
+      return [
+        _StaffMetric(
+          label: 'Assignments',
+          value: '${h['assignments'] ?? 0}',
+          caption: 'Created homework and assignments',
+        ),
+        _StaffMetric(
+          label: 'Deadlines',
+          value: '${h['deadlines'] ?? 0}',
+          caption: 'Configured due dates',
+        ),
+        _StaffMetric(
+          label: 'Submissions',
+          value: '${h['submissions'] ?? 0}',
+          caption: 'Submission records',
+        ),
+        _StaffMetric(
+          label: 'Feedback',
+          value: '${h['feedback'] ?? 0}',
+          caption: 'Feedback entries shared',
+        ),
+      ];
     case 'exam_assessment':
+      final e = examAssessment.metrics();
+      return [
+        _StaffMetric(
+          label: 'Exams',
+          value: '${e['exams'] ?? 0}',
+          caption: 'Exam records created',
+        ),
+        _StaffMetric(
+          label: 'Question Papers',
+          value: '${e['papers'] ?? 0}',
+          caption: 'Uploaded question papers',
+        ),
+        _StaffMetric(
+          label: 'Marks Entries',
+          value: '${e['marks'] ?? 0}',
+          caption: 'Marks records captured',
+        ),
+        _StaffMetric(
+          label: 'Results',
+          value: '${e['results'] ?? 0}',
+          caption: 'Published result records',
+        ),
+      ];
+    case 'study_material':
       return [
         _StaffMetric(
           label: 'Assigned Classes',
@@ -489,26 +597,27 @@ List<_StaffMetric> _buildStaffMetrics(String moduleId) {
         ),
       ];
     case 'performance':
+      final p = performanceMonitoring.metrics();
       return [
         _StaffMetric(
-          label: 'Assigned Classes',
-          value: '${dashboard.assignedClasses.length}',
-          caption: 'Classes being monitored',
+          label: 'Marks Tracking',
+          value: '${p['marks'] ?? 0}',
+          caption: 'Student marks records',
         ),
         _StaffMetric(
-          label: 'Student Alerts',
-          value: '${dashboard.studentAlerts.length}',
-          caption: 'Students needing attention',
+          label: 'Attendance',
+          value: '${p['attendance'] ?? 0}',
+          caption: 'Attendance monitoring records',
         ),
         _StaffMetric(
-          label: 'Reports',
-          value: '${reports.reportTiles.length}',
-          caption: 'Live analytics cards',
+          label: 'Progress Reports',
+          value: '${p['reports'] ?? 0}',
+          caption: 'Academic progress report items',
         ),
         _StaffMetric(
-          label: 'Today Schedule',
-          value: '${dashboard.todayScheduleItems.length}',
-          caption: 'Monitoring coverage for today',
+          label: 'Weak Students',
+          value: '${p['weak'] ?? 0}',
+          caption: 'Students flagged for follow-up',
         ),
       ];
     case 'communication_ai':

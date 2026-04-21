@@ -17,6 +17,13 @@ class StaffService {
     return extractApiData(res.data, context: 'staff profile');
   }
 
+  Future<Map<String, dynamic>> updateProfile({
+    required Map<String, dynamic> payload,
+  }) async {
+    final res = await _apiClient.put(ApiEndpoints.staffProfile, data: payload);
+    return extractApiData(res.data, context: 'update staff profile');
+  }
+
   Future<Map<String, dynamic>> getReports() async {
     final res = await _apiClient.get(ApiEndpoints.staffReports);
     return extractApiData(res.data, context: 'staff reports');

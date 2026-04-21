@@ -44,6 +44,12 @@ import 'package:erp_frontend/app/modules/staff/views/staff_module_detail_view.da
 import 'package:erp_frontend/app/modules/staff/views/staff_modules_view.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_shell_view.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_feature_detail_view.dart';
+import 'package:erp_frontend/app/modules/staff/views/staff_attendance_leave_view.dart';
+import 'package:erp_frontend/app/modules/staff/views/staff_class_teaching_view.dart';
+import 'package:erp_frontend/app/modules/staff/views/staff_lesson_planning_view.dart';
+import 'package:erp_frontend/app/modules/staff/views/staff_homework_assignment_view.dart';
+import 'package:erp_frontend/app/modules/staff/views/staff_exam_assessment_view.dart';
+import 'package:erp_frontend/app/modules/staff/views/staff_performance_monitoring_view.dart';
 import 'package:erp_frontend/modules/auth/login/login_binding.dart';
 import 'package:erp_frontend/modules/auth/login/login_screen.dart';
 import 'package:get/get.dart';
@@ -232,6 +238,36 @@ class AppPages {
     GetPage(
       name: AppRoutes.STAFF_FEATURE_DETAIL,
       page: () => const StaffFeatureDetailView(),
+      binding: StaffBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.STAFF_ATTENDANCE_LEAVE,
+      page: () => const StaffAttendanceLeaveView(),
+      binding: StaffBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.STAFF_CLASS_TEACHING,
+      page: () => const StaffClassTeachingView(),
+      binding: StaffBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.STAFF_LESSON_PLANNING,
+      page: () => const StaffLessonPlanningView(),
+      binding: StaffBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.STAFF_HOMEWORK_ASSIGNMENT,
+      page: () => const StaffHomeworkAssignmentView(),
+      binding: StaffBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.STAFF_EXAM_ASSESSMENT,
+      page: () => const StaffExamAssessmentView(),
+      binding: StaffBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.STAFF_PERFORMANCE_MONITORING,
+      page: () => const StaffPerformanceMonitoringView(),
       binding: StaffBinding(),
     ),
     GetPage(

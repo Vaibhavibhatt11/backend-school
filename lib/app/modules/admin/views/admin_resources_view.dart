@@ -30,12 +30,12 @@ class AdminResourcesView extends GetView<AdminResourcesController> {
           bottom: tabCount == 1
               ? null
               : TabBar(
-                  onTap: (value) => controller.changeTab(value),
-                  tabs: const [
-                    Tab(text: 'Library'),
-                    Tab(text: 'Inventory'),
-                  ],
-                ),
+            onTap: (value) => controller.changeTab(value),
+            tabs: const [
+              Tab(text: 'Library'),
+              Tab(text: 'Inventory'),
+            ],
+          ),
         ),
         body: TabBarView(
           children: isLibraryOnly
@@ -43,9 +43,9 @@ class AdminResourcesView extends GetView<AdminResourcesController> {
               : isInventoryOnly
                   ? [_InventoryTab(controller: controller)]
                   : [
-                      _LibraryTab(controller: controller),
-                      _InventoryTab(controller: controller),
-                    ],
+            _LibraryTab(controller: controller),
+            _InventoryTab(controller: controller),
+          ],
         ),
       ),
     );
@@ -99,21 +99,21 @@ class _LibraryTab extends StatelessWidget {
           ),
           Expanded(
             child: Obx(() {
-              if (controller.isLoading.value &&
-                  controller.libraryBooks.isEmpty &&
-                  controller.libraryBorrows.isEmpty) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (controller.errorMessage.value.isNotEmpty &&
-                  controller.libraryBooks.isEmpty &&
-                  controller.libraryBorrows.isEmpty) {
-                return _ResourcesError(
-                  message: controller.errorMessage.value,
-                  onRetry: controller.refreshCurrentTab,
-                );
-              }
+      if (controller.isLoading.value &&
+          controller.libraryBooks.isEmpty &&
+          controller.libraryBorrows.isEmpty) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (controller.errorMessage.value.isNotEmpty &&
+          controller.libraryBooks.isEmpty &&
+          controller.libraryBorrows.isEmpty) {
+        return _ResourcesError(
+          message: controller.errorMessage.value,
+          onRetry: controller.refreshCurrentTab,
+        );
+      }
               return TabBarView(
-                children: [
+          children: [
                   _LibraryBooksSubTab(controller: controller),
                   _LibraryCategoriesSubTab(controller: controller),
                   _LibraryIssueReturnSubTab(controller: controller),
@@ -122,10 +122,10 @@ class _LibraryTab extends StatelessWidget {
                 ],
               );
             }),
-          ),
-        ],
-      ),
-    );
+              ),
+          ],
+        ),
+      );
   }
 }
 
@@ -172,19 +172,19 @@ class _InventoryTab extends StatelessWidget {
           ),
           Expanded(
             child: Obx(() {
-              if (controller.isLoading.value &&
-                  controller.inventoryItems.isEmpty &&
-                  controller.inventoryTransactions.isEmpty) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (controller.errorMessage.value.isNotEmpty &&
-                  controller.inventoryItems.isEmpty &&
-                  controller.inventoryTransactions.isEmpty) {
-                return _ResourcesError(
-                  message: controller.errorMessage.value,
-                  onRetry: controller.refreshCurrentTab,
-                );
-              }
+      if (controller.isLoading.value &&
+          controller.inventoryItems.isEmpty &&
+          controller.inventoryTransactions.isEmpty) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (controller.errorMessage.value.isNotEmpty &&
+          controller.inventoryItems.isEmpty &&
+          controller.inventoryTransactions.isEmpty) {
+        return _ResourcesError(
+          message: controller.errorMessage.value,
+          onRetry: controller.refreshCurrentTab,
+        );
+      }
               return TabBarView(
                 children: [
                   _AssetsSubTab(controller: controller),
@@ -263,48 +263,48 @@ class _EquipmentSubTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: controller.refreshCurrentTab,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        children: [
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
+      return RefreshIndicator(
+        onRefresh: controller.refreshCurrentTab,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          children: [
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
               _ResourcesChip(label: 'Items', value: '${controller.inventoryItems.length}'),
               _ResourcesChip(label: 'Transactions', value: '${controller.inventoryTransactions.length}'),
-              FilledButton.icon(
-                onPressed: () => controller.openInventoryItemDialog(),
-                icon: const Icon(Icons.inventory_2_rounded),
-                label: const Text('Add Item'),
-              ),
-              OutlinedButton.icon(
-                onPressed: controller.createInventoryTransaction,
-                icon: const Icon(Icons.sync_alt_rounded),
-                label: const Text('Stock Move'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          if (controller.inventoryItems.isEmpty)
-            const _ResourcesEmpty(
-              icon: Icons.inventory_rounded,
-              title: 'No inventory items',
-              message: 'Stock items and equipment will appear here.',
-            )
-          else
-            ...controller.inventoryItems.map(
-              (item) => _InventoryCard(item: item, controller: controller),
+                FilledButton.icon(
+                  onPressed: () => controller.openInventoryItemDialog(),
+                  icon: const Icon(Icons.inventory_2_rounded),
+                  label: const Text('Add Item'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: controller.createInventoryTransaction,
+                  icon: const Icon(Icons.sync_alt_rounded),
+                  label: const Text('Stock Move'),
+                ),
+              ],
             ),
-          const SizedBox(height: 20),
-          if (controller.inventoryTransactions.isEmpty)
-            const _ResourcesEmpty(
-              icon: Icons.swap_vert_rounded,
-              title: 'No transactions found',
-              message: 'Stock movement history will appear here.',
-            )
-          else
+            const SizedBox(height: 20),
+            if (controller.inventoryItems.isEmpty)
+              const _ResourcesEmpty(
+                icon: Icons.inventory_rounded,
+                title: 'No inventory items',
+                message: 'Stock items and equipment will appear here.',
+              )
+            else
+              ...controller.inventoryItems.map(
+                (item) => _InventoryCard(item: item, controller: controller),
+              ),
+            const SizedBox(height: 20),
+            if (controller.inventoryTransactions.isEmpty)
+              const _ResourcesEmpty(
+                icon: Icons.swap_vert_rounded,
+                title: 'No transactions found',
+                message: 'Stock movement history will appear here.',
+              )
+            else
             ...controller.inventoryTransactions.map((item) => _TransactionCard(item: item)),
         ],
       ),

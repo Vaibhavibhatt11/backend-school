@@ -1,6 +1,8 @@
 import 'package:erp_frontend/app/modules/staff/widgets/staff_ai_assistant_sheet.dart';
+import 'package:erp_frontend/app/modules/staff/controllers/staff_shell_controller.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:erp_frontend/common/utils/safe_navigation.dart';
+import 'package:get/get.dart';
 
 class StaffPortalScreen {
   const StaffPortalScreen({
@@ -56,85 +58,115 @@ class StaffPortalNavigation {
       case 'attendance_leave':
         return const [
           StaffPortalScreen(
-            title: 'Attendance Selector',
-            description: 'Open the attendance workflow used by staff.',
-            route: AppRoutes.TEACHER_ATTENDANCE_SELECTOR,
+            title: 'Attendance & Leave Management',
+            description:
+                'Manage staff attendance, leave flow, approvals, reports, and late tracking.',
+            route: AppRoutes.STAFF_ATTENDANCE_LEAVE,
           ),
           StaffPortalScreen(
-            title: 'Staff Dashboard',
-            description: 'Cross-check workload and schedule impact.',
-            route: AppRoutes.STAFF_HOME,
-            arguments: {'tabIndex': 0},
+            title: 'Attendance Reports',
+            description: 'Open the attendance report dashboard view.',
+            route: AppRoutes.STAFF_ATTENDANCE_LEAVE,
+            arguments: {'tab': 'reports'},
           ),
         ];
       case 'class_teaching':
         return const [
           StaffPortalScreen(
-            title: 'Student Directory',
-            description: 'Access class and student-linked teaching workflows.',
-            route: AppRoutes.TEACHER_STUDENT_DIRECTORY,
+            title: 'Class & Teaching Management',
+            description:
+                'Manage class list, students, assignments, schedule, and notes.',
+            route: AppRoutes.STAFF_CLASS_TEACHING,
           ),
           StaffPortalScreen(
-            title: 'Staff Dashboard',
-            description: 'Review today\'s class coverage and assignments.',
-            route: AppRoutes.STAFF_HOME,
-            arguments: {'tabIndex': 0},
+            title: 'Classroom Schedule',
+            description: 'Open teaching schedule workspace.',
+            route: AppRoutes.STAFF_CLASS_TEACHING,
+            arguments: {'tab': 'schedule'},
           ),
         ];
       case 'lesson_planning':
         return const [
           StaffPortalScreen(
-            title: 'Upload Center',
+            title: 'Lesson Planning',
             description:
-                'Use the teaching upload flow for plans and materials.',
-            route: AppRoutes.TEACHER_UPLOAD,
+                'Create lesson plans, schedule topics, and manage lesson notes.',
+            route: AppRoutes.STAFF_LESSON_PLANNING,
           ),
           StaffPortalScreen(
-            title: 'Reports',
-            description: 'Track the latest teaching-related reporting.',
-            route: AppRoutes.STAFF_HOME,
-            arguments: {'tabIndex': 3},
+            title: 'Topic Scheduling',
+            description: 'Open the lesson topic scheduling workspace.',
+            route: AppRoutes.STAFF_LESSON_PLANNING,
+            arguments: {'tab': 'topics'},
+          ),
+          StaffPortalScreen(
+            title: 'Lesson Notes',
+            description: 'Open lesson notes workspace.',
+            route: AppRoutes.STAFF_LESSON_PLANNING,
+            arguments: {'tab': 'notes'},
           ),
         ];
       case 'homework_assignment':
         return const [
           StaffPortalScreen(
-            title: 'Upload Center',
-            description: 'Manage assignment and homework resources.',
-            route: AppRoutes.TEACHER_UPLOAD,
+            title: 'Homework & Assignment Management',
+            description:
+                'Create homework, set deadlines, review submissions, and share feedback.',
+            route: AppRoutes.STAFF_HOMEWORK_ASSIGNMENT,
           ),
           StaffPortalScreen(
-            title: 'Student Directory',
-            description: 'Open students connected to assignment workflows.',
-            route: AppRoutes.TEACHER_STUDENT_DIRECTORY,
+            title: 'Submissions',
+            description: 'Open assignment submission tracking workspace.',
+            route: AppRoutes.STAFF_HOMEWORK_ASSIGNMENT,
+            arguments: {'tab': 'submissions'},
+          ),
+          StaffPortalScreen(
+            title: 'Feedback',
+            description: 'Open assignment feedback workspace.',
+            route: AppRoutes.STAFF_HOMEWORK_ASSIGNMENT,
+            arguments: {'tab': 'feedback'},
           ),
         ];
       case 'exam_assessment':
         return const [
           StaffPortalScreen(
-            title: 'Upload Center',
-            description: 'Use the current exam-content workflow.',
-            route: AppRoutes.TEACHER_UPLOAD,
+            title: 'Exam & Assessment Management',
+            description:
+                'Create exams, upload papers, enter marks, configure grading, and publish results.',
+            route: AppRoutes.STAFF_EXAM_ASSESSMENT,
           ),
           StaffPortalScreen(
-            title: 'Reports',
-            description: 'Review reporting tied to academic outcomes.',
-            route: AppRoutes.STAFF_HOME,
-            arguments: {'tabIndex': 3},
+            title: 'Marks Entry',
+            description: 'Open marks entry workflow.',
+            route: AppRoutes.STAFF_EXAM_ASSESSMENT,
+            arguments: {'tab': 'marks'},
+          ),
+          StaffPortalScreen(
+            title: 'Result Publishing',
+            description: 'Open result publishing workflow.',
+            route: AppRoutes.STAFF_EXAM_ASSESSMENT,
+            arguments: {'tab': 'results'},
           ),
         ];
       case 'performance':
         return const [
           StaffPortalScreen(
-            title: 'Student Directory',
-            description: 'Open student-level monitoring and records.',
-            route: AppRoutes.TEACHER_STUDENT_DIRECTORY,
+            title: 'Student Performance Monitoring',
+            description:
+                'Track marks, attendance, progress reports, and weak students.',
+            route: AppRoutes.STAFF_PERFORMANCE_MONITORING,
           ),
           StaffPortalScreen(
-            title: 'Reports',
-            description: 'View academic and attendance analytics.',
-            route: AppRoutes.STAFF_HOME,
-            arguments: {'tabIndex': 3},
+            title: 'Attendance Monitoring',
+            description: 'Open student attendance monitoring workspace.',
+            route: AppRoutes.STAFF_PERFORMANCE_MONITORING,
+            arguments: {'tab': 'attendance'},
+          ),
+          StaffPortalScreen(
+            title: 'Weak Students',
+            description: 'Open weak student identification workspace.',
+            route: AppRoutes.STAFF_PERFORMANCE_MONITORING,
+            arguments: {'tab': 'weak'},
           ),
         ];
       case 'communication':
@@ -326,6 +358,15 @@ class StaffPortalNavigation {
       return;
     }
     if (screen.route != null) {
+      if (screen.route == AppRoutes.STAFF_HOME &&
+          Get.isRegistered<StaffShellController>()) {
+        final args = screen.arguments;
+        final index = StaffShellController.resolveIndex(arguments: args);
+        if (Get.currentRoute == AppRoutes.STAFF_HOME) {
+          Get.find<StaffShellController>().setTab(index);
+          return;
+        }
+      }
       SafeNavigation.offNamed(screen.route!, arguments: screen.arguments);
     }
   }

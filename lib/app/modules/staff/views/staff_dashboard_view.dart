@@ -1,6 +1,7 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/modules/staff/controllers/staff_dashboard_controller.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/utils/safe_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -53,7 +54,8 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
               ),
               IconButton(
                 tooltip: 'All modules',
-                onPressed: () => Get.toNamed(AppRoutes.STAFF_MODULES),
+                onPressed: () =>
+                    SafeNavigation.toNamed(AppRoutes.STAFF_MODULES),
                 icon: const Icon(Icons.apps_rounded),
               ),
               IconButton(onPressed: controller.loadDashboard, icon: const Icon(Icons.refresh_rounded)),
@@ -105,6 +107,36 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
             ),
           ),
           const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.surfaceDark : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark ? AppColors.borderDark : AppColors.borderLight,
+              ),
+            ),
+            child: Obx(
+              () => SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _dashTab('Today', 0),
+                    _dashTab('Classes', 1),
+                    _dashTab('Tasks', 2),
+                    _dashTab('Alerts', 3),
+                    _dashTab('Notify', 4),
+                    _dashTab('Homework', 5),
+                    _dashTab('Exams', 6),
+                    _dashTab('Meetings', 7),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Obx(() => _dashboardFeaturePanel(isDark)),
+          const SizedBox(height: 18),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -128,7 +160,6 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
               _quickAction('Profile', Icons.badge_rounded, Colors.blue, 'profile'),
               _quickAction('Communication', Icons.support_agent_rounded, Colors.orange, 'communication'),
               _quickAction('Reports', Icons.bar_chart_rounded, Colors.purple, 'reports'),
-              _quickAction('AI Assistant', Icons.smart_toy_rounded, Colors.teal, 'ai_teaching_assistant'),
             ],
           ),
           const SizedBox(height: 24),
@@ -140,16 +171,6 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
           _miniTile('Meetings', controller.meetings, isDark),
           const SizedBox(height: 12),
         ],
-            ),
-            Positioned(
-              right: 16,
-              bottom: 16,
-              child: FloatingActionButton.extended(
-                onPressed: controller.openAiAssistant,
-                backgroundColor: AppColors.primary,
-                icon: const Icon(Icons.smart_toy_rounded),
-                label: const Text('AI'),
-              ),
             ),
           ],
         );
@@ -290,6 +311,211 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _dashTab(String label, int index) {
+    final selected = controller.selectedDashboardTab.value == index;
+    return GestureDetector(
+      onTap: () => controller.setDashboardTab(index),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primary.withValues(alpha: 0.12) : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: selected ? AppColors.primary : null,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _dashboardFeaturePanel(bool isDark) {
+    final idx = controller.selectedDashboardTab.value;
+    if (idx == 0) {
+      return _recordPanel(
+        isDark: isDark,
+        title: "Today's Schedule",
+        records: controller.scheduleRecords,
+        detailBuilder: (e) =>
+            '${e['time'] ?? '-'} | ${e['subject'] ?? '-'} | ${e['classLabel'] ?? '-'}',
+        onAdd: null,
+      );
+    }
+    if (idx == 1) {
+      return _recordPanel(
+        isDark: isDark,
+        title: 'Assigned Classes',
+        records: controller.classRecords,
+        detailBuilder: (e) => e['name'] ?? '-',
+        onAdd: null,
+      );
+    }
+    if (idx == 2) {
+      return _recordPanel(
+        isDark: isDark,
+        title: 'Pending Tasks',
+        records: controller.taskRecords,
+        detailBuilder: (e) => e['title'] ?? '-',
+        onAdd: controller.addTaskRecord,
+        statusActions: const ['IN_PROGRESS', 'DONE'],
+        statusUpdater: (id, status) =>
+            controller.updateRecordStatus(controller.taskRecords, id, status),
+        onDelete: (id) => controller.deleteRecord(controller.taskRecords, id),
+      );
+    }
+    if (idx == 3) {
+      return _recordPanel(
+        isDark: isDark,
+        title: 'Student Alerts',
+        records: controller.alertRecords,
+        detailBuilder: (e) => e['title'] ?? '-',
+        statusActions: const ['ACKNOWLEDGED', 'RESOLVED'],
+        statusUpdater: (id, status) =>
+            controller.updateRecordStatus(controller.alertRecords, id, status),
+      );
+    }
+    if (idx == 4) {
+      return _recordPanel(
+        isDark: isDark,
+        title: 'Notifications',
+        records: controller.notificationRecords,
+        detailBuilder: (e) => e['title'] ?? '-',
+        statusActions: const ['READ', 'ARCHIVED'],
+        statusUpdater: (id, status) => controller.updateRecordStatus(
+          controller.notificationRecords,
+          id,
+          status,
+        ),
+      );
+    }
+    if (idx == 5) {
+      return _recordPanel(
+        isDark: isDark,
+        title: 'Homework Status',
+        records: controller.homeworkRecords,
+        detailBuilder: (e) => e['title'] ?? '-',
+        statusActions: const ['CHECKED', 'COMPLETED'],
+        statusUpdater: (id, status) =>
+            controller.updateRecordStatus(controller.homeworkRecords, id, status),
+      );
+    }
+    if (idx == 6) {
+      return _recordPanel(
+        isDark: isDark,
+        title: 'Upcoming Exams',
+        records: controller.examRecords,
+        detailBuilder: (e) => e['title'] ?? '-',
+        statusActions: const ['READY', 'COMPLETED'],
+        statusUpdater: (id, status) =>
+            controller.updateRecordStatus(controller.examRecords, id, status),
+      );
+    }
+    return _recordPanel(
+      isDark: isDark,
+      title: 'Meetings',
+      records: controller.meetingRecords,
+      detailBuilder: (e) => e['title'] ?? '-',
+      statusActions: const ['ATTENDED', 'CLOSED'],
+      statusUpdater: (id, status) =>
+          controller.updateRecordStatus(controller.meetingRecords, id, status),
+    );
+  }
+
+  Widget _recordPanel({
+    required bool isDark,
+    required String title,
+    required RxList<Map<String, String>> records,
+    required String Function(Map<String, String>) detailBuilder,
+    Future<void> Function()? onAdd,
+    List<String> statusActions = const [],
+    void Function(String id, String status)? statusUpdater,
+    void Function(String id)? onDelete,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+      ),
+      child: Obx(
+        () => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                ),
+                if (onAdd != null)
+                  IconButton(
+                    tooltip: 'Add',
+                    onPressed: onAdd,
+                    icon: const Icon(Icons.add_circle_rounded),
+                  ),
+              ],
+            ),
+            if (records.isEmpty)
+              const Padding(
+                padding: EdgeInsets.only(top: 4),
+                child: Text('No items available', style: TextStyle(color: Colors.grey)),
+              )
+            else
+              ...records.map((item) {
+                final id = item['id'] ?? '';
+                return Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(top: 8),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(detailBuilder(item)),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Status: ${item['status'] ?? '-'}',
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      if (statusActions.isNotEmpty || onDelete != null) ...[
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: [
+                            ...statusActions.map(
+                              (status) => OutlinedButton(
+                                onPressed: statusUpdater == null || id.isEmpty
+                                    ? null
+                                    : () => statusUpdater(id, status),
+                                child: Text(status),
+                              ),
+                            ),
+                            if (onDelete != null)
+                              FilledButton.tonal(
+                                onPressed: id.isEmpty ? null : () => onDelete(id),
+                                child: const Text('Remove'),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                );
+              }),
+          ],
+        ),
       ),
     );
   }
