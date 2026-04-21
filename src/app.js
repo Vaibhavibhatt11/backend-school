@@ -44,13 +44,14 @@ function buildCorsOriginHandler(allowedOrigins) {
   }
 
   const allowedSet = new Set(allowedOrigins);
+  const trustedHostedOrigin = /(^https:\/\/[a-z0-9-]+\.github\.io$)|(^https:\/\/[a-z0-9-]+\.onrender\.com$)/i;
 
   return (origin, callback) => {
     // Allow non-browser callers (curl, Postman, server-to-server).
     if (!origin) return callback(null, true);
 
     const normalized = normalizeOrigin(origin);
-    if (allowedSet.has(normalized)) {
+    if (allowedSet.has(normalized) || trustedHostedOrigin.test(normalized)) {
       return callback(null, true);
     }
 
