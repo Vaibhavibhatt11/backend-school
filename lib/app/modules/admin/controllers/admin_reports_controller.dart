@@ -6,6 +6,7 @@ import 'package:erp_frontend/app/modules/admin/views/admin_report_detail_view.da
 import 'package:erp_frontend/common/services/admin/admin_service.dart';
 import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
+import 'package:erp_frontend/common/utils/export_downloader.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -99,7 +100,9 @@ class AdminReportsController extends GetxController {
     attendanceDetail.value = built.payload;
     attendanceDetailError.value = '';
     final total = built.present + built.late + built.absent;
-    final pct = total > 0 ? (((built.present + built.late) / total) * 100).round() : 0;
+    final pct = total > 0
+        ? (((built.present + built.late) / total) * 100).round()
+        : 0;
     attendanceBadge.value = '$pct% Attendance';
   }
 
@@ -277,7 +280,8 @@ class AdminReportsController extends GetxController {
     final payload = await _ensurePayload(kind);
     if (payload == null) return;
     final bytes = _buildPdfBytes(payload);
-    final fileName = '${payload.kind.fileStem}-${_timestampFilePart(payload.generatedAt)}.pdf';
+    final fileName =
+        '${payload.kind.fileStem}-${_timestampFilePart(payload.generatedAt)}.pdf';
     await _saveExport(
       bytes: bytes,
       fileName: fileName,
@@ -290,12 +294,12 @@ class AdminReportsController extends GetxController {
     final payload = await _ensurePayload(kind);
     if (payload == null) return;
     final workbook = _buildExcelWorkbook(payload);
-    final fileName = '${payload.kind.fileStem}-${_timestampFilePart(payload.generatedAt)}.xls';
+    final fileName =
+        '${payload.kind.fileStem}-${_timestampFilePart(payload.generatedAt)}.xls';
     await _saveExport(
       bytes: utf8.encode(workbook),
       fileName: fileName,
       mimeType: 'application/vnd.ms-excel',
-      textPayload: workbook,
       successLabel: 'Excel export ready',
     );
   }
@@ -328,12 +332,8 @@ class AdminReportsController extends GetxController {
     }
   }
 
-  ({
-    AdminReportPayload payload,
-    int present,
-    int late,
-    int absent,
-  }) _buildAttendancePayload(Map<String, dynamic> data) {
+  ({AdminReportPayload payload, int present, int late, int absent})
+  _buildAttendancePayload(Map<String, dynamic> data) {
     final generatedAt = DateTime.now();
     final subtitle = _reportSubtitle();
     final summary = _asMap(data['summary']);
@@ -375,23 +375,24 @@ class AdminReportsController extends GetxController {
       }
     }
 
-    final attendanceRecords = _firstMapList(
-      data,
-      const [
-        ['records'],
-        ['attendance'],
-        ['items'],
-        ['rows'],
-        ['logs'],
-      ],
-    );
+    final attendanceRecords = _firstMapList(data, const [
+      ['records'],
+      ['attendance'],
+      ['items'],
+      ['rows'],
+      ['logs'],
+    ]);
 
-    if (present == 0 && late == 0 && absent == 0 && attendanceRecords.isNotEmpty) {
+    if (present == 0 &&
+        late == 0 &&
+        absent == 0 &&
+        attendanceRecords.isNotEmpty) {
       for (final row in attendanceRecords) {
-        final status = _firstText(
-          row,
-          const ['status', 'attendanceStatus', 'state'],
-        ).toUpperCase();
+        final status = _firstText(row, const [
+          'status',
+          'attendanceStatus',
+          'state',
+        ]).toUpperCase();
         if (status == 'PRESENT') present++;
         if (status == 'LATE') late++;
         if (status == 'ABSENT') absent++;
@@ -410,14 +411,8 @@ class AdminReportsController extends GetxController {
         value: '$attendancePct%',
         helper: '${selectedRange.value} range',
       ),
-      AdminReportMetric(
-        label: 'Present',
-        value: '$present',
-      ),
-      AdminReportMetric(
-        label: 'Late',
-        value: '$late',
-      ),
+      AdminReportMetric(label: 'Present', value: '$present'),
+      AdminReportMetric(label: 'Late', value: '$late'),
       AdminReportMetric(
         label: 'Absent',
         value: '$absent',
@@ -431,11 +426,7 @@ class AdminReportsController extends GetxController {
       sections.add(
         AdminReportSection(
           title: 'Attendance Summary',
-          columns: [
-            'Group',
-            ...orderedStatuses.map(_humanize),
-            'Total',
-          ],
+          columns: ['Group', ...orderedStatuses.map(_humanize), 'Total'],
           rows: summaryRows,
         ),
       );
@@ -449,55 +440,45 @@ class AdminReportsController extends GetxController {
           'Date',
           (row) => _formatDateTime(
             _parseDate(
-              _firstText(
-                row,
-                const ['date', 'attendanceDate', 'createdAt', 'updatedAt'],
-              ),
+              _firstText(row, const [
+                'date',
+                'attendanceDate',
+                'createdAt',
+                'updatedAt',
+              ]),
             ),
           ),
         ),
-        _ReportColumnSpec(
-          'Name',
-          (row) => _extractPersonName(row),
-        ),
+        _ReportColumnSpec('Name', (row) => _extractPersonName(row)),
         _ReportColumnSpec(
           'ID',
-          (row) => _firstText(
-            row,
-            const ['admissionNo', 'employeeCode', 'studentId', 'staffId', 'id'],
-          ),
+          (row) => _firstText(row, const [
+            'admissionNo',
+            'employeeCode',
+            'studentId',
+            'staffId',
+            'id',
+          ]),
         ),
-        _ReportColumnSpec(
-          'Class',
-          (row) => _extractClassLabel(row),
-        ),
+        _ReportColumnSpec('Class', (row) => _extractClassLabel(row)),
         _ReportColumnSpec(
           'Status',
-          (row) => _firstText(
-            row,
-            const ['status', 'attendanceStatus', 'state'],
-          ),
+          (row) =>
+              _firstText(row, const ['status', 'attendanceStatus', 'state']),
         ),
         _ReportColumnSpec(
           'In Time',
-          (row) => _firstText(
-            row,
-            const ['inTime', 'checkInAt', 'checkInTime'],
-          ),
+          (row) =>
+              _firstText(row, const ['inTime', 'checkInAt', 'checkInTime']),
         ),
         _ReportColumnSpec(
           'Out Time',
-          (row) => _firstText(
-            row,
-            const ['outTime', 'checkOutAt', 'checkOutTime'],
-          ),
+          (row) =>
+              _firstText(row, const ['outTime', 'checkOutAt', 'checkOutTime']),
         ),
         _ReportColumnSpec(
           'Remark',
-          (row) => _firstText(
-            row,
-            const ['remark', 'notes', 'reason'],
-          ),
+          (row) => _firstText(row, const ['remark', 'notes', 'reason']),
         ),
       ],
     );
@@ -520,48 +501,47 @@ class AdminReportsController extends GetxController {
     );
   }
 
-  ({
-    AdminReportPayload payload,
-    double outstanding,
-    double collectionTotal,
-  }) _buildFeesPayload(Map<String, dynamic> data) {
+  ({AdminReportPayload payload, double outstanding, double collectionTotal})
+  _buildFeesPayload(Map<String, dynamic> data) {
     final generatedAt = DateTime.now();
     final subtitle = _reportSubtitle();
     final invoices = _asMap(data['invoices']) ?? const <String, dynamic>{};
-    final collections = _asMap(data['collections']) ?? const <String, dynamic>{};
-    final totalDue = _readDoubleAny(
-      invoices,
-      const ['totalDue', 'amountDue', 'grandTotal', 'totalAmount'],
-    );
-    final totalPaid = _readDoubleAny(
-      invoices,
-      const ['totalPaid', 'amountPaid', 'collectedAmount', 'paidAmount'],
-    );
-    final rawOutstanding = _readDoubleAny(
-      invoices,
-      const ['outstanding', 'balanceDue', 'pendingAmount'],
-    );
+    final collections =
+        _asMap(data['collections']) ?? const <String, dynamic>{};
+    final totalDue = _readDoubleAny(invoices, const [
+      'totalDue',
+      'amountDue',
+      'grandTotal',
+      'totalAmount',
+    ]);
+    final totalPaid = _readDoubleAny(invoices, const [
+      'totalPaid',
+      'amountPaid',
+      'collectedAmount',
+      'paidAmount',
+    ]);
+    final rawOutstanding = _readDoubleAny(invoices, const [
+      'outstanding',
+      'balanceDue',
+      'pendingAmount',
+    ]);
     final outstanding = rawOutstanding > 0
         ? rawOutstanding
         : (totalDue > totalPaid ? totalDue - totalPaid : 0.0);
-    final collectionAmount = _readDoubleAny(
-      collections,
-      const ['total', 'totalCollected', 'amount', 'totalAmount'],
-    );
+    final collectionAmount = _readDoubleAny(collections, const [
+      'total',
+      'totalCollected',
+      'amount',
+      'totalAmount',
+    ]);
 
     final metrics = <AdminReportMetric>[
-      AdminReportMetric(
-        label: 'Outstanding',
-        value: _currency(outstanding),
-      ),
+      AdminReportMetric(label: 'Outstanding', value: _currency(outstanding)),
       AdminReportMetric(
         label: 'Collected',
         value: _currency(collectionAmount > 0 ? collectionAmount : totalPaid),
       ),
-      AdminReportMetric(
-        label: 'Billed',
-        value: _currency(totalDue),
-      ),
+      AdminReportMetric(label: 'Billed', value: _currency(totalDue)),
       AdminReportMetric(
         label: 'Filters',
         value: selectedClass.value,
@@ -571,77 +551,68 @@ class AdminReportsController extends GetxController {
 
     final sections = <AdminReportSection>[];
 
-    final invoiceRows = _firstMapList(
-      data,
-      const [
-        ['invoiceItems'],
-        ['invoices', 'items'],
-        ['invoices', 'records'],
-        ['invoices', 'rows'],
-      ],
-    );
+    final invoiceRows = _firstMapList(data, const [
+      ['invoiceItems'],
+      ['invoices', 'items'],
+      ['invoices', 'records'],
+      ['invoices', 'rows'],
+    ]);
     final invoiceSection = _buildSectionFromRecords(
       title: 'Invoice Details',
       records: invoiceRows,
       specs: [
         _ReportColumnSpec(
           'Invoice',
-          (row) => _firstText(
-            row,
-            const ['invoiceNo', 'invoiceNumber', 'referenceNo', 'id'],
-          ),
+          (row) => _firstText(row, const [
+            'invoiceNo',
+            'invoiceNumber',
+            'referenceNo',
+            'id',
+          ]),
         ),
-        _ReportColumnSpec(
-          'Student',
-          (row) => _extractPersonName(row),
-        ),
-        _ReportColumnSpec(
-          'Class',
-          (row) => _extractClassLabel(row),
-        ),
+        _ReportColumnSpec('Student', (row) => _extractPersonName(row)),
+        _ReportColumnSpec('Class', (row) => _extractClassLabel(row)),
         _ReportColumnSpec(
           'Due',
           (row) => _currency(
-            _readDoubleAny(
-              row,
-              const ['totalDue', 'amountDue', 'due', 'amount'],
-            ),
+            _readDoubleAny(row, const [
+              'totalDue',
+              'amountDue',
+              'due',
+              'amount',
+            ]),
           ),
         ),
         _ReportColumnSpec(
           'Paid',
           (row) => _currency(
-            _readDoubleAny(
-              row,
-              const ['totalPaid', 'amountPaid', 'paid', 'collectedAmount'],
-            ),
+            _readDoubleAny(row, const [
+              'totalPaid',
+              'amountPaid',
+              'paid',
+              'collectedAmount',
+            ]),
           ),
         ),
         _ReportColumnSpec(
           'Balance',
           (row) => _currency(
-            _readDoubleAny(
-              row,
-              const ['balance', 'balanceDue', 'outstanding', 'pendingAmount'],
-            ),
+            _readDoubleAny(row, const [
+              'balance',
+              'balanceDue',
+              'outstanding',
+              'pendingAmount',
+            ]),
           ),
         ),
         _ReportColumnSpec(
           'Status',
-          (row) => _firstText(
-            row,
-            const ['status', 'invoiceStatus'],
-          ),
+          (row) => _firstText(row, const ['status', 'invoiceStatus']),
         ),
         _ReportColumnSpec(
           'Due Date',
           (row) => _formatDateTime(
-            _parseDate(
-              _firstText(
-                row,
-                const ['dueDate', 'date', 'createdAt'],
-              ),
-            ),
+            _parseDate(_firstText(row, const ['dueDate', 'date', 'createdAt'])),
           ),
         ),
       ],
@@ -650,65 +621,51 @@ class AdminReportsController extends GetxController {
       sections.add(invoiceSection);
     }
 
-    final collectionRows = _firstMapList(
-      data,
-      const [
-        ['collectionItems'],
-        ['collections', 'items'],
-        ['collections', 'records'],
-        ['collections', 'rows'],
-        ['payments'],
-        ['receipts'],
-      ],
-    );
+    final collectionRows = _firstMapList(data, const [
+      ['collectionItems'],
+      ['collections', 'items'],
+      ['collections', 'records'],
+      ['collections', 'rows'],
+      ['payments'],
+      ['receipts'],
+    ]);
     final collectionSection = _buildSectionFromRecords(
       title: 'Collection Details',
       records: collectionRows,
       specs: [
         _ReportColumnSpec(
           'Receipt',
-          (row) => _firstText(
-            row,
-            const ['receiptNo', 'receiptNumber', 'referenceNo', 'id'],
-          ),
+          (row) => _firstText(row, const [
+            'receiptNo',
+            'receiptNumber',
+            'referenceNo',
+            'id',
+          ]),
         ),
-        _ReportColumnSpec(
-          'Student',
-          (row) => _extractPersonName(row),
-        ),
+        _ReportColumnSpec('Student', (row) => _extractPersonName(row)),
         _ReportColumnSpec(
           'Mode',
-          (row) => _firstText(
-            row,
-            const ['paymentMode', 'mode', 'method'],
-          ),
+          (row) => _firstText(row, const ['paymentMode', 'mode', 'method']),
         ),
         _ReportColumnSpec(
           'Amount',
           (row) => _currency(
-            _readDoubleAny(
-              row,
-              const ['amount', 'paidAmount', 'collectionAmount'],
-            ),
+            _readDoubleAny(row, const [
+              'amount',
+              'paidAmount',
+              'collectionAmount',
+            ]),
           ),
         ),
         _ReportColumnSpec(
           'Date',
           (row) => _formatDateTime(
-            _parseDate(
-              _firstText(
-                row,
-                const ['date', 'paidAt', 'createdAt'],
-              ),
-            ),
+            _parseDate(_firstText(row, const ['date', 'paidAt', 'createdAt'])),
           ),
         ),
         _ReportColumnSpec(
           'Remark',
-          (row) => _firstText(
-            row,
-            const ['remark', 'notes'],
-          ),
+          (row) => _firstText(row, const ['remark', 'notes']),
         ),
       ],
     );
@@ -738,9 +695,7 @@ class AdminReportsController extends GetxController {
     if (records.isEmpty) return null;
     final selectedSpecs = specs
         .where(
-          (spec) => records.any(
-            (row) => spec.value(row).trim().isNotEmpty,
-          ),
+          (spec) => records.any((row) => spec.value(row).trim().isNotEmpty),
         )
         .toList();
 
@@ -789,15 +744,15 @@ class AdminReportsController extends GetxController {
     required String fileName,
     required String mimeType,
     required String successLabel,
-    String? textPayload,
   }) async {
     try {
       if (kIsWeb) {
-        final uri = textPayload != null
-            ? Uri.dataFromString(textPayload, mimeType: mimeType, encoding: utf8)
-            : Uri.dataFromBytes(bytes, mimeType: mimeType);
-        final launched = await launchUrl(uri);
-        if (!launched) {
+        final downloaded = await downloadExportBytes(
+          bytes: bytes,
+          fileName: fileName,
+          mimeType: mimeType,
+        );
+        if (!downloaded) {
           throw Exception('Unable to start download.');
         }
         AppToast.show(successLabel);
@@ -805,7 +760,9 @@ class AdminReportsController extends GetxController {
       }
 
       final dir = await _resolveExportDirectory();
-      final exportDir = Directory('${dir.path}${Platform.pathSeparator}School App Exports');
+      final exportDir = Directory(
+        '${dir.path}${Platform.pathSeparator}School App Exports',
+      );
       if (!await exportDir.exists()) {
         await exportDir.create(recursive: true);
       }
@@ -839,7 +796,8 @@ class AdminReportsController extends GetxController {
       '<Row><Cell><Data ss:Type="String">Metrics</Data></Cell></Row>',
       '<Row><Cell><Data ss:Type="String">Label</Data></Cell><Cell><Data ss:Type="String">Value</Data></Cell><Cell><Data ss:Type="String">Helper</Data></Cell></Row>',
       ...payload.metrics.map(
-        (metric) => '<Row>'
+        (metric) =>
+            '<Row>'
             '<Cell><Data ss:Type="String">${_xmlEscape(metric.label)}</Data></Cell>'
             '<Cell><Data ss:Type="String">${_xmlEscape(metric.value)}</Data></Cell>'
             '<Cell><Data ss:Type="String">${_xmlEscape(metric.helper ?? '')}</Data></Cell>'
@@ -857,7 +815,8 @@ class AdminReportsController extends GetxController {
       );
       rows.addAll(
         section.rows.map(
-          (row) => '<Row>${row.map((value) => '<Cell><Data ss:Type="String">${_xmlEscape(value)}</Data></Cell>').join()}</Row>',
+          (row) =>
+              '<Row>${row.map((value) => '<Cell><Data ss:Type="String">${_xmlEscape(value)}</Data></Cell>').join()}</Row>',
         ),
       );
     }
@@ -883,7 +842,8 @@ class AdminReportsController extends GetxController {
       '',
       'Metrics',
       ...payload.metrics.map(
-        (metric) => '- ${metric.label}: ${metric.value}${metric.helper == null ? '' : ' (${metric.helper})'}',
+        (metric) =>
+            '- ${metric.label}: ${metric.value}${metric.helper == null ? '' : ' (${metric.helper})'}',
       ),
       '',
     ];
@@ -897,10 +857,7 @@ class AdminReportsController extends GetxController {
       lines.add('');
     }
 
-    return _SimplePdfBuilder.build(
-      title: payload.title,
-      lines: lines,
-    );
+    return _SimplePdfBuilder.build(title: payload.title, lines: lines);
   }
 
   DateTimeRange _dateRange() {
@@ -942,32 +899,42 @@ class AdminReportsController extends GetxController {
   Future<void> _refreshAcademicData() async {
     final classesData = await _adminService.getClasses(page: 1, limit: 200);
     final subjectsData = await _adminService.getSubjects(page: 1, limit: 200);
-    final classes = (classesData['items'] as List<dynamic>? ?? const <dynamic>[])
-        .whereType<Map>()
-        .map((e) => e.cast<String, dynamic>())
-        .toList();
-    final subjects = (subjectsData['items'] as List<dynamic>? ?? const <dynamic>[])
-        .whereType<Map>()
-        .map((e) => e.cast<String, dynamic>())
-        .toList();
+    final classes =
+        (classesData['items'] as List<dynamic>? ?? const <dynamic>[])
+            .whereType<Map>()
+            .map((e) => e.cast<String, dynamic>())
+            .toList();
+    final subjects =
+        (subjectsData['items'] as List<dynamic>? ?? const <dynamic>[])
+            .whereType<Map>()
+            .map((e) => e.cast<String, dynamic>())
+            .toList();
     final metrics = <AdminReportMetric>[
       AdminReportMetric(label: 'Classes', value: '${classes.length}'),
       AdminReportMetric(label: 'Subjects', value: '${subjects.length}'),
-      AdminReportMetric(label: 'Filters', value: selectedClass.value, helper: selectedRange.value),
+      AdminReportMetric(
+        label: 'Filters',
+        value: selectedClass.value,
+        helper: selectedRange.value,
+      ),
     ];
     final classRows = classes
-        .map((e) => [
-              _firstText(e, const ['name']),
-              _firstText(e, const ['section']),
-              _firstText(e, const ['classTeacherId', 'id']),
-            ])
+        .map(
+          (e) => [
+            _firstText(e, const ['name']),
+            _firstText(e, const ['section']),
+            _firstText(e, const ['classTeacherId', 'id']),
+          ],
+        )
         .toList();
     final subjectRows = subjects
-        .map((e) => [
-              _firstText(e, const ['name', 'title']),
-              _firstText(e, const ['code']),
-              _firstText(e, const ['classId']),
-            ])
+        .map(
+          (e) => [
+            _firstText(e, const ['name', 'title']),
+            _firstText(e, const ['code']),
+            _firstText(e, const ['classId']),
+          ],
+        )
         .toList();
     academicDetail.value = AdminReportPayload(
       kind: AdminReportKind.academic,
@@ -991,7 +958,11 @@ class AdminReportsController extends GetxController {
   }
 
   Future<void> _refreshStaffData() async {
-    final data = await _adminService.getStaff(page: 1, limit: 200, isActive: true);
+    final data = await _adminService.getStaff(
+      page: 1,
+      limit: 200,
+      isActive: true,
+    );
     final rows = (data['items'] as List<dynamic>? ?? const <dynamic>[])
         .whereType<Map>()
         .map((e) => e.cast<String, dynamic>())
@@ -1003,19 +974,25 @@ class AdminReportsController extends GetxController {
       generatedAt: DateTime.now(),
       metrics: [
         AdminReportMetric(label: 'Active Staff', value: '${rows.length}'),
-        AdminReportMetric(label: 'Filters', value: selectedClass.value, helper: selectedRange.value),
+        AdminReportMetric(
+          label: 'Filters',
+          value: selectedClass.value,
+          helper: selectedRange.value,
+        ),
       ],
       sections: [
         AdminReportSection(
           title: 'Staff Directory Snapshot',
           columns: const ['Name', 'Employee Code', 'Role', 'Phone'],
           rows: rows
-              .map((e) => [
-                    _firstText(e, const ['fullName', 'name']),
-                    _firstText(e, const ['employeeCode', 'id']),
-                    _firstText(e, const ['role', 'designation']),
-                    _firstText(e, const ['phone']),
-                  ])
+              .map(
+                (e) => [
+                  _firstText(e, const ['fullName', 'name']),
+                  _firstText(e, const ['employeeCode', 'id']),
+                  _firstText(e, const ['role', 'designation']),
+                  _firstText(e, const ['phone']),
+                ],
+              )
               .toList(),
         ),
       ],
@@ -1023,16 +1000,23 @@ class AdminReportsController extends GetxController {
   }
 
   Future<void> _refreshTransportData() async {
-    final routesData = await _adminService.getTransportRoutes(page: 1, limit: 200);
-    final allocationsData = await _adminService.getTransportAllocations(page: 1, limit: 200);
+    final routesData = await _adminService.getTransportRoutes(
+      page: 1,
+      limit: 200,
+    );
+    final allocationsData = await _adminService.getTransportAllocations(
+      page: 1,
+      limit: 200,
+    );
     final routes = (routesData['items'] as List<dynamic>? ?? const <dynamic>[])
         .whereType<Map>()
         .map((e) => e.cast<String, dynamic>())
         .toList();
-    final allocations = (allocationsData['items'] as List<dynamic>? ?? const <dynamic>[])
-        .whereType<Map>()
-        .map((e) => e.cast<String, dynamic>())
-        .toList();
+    final allocations =
+        (allocationsData['items'] as List<dynamic>? ?? const <dynamic>[])
+            .whereType<Map>()
+            .map((e) => e.cast<String, dynamic>())
+            .toList();
     transportDetail.value = AdminReportPayload(
       kind: AdminReportKind.transport,
       title: AdminReportKind.transport.title,
@@ -1047,23 +1031,27 @@ class AdminReportsController extends GetxController {
           title: 'Transport Routes',
           columns: const ['Route', 'Code', 'Status'],
           rows: routes
-              .map((e) => [
-                    _firstText(e, const ['name']),
-                    _firstText(e, const ['routeCode']),
-                    _firstText(e, const ['isActive']),
-                  ])
+              .map(
+                (e) => [
+                  _firstText(e, const ['name']),
+                  _firstText(e, const ['routeCode']),
+                  _firstText(e, const ['isActive']),
+                ],
+              )
               .toList(),
         ),
         AdminReportSection(
           title: 'Transport Allocations',
           columns: const ['Student', 'Route', 'Stop', 'Fee'],
           rows: allocations
-              .map((e) => [
-                    _firstText(e, const ['studentId']),
-                    _firstText(e, const ['routeId']),
-                    _firstText(e, const ['stopName']),
-                    _firstText(e, const ['feeAmount']),
-                  ])
+              .map(
+                (e) => [
+                  _firstText(e, const ['studentId']),
+                  _firstText(e, const ['routeId']),
+                  _firstText(e, const ['stopName']),
+                  _firstText(e, const ['feeAmount']),
+                ],
+              )
               .toList(),
         ),
       ],
@@ -1083,17 +1071,18 @@ class AdminReportsController extends GetxController {
       generatedAt: DateTime.now(),
       metrics: [
         AdminReportMetric(label: 'Attendance', value: attendanceBadge.value),
-        AdminReportMetric(label: 'Outstanding Fees', value: _currency(feeOutstanding.value)),
-        AdminReportMetric(label: 'Collections', value: _currency(collectionTotal.value)),
+        AdminReportMetric(
+          label: 'Outstanding Fees',
+          value: _currency(feeOutstanding.value),
+        ),
+        AdminReportMetric(
+          label: 'Collections',
+          value: _currency(collectionTotal.value),
+        ),
         AdminReportMetric(
           label: 'Modules Covered',
-          value: '${[
-            attendance,
-            fees,
-            academic,
-            staff,
-            transport,
-          ].where((e) => e != null).length}/5',
+          value:
+              '${[attendance, fees, academic, staff, transport].where((e) => e != null).length}/5',
         ),
       ],
       sections: [
@@ -1101,11 +1090,31 @@ class AdminReportsController extends GetxController {
           title: 'Cross Module Snapshot',
           columns: const ['Module', 'Status', 'Highlights'],
           rows: [
-            ['Attendance', attendance == null ? 'Pending' : 'Ready', attendanceBadge.value],
-            ['Fees', fees == null ? 'Pending' : 'Ready', _currency(feeOutstanding.value)],
-            ['Academic', academic == null ? 'Pending' : 'Ready', 'Classes + subjects'],
-            ['Staff', staff == null ? 'Pending' : 'Ready', 'Active staff directory'],
-            ['Transport', transport == null ? 'Pending' : 'Ready', 'Routes + allocations'],
+            [
+              'Attendance',
+              attendance == null ? 'Pending' : 'Ready',
+              attendanceBadge.value,
+            ],
+            [
+              'Fees',
+              fees == null ? 'Pending' : 'Ready',
+              _currency(feeOutstanding.value),
+            ],
+            [
+              'Academic',
+              academic == null ? 'Pending' : 'Ready',
+              'Classes + subjects',
+            ],
+            [
+              'Staff',
+              staff == null ? 'Pending' : 'Ready',
+              'Active staff directory',
+            ],
+            [
+              'Transport',
+              transport == null ? 'Pending' : 'Ready',
+              'Routes + allocations',
+            ],
           ],
         ),
       ],
@@ -1189,10 +1198,13 @@ class AdminReportsController extends GetxController {
   }
 
   String _extractPersonName(Map<String, dynamic> row) {
-    final direct = _firstText(
-      row,
-      const ['studentName', 'staffName', 'fullName', 'name', 'title'],
-    );
+    final direct = _firstText(row, const [
+      'studentName',
+      'staffName',
+      'fullName',
+      'name',
+      'title',
+    ]);
     if (direct.isNotEmpty) return direct;
 
     for (final key in const ['student', 'staff', 'user']) {
@@ -1200,7 +1212,10 @@ class AdminReportsController extends GetxController {
       if (nested == null) continue;
       final first = _firstText(nested, const ['firstName', 'fullName', 'name']);
       final last = _firstText(nested, const ['lastName']);
-      final full = [first, last].where((part) => part.isNotEmpty).join(' ').trim();
+      final full = [
+        first,
+        last,
+      ].where((part) => part.isNotEmpty).join(' ').trim();
       if (full.isNotEmpty) return full;
     }
     return '';
@@ -1251,7 +1266,10 @@ class AdminReportsController extends GetxController {
         .replaceAll('-', ' ')
         .split(RegExp(r'\s+'))
         .where((part) => part.isNotEmpty)
-        .map((part) => '${part[0].toUpperCase()}${part.substring(1).toLowerCase()}')
+        .map(
+          (part) =>
+              '${part[0].toUpperCase()}${part.substring(1).toLowerCase()}',
+        )
         .join(' ');
   }
 
@@ -1318,10 +1336,7 @@ class _ReportColumnSpec {
 }
 
 class _SimplePdfBuilder {
-  static List<int> build({
-    required String title,
-    required List<String> lines,
-  }) {
+  static List<int> build({required String title, required List<String> lines}) {
     const linesPerPage = 42;
     final pages = <String>[];
     for (var start = 0; start < lines.length; start += linesPerPage) {
@@ -1364,7 +1379,8 @@ class _SimplePdfBuilder {
       );
     }
 
-    objects[1] = '<< /Type /Pages /Count ${pages.length} /Kids [${kids.join(' ')}] >>';
+    objects[1] =
+        '<< /Type /Pages /Count ${pages.length} /Kids [${kids.join(' ')}] >>';
 
     final buffer = StringBuffer()..writeln('%PDF-1.4');
     final offsets = <int>[0];

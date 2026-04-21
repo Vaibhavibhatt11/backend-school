@@ -763,54 +763,72 @@ class AdminAcademicsController extends GetxController {
     final titleCtrl = TextEditingController();
     final urlCtrl = TextEditingController();
     final typeCtrl = TextEditingController(text: 'PDF');
-    final ok = await Get.dialog<bool>(
-      AlertDialog(
-        title: const Text('Upload Study Material'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: titleCtrl,
-              decoration: const InputDecoration(labelText: 'Material Title'),
+    try {
+      final ok = await Get.dialog<bool>(
+        AlertDialog(
+          title: const Text('Upload Study Material'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Material Title',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: urlCtrl,
+                  decoration: const InputDecoration(labelText: 'File URL'),
+                  keyboardType: TextInputType.url,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: typeCtrl,
+                  decoration: const InputDecoration(labelText: 'Type'),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: urlCtrl,
-              decoration: const InputDecoration(labelText: 'File URL'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: const Text('Cancel'),
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: typeCtrl,
-              decoration: const InputDecoration(labelText: 'Type'),
+            FilledButton(
+              onPressed: () => Get.back(result: true),
+              child: const Text('Upload'),
             ),
           ],
         ),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
-          FilledButton(
-            onPressed: () => Get.back(result: true),
-            child: const Text('Upload'),
-          ),
-        ],
-      ),
-    );
+      );
 
-    if (ok == true) {
-      if (titleCtrl.text.trim().isEmpty || urlCtrl.text.trim().isEmpty) {
-        AppToast.show('Material title and file URL are required.');
-        return;
-      }
-      try {
+      if (ok == true) {
+        final title = titleCtrl.text.trim();
+        final url = _normalizeMaterialUrl(urlCtrl.text.trim());
+        final type = typeCtrl.text.trim().isEmpty
+            ? _inferMaterialType(url)
+            : typeCtrl.text.trim().toUpperCase();
+        if (title.isEmpty || url.isEmpty) {
+          AppToast.show('Material title and file URL are required.');
+          return;
+        }
         await _adminService.uploadStudyMaterial({
-          'title': titleCtrl.text.trim(),
-          'type': typeCtrl.text.trim().isEmpty ? 'PDF' : typeCtrl.text.trim(),
-          'url': urlCtrl.text.trim(),
+          'title': title,
+          'type': type,
+          'url': url,
+          'isPublished': true,
         });
         await loadExtraData();
         AppToast.show('Material uploaded.');
-      } catch (e) {
-        AppToast.show(dioOrApiErrorMessage(e));
       }
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    } finally {
+      titleCtrl.dispose();
+      urlCtrl.dispose();
+      typeCtrl.dispose();
     }
   }
 
@@ -822,5 +840,27 @@ class AdminAcademicsController extends GetxController {
     } catch (e) {
       AppToast.show(dioOrApiErrorMessage(e));
     }
+  }
+
+  String _normalizeMaterialUrl(String raw) {
+    final value = raw.trim();
+    if (value.isEmpty) return '';
+    final uri = Uri.tryParse(value);
+    if (uri != null && uri.hasScheme) return value;
+    if (value.startsWith('www.')) return 'https://$value';
+    return value;
+  }
+
+  String _inferMaterialType(String url) {
+    final path = Uri.tryParse(url)?.path.toLowerCase() ?? url.toLowerCase();
+    if (path.endsWith('.mp4') ||
+        path.endsWith('.mov') ||
+        path.endsWith('.webm')) {
+      return 'VIDEO';
+    }
+    if (path.endsWith('.ppt') || path.endsWith('.pptx')) return 'PPT';
+    if (path.endsWith('.doc') || path.endsWith('.docx')) return 'DOC';
+    if (path.endsWith('.xls') || path.endsWith('.xlsx')) return 'EXCEL';
+    return 'PDF';
   }
 }

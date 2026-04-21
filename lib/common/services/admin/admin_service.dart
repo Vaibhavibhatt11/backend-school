@@ -1565,7 +1565,31 @@ class AdminService {
       ApiEndpoints.schoolReportAttendance,
       query: query,
     );
-    return extractApiData(res.data, context: 'attendance report');
+    final reportData = extractApiData(res.data, context: 'attendance report');
+
+    try {
+      final exportRes = await _apiClient.get(
+        ApiEndpoints.schoolAttendanceExport,
+        query: {
+          'type': type,
+          if (dateFrom != null && dateFrom.isNotEmpty) 'dateFrom': dateFrom,
+          if (dateTo != null && dateTo.isNotEmpty) 'dateTo': dateTo,
+          'format': 'json',
+        },
+      );
+      final exportData = extractApiData(
+        exportRes.data,
+        context: 'attendance export records',
+      );
+      final records = exportData['records'] ?? exportData['items'];
+      if (records is List) {
+        return {...reportData, 'records': records};
+      }
+    } catch (_) {
+      // Summary report is still useful even if the detailed export endpoint is unavailable.
+    }
+
+    return reportData;
   }
 
   Future<Map<String, dynamic>> getFeesReport({

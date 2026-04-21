@@ -150,11 +150,7 @@ class AdminAttendanceController extends GetxController {
 
   Future<void> pickDate(DateTime date) async {
     selectedDateIso.value = _isoDate(date);
-    await Future.wait([
-      _loadOverview(),
-      _loadRecords(),
-      _loadBulkTargets(),
-    ]);
+    await Future.wait([_loadOverview(), _loadRecords(), _loadBulkTargets()]);
   }
 
   Future<void> selectClassFilter(String value) async {
@@ -187,7 +183,9 @@ class AdminAttendanceController extends GetxController {
       AppToast.show('No records available for bulk marking.');
       return;
     }
-    final pending = bulkTargets.where((item) => item.status.value.isEmpty).length;
+    final pending = bulkTargets
+        .where((item) => item.status.value.isEmpty)
+        .length;
     if (pending > 0) {
       AppToast.show('Please set attendance status for all entries.');
       return;
@@ -195,16 +193,21 @@ class AdminAttendanceController extends GetxController {
 
     isSubmittingBulk.value = true;
     try {
-      final isStudent = selectedBulkAudience.value == AttendanceAudience.student;
+      final isStudent =
+          selectedBulkAudience.value == AttendanceAudience.student;
       final records = bulkTargets
+          .where((item) => item.id.trim().isNotEmpty)
           .map(
             (item) => {
               isStudent ? 'studentId' : 'staffId': item.id,
               'status': _uiStatusToBackend(item.status.value),
-              'remark': null,
             },
           )
           .toList();
+      if (records.isEmpty) {
+        AppToast.show('No valid records available for bulk marking.');
+        return;
+      }
       await _adminService.markAttendanceBulk(
         type: isStudent ? 'student' : 'staff',
         date: selectedDateIso.value,
@@ -260,11 +263,14 @@ class AdminAttendanceController extends GetxController {
   }
 
   Future<void> _loadOverview() async {
-    final overview = await _adminService.getAttendanceOverview(date: selectedDateIso.value);
+    final overview = await _adminService.getAttendanceOverview(
+      date: selectedDateIso.value,
+    );
     final student = overview['students'] as Map<String, dynamic>? ?? const {};
     final staff = overview['staff'] as Map<String, dynamic>? ?? const {};
 
-    final studentSummary = student['summary'] as Map<String, dynamic>? ?? const {};
+    final studentSummary =
+        student['summary'] as Map<String, dynamic>? ?? const {};
     final staffSummary = staff['summary'] as Map<String, dynamic>? ?? const {};
 
     final sPresent = (studentSummary['PRESENT'] as num?)?.toInt() ?? 0;
@@ -283,20 +289,27 @@ class AdminAttendanceController extends GetxController {
         ? ((teacherPresent.value / teacherTotal.value) * 100).round()
         : 0;
 
-    final trend = await _adminService.getAttendanceTrend(days: 7, type: 'student');
+    final trend = await _adminService.getAttendanceTrend(
+      days: 7,
+      type: 'student',
+    );
     final days = (trend['days'] as List<dynamic>? ?? const <dynamic>[])
         .whereType<Map>()
         .map((row) {
-      final m = Map<String, dynamic>.from(row);
-      final dayLabel = (m['date'] ?? '').toString();
-      final pct = ((m['presentPct'] as num?)?.toDouble() ?? 0).round();
-      final absent = ((m['summary'] as Map?)?['ABSENT'] as num?)?.toInt() ?? 0;
-      return AttendanceTrendRow(
-        dayLabel: dayLabel.length >= 10 ? dayLabel.substring(5, 10) : dayLabel,
-        presentPct: pct,
-        absentCount: absent,
-      );
-    }).toList();
+          final m = Map<String, dynamic>.from(row);
+          final dayLabel = (m['date'] ?? '').toString();
+          final pct = ((m['presentPct'] as num?)?.toDouble() ?? 0).round();
+          final absent =
+              ((m['summary'] as Map?)?['ABSENT'] as num?)?.toInt() ?? 0;
+          return AttendanceTrendRow(
+            dayLabel: dayLabel.length >= 10
+                ? dayLabel.substring(5, 10)
+                : dayLabel,
+            presentPct: pct,
+            absentCount: absent,
+          );
+        })
+        .toList();
     trendRows.assignAll(days);
     classes.assignAll(
       days
@@ -369,7 +382,11 @@ class AdminAttendanceController extends GetxController {
       return;
     }
 
-    final staff = await _adminService.getStaff(page: 1, limit: 300, isActive: true);
+    final staff = await _adminService.getStaff(
+      page: 1,
+      limit: 300,
+      isActive: true,
+    );
     final records = await _adminService.getAttendanceRecords(
       type: 'staff',
       date: selectedDateIso.value,
