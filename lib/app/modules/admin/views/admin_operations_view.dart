@@ -543,7 +543,7 @@ class _EventRegistrationsTab extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       children: [
         DropdownButtonFormField<String>(
-          initialValue: selected.isEmpty ? null : selected,
+          value: selected.isEmpty ? null : selected,
           decoration: const InputDecoration(labelText: 'Select event'),
           items: controller.events
               .map(
@@ -678,7 +678,7 @@ class _EventGalleryTab extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       children: [
         DropdownButtonFormField<String>(
-          initialValue: selected.isEmpty ? null : selected,
+          value: selected.isEmpty ? null : selected,
           decoration: const InputDecoration(labelText: 'Select event'),
           items: controller.events
               .map(

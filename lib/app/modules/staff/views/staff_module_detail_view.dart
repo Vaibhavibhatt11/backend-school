@@ -624,23 +624,23 @@ List<_StaffMetric> _buildStaffMetrics(String moduleId) {
       return [
         _StaffMetric(
           label: 'Chats',
-          value: '${communication.chats.length}',
+          value: '${communication.conversationThreads.length}',
           caption: 'Active conversation threads',
         ),
         _StaffMetric(
           label: 'Announcements',
-          value: '${communication.announcements.length}',
+          value: '${communication.liveAnnouncementCount}',
           caption: 'Current posted updates',
         ),
         _StaffMetric(
           label: 'Meetings',
-          value: '${communication.meetings.length}',
-          caption: 'Saved meeting notes',
+          value: '${communication.scheduledMeetingCount}',
+          caption: 'Scheduled PTM records',
         ),
         _StaffMetric(
           label: 'Notifications',
-          value: '${dashboard.notifications.length}',
-          caption: 'Dashboard communication alerts',
+          value: '${communication.unreadNotificationsCount}',
+          caption: 'Unread communication alerts',
         ),
       ];
     case 'events':

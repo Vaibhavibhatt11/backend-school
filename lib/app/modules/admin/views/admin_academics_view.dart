@@ -1,5 +1,6 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/modules/admin/controllers/admin_academics_controller.dart';
+import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -65,7 +66,7 @@ class AdminAcademicsView extends GetView<AdminAcademicsController> {
                   title: 'Materials Vault',
                   subtitle: 'Digital study assets',
                   icon: Icons.cloud_upload_rounded,
-                  onTap: () => _showTabSheet(context, 4),
+                  onTap: () => Get.toNamed(AppRoutes.ADMIN_STUDY_MATERIAL),
                 ),
                 _CategoryCard(
                   title: 'Academic Reports',

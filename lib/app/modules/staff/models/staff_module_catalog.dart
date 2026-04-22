@@ -124,6 +124,7 @@ const List<StaffModuleItem> kStaffModules = [
       'Notifications',
       'Parent-teacher meeting scheduling',
       'Meeting notes',
+      'AI communication drafting',
     ],
   ),
   StaffModuleItem(

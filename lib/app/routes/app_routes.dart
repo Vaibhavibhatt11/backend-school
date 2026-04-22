@@ -52,6 +52,20 @@ abstract class AppRoutes {
   static const STAFF_HOMEWORK_ASSIGNMENT = '/staff-homework-assignment';
   static const STAFF_EXAM_ASSESSMENT = '/staff-exam-assessment';
   static const STAFF_PERFORMANCE_MONITORING = '/staff-performance-monitoring';
+  static const STAFF_STUDY_MATERIAL = '/staff-study-material';
+  static const STAFF_STUDY_MATERIAL_LIBRARY = '/staff-study-material-library';
+  static const STAFF_STUDY_MATERIAL_COMPOSER = '/staff-study-material-composer';
+  static const STAFF_STUDY_MATERIAL_DETAIL = '/staff-study-material-detail';
+  static const STAFF_COMMUNICATION_RECIPIENTS =
+      '/staff-communication-recipients';
+  static const STAFF_COMMUNICATION_CONVERSATION =
+      '/staff-communication-conversation';
+  static const STAFF_COMMUNICATION_ANNOUNCEMENTS =
+      '/staff-communication-announcements';
+  static const STAFF_COMMUNICATION_NOTIFICATIONS =
+      '/staff-communication-notifications';
+  static const STAFF_COMMUNICATION_MEETINGS =
+      '/staff-communication-meetings';
 
   // Admin Module
   static const ADMIN_HOME = '/admin-dashboard';
@@ -74,4 +88,8 @@ abstract class AppRoutes {
   static const ADMIN_MODULES = '/admin-modules';
   static const ADMIN_MODULE_DETAIL = '/admin-module-detail';
   static const ADMIN_FEATURE_DETAIL = '/admin-feature-detail';
+  static const ADMIN_STUDY_MATERIAL = '/admin-study-material';
+  static const ADMIN_STUDY_MATERIAL_LIBRARY = '/admin-study-material-library';
+  static const ADMIN_STUDY_MATERIAL_COMPOSER = '/admin-study-material-composer';
+  static const ADMIN_STUDY_MATERIAL_DETAIL = '/admin-study-material-detail';
 }

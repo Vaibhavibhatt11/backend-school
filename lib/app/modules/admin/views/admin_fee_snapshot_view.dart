@@ -12,7 +12,9 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
     return DefaultTabController(
       length: 8,
       child: Scaffold(
-        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        backgroundColor: isDark
+            ? AppColors.backgroundDark
+            : AppColors.backgroundLight,
         appBar: AppBar(
           title: const Text('Fee Management'),
           backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
@@ -32,7 +34,11 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.surfaceDark : Colors.white,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+                  border: Border.all(
+                    color: isDark
+                        ? AppColors.borderDark
+                        : AppColors.borderLight,
+                  ),
                 ),
                 child: TabBar(
                   isScrollable: true,
@@ -44,7 +50,9 @@ class AdminFeeSnapshotView extends GetView<AdminFeeSnapshotController> {
                   indicatorPadding: const EdgeInsets.all(6),
                   dividerColor: Colors.transparent,
                   labelColor: AppColors.primary,
-                  unselectedLabelColor: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                  unselectedLabelColor: isDark
+                      ? AppColors.textSecondaryDark
+                      : AppColors.textSecondaryLight,
                   tabs: const [
                     Tab(text: 'Structure'),
                     Tab(text: 'Installments'),
@@ -89,7 +97,9 @@ class _FeeHeaderCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [AppColors.primary, AppColors.primaryDark]),
+        gradient: const LinearGradient(
+          colors: [AppColors.primary, AppColors.primaryDark],
+        ),
         borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
@@ -110,7 +120,11 @@ class _FeeHeaderCard extends StatelessWidget {
                 children: [
                   const Text(
                     'Fee Management Workspace',
-                    style: TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.w800),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 19,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -140,16 +154,20 @@ class _StructureTab extends StatelessWidget {
       actionLabel: 'Add Structure',
       onAction: () => _openStructureDialog(context, controller),
       child: Obx(() {
-        if (controller.structures.isEmpty) return const _EmptyState(text: 'No fee structures configured.');
+        if (controller.structures.isEmpty)
+          return const _EmptyState(text: 'No fee structures configured.');
         return Column(
           children: controller.structures
-              .map((item) => _DataTile(
-                    title: item.name,
-                    subtitle: '${item.className} • ${item.category}',
-                    trailingText: '\$${item.amount.toStringAsFixed(2)}',
-                    onEdit: () => _openStructureDialog(context, controller, existing: item),
-                    onDelete: () => controller.deleteStructure(item.id),
-                  ))
+              .map(
+                (item) => _DataTile(
+                  title: item.name,
+                  subtitle: '${item.className} • ${item.category}',
+                  trailingText: '\$${item.amount.toStringAsFixed(2)}',
+                  onEdit: () =>
+                      _openStructureDialog(context, controller, existing: item),
+                  onDelete: () => controller.deleteStructure(item.id),
+                ),
+              )
               .toList(),
         );
       }),
@@ -168,16 +186,24 @@ class _InstallmentsTab extends StatelessWidget {
       actionLabel: 'Add Installment Plan',
       onAction: () => _openInstallmentDialog(context, controller),
       child: Obx(() {
-        if (controller.installmentPlans.isEmpty) return const _EmptyState(text: 'No installment plans configured.');
+        if (controller.installmentPlans.isEmpty)
+          return const _EmptyState(text: 'No installment plans configured.');
         return Column(
           children: controller.installmentPlans
-              .map((item) => _DataTile(
-                    title: item.title,
-                    subtitle: '${item.className} • ${item.installments} installments',
-                    trailingText: '\$${item.totalAmount.toStringAsFixed(2)}',
-                    onEdit: () => _openInstallmentDialog(context, controller, existing: item),
-                    onDelete: () => controller.deleteInstallmentPlan(item.id),
-                  ))
+              .map(
+                (item) => _DataTile(
+                  title: item.title,
+                  subtitle:
+                      '${item.className} • ${item.installments} installments',
+                  trailingText: '\$${item.totalAmount.toStringAsFixed(2)}',
+                  onEdit: () => _openInstallmentDialog(
+                    context,
+                    controller,
+                    existing: item,
+                  ),
+                  onDelete: () => controller.deleteInstallmentPlan(item.id),
+                ),
+              )
               .toList(),
         );
       }),
@@ -196,15 +222,19 @@ class _CategoriesTab extends StatelessWidget {
       actionLabel: 'Add Category',
       onAction: () => _openCategoryDialog(context, controller),
       child: Obx(() {
-        if (controller.categoryConfigs.isEmpty) return const _EmptyState(text: 'No fee categories configured.');
+        if (controller.categoryConfigs.isEmpty)
+          return const _EmptyState(text: 'No fee categories configured.');
         return Column(
           children: controller.categoryConfigs
-              .map((item) => _DataTile(
-                    title: item.name,
-                    subtitle: item.description,
-                    onEdit: () => _openCategoryDialog(context, controller, existing: item),
-                    onDelete: () => controller.deleteCategoryConfig(item.id),
-                  ))
+              .map(
+                (item) => _DataTile(
+                  title: item.name,
+                  subtitle: item.description,
+                  onEdit: () =>
+                      _openCategoryDialog(context, controller, existing: item),
+                  onDelete: () => controller.deleteCategoryConfig(item.id),
+                ),
+              )
               .toList(),
         );
       }),
@@ -231,12 +261,18 @@ class _GatewayTab extends StatelessWidget {
               children: [
                 Text(
                   'Provider: ${controller.gatewayProvider.value.isEmpty ? 'Not configured' : controller.gatewayProvider.value}',
-                  style: TextStyle(color: isDark ? AppColors.textDark : AppColors.textLight),
+                  style: TextStyle(
+                    color: isDark ? AppColors.textDark : AppColors.textLight,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   'Merchant ID: ${controller.gatewayMerchantId.value.isEmpty ? 'Not configured' : controller.gatewayMerchantId.value}',
-                  style: TextStyle(color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+                  style: TextStyle(
+                    color: isDark
+                        ? AppColors.textSecondaryDark
+                        : AppColors.textSecondaryLight,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -280,15 +316,20 @@ class _ReceiptsTab extends StatelessWidget {
         _SectionTitle(title: 'Fee Receipts'),
         const SizedBox(height: 12),
         Obx(() {
-          if (controller.receipts.isEmpty) return const _EmptyState(text: 'No receipts found for current range.');
+          if (controller.receipts.isEmpty)
+            return const _EmptyState(
+              text: 'No receipts found for current range.',
+            );
           return Column(
             children: controller.receipts
-                .map((item) => _DataTile(
-                      title: item.receiptNo,
-                      subtitle: '${item.studentName} • ${item.mode}',
-                      trailingText: '\$${item.amount.toStringAsFixed(2)}',
-                      infoText: item.date,
-                    ))
+                .map(
+                  (item) => _DataTile(
+                    title: item.receiptNo,
+                    subtitle: '${item.studentName} • ${item.mode}',
+                    trailingText: '\$${item.amount.toStringAsFixed(2)}',
+                    infoText: item.date,
+                  ),
+                )
                 .toList(),
           );
         }),
@@ -344,10 +385,17 @@ class _RemindersTab extends StatelessWidget {
       actionLabel: 'Send Reminder',
       onAction: () => _openReminderDialog(context, controller),
       child: Obx(() {
-        if (controller.reminderLogs.isEmpty) return const _EmptyState(text: 'No reminder logs found.');
+        if (controller.reminderLogs.isEmpty)
+          return const _EmptyState(text: 'No reminder logs found.');
         return Column(
           children: controller.reminderLogs
-              .map((item) => _DataTile(title: item.title, subtitle: item.status, infoText: item.createdAt))
+              .map(
+                (item) => _DataTile(
+                  title: item.title,
+                  subtitle: item.status,
+                  infoText: item.createdAt,
+                ),
+              )
               .toList(),
         );
       }),
@@ -434,7 +482,9 @@ class _ThemedBox extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
       ),
       child: child,
     );
@@ -483,20 +533,42 @@ class _DataTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
       ),
       child: ListTile(
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
-        subtitle: Text([subtitle, if (infoText != null && infoText!.isNotEmpty) infoText!].join('\n')),
+        subtitle: Text(
+          [
+            subtitle,
+            if (infoText != null && infoText!.isNotEmpty) infoText!,
+          ].join('\n'),
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (trailingText != null) Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: Text(trailingText!, style: const TextStyle(fontWeight: FontWeight.w700)),
-            ),
-            if (onEdit != null) IconButton(onPressed: onEdit, icon: const Icon(Icons.edit_rounded)),
-            if (onDelete != null) IconButton(onPressed: onDelete, icon: const Icon(Icons.delete_outline_rounded, color: Colors.red)),
+            if (trailingText != null)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Text(
+                  trailingText!,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+            if (onEdit != null)
+              IconButton(
+                onPressed: onEdit,
+                icon: const Icon(Icons.edit_rounded),
+              ),
+            if (onDelete != null)
+              IconButton(
+                onPressed: onDelete,
+                icon: const Icon(
+                  Icons.delete_outline_rounded,
+                  color: Colors.red,
+                ),
+              ),
           ],
         ),
       ),
@@ -515,12 +587,18 @@ class _EmptyState extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
       ),
       child: Text(
         text,
         textAlign: TextAlign.center,
-        style: TextStyle(color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+        style: TextStyle(
+          color: isDark
+              ? AppColors.textSecondaryDark
+              : AppColors.textSecondaryLight,
+        ),
       ),
     );
   }
@@ -533,25 +611,48 @@ Future<void> _openStructureDialog(
 }) async {
   final name = TextEditingController(text: existing?.name ?? '');
   final className = TextEditingController(text: existing?.className ?? '');
-  final amount = TextEditingController(text: existing == null ? '' : existing.amount.toString());
+  final amount = TextEditingController(
+    text: existing == null ? '' : existing.amount.toString(),
+  );
   final category = TextEditingController(text: existing?.category ?? '');
   final ok = await Get.dialog<bool>(
     AlertDialog(
-      title: Text(existing == null ? 'Add Fee Structure' : 'Edit Fee Structure'),
+      title: Text(
+        existing == null ? 'Add Fee Structure' : 'Edit Fee Structure',
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: name, decoration: const InputDecoration(labelText: 'Structure name')),
-            TextField(controller: className, decoration: const InputDecoration(labelText: 'Class')),
-            TextField(controller: category, decoration: const InputDecoration(labelText: 'Category')),
-            TextField(controller: amount, decoration: const InputDecoration(labelText: 'Amount'), keyboardType: TextInputType.number),
+            TextField(
+              controller: name,
+              decoration: const InputDecoration(labelText: 'Structure name'),
+            ),
+            TextField(
+              controller: className,
+              decoration: const InputDecoration(labelText: 'Class'),
+            ),
+            TextField(
+              controller: category,
+              decoration: const InputDecoration(labelText: 'Category'),
+            ),
+            TextField(
+              controller: amount,
+              decoration: const InputDecoration(labelText: 'Amount'),
+              keyboardType: TextInputType.number,
+            ),
           ],
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
-        FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+        TextButton(
+          onPressed: () => Get.back(result: false),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Get.back(result: true),
+          child: const Text('Save'),
+        ),
       ],
     ),
   );
@@ -574,25 +675,53 @@ Future<void> _openInstallmentDialog(
 }) async {
   final title = TextEditingController(text: existing?.title ?? '');
   final className = TextEditingController(text: existing?.className ?? '');
-  final total = TextEditingController(text: existing == null ? '' : existing.totalAmount.toString());
-  final count = TextEditingController(text: existing == null ? '3' : existing.installments.toString());
+  final total = TextEditingController(
+    text: existing == null ? '' : existing.totalAmount.toString(),
+  );
+  final count = TextEditingController(
+    text: existing == null ? '3' : existing.installments.toString(),
+  );
   final ok = await Get.dialog<bool>(
     AlertDialog(
-      title: Text(existing == null ? 'Add Installment Plan' : 'Edit Installment Plan'),
+      title: Text(
+        existing == null ? 'Add Installment Plan' : 'Edit Installment Plan',
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: title, decoration: const InputDecoration(labelText: 'Plan title')),
-            TextField(controller: className, decoration: const InputDecoration(labelText: 'Class')),
-            TextField(controller: total, decoration: const InputDecoration(labelText: 'Total amount'), keyboardType: TextInputType.number),
-            TextField(controller: count, decoration: const InputDecoration(labelText: 'Installments count'), keyboardType: TextInputType.number),
+            TextField(
+              controller: title,
+              decoration: const InputDecoration(labelText: 'Plan title'),
+            ),
+            TextField(
+              controller: className,
+              decoration: const InputDecoration(labelText: 'Class'),
+            ),
+            TextField(
+              controller: total,
+              decoration: const InputDecoration(labelText: 'Total amount'),
+              keyboardType: TextInputType.number,
+            ),
+            TextField(
+              controller: count,
+              decoration: const InputDecoration(
+                labelText: 'Installments count',
+              ),
+              keyboardType: TextInputType.number,
+            ),
           ],
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
-        FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+        TextButton(
+          onPressed: () => Get.back(result: false),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Get.back(result: true),
+          child: const Text('Save'),
+        ),
       ],
     ),
   );
@@ -622,14 +751,26 @@ Future<void> _openCategoryDialog(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: name, decoration: const InputDecoration(labelText: 'Category name')),
-            TextField(controller: desc, decoration: const InputDecoration(labelText: 'Description')),
+            TextField(
+              controller: name,
+              decoration: const InputDecoration(labelText: 'Category name'),
+            ),
+            TextField(
+              controller: desc,
+              decoration: const InputDecoration(labelText: 'Description'),
+            ),
           ],
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
-        FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+        TextButton(
+          onPressed: () => Get.back(result: false),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Get.back(result: true),
+          child: const Text('Save'),
+        ),
       ],
     ),
   );
@@ -643,9 +784,16 @@ Future<void> _openCategoryDialog(
   );
 }
 
-Future<void> _openGatewayDialog(BuildContext context, AdminFeeSnapshotController controller) async {
-  final provider = TextEditingController(text: controller.gatewayProvider.value);
-  final merchant = TextEditingController(text: controller.gatewayMerchantId.value);
+Future<void> _openGatewayDialog(
+  BuildContext context,
+  AdminFeeSnapshotController controller,
+) async {
+  final provider = TextEditingController(
+    text: controller.gatewayProvider.value,
+  );
+  final merchant = TextEditingController(
+    text: controller.gatewayMerchantId.value,
+  );
   bool active = controller.gatewayActive.value;
   final ok = await Get.dialog<bool>(
     StatefulBuilder(
@@ -656,8 +804,14 @@ Future<void> _openGatewayDialog(BuildContext context, AdminFeeSnapshotController
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(controller: provider, decoration: const InputDecoration(labelText: 'Provider')),
-                TextField(controller: merchant, decoration: const InputDecoration(labelText: 'Merchant ID')),
+                TextField(
+                  controller: provider,
+                  decoration: const InputDecoration(labelText: 'Provider'),
+                ),
+                TextField(
+                  controller: merchant,
+                  decoration: const InputDecoration(labelText: 'Merchant ID'),
+                ),
                 const SizedBox(height: 8),
                 SwitchListTile(
                   value: active,
@@ -669,8 +823,14 @@ Future<void> _openGatewayDialog(BuildContext context, AdminFeeSnapshotController
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+            TextButton(
+              onPressed: () => Get.back(result: false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Get.back(result: true),
+              child: const Text('Save'),
+            ),
           ],
         );
       },
@@ -684,10 +844,17 @@ Future<void> _openGatewayDialog(BuildContext context, AdminFeeSnapshotController
   );
 }
 
-Future<void> _openLateFeeDialog(BuildContext context, AdminFeeSnapshotController controller) async {
+Future<void> _openLateFeeDialog(
+  BuildContext context,
+  AdminFeeSnapshotController controller,
+) async {
   String type = controller.lateFeeType.value;
-  final value = TextEditingController(text: controller.lateFeeValue.value.toString());
-  final grace = TextEditingController(text: controller.lateFeeGraceDays.value.toString());
+  final value = TextEditingController(
+    text: controller.lateFeeValue.value.toString(),
+  );
+  final grace = TextEditingController(
+    text: controller.lateFeeGraceDays.value.toString(),
+  );
   final ok = await Get.dialog<bool>(
     StatefulBuilder(
       builder: (context, setState) {
@@ -698,22 +865,41 @@ Future<void> _openLateFeeDialog(BuildContext context, AdminFeeSnapshotController
               mainAxisSize: MainAxisSize.min,
               children: [
                 DropdownButtonFormField<String>(
-                  initialValue: type,
-                  decoration: const InputDecoration(labelText: 'Calculation type'),
+                  value: type,
+                  decoration: const InputDecoration(
+                    labelText: 'Calculation type',
+                  ),
                   items: const [
                     DropdownMenuItem(value: 'percent', child: Text('Percent')),
-                    DropdownMenuItem(value: 'fixed', child: Text('Fixed amount')),
+                    DropdownMenuItem(
+                      value: 'fixed',
+                      child: Text('Fixed amount'),
+                    ),
                   ],
                   onChanged: (v) => setState(() => type = v ?? 'percent'),
                 ),
-                TextField(controller: value, decoration: const InputDecoration(labelText: 'Value'), keyboardType: TextInputType.number),
-                TextField(controller: grace, decoration: const InputDecoration(labelText: 'Grace days'), keyboardType: TextInputType.number),
+                TextField(
+                  controller: value,
+                  decoration: const InputDecoration(labelText: 'Value'),
+                  keyboardType: TextInputType.number,
+                ),
+                TextField(
+                  controller: grace,
+                  decoration: const InputDecoration(labelText: 'Grace days'),
+                  keyboardType: TextInputType.number,
+                ),
               ],
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+            TextButton(
+              onPressed: () => Get.back(result: false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Get.back(result: true),
+              child: const Text('Save'),
+            ),
           ],
         );
       },
@@ -727,9 +913,14 @@ Future<void> _openLateFeeDialog(BuildContext context, AdminFeeSnapshotController
   );
 }
 
-Future<void> _openReminderDialog(BuildContext context, AdminFeeSnapshotController controller) async {
+Future<void> _openReminderDialog(
+  BuildContext context,
+  AdminFeeSnapshotController controller,
+) async {
   final title = TextEditingController(text: 'Fee Payment Reminder');
-  final content = TextEditingController(text: 'Please clear your pending fees to avoid late charges.');
+  final content = TextEditingController(
+    text: 'Please clear your pending fees to avoid late charges.',
+  );
   final ok = await Get.dialog<bool>(
     AlertDialog(
       title: const Text('Send Fee Reminder'),
@@ -737,13 +928,23 @@ Future<void> _openReminderDialog(BuildContext context, AdminFeeSnapshotControlle
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: title, decoration: const InputDecoration(labelText: 'Title')),
-            TextField(controller: content, decoration: const InputDecoration(labelText: 'Message'), maxLines: 3),
+            TextField(
+              controller: title,
+              decoration: const InputDecoration(labelText: 'Title'),
+            ),
+            TextField(
+              controller: content,
+              decoration: const InputDecoration(labelText: 'Message'),
+              maxLines: 3,
+            ),
           ],
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
+        TextButton(
+          onPressed: () => Get.back(result: false),
+          child: const Text('Cancel'),
+        ),
         FilledButton(
           onPressed: () => Get.back(result: true),
           child: const Text('Send'),
@@ -752,5 +953,8 @@ Future<void> _openReminderDialog(BuildContext context, AdminFeeSnapshotControlle
     ),
   );
   if (ok != true) return;
-  await controller.sendFeeReminder(title: title.text.trim(), content: content.text.trim());
+  await controller.sendFeeReminder(
+    title: title.text.trim(),
+    content: content.text.trim(),
+  );
 }

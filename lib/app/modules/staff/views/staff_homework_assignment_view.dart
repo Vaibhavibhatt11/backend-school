@@ -12,7 +12,9 @@ class StaffHomeworkAssignmentView
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: isDark
+          ? AppColors.backgroundDark
+          : AppColors.backgroundLight,
       appBar: const CustomAppBar(title: 'Homework & Assignment Management'),
       body: Obx(
         () => ListView(
@@ -28,18 +30,15 @@ class StaffHomeworkAssignmentView
   }
 
   Widget _tabs(bool isDark) {
-    const labels = [
-      'Create',
-      'Deadlines',
-      'Submissions',
-      'Feedback',
-    ];
+    const labels = ['Create', 'Deadlines', 'Submissions', 'Feedback'];
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
       ),
       child: Row(
         children: List.generate(labels.length, (index) {
@@ -51,7 +50,9 @@ class StaffHomeworkAssignmentView
                 margin: const EdgeInsets.symmetric(horizontal: 4),
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
-                  color: selected ? AppColors.primary.withValues(alpha: 0.15) : Colors.transparent,
+                  color: selected
+                      ? AppColors.primary.withValues(alpha: 0.15)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -76,7 +77,9 @@ class StaffHomeworkAssignmentView
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,12 +120,17 @@ class StaffHomeworkAssignmentView
             ),
           ),
           const SizedBox(height: 8),
-          ...controller.assignments.map((row) => ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.assignment_rounded, color: AppColors.primary),
-                title: Text('${row['title']} · ${row['className']}'),
-                subtitle: Text('${row['subject']} · ${row['status']}'),
-              )),
+          ...controller.assignments.map(
+            (row) => ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(
+                Icons.assignment_rounded,
+                color: AppColors.primary,
+              ),
+              title: Text('${row['title']} · ${row['className']}'),
+              subtitle: Text('${row['subject']} · ${row['status']}'),
+            ),
+          ),
         ],
       ),
     );
@@ -143,12 +151,17 @@ class StaffHomeworkAssignmentView
             ),
           ),
           const SizedBox(height: 8),
-          ...controller.deadlines.map((row) => ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.calendar_today_rounded, color: AppColors.primary),
-                title: Text('${row['assignmentTitle']}'),
-                subtitle: Text('Due ${row['dueDate']} · ${row['dueTime']}'),
-              )),
+          ...controller.deadlines.map(
+            (row) => ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(
+                Icons.calendar_today_rounded,
+                color: AppColors.primary,
+              ),
+              title: Text('${row['assignmentTitle']}'),
+              subtitle: Text('Due ${row['dueDate']} · ${row['dueTime']}'),
+            ),
+          ),
         ],
       ),
     );
@@ -169,12 +182,17 @@ class StaffHomeworkAssignmentView
             ),
           ),
           const SizedBox(height: 8),
-          ...controller.submissions.map((row) => ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.person_rounded, color: AppColors.primary),
-                title: Text('${row['studentName']}'),
-                subtitle: Text('${row['assignmentTitle']} · ${row['status']}'),
-              )),
+          ...controller.submissions.map(
+            (row) => ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(
+                Icons.person_rounded,
+                color: AppColors.primary,
+              ),
+              title: Text('${row['studentName']}'),
+              subtitle: Text('${row['assignmentTitle']} · ${row['status']}'),
+            ),
+          ),
         ],
       ),
     );
@@ -195,24 +213,28 @@ class StaffHomeworkAssignmentView
             ),
           ),
           const SizedBox(height: 8),
-          ...controller.feedbackItems.map((row) => Container(
-                width: double.infinity,
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('${row['studentName']} · ${row['assignmentTitle']}',
-                        style: const TextStyle(fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 4),
-                    Text('${row['feedback']}'),
-                  ],
-                ),
-              )),
+          ...controller.feedbackItems.map(
+            (row) => Container(
+              width: double.infinity,
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${row['studentName']} · ${row['assignmentTitle']}',
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 4),
+                  Text('${row['feedback']}'),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -228,11 +250,20 @@ class StaffHomeworkAssignmentView
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: title, decoration: const InputDecoration(labelText: 'Title')),
+            TextField(
+              controller: title,
+              decoration: const InputDecoration(labelText: 'Title'),
+            ),
             const SizedBox(height: 8),
-            TextField(controller: className, decoration: const InputDecoration(labelText: 'Class')),
+            TextField(
+              controller: className,
+              decoration: const InputDecoration(labelText: 'Class'),
+            ),
             const SizedBox(height: 8),
-            TextField(controller: subject, decoration: const InputDecoration(labelText: 'Subject')),
+            TextField(
+              controller: subject,
+              decoration: const InputDecoration(labelText: 'Subject'),
+            ),
           ],
         ),
         actions: [
@@ -255,7 +286,9 @@ class StaffHomeworkAssignmentView
 
   Future<void> _openDeadlineDialog() async {
     final title = TextEditingController();
-    final date = TextEditingController(text: DateTime.now().toIso8601String().split('T').first);
+    final date = TextEditingController(
+      text: DateTime.now().toIso8601String().split('T').first,
+    );
     final time = TextEditingController(text: '17:00');
     await Get.dialog(
       AlertDialog(
@@ -263,11 +296,20 @@ class StaffHomeworkAssignmentView
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: title, decoration: const InputDecoration(labelText: 'Assignment Title')),
+            TextField(
+              controller: title,
+              decoration: const InputDecoration(labelText: 'Assignment Title'),
+            ),
             const SizedBox(height: 8),
-            TextField(controller: date, decoration: const InputDecoration(labelText: 'Due Date')),
+            TextField(
+              controller: date,
+              decoration: const InputDecoration(labelText: 'Due Date'),
+            ),
             const SizedBox(height: 8),
-            TextField(controller: time, decoration: const InputDecoration(labelText: 'Due Time')),
+            TextField(
+              controller: time,
+              decoration: const InputDecoration(labelText: 'Due Time'),
+            ),
           ],
         ),
         actions: [
@@ -299,17 +341,26 @@ class StaffHomeworkAssignmentView
           builder: (context, setState) => Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: student, decoration: const InputDecoration(labelText: 'Student Name')),
+              TextField(
+                controller: student,
+                decoration: const InputDecoration(labelText: 'Student Name'),
+              ),
               const SizedBox(height: 8),
-              TextField(controller: title, decoration: const InputDecoration(labelText: 'Assignment Title')),
+              TextField(
+                controller: title,
+                decoration: const InputDecoration(
+                  labelText: 'Assignment Title',
+                ),
+              ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                initialValue: status,
+                value: status,
                 decoration: const InputDecoration(labelText: 'Status'),
                 items: const ['SUBMITTED', 'PENDING', 'LATE']
                     .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                     .toList(),
-                onChanged: (value) => setState(() => status = value ?? 'SUBMITTED'),
+                onChanged: (value) =>
+                    setState(() => status = value ?? 'SUBMITTED'),
               ),
             ],
           ),
@@ -343,11 +394,23 @@ class StaffHomeworkAssignmentView
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: student, decoration: const InputDecoration(labelText: 'Student Name')),
+              TextField(
+                controller: student,
+                decoration: const InputDecoration(labelText: 'Student Name'),
+              ),
               const SizedBox(height: 8),
-              TextField(controller: title, decoration: const InputDecoration(labelText: 'Assignment Title')),
+              TextField(
+                controller: title,
+                decoration: const InputDecoration(
+                  labelText: 'Assignment Title',
+                ),
+              ),
               const SizedBox(height: 8),
-              TextField(controller: feedback, maxLines: 3, decoration: const InputDecoration(labelText: 'Feedback')),
+              TextField(
+                controller: feedback,
+                maxLines: 3,
+                decoration: const InputDecoration(labelText: 'Feedback'),
+              ),
             ],
           ),
         ),

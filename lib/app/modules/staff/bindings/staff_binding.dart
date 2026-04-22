@@ -9,6 +9,8 @@ import 'package:erp_frontend/app/modules/staff/controllers/staff_performance_mon
 import 'package:erp_frontend/app/modules/staff/controllers/staff_profile_controller.dart';
 import 'package:erp_frontend/app/modules/staff/controllers/staff_reports_controller.dart';
 import 'package:erp_frontend/app/modules/staff/controllers/staff_settings_controller.dart';
+import 'package:erp_frontend/app/modules/staff/controllers/staff_study_material_controller.dart';
+import 'package:erp_frontend/common/services/admin/admin_service.dart';
 import 'package:erp_frontend/app/modules/staff/controllers/staff_shell_controller.dart';
 import 'package:erp_frontend/common/services/staff/staff_service.dart';
 import 'package:get/get.dart';
@@ -26,7 +28,13 @@ class StaffBinding extends Bindings {
       Get.put(StaffProfileController(Get.find<StaffService>()), permanent: true);
     }
     if (!Get.isRegistered<StaffCommunicationController>()) {
-      Get.put(StaffCommunicationController(Get.find<StaffService>()), permanent: true);
+      Get.put(
+        StaffCommunicationController(
+          Get.find<StaffService>(),
+          Get.find<AdminService>(),
+        ),
+        permanent: true,
+      );
     }
     if (!Get.isRegistered<StaffReportsController>()) {
       Get.put(StaffReportsController(Get.find<StaffService>()), permanent: true);
@@ -51,6 +59,12 @@ class StaffBinding extends Bindings {
     }
     if (!Get.isRegistered<StaffPerformanceMonitoringController>()) {
       Get.put(StaffPerformanceMonitoringController(), permanent: true);
+    }
+    if (!Get.isRegistered<StaffStudyMaterialController>()) {
+      Get.put(
+        StaffStudyMaterialController(Get.find<AdminService>()),
+        permanent: true,
+      );
     }
   }
 }

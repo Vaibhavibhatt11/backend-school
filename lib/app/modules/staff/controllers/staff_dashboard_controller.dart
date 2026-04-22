@@ -105,79 +105,37 @@ class StaffDashboardController extends GetxController {
     );
     classRecords.assignAll(
       assignedClasses
-          .map(
-            (e) => {
-              'id': e,
-              'name': e,
-              'status': 'ASSIGNED',
-            },
-          )
+          .map((e) => {'id': e, 'name': e, 'status': 'ASSIGNED'})
           .toList(),
     );
     taskRecords.assignAll(
       pendingTasks
-          .map(
-            (e) => {
-              'id': e,
-              'title': e,
-              'status': 'PENDING',
-            },
-          )
+          .map((e) => {'id': e, 'title': e, 'status': 'PENDING'})
           .toList(),
     );
     alertRecords.assignAll(
       studentAlerts
-          .map(
-            (e) => {
-              'id': e,
-              'title': e,
-              'status': 'OPEN',
-            },
-          )
+          .map((e) => {'id': e, 'title': e, 'status': 'OPEN'})
           .toList(),
     );
     notificationRecords.assignAll(
       notifications
-          .map(
-            (e) => {
-              'id': e,
-              'title': e,
-              'status': 'UNREAD',
-            },
-          )
+          .map((e) => {'id': e, 'title': e, 'status': 'UNREAD'})
           .toList(),
     );
     homeworkRecords.assignAll(
       homeworkStatus
-          .map(
-            (e) => {
-              'id': e,
-              'title': e,
-              'status': 'ACTIVE',
-            },
-          )
+          .map((e) => {'id': e, 'title': e, 'status': 'ACTIVE'})
           .toList(),
     );
     examRecords.assignAll(
       upcomingExams
-          .map(
-            (e) => {
-              'id': e,
-              'title': e,
-              'status': 'UPCOMING',
-            },
-          )
+          .map((e) => {'id': e, 'title': e, 'status': 'UPCOMING'})
           .toList(),
     );
     meetingRecords.assignAll(
       meetings
-          .map(
-            (e) => {
-              'id': e,
-              'title': e,
-              'status': 'SCHEDULED',
-            },
-          )
+          .map((e) => {'id': e, 'title': e, 'status': 'SCHEDULED'})
           .toList(),
     );
   }
@@ -200,19 +158,26 @@ class StaffDashboardController extends GetxController {
                 ),
                 const SizedBox(height: 10),
                 DropdownButtonFormField<String>(
-                  initialValue: status,
+                  value: status,
                   decoration: const InputDecoration(labelText: 'Status'),
                   items: const ['PENDING', 'IN_PROGRESS', 'DONE']
                       .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                       .toList(),
-                  onChanged: (value) => setState(() => status = value ?? 'PENDING'),
+                  onChanged: (value) =>
+                      setState(() => status = value ?? 'PENDING'),
                 ),
               ],
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+            TextButton(
+              onPressed: () => Get.back(result: false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Get.back(result: true),
+              child: const Text('Save'),
+            ),
           ],
         ),
       ),
@@ -225,17 +190,14 @@ class StaffDashboardController extends GetxController {
     });
   }
 
-  void updateRecordStatus(RxList<Map<String, String>> source, String id, String nextStatus) {
+  void updateRecordStatus(
+    RxList<Map<String, String>> source,
+    String id,
+    String nextStatus,
+  ) {
     source.assignAll(
       source
-          .map(
-            (e) => e['id'] == id
-                ? {
-                    ...e,
-                    'status': nextStatus,
-                  }
-                : e,
-          )
+          .map((e) => e['id'] == id ? {...e, 'status': nextStatus} : e)
           .toList(),
     );
   }
@@ -246,7 +208,10 @@ class StaffDashboardController extends GetxController {
 
   List<String> _asStringList(dynamic value) {
     if (value is! List) return <String>[];
-    return value.map((e) => e.toString()).where((e) => e.trim().isNotEmpty).toList();
+    return value
+        .map((e) => e.toString())
+        .where((e) => e.trim().isNotEmpty)
+        .toList();
   }
 
   void _parseScheduleItems(dynamic value) {
@@ -278,4 +243,3 @@ class StaffDashboardController extends GetxController {
     StaffPortalNavigation.openModule(moduleId);
   }
 }
-

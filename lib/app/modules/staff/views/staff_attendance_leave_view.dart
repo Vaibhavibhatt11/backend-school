@@ -11,7 +11,9 @@ class StaffAttendanceLeaveView extends GetView<StaffAttendanceLeaveController> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: isDark
+          ? AppColors.backgroundDark
+          : AppColors.backgroundLight,
       appBar: const CustomAppBar(title: 'Attendance & Leave Management'),
       body: Obx(
         () => ListView(
@@ -39,7 +41,9 @@ class StaffAttendanceLeaveView extends GetView<StaffAttendanceLeaveController> {
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
       ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -50,9 +54,14 @@ class StaffAttendanceLeaveView extends GetView<StaffAttendanceLeaveController> {
               onTap: () => controller.setTab(index),
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 4),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
-                  color: selected ? AppColors.primary.withValues(alpha: 0.15) : Colors.transparent,
+                  color: selected
+                      ? AppColors.primary.withValues(alpha: 0.15)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -91,7 +100,9 @@ class StaffAttendanceLeaveView extends GetView<StaffAttendanceLeaveController> {
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,7 +136,10 @@ class StaffAttendanceLeaveView extends GetView<StaffAttendanceLeaveController> {
             ...controller.attendanceRecords.map(
               (row) => ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.calendar_today_rounded, color: AppColors.primary),
+                leading: const Icon(
+                  Icons.calendar_today_rounded,
+                  color: AppColors.primary,
+                ),
                 title: Text('${row['date']} · ${row['checkIn']}'),
                 subtitle: Text('Status: ${row['status']}'),
               ),
@@ -161,7 +175,9 @@ class StaffAttendanceLeaveView extends GetView<StaffAttendanceLeaveController> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: ListTile(
-                  title: Text('${row['type']} leave (${row['fromDate']} to ${row['toDate']})'),
+                  title: Text(
+                    '${row['type']} leave (${row['fromDate']} to ${row['toDate']})',
+                  ),
                   subtitle: Text('${row['reason']} · ${row['status']}'),
                 ),
               ),
@@ -186,7 +202,9 @@ class StaffAttendanceLeaveView extends GetView<StaffAttendanceLeaveController> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: ListTile(
-              title: Text('${row['type']} · ${row['fromDate']} to ${row['toDate']}'),
+              title: Text(
+                '${row['type']} · ${row['fromDate']} to ${row['toDate']}',
+              ),
               subtitle: Text('Status: ${row['status']}'),
               trailing: Wrap(
                 spacing: 6,
@@ -224,8 +242,16 @@ class StaffAttendanceLeaveView extends GetView<StaffAttendanceLeaveController> {
           _metricCard('Total Entries', '${metrics['total'] ?? 0}', isDark),
           _metricCard('Present', '${metrics['present'] ?? 0}', isDark),
           _metricCard('Late Arrivals', '${metrics['late'] ?? 0}', isDark),
-          _metricCard('Leave Approved', '${metrics['leaveApproved'] ?? 0}', isDark),
-          _metricCard('Leave Pending', '${metrics['leavePending'] ?? 0}', isDark),
+          _metricCard(
+            'Leave Approved',
+            '${metrics['leaveApproved'] ?? 0}',
+            isDark,
+          ),
+          _metricCard(
+            'Leave Pending',
+            '${metrics['leavePending'] ?? 0}',
+            isDark,
+          ),
         ],
       ),
     );
@@ -238,14 +264,19 @@ class StaffAttendanceLeaveView extends GetView<StaffAttendanceLeaveController> {
       decoration: BoxDecoration(
         color: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: const TextStyle(fontSize: 12)),
           const SizedBox(height: 6),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 22)),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 22),
+          ),
         ],
       ),
     );
@@ -265,11 +296,18 @@ class StaffAttendanceLeaveView extends GetView<StaffAttendanceLeaveController> {
               final open = row['status'] == 'OPEN';
               return ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.watch_later_outlined, color: AppColors.primary),
+                leading: const Icon(
+                  Icons.watch_later_outlined,
+                  color: AppColors.primary,
+                ),
                 title: Text('${row['date']} · Check-in ${row['checkIn']}'),
-                subtitle: Text('Late: ${row['minutesLate']} mins · ${row['status']}'),
+                subtitle: Text(
+                  'Late: ${row['minutesLate']} mins · ${row['status']}',
+                ),
                 trailing: FilledButton.tonal(
-                  onPressed: open && id.isNotEmpty ? () => controller.closeLateEntry(id) : null,
+                  onPressed: open && id.isNotEmpty
+                      ? () => controller.closeLateEntry(id)
+                      : null,
                   child: const Text('Resolve'),
                 ),
               );
@@ -282,7 +320,9 @@ class StaffAttendanceLeaveView extends GetView<StaffAttendanceLeaveController> {
   Future<void> _showMarkAttendanceDialog() async {
     String status = 'PRESENT';
     final checkIn = TextEditingController(text: '08:45');
-    final date = TextEditingController(text: DateTime.now().toIso8601String().split('T').first);
+    final date = TextEditingController(
+      text: DateTime.now().toIso8601String().split('T').first,
+    );
     await Get.dialog(
       AlertDialog(
         title: const Text('Mark Attendance'),
@@ -290,17 +330,28 @@ class StaffAttendanceLeaveView extends GetView<StaffAttendanceLeaveController> {
           builder: (context, setState) => Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: date, decoration: const InputDecoration(labelText: 'Date (YYYY-MM-DD)')),
+              TextField(
+                controller: date,
+                decoration: const InputDecoration(
+                  labelText: 'Date (YYYY-MM-DD)',
+                ),
+              ),
               const SizedBox(height: 8),
-              TextField(controller: checkIn, decoration: const InputDecoration(labelText: 'Check-in (HH:MM)')),
+              TextField(
+                controller: checkIn,
+                decoration: const InputDecoration(
+                  labelText: 'Check-in (HH:MM)',
+                ),
+              ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                initialValue: status,
+                value: status,
                 decoration: const InputDecoration(labelText: 'Status'),
                 items: const ['PRESENT', 'LATE', 'ABSENT']
                     .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                     .toList(),
-                onChanged: (value) => setState(() => status = value ?? 'PRESENT'),
+                onChanged: (value) =>
+                    setState(() => status = value ?? 'PRESENT'),
               ),
             ],
           ),
@@ -325,8 +376,12 @@ class StaffAttendanceLeaveView extends GetView<StaffAttendanceLeaveController> {
 
   Future<void> _showLeaveApplyDialog() async {
     String type = 'Casual';
-    final fromDate = TextEditingController(text: DateTime.now().toIso8601String().split('T').first);
-    final toDate = TextEditingController(text: DateTime.now().toIso8601String().split('T').first);
+    final fromDate = TextEditingController(
+      text: DateTime.now().toIso8601String().split('T').first,
+    );
+    final toDate = TextEditingController(
+      text: DateTime.now().toIso8601String().split('T').first,
+    );
     final reason = TextEditingController();
     await Get.dialog(
       AlertDialog(
@@ -337,19 +392,30 @@ class StaffAttendanceLeaveView extends GetView<StaffAttendanceLeaveController> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 DropdownButtonFormField<String>(
-                  initialValue: type,
+                  value: type,
                   decoration: const InputDecoration(labelText: 'Leave Type'),
                   items: const ['Casual', 'Sick', 'Emergency']
                       .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                       .toList(),
-                  onChanged: (value) => setState(() => type = value ?? 'Casual'),
+                  onChanged: (value) =>
+                      setState(() => type = value ?? 'Casual'),
                 ),
                 const SizedBox(height: 8),
-                TextField(controller: fromDate, decoration: const InputDecoration(labelText: 'From Date')),
+                TextField(
+                  controller: fromDate,
+                  decoration: const InputDecoration(labelText: 'From Date'),
+                ),
                 const SizedBox(height: 8),
-                TextField(controller: toDate, decoration: const InputDecoration(labelText: 'To Date')),
+                TextField(
+                  controller: toDate,
+                  decoration: const InputDecoration(labelText: 'To Date'),
+                ),
                 const SizedBox(height: 8),
-                TextField(controller: reason, maxLines: 3, decoration: const InputDecoration(labelText: 'Reason')),
+                TextField(
+                  controller: reason,
+                  maxLines: 3,
+                  decoration: const InputDecoration(labelText: 'Reason'),
+                ),
               ],
             ),
           ),

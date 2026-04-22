@@ -41,7 +41,10 @@ class StaffModulesView extends StatelessWidget {
               final screens = StaffPortalNavigation.screensForModule(m.id);
               return InkWell(
                 borderRadius: BorderRadius.circular(14),
-                onTap: () => StaffPortalNavigation.openModule(m.id),
+                onTap: () => StaffPortalNavigation.openModule(
+                  m.id,
+                  replaceCurrent: false,
+                ),
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(

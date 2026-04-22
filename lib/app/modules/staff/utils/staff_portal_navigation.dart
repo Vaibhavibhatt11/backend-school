@@ -179,18 +179,44 @@ class StaffPortalNavigation {
             arguments: {'tabIndex': 2},
           ),
           StaffPortalScreen(
-            title: 'Staff Dashboard',
-            description: 'See alerts and notification context.',
-            route: AppRoutes.STAFF_HOME,
-            arguments: {'tabIndex': 0},
+            title: 'Message Parents',
+            description: 'Open the parent communication directory.',
+            route: AppRoutes.STAFF_COMMUNICATION_RECIPIENTS,
+            arguments: {'audience': 'parent'},
+          ),
+          StaffPortalScreen(
+            title: 'Message Students',
+            description: 'Open the student communication directory.',
+            route: AppRoutes.STAFF_COMMUNICATION_RECIPIENTS,
+            arguments: {'audience': 'student'},
+          ),
+          StaffPortalScreen(
+            title: 'Announcements',
+            description: 'Create and publish school announcements.',
+            route: AppRoutes.STAFF_COMMUNICATION_ANNOUNCEMENTS,
+          ),
+          StaffPortalScreen(
+            title: 'Notifications',
+            description: 'Review communication and system notifications.',
+            route: AppRoutes.STAFF_COMMUNICATION_NOTIFICATIONS,
+          ),
+          StaffPortalScreen(
+            title: 'Parent-Teacher Meetings',
+            description: 'Schedule PTMs and send meeting invitations.',
+            route: AppRoutes.STAFF_COMMUNICATION_MEETINGS,
+          ),
+          StaffPortalScreen(
+            title: 'AI Communication Drafting',
+            description: 'Open AI support for notices and message drafts.',
+            opensAssistant: true,
           ),
         ];
       case 'study_material':
         return const [
           StaffPortalScreen(
-            title: 'Upload Center',
-            description: 'Use the current study material publishing flow.',
-            route: AppRoutes.TEACHER_UPLOAD,
+            title: 'Study Material Management',
+            description: 'Manage notes, videos, PDFs, and learning resources.',
+            route: AppRoutes.STAFF_STUDY_MATERIAL,
           ),
           StaffPortalScreen(
             title: 'Reports',
@@ -352,7 +378,10 @@ class StaffPortalNavigation {
     }
   }
 
-  static void openScreen(StaffPortalScreen screen) {
+  static void openScreen(
+    StaffPortalScreen screen, {
+    bool replaceCurrent = true,
+  }) {
     if (screen.opensAssistant) {
       StaffAiAssistantSheet.open();
       return;
@@ -367,23 +396,39 @@ class StaffPortalNavigation {
           return;
         }
       }
-      SafeNavigation.offNamed(screen.route!, arguments: screen.arguments);
+      if (replaceCurrent) {
+        SafeNavigation.offNamed(screen.route!, arguments: screen.arguments);
+      } else {
+        SafeNavigation.toNamed(screen.route!, arguments: screen.arguments);
+      }
     }
   }
 
-  static void openModule(String moduleId, {String? feature}) {
+  static void openModule(
+    String moduleId, {
+    String? feature,
+    bool replaceCurrent = true,
+  }) {
     final screens = screensForModule(moduleId);
     if (screens.isNotEmpty) {
-      openScreen(screens.first);
+      openScreen(screens.first, replaceCurrent: replaceCurrent);
       return;
     }
-    SafeNavigation.offNamed(
-      AppRoutes.STAFF_FEATURE_DETAIL,
-      arguments: {
-        'moduleId': moduleId,
-        'module': moduleId.replaceAll('_', ' ').toUpperCase(),
-        'feature': feature ?? 'Feature',
-      },
-    );
+    final arguments = {
+      'moduleId': moduleId,
+      'module': moduleId.replaceAll('_', ' ').toUpperCase(),
+      'feature': feature ?? 'Feature',
+    };
+    if (replaceCurrent) {
+      SafeNavigation.offNamed(
+        AppRoutes.STAFF_FEATURE_DETAIL,
+        arguments: arguments,
+      );
+    } else {
+      SafeNavigation.toNamed(
+        AppRoutes.STAFF_FEATURE_DETAIL,
+        arguments: arguments,
+      );
+    }
   }
 }

@@ -45,11 +45,25 @@ import 'package:erp_frontend/app/modules/staff/views/staff_modules_view.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_shell_view.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_feature_detail_view.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_attendance_leave_view.dart';
+import 'package:erp_frontend/app/modules/staff/views/staff_communication_announcements_view.dart';
+import 'package:erp_frontend/app/modules/staff/views/staff_communication_conversation_view.dart';
+import 'package:erp_frontend/app/modules/staff/views/staff_communication_meetings_view.dart';
+import 'package:erp_frontend/app/modules/staff/views/staff_communication_notifications_view.dart';
+import 'package:erp_frontend/app/modules/staff/views/staff_communication_recipients_view.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_class_teaching_view.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_lesson_planning_view.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_homework_assignment_view.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_exam_assessment_view.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_performance_monitoring_view.dart';
+import 'package:erp_frontend/app/modules/staff/views/staff_study_material_view.dart';
+import 'package:erp_frontend/app/modules/staff/views/staff_study_material_library_view.dart';
+import 'package:erp_frontend/app/modules/staff/views/staff_study_material_compose_view.dart';
+import 'package:erp_frontend/app/modules/staff/views/staff_study_material_detail_view.dart';
+
+import 'package:erp_frontend/app/modules/admin/views/admin_study_material_compose_view.dart';
+import 'package:erp_frontend/app/modules/admin/views/admin_study_material_detail_view.dart';
+import 'package:erp_frontend/app/modules/admin/views/admin_study_material_library_view.dart';
+import 'package:erp_frontend/app/modules/admin/views/admin_study_material_view.dart';
 import 'package:erp_frontend/modules/auth/login/login_binding.dart';
 import 'package:erp_frontend/modules/auth/login/login_screen.dart';
 import 'package:get/get.dart';
@@ -271,6 +285,51 @@ class AppPages {
       binding: StaffBinding(),
     ),
     GetPage(
+      name: AppRoutes.STAFF_STUDY_MATERIAL,
+      page: () => const StaffStudyMaterialView(),
+      binding: StaffBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.STAFF_STUDY_MATERIAL_LIBRARY,
+      page: () => const StaffStudyMaterialLibraryView(),
+      binding: StaffBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.STAFF_STUDY_MATERIAL_COMPOSER,
+      page: () => const StaffStudyMaterialComposeView(),
+      binding: StaffBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.STAFF_STUDY_MATERIAL_DETAIL,
+      page: () => const StaffStudyMaterialDetailView(),
+      binding: StaffBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.STAFF_COMMUNICATION_RECIPIENTS,
+      page: () => const StaffCommunicationRecipientsView(),
+      binding: StaffBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.STAFF_COMMUNICATION_CONVERSATION,
+      page: () => const StaffCommunicationConversationView(),
+      binding: StaffBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.STAFF_COMMUNICATION_ANNOUNCEMENTS,
+      page: () => const StaffCommunicationAnnouncementsView(),
+      binding: StaffBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.STAFF_COMMUNICATION_NOTIFICATIONS,
+      page: () => const StaffCommunicationNotificationsView(),
+      binding: StaffBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.STAFF_COMMUNICATION_MEETINGS,
+      page: () => const StaffCommunicationMeetingsView(),
+      binding: StaffBinding(),
+    ),
+    GetPage(
       name: AppRoutes.ADMIN_HOME,
       page: () => const AdminShellView(),
       binding: AdminBinding(),
@@ -368,6 +427,26 @@ class AppPages {
     GetPage(
       name: AppRoutes.ADMIN_FEATURE_DETAIL,
       page: () => const AdminFeatureDetailView(),
+      binding: AdminBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ADMIN_STUDY_MATERIAL,
+      page: () => const AdminStudyMaterialView(),
+      binding: AdminBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ADMIN_STUDY_MATERIAL_LIBRARY,
+      page: () => const AdminStudyMaterialLibraryView(),
+      binding: AdminBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ADMIN_STUDY_MATERIAL_COMPOSER,
+      page: () => const AdminStudyMaterialComposeView(),
+      binding: AdminBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ADMIN_STUDY_MATERIAL_DETAIL,
+      page: () => const AdminStudyMaterialDetailView(),
       binding: AdminBinding(),
     ),
   ];

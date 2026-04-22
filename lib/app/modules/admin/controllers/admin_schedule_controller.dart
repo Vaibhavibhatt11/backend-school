@@ -167,13 +167,13 @@ class AdminQuestionPaperRecord {
   final DateTime uploadedAt;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'examId': examId,
-        'examName': examName,
-        'title': title,
-        'fileUrl': fileUrl,
-        'uploadedAt': uploadedAt.toIso8601String(),
-      };
+    'id': id,
+    'examId': examId,
+    'examName': examName,
+    'title': title,
+    'fileUrl': fileUrl,
+    'uploadedAt': uploadedAt.toIso8601String(),
+  };
 
   factory AdminQuestionPaperRecord.fromJson(Map<String, dynamic> json) {
     return AdminQuestionPaperRecord(
@@ -203,12 +203,12 @@ class AdminGradingBand {
   final double gpa;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'label': label,
-        'minPercent': minPercent,
-        'maxPercent': maxPercent,
-        'gpa': gpa,
-      };
+    'id': id,
+    'label': label,
+    'minPercent': minPercent,
+    'maxPercent': maxPercent,
+    'gpa': gpa,
+  };
 
   factory AdminGradingBand.fromJson(Map<String, dynamic> json) {
     return AdminGradingBand(
@@ -247,16 +247,16 @@ class AdminReportCardRecord {
   double get percent => maxMarks > 0 ? (obtainedMarks / maxMarks) * 100 : 0;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'examId': examId,
-        'examName': examName,
-        'studentId': studentId,
-        'studentName': studentName,
-        'obtainedMarks': obtainedMarks,
-        'maxMarks': maxMarks,
-        'grade': grade,
-        'isPublished': isPublished,
-      };
+    'id': id,
+    'examId': examId,
+    'examName': examName,
+    'studentId': studentId,
+    'studentName': studentName,
+    'obtainedMarks': obtainedMarks,
+    'maxMarks': maxMarks,
+    'grade': grade,
+    'isPublished': isPublished,
+  };
 
   factory AdminReportCardRecord.fromJson(Map<String, dynamic> json) {
     return AdminReportCardRecord(
@@ -291,13 +291,13 @@ class AdminRoomAllocationRecord {
   final String timeLabel;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'roomName': roomName,
-        'classLabel': classLabel,
-        'subjectLabel': subjectLabel,
-        'teacherName': teacherName,
-        'timeLabel': timeLabel,
-      };
+    'id': id,
+    'roomName': roomName,
+    'classLabel': classLabel,
+    'subjectLabel': subjectLabel,
+    'teacherName': teacherName,
+    'timeLabel': timeLabel,
+  };
 
   factory AdminRoomAllocationRecord.fromJson(Map<String, dynamic> json) {
     return AdminRoomAllocationRecord(
@@ -331,14 +331,14 @@ class AdminSubstituteTeacherRecord {
   final String reason;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'classLabel': classLabel,
-        'subjectLabel': subjectLabel,
-        'originalTeacherName': originalTeacherName,
-        'substituteTeacherName': substituteTeacherName,
-        'dateLabel': dateLabel,
-        'reason': reason,
-      };
+    'id': id,
+    'classLabel': classLabel,
+    'subjectLabel': subjectLabel,
+    'originalTeacherName': originalTeacherName,
+    'substituteTeacherName': substituteTeacherName,
+    'dateLabel': dateLabel,
+    'reason': reason,
+  };
 
   factory AdminSubstituteTeacherRecord.fromJson(Map<String, dynamic> json) {
     return AdminSubstituteTeacherRecord(
@@ -558,7 +558,10 @@ class AdminScheduleController extends GetxController {
     questionPapers.assignAll(
       (map['questionPapers'] as List<dynamic>? ?? const <dynamic>[])
           .whereType<Map>()
-          .map((e) => AdminQuestionPaperRecord.fromJson(Map<String, dynamic>.from(e)))
+          .map(
+            (e) =>
+                AdminQuestionPaperRecord.fromJson(Map<String, dynamic>.from(e)),
+          )
           .toList(),
     );
     gradingBands.assignAll(
@@ -577,23 +580,22 @@ class AdminScheduleController extends GetxController {
     for (final exam in exams) {
       try {
         final status = await _adminService.getExamMarksStatus(exam.id);
-        final results = (status['results'] as List<dynamic>? ?? const <dynamic>[])
-            .whereType<Map>()
-            .map((e) => Map<String, dynamic>.from(e))
-            .toList();
+        final results =
+            (status['results'] as List<dynamic>? ?? const <dynamic>[])
+                .whereType<Map>()
+                .map((e) => Map<String, dynamic>.from(e))
+                .toList();
         for (final row in results) {
           final studentId = row['studentId']?.toString() ?? '';
           final student = row['student'] as Map<String, dynamic>?;
           final obtained = (row['marks'] as num?)?.toDouble() ?? 0;
           final studentName = student == null
               ? (row['studentName']?.toString() ?? '')
-              : '${student['firstName'] ?? ''} ${student['lastName'] ?? ''}'.trim();
+              : '${student['firstName'] ?? ''} ${student['lastName'] ?? ''}'
+                    .trim();
           final grade = row['grade']?.toString().trim().isNotEmpty == true
               ? row['grade']!.toString()
-              : _gradeFromPercent(
-                  maxMarks: exam.maxMarks,
-                  marks: obtained,
-                );
+              : _gradeFromPercent(maxMarks: exam.maxMarks, marks: obtained);
           records.add(
             AdminReportCardRecord(
               id: '${exam.id}::$studentId',
@@ -624,7 +626,11 @@ class AdminScheduleController extends GetxController {
       StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: Text(existing == null ? 'Upload Question Paper' : 'Edit Question Paper'),
+            title: Text(
+              existing == null
+                  ? 'Upload Question Paper'
+                  : 'Edit Question Paper',
+            ),
             content: SizedBox(
               width: 520,
               child: SingleChildScrollView(
@@ -632,10 +638,13 @@ class AdminScheduleController extends GetxController {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      initialValue: examId,
+                      value: examId,
                       decoration: const InputDecoration(labelText: 'Exam'),
                       items: [
-                        const DropdownMenuItem<String>(value: '', child: Text('Select exam')),
+                        const DropdownMenuItem<String>(
+                          value: '',
+                          child: Text('Select exam'),
+                        ),
                         ...exams.map(
                           (exam) => DropdownMenuItem<String>(
                             value: exam.id,
@@ -643,12 +652,15 @@ class AdminScheduleController extends GetxController {
                           ),
                         ),
                       ],
-                      onChanged: (value) => setState(() => examId = value ?? ''),
+                      onChanged: (value) =>
+                          setState(() => examId = value ?? ''),
                     ),
                     const SizedBox(height: 10),
                     TextField(
                       controller: titleCtrl,
-                      decoration: const InputDecoration(labelText: 'Paper title'),
+                      decoration: const InputDecoration(
+                        labelText: 'Paper title',
+                      ),
                     ),
                     const SizedBox(height: 10),
                     TextField(
@@ -660,19 +672,28 @@ class AdminScheduleController extends GetxController {
               ),
             ),
             actions: [
-              TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
-              FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+              TextButton(
+                onPressed: () => Get.back(result: false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Get.back(result: true),
+                child: const Text('Save'),
+              ),
             ],
           );
         },
       ),
     );
     if (ok != true) return;
-    if (examId.isEmpty || titleCtrl.text.trim().isEmpty || urlCtrl.text.trim().isEmpty) {
+    if (examId.isEmpty ||
+        titleCtrl.text.trim().isEmpty ||
+        urlCtrl.text.trim().isEmpty) {
       AppToast.show('Exam, title, and file URL are required.');
       return;
     }
-    final examName = exams.firstWhereOrNull((e) => e.id == examId)?.name ?? 'Exam';
+    final examName =
+        exams.firstWhereOrNull((e) => e.id == examId)?.name ?? 'Exam';
     final next = [
       ...questionPapers.where((p) => p.id != existing?.id),
       AdminQuestionPaperRecord(
@@ -684,7 +705,9 @@ class AdminScheduleController extends GetxController {
         uploadedAt: DateTime.now(),
       ),
     ];
-    await _saveExamWorkbenchSettings(questionPapersData: next.map((e) => e.toJson()).toList());
+    await _saveExamWorkbenchSettings(
+      questionPapersData: next.map((e) => e.toJson()).toList(),
+    );
     questionPapers.assignAll(next);
     AppToast.show('Question paper saved.');
   }
@@ -696,15 +719,21 @@ class AdminScheduleController extends GetxController {
     );
     if (!confirmed) return;
     final next = questionPapers.where((item) => item.id != paper.id).toList();
-    await _saveExamWorkbenchSettings(questionPapersData: next.map((e) => e.toJson()).toList());
+    await _saveExamWorkbenchSettings(
+      questionPapersData: next.map((e) => e.toJson()).toList(),
+    );
     questionPapers.assignAll(next);
     AppToast.show('Question paper deleted.');
   }
 
   Future<void> openGradingBandDialog({AdminGradingBand? existing}) async {
     final labelCtrl = TextEditingController(text: existing?.label ?? '');
-    final minCtrl = TextEditingController(text: existing?.minPercent.toString() ?? '');
-    final maxCtrl = TextEditingController(text: existing?.maxPercent.toString() ?? '');
+    final minCtrl = TextEditingController(
+      text: existing?.minPercent.toString() ?? '',
+    );
+    final maxCtrl = TextEditingController(
+      text: existing?.maxPercent.toString() ?? '',
+    );
     final gpaCtrl = TextEditingController(text: existing?.gpa.toString() ?? '');
     final ok = await Get.dialog<bool>(
       AlertDialog(
@@ -715,20 +744,41 @@ class AdminScheduleController extends GetxController {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(controller: labelCtrl, decoration: const InputDecoration(labelText: 'Grade label')),
+                TextField(
+                  controller: labelCtrl,
+                  decoration: const InputDecoration(labelText: 'Grade label'),
+                ),
                 const SizedBox(height: 10),
-                TextField(controller: minCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Min %')),
+                TextField(
+                  controller: minCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Min %'),
+                ),
                 const SizedBox(height: 10),
-                TextField(controller: maxCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Max %')),
+                TextField(
+                  controller: maxCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Max %'),
+                ),
                 const SizedBox(height: 10),
-                TextField(controller: gpaCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'GPA value')),
+                TextField(
+                  controller: gpaCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'GPA value'),
+                ),
               ],
             ),
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Get.back(result: true),
+            child: const Text('Save'),
+          ),
         ],
       ),
     );
@@ -736,7 +786,11 @@ class AdminScheduleController extends GetxController {
     final min = double.tryParse(minCtrl.text.trim());
     final max = double.tryParse(maxCtrl.text.trim());
     final gpa = double.tryParse(gpaCtrl.text.trim());
-    if (labelCtrl.text.trim().isEmpty || min == null || max == null || gpa == null || min > max) {
+    if (labelCtrl.text.trim().isEmpty ||
+        min == null ||
+        max == null ||
+        gpa == null ||
+        min > max) {
       AppToast.show('Enter valid grading band details.');
       return;
     }
@@ -750,7 +804,9 @@ class AdminScheduleController extends GetxController {
         gpa: gpa,
       ),
     ]..sort((a, b) => b.maxPercent.compareTo(a.maxPercent));
-    await _saveExamWorkbenchSettings(gradingBandsData: next.map((e) => e.toJson()).toList());
+    await _saveExamWorkbenchSettings(
+      gradingBandsData: next.map((e) => e.toJson()).toList(),
+    );
     gradingBands.assignAll(next);
     await _rebuildReportCardsFromExamData();
     AppToast.show('Grading band saved.');
@@ -763,7 +819,9 @@ class AdminScheduleController extends GetxController {
     );
     if (!confirmed) return;
     final next = gradingBands.where((item) => item.id != band.id).toList();
-    await _saveExamWorkbenchSettings(gradingBandsData: next.map((e) => e.toJson()).toList());
+    await _saveExamWorkbenchSettings(
+      gradingBandsData: next.map((e) => e.toJson()).toList(),
+    );
     gradingBands.assignAll(next);
     await _rebuildReportCardsFromExamData();
     AppToast.show('Grading band deleted.');
@@ -798,13 +856,55 @@ class AdminScheduleController extends GetxController {
 
   List<AdminGradingBand> _defaultGradingBands() {
     return const [
-      AdminGradingBand(id: 'A1', label: 'A+', minPercent: 90, maxPercent: 100, gpa: 4.0),
-      AdminGradingBand(id: 'A2', label: 'A', minPercent: 80, maxPercent: 89.99, gpa: 3.7),
-      AdminGradingBand(id: 'B1', label: 'B+', minPercent: 70, maxPercent: 79.99, gpa: 3.3),
-      AdminGradingBand(id: 'B2', label: 'B', minPercent: 60, maxPercent: 69.99, gpa: 3.0),
-      AdminGradingBand(id: 'C1', label: 'C', minPercent: 50, maxPercent: 59.99, gpa: 2.5),
-      AdminGradingBand(id: 'D1', label: 'D', minPercent: 40, maxPercent: 49.99, gpa: 2.0),
-      AdminGradingBand(id: 'F1', label: 'F', minPercent: 0, maxPercent: 39.99, gpa: 0),
+      AdminGradingBand(
+        id: 'A1',
+        label: 'A+',
+        minPercent: 90,
+        maxPercent: 100,
+        gpa: 4.0,
+      ),
+      AdminGradingBand(
+        id: 'A2',
+        label: 'A',
+        minPercent: 80,
+        maxPercent: 89.99,
+        gpa: 3.7,
+      ),
+      AdminGradingBand(
+        id: 'B1',
+        label: 'B+',
+        minPercent: 70,
+        maxPercent: 79.99,
+        gpa: 3.3,
+      ),
+      AdminGradingBand(
+        id: 'B2',
+        label: 'B',
+        minPercent: 60,
+        maxPercent: 69.99,
+        gpa: 3.0,
+      ),
+      AdminGradingBand(
+        id: 'C1',
+        label: 'C',
+        minPercent: 50,
+        maxPercent: 59.99,
+        gpa: 2.5,
+      ),
+      AdminGradingBand(
+        id: 'D1',
+        label: 'D',
+        minPercent: 40,
+        maxPercent: 49.99,
+        gpa: 2.0,
+      ),
+      AdminGradingBand(
+        id: 'F1',
+        label: 'F',
+        minPercent: 0,
+        maxPercent: 39.99,
+        gpa: 0,
+      ),
     ];
   }
 
@@ -824,7 +924,10 @@ class AdminScheduleController extends GetxController {
 
   double get averageScore {
     if (reportCards.isEmpty) return 0;
-    final total = reportCards.fold<double>(0, (sum, card) => sum + card.percent);
+    final total = reportCards.fold<double>(
+      0,
+      (sum, card) => sum + card.percent,
+    );
     return total / reportCards.length;
   }
 
@@ -985,7 +1088,7 @@ class AdminScheduleController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: status,
+                      value: status,
                       decoration: const InputDecoration(labelText: 'Status'),
                       items: const ['UPCOMING', 'LIVE', 'ENDED']
                           .map(
@@ -1075,13 +1178,21 @@ class AdminScheduleController extends GetxController {
     roomAllocations.assignAll(
       (map['roomAllocations'] as List<dynamic>? ?? const <dynamic>[])
           .whereType<Map>()
-          .map((e) => AdminRoomAllocationRecord.fromJson(Map<String, dynamic>.from(e)))
+          .map(
+            (e) => AdminRoomAllocationRecord.fromJson(
+              Map<String, dynamic>.from(e),
+            ),
+          )
           .toList(),
     );
     substituteTeachers.assignAll(
       (map['substituteTeachers'] as List<dynamic>? ?? const <dynamic>[])
           .whereType<Map>()
-          .map((e) => AdminSubstituteTeacherRecord.fromJson(Map<String, dynamic>.from(e)))
+          .map(
+            (e) => AdminSubstituteTeacherRecord.fromJson(
+              Map<String, dynamic>.from(e),
+            ),
+          )
           .toList(),
     );
   }
@@ -1091,34 +1202,61 @@ class AdminScheduleController extends GetxController {
   }) async {
     final roomCtrl = TextEditingController(text: existing?.roomName ?? '');
     final classCtrl = TextEditingController(text: existing?.classLabel ?? '');
-    final subjectCtrl = TextEditingController(text: existing?.subjectLabel ?? '');
-    final teacherCtrl = TextEditingController(text: existing?.teacherName ?? '');
+    final subjectCtrl = TextEditingController(
+      text: existing?.subjectLabel ?? '',
+    );
+    final teacherCtrl = TextEditingController(
+      text: existing?.teacherName ?? '',
+    );
     final timeCtrl = TextEditingController(text: existing?.timeLabel ?? '');
     final ok = await Get.dialog<bool>(
       AlertDialog(
-        title: Text(existing == null ? 'Add Room Allocation' : 'Edit Room Allocation'),
+        title: Text(
+          existing == null ? 'Add Room Allocation' : 'Edit Room Allocation',
+        ),
         content: SizedBox(
           width: 460,
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(controller: roomCtrl, decoration: const InputDecoration(labelText: 'Room name')),
+                TextField(
+                  controller: roomCtrl,
+                  decoration: const InputDecoration(labelText: 'Room name'),
+                ),
                 const SizedBox(height: 10),
-                TextField(controller: classCtrl, decoration: const InputDecoration(labelText: 'Class label')),
+                TextField(
+                  controller: classCtrl,
+                  decoration: const InputDecoration(labelText: 'Class label'),
+                ),
                 const SizedBox(height: 10),
-                TextField(controller: subjectCtrl, decoration: const InputDecoration(labelText: 'Subject label')),
+                TextField(
+                  controller: subjectCtrl,
+                  decoration: const InputDecoration(labelText: 'Subject label'),
+                ),
                 const SizedBox(height: 10),
-                TextField(controller: teacherCtrl, decoration: const InputDecoration(labelText: 'Teacher')),
+                TextField(
+                  controller: teacherCtrl,
+                  decoration: const InputDecoration(labelText: 'Teacher'),
+                ),
                 const SizedBox(height: 10),
-                TextField(controller: timeCtrl, decoration: const InputDecoration(labelText: 'Time slot')),
+                TextField(
+                  controller: timeCtrl,
+                  decoration: const InputDecoration(labelText: 'Time slot'),
+                ),
               ],
             ),
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Get.back(result: true),
+            child: const Text('Save'),
+          ),
         ],
       ),
     );
@@ -1152,7 +1290,9 @@ class AdminScheduleController extends GetxController {
     );
     if (!confirmed) return;
     final next = roomAllocations.where((e) => e.id != item.id).toList();
-    await _saveTimetableWorkbench(roomData: next.map((e) => e.toJson()).toList());
+    await _saveTimetableWorkbench(
+      roomData: next.map((e) => e.toJson()).toList(),
+    );
     roomAllocations.assignAll(next);
     AppToast.show('Room allocation deleted.');
   }
@@ -1161,38 +1301,76 @@ class AdminScheduleController extends GetxController {
     AdminSubstituteTeacherRecord? existing,
   }) async {
     final classCtrl = TextEditingController(text: existing?.classLabel ?? '');
-    final subjectCtrl = TextEditingController(text: existing?.subjectLabel ?? '');
-    final originalCtrl = TextEditingController(text: existing?.originalTeacherName ?? '');
-    final substituteCtrl = TextEditingController(text: existing?.substituteTeacherName ?? '');
+    final subjectCtrl = TextEditingController(
+      text: existing?.subjectLabel ?? '',
+    );
+    final originalCtrl = TextEditingController(
+      text: existing?.originalTeacherName ?? '',
+    );
+    final substituteCtrl = TextEditingController(
+      text: existing?.substituteTeacherName ?? '',
+    );
     final dateCtrl = TextEditingController(text: existing?.dateLabel ?? '');
     final reasonCtrl = TextEditingController(text: existing?.reason ?? '');
     final ok = await Get.dialog<bool>(
       AlertDialog(
-        title: Text(existing == null ? 'Assign Substitute' : 'Edit Substitute Assignment'),
+        title: Text(
+          existing == null ? 'Assign Substitute' : 'Edit Substitute Assignment',
+        ),
         content: SizedBox(
           width: 480,
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(controller: classCtrl, decoration: const InputDecoration(labelText: 'Class label')),
+                TextField(
+                  controller: classCtrl,
+                  decoration: const InputDecoration(labelText: 'Class label'),
+                ),
                 const SizedBox(height: 10),
-                TextField(controller: subjectCtrl, decoration: const InputDecoration(labelText: 'Subject label')),
+                TextField(
+                  controller: subjectCtrl,
+                  decoration: const InputDecoration(labelText: 'Subject label'),
+                ),
                 const SizedBox(height: 10),
-                TextField(controller: originalCtrl, decoration: const InputDecoration(labelText: 'Original teacher')),
+                TextField(
+                  controller: originalCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Original teacher',
+                  ),
+                ),
                 const SizedBox(height: 10),
-                TextField(controller: substituteCtrl, decoration: const InputDecoration(labelText: 'Substitute teacher')),
+                TextField(
+                  controller: substituteCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Substitute teacher',
+                  ),
+                ),
                 const SizedBox(height: 10),
-                TextField(controller: dateCtrl, decoration: const InputDecoration(labelText: 'Date (YYYY-MM-DD)')),
+                TextField(
+                  controller: dateCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Date (YYYY-MM-DD)',
+                  ),
+                ),
                 const SizedBox(height: 10),
-                TextField(controller: reasonCtrl, decoration: const InputDecoration(labelText: 'Reason')),
+                TextField(
+                  controller: reasonCtrl,
+                  decoration: const InputDecoration(labelText: 'Reason'),
+                ),
               ],
             ),
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Get.back(result: true),
+            child: const Text('Save'),
+          ),
         ],
       ),
     );
@@ -1200,7 +1378,9 @@ class AdminScheduleController extends GetxController {
     if (classCtrl.text.trim().isEmpty ||
         originalCtrl.text.trim().isEmpty ||
         substituteCtrl.text.trim().isEmpty) {
-      AppToast.show('Class, original teacher, and substitute teacher are required.');
+      AppToast.show(
+        'Class, original teacher, and substitute teacher are required.',
+      );
       return;
     }
     final next = [
@@ -1222,7 +1402,9 @@ class AdminScheduleController extends GetxController {
     AppToast.show('Substitute assignment saved.');
   }
 
-  Future<void> deleteSubstituteTeacher(AdminSubstituteTeacherRecord item) async {
+  Future<void> deleteSubstituteTeacher(
+    AdminSubstituteTeacherRecord item,
+  ) async {
     final confirmed = await _confirm(
       title: 'Delete Substitute Assignment',
       message: 'Delete assignment for ${item.classLabel}?',
@@ -1290,7 +1472,7 @@ class AdminScheduleController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: classId,
+                      value: classId,
                       decoration: const InputDecoration(labelText: 'Class'),
                       items: [
                         const DropdownMenuItem<String>(
@@ -1309,7 +1491,7 @@ class AdminScheduleController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: subjectId,
+                      value: subjectId,
                       decoration: const InputDecoration(labelText: 'Subject'),
                       items: [
                         const DropdownMenuItem<String>(
@@ -1342,7 +1524,7 @@ class AdminScheduleController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: status,
+                      value: status,
                       decoration: const InputDecoration(labelText: 'Status'),
                       items:
                           const ['DRAFT', 'SCHEDULED', 'COMPLETED', 'PUBLISHED']
@@ -1761,7 +1943,7 @@ class AdminScheduleController extends GetxController {
         ),
         const SizedBox(height: 10),
         DropdownButtonFormField<String>(
-          initialValue: classId,
+          value: classId,
           decoration: const InputDecoration(labelText: 'Class'),
           items: [
             const DropdownMenuItem<String>(value: '', child: Text('No class')),
@@ -1776,7 +1958,7 @@ class AdminScheduleController extends GetxController {
         ),
         const SizedBox(height: 10),
         DropdownButtonFormField<String>(
-          initialValue: subjectId,
+          value: subjectId,
           decoration: const InputDecoration(labelText: 'Subject'),
           items: [
             const DropdownMenuItem<String>(
@@ -1794,7 +1976,7 @@ class AdminScheduleController extends GetxController {
         ),
         const SizedBox(height: 10),
         DropdownButtonFormField<String>(
-          initialValue: teacherId,
+          value: teacherId,
           decoration: const InputDecoration(labelText: 'Teacher'),
           items: [
             const DropdownMenuItem<String>(

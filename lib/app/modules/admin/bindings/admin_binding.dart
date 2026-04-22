@@ -17,6 +17,7 @@ import '../controllers/admin_settings_controller.dart';
 import '../controllers/admin_shell_controller.dart';
 import '../controllers/admin_students_controller.dart';
 import '../controllers/admin_staff_controller.dart';
+import '../controllers/admin_study_material_controller.dart';
 import 'package:erp_frontend/common/services/admin/admin_service.dart';
 
 class AdminBinding extends Bindings {
@@ -125,6 +126,12 @@ class AdminBinding extends Bindings {
       Get.put(
         AdminSettingsController(Get.find<AdminService>()),
         permanent: true,
+      );
+    }
+    if (!Get.isRegistered<AdminStudyMaterialController>()) {
+      Get.lazyPut<AdminStudyMaterialController>(
+        () => AdminStudyMaterialController(Get.find<AdminService>()),
+        fenix: true,
       );
     }
   }

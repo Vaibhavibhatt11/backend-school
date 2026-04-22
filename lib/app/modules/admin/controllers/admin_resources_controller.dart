@@ -88,10 +88,10 @@ class AdminLibraryCategoryRecord {
   final String description;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'description': description,
-      };
+    'id': id,
+    'name': name,
+    'description': description,
+  };
 
   factory AdminLibraryCategoryRecord.fromJson(Map<String, dynamic> json) {
     return AdminLibraryCategoryRecord(
@@ -120,13 +120,13 @@ class AdminStudentLibraryCardRecord {
   final bool isActive;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'studentId': studentId,
-        'studentName': studentName,
-        'cardNo': cardNo,
-        'issuedOn': issuedOn,
-        'isActive': isActive,
-      };
+    'id': id,
+    'studentId': studentId,
+    'studentName': studentName,
+    'cardNo': cardNo,
+    'issuedOn': issuedOn,
+    'isActive': isActive,
+  };
 
   factory AdminStudentLibraryCardRecord.fromJson(Map<String, dynamic> json) {
     return AdminStudentLibraryCardRecord(
@@ -152,10 +152,10 @@ class AdminLateFineRule {
   final int graceDays;
 
   Map<String, dynamic> toJson() => {
-        'type': type,
-        'amount': amount,
-        'graceDays': graceDays,
-      };
+    'type': type,
+    'amount': amount,
+    'graceDays': graceDays,
+  };
 
   factory AdminLateFineRule.fromJson(Map<String, dynamic> json) {
     return AdminLateFineRule(
@@ -254,14 +254,14 @@ class AdminAssetRecord {
   final String purchaseDate;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'assetCode': assetCode,
-        'name': name,
-        'category': category,
-        'assignedTo': assignedTo,
-        'status': status,
-        'purchaseDate': purchaseDate,
-      };
+    'id': id,
+    'assetCode': assetCode,
+    'name': name,
+    'category': category,
+    'assignedTo': assignedTo,
+    'status': status,
+    'purchaseDate': purchaseDate,
+  };
 
   factory AdminAssetRecord.fromJson(Map<String, dynamic> json) {
     return AdminAssetRecord(
@@ -296,14 +296,14 @@ class AdminVendorRecord {
   final bool isActive;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'contactPerson': contactPerson,
-        'phone': phone,
-        'email': email,
-        'address': address,
-        'isActive': isActive,
-      };
+    'id': id,
+    'name': name,
+    'contactPerson': contactPerson,
+    'phone': phone,
+    'email': email,
+    'address': address,
+    'isActive': isActive,
+  };
 
   factory AdminVendorRecord.fromJson(Map<String, dynamic> json) {
     return AdminVendorRecord(
@@ -342,16 +342,16 @@ class AdminPurchaseOrderRecord {
   final String expectedDate;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'poNumber': poNumber,
-        'vendorId': vendorId,
-        'vendorName': vendorName,
-        'itemSummary': itemSummary,
-        'totalAmount': totalAmount,
-        'status': status,
-        'orderDate': orderDate,
-        'expectedDate': expectedDate,
-      };
+    'id': id,
+    'poNumber': poNumber,
+    'vendorId': vendorId,
+    'vendorName': vendorName,
+    'itemSummary': itemSummary,
+    'totalAmount': totalAmount,
+    'status': status,
+    'orderDate': orderDate,
+    'expectedDate': expectedDate,
+  };
 
   factory AdminPurchaseOrderRecord.fromJson(Map<String, dynamic> json) {
     return AdminPurchaseOrderRecord(
@@ -741,7 +741,7 @@ class AdminResourcesController extends GetxController {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      initialValue: bookId,
+                      value: bookId,
                       decoration: const InputDecoration(labelText: 'Book'),
                       items: libraryBooks
                           .map(
@@ -756,7 +756,7 @@ class AdminResourcesController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: borrowerType,
+                      value: borrowerType,
                       decoration: const InputDecoration(
                         labelText: 'Borrower type',
                       ),
@@ -782,7 +782,7 @@ class AdminResourcesController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: borrowerRefId.isEmpty ? null : borrowerRefId,
+                      value: borrowerRefId.isEmpty ? null : borrowerRefId,
                       decoration: const InputDecoration(labelText: 'Borrower'),
                       items: borrowerItems
                           .map(
@@ -859,18 +859,28 @@ class AdminResourcesController extends GetxController {
     libraryCategories.assignAll(
       (map['categories'] as List<dynamic>? ?? const <dynamic>[])
           .whereType<Map>()
-          .map((e) => AdminLibraryCategoryRecord.fromJson(Map<String, dynamic>.from(e)))
+          .map(
+            (e) => AdminLibraryCategoryRecord.fromJson(
+              Map<String, dynamic>.from(e),
+            ),
+          )
           .toList(),
     );
     libraryCards.assignAll(
       (map['studentCards'] as List<dynamic>? ?? const <dynamic>[])
           .whereType<Map>()
-          .map((e) => AdminStudentLibraryCardRecord.fromJson(Map<String, dynamic>.from(e)))
+          .map(
+            (e) => AdminStudentLibraryCardRecord.fromJson(
+              Map<String, dynamic>.from(e),
+            ),
+          )
           .toList(),
     );
     final fine = map['lateFineRule'];
     if (fine is Map) {
-      lateFineRule.value = AdminLateFineRule.fromJson(Map<String, dynamic>.from(fine));
+      lateFineRule.value = AdminLateFineRule.fromJson(
+        Map<String, dynamic>.from(fine),
+      );
     }
   }
 
@@ -887,15 +897,27 @@ class AdminResourcesController extends GetxController {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Category name')),
+              TextField(
+                controller: nameCtrl,
+                decoration: const InputDecoration(labelText: 'Category name'),
+              ),
               const SizedBox(height: 10),
-              TextField(controller: descCtrl, decoration: const InputDecoration(labelText: 'Description')),
+              TextField(
+                controller: descCtrl,
+                decoration: const InputDecoration(labelText: 'Description'),
+              ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Get.back(result: true),
+            child: const Text('Save'),
+          ),
         ],
       ),
     );
@@ -912,7 +934,9 @@ class AdminResourcesController extends GetxController {
         description: descCtrl.text.trim(),
       ),
     ];
-    await _saveLibraryManagementSettings(categories: next.map((e) => e.toJson()).toList());
+    await _saveLibraryManagementSettings(
+      categories: next.map((e) => e.toJson()).toList(),
+    );
     libraryCategories.assignAll(next);
     AppToast.show('Library category saved.');
   }
@@ -920,7 +944,9 @@ class AdminResourcesController extends GetxController {
   Future<void> deleteLibraryCategory(AdminLibraryCategoryRecord item) async {
     if (!await _confirm('Delete ${item.name}?')) return;
     final next = libraryCategories.where((e) => e.id != item.id).toList();
-    await _saveLibraryManagementSettings(categories: next.map((e) => e.toJson()).toList());
+    await _saveLibraryManagementSettings(
+      categories: next.map((e) => e.toJson()).toList(),
+    );
     libraryCategories.assignAll(next);
     AppToast.show('Library category deleted.');
   }
@@ -928,17 +954,25 @@ class AdminResourcesController extends GetxController {
   Future<void> openLibraryCardDialog({
     AdminStudentLibraryCardRecord? existing,
   }) async {
-    String studentId = existing?.studentId ?? (studentOptions.isNotEmpty ? studentOptions.first['id']! : '');
-    final cardNoCtrl = TextEditingController(text: existing?.cardNo ?? 'LIB-${DateTime.now().millisecondsSinceEpoch}');
+    String studentId =
+        existing?.studentId ??
+        (studentOptions.isNotEmpty ? studentOptions.first['id']! : '');
+    final cardNoCtrl = TextEditingController(
+      text: existing?.cardNo ?? 'LIB-${DateTime.now().millisecondsSinceEpoch}',
+    );
     final issuedOnCtrl = TextEditingController(
-      text: existing?.issuedOn ?? DateTime.now().toIso8601String().substring(0, 10),
+      text:
+          existing?.issuedOn ??
+          DateTime.now().toIso8601String().substring(0, 10),
     );
     bool isActive = existing?.isActive ?? true;
     final ok = await Get.dialog<bool>(
       StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: Text(existing == null ? 'Issue Library Card' : 'Edit Library Card'),
+            title: Text(
+              existing == null ? 'Issue Library Card' : 'Edit Library Card',
+            ),
             content: SizedBox(
               width: 460,
               child: SingleChildScrollView(
@@ -946,17 +980,33 @@ class AdminResourcesController extends GetxController {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      initialValue: studentId.isEmpty ? null : studentId,
+                      value: studentId.isEmpty ? null : studentId,
                       decoration: const InputDecoration(labelText: 'Student'),
                       items: studentOptions
-                          .map((item) => DropdownMenuItem<String>(value: item['id'], child: Text(item['label'] ?? '')))
+                          .map(
+                            (item) => DropdownMenuItem<String>(
+                              value: item['id'],
+                              child: Text(item['label'] ?? ''),
+                            ),
+                          )
                           .toList(),
-                      onChanged: (value) => setState(() => studentId = value ?? ''),
+                      onChanged: (value) =>
+                          setState(() => studentId = value ?? ''),
                     ),
                     const SizedBox(height: 10),
-                    TextField(controller: cardNoCtrl, decoration: const InputDecoration(labelText: 'Card number')),
+                    TextField(
+                      controller: cardNoCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Card number',
+                      ),
+                    ),
                     const SizedBox(height: 10),
-                    TextField(controller: issuedOnCtrl, decoration: const InputDecoration(labelText: 'Issued on (YYYY-MM-DD)')),
+                    TextField(
+                      controller: issuedOnCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Issued on (YYYY-MM-DD)',
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
@@ -969,8 +1019,14 @@ class AdminResourcesController extends GetxController {
               ),
             ),
             actions: [
-              TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
-              FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+              TextButton(
+                onPressed: () => Get.back(result: false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Get.back(result: true),
+                child: const Text('Save'),
+              ),
             ],
           );
         },
@@ -981,7 +1037,11 @@ class AdminResourcesController extends GetxController {
       AppToast.show('Student and card number are required.');
       return;
     }
-    final studentLabel = studentOptions.firstWhereOrNull((e) => e['id'] == studentId)?['label'] ?? 'Student';
+    final studentLabel =
+        studentOptions.firstWhereOrNull(
+          (e) => e['id'] == studentId,
+        )?['label'] ??
+        'Student';
     final next = [
       ...libraryCards.where((e) => e.id != existing?.id),
       AdminStudentLibraryCardRecord(
@@ -993,7 +1053,9 @@ class AdminResourcesController extends GetxController {
         isActive: isActive,
       ),
     ];
-    await _saveLibraryManagementSettings(cards: next.map((e) => e.toJson()).toList());
+    await _saveLibraryManagementSettings(
+      cards: next.map((e) => e.toJson()).toList(),
+    );
     libraryCards.assignAll(next);
     AppToast.show('Library card saved.');
   }
@@ -1001,7 +1063,9 @@ class AdminResourcesController extends GetxController {
   Future<void> deleteLibraryCard(AdminStudentLibraryCardRecord item) async {
     if (!await _confirm('Delete card ${item.cardNo}?')) return;
     final next = libraryCards.where((e) => e.id != item.id).toList();
-    await _saveLibraryManagementSettings(cards: next.map((e) => e.toJson()).toList());
+    await _saveLibraryManagementSettings(
+      cards: next.map((e) => e.toJson()).toList(),
+    );
     libraryCards.assignAll(next);
     AppToast.show('Library card deleted.');
   }
@@ -1009,7 +1073,9 @@ class AdminResourcesController extends GetxController {
   Future<void> openLateFineRuleDialog() async {
     final current = lateFineRule.value;
     String type = current.type;
-    final amountCtrl = TextEditingController(text: current.amount.toStringAsFixed(2));
+    final amountCtrl = TextEditingController(
+      text: current.amount.toStringAsFixed(2),
+    );
     final graceCtrl = TextEditingController(text: current.graceDays.toString());
     final ok = await Get.dialog<bool>(
       StatefulBuilder(
@@ -1022,24 +1088,45 @@ class AdminResourcesController extends GetxController {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DropdownButtonFormField<String>(
-                    initialValue: type,
+                    value: type,
                     decoration: const InputDecoration(labelText: 'Fine type'),
                     items: const [
-                      DropdownMenuItem(value: 'per_day', child: Text('Per day fine')),
-                      DropdownMenuItem(value: 'fixed', child: Text('Fixed fine')),
+                      DropdownMenuItem(
+                        value: 'per_day',
+                        child: Text('Per day fine'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'fixed',
+                        child: Text('Fixed fine'),
+                      ),
                     ],
-                    onChanged: (value) => setState(() => type = value ?? 'per_day'),
+                    onChanged: (value) =>
+                        setState(() => type = value ?? 'per_day'),
                   ),
                   const SizedBox(height: 10),
-                  TextField(controller: amountCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Fine amount')),
+                  TextField(
+                    controller: amountCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: 'Fine amount'),
+                  ),
                   const SizedBox(height: 10),
-                  TextField(controller: graceCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Grace days')),
+                  TextField(
+                    controller: graceCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: 'Grace days'),
+                  ),
                 ],
               ),
             ),
             actions: [
-              TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
-              FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+              TextButton(
+                onPressed: () => Get.back(result: false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Get.back(result: true),
+                child: const Text('Save'),
+              ),
             ],
           );
         },
@@ -1052,7 +1139,11 @@ class AdminResourcesController extends GetxController {
       AppToast.show('Enter valid late fine values.');
       return;
     }
-    final next = AdminLateFineRule(type: type, amount: amount, graceDays: grace);
+    final next = AdminLateFineRule(
+      type: type,
+      amount: amount,
+      graceDays: grace,
+    );
     await _saveLibraryManagementSettings(lateFineRuleData: next.toJson());
     lateFineRule.value = next;
     AppToast.show('Late fine rule saved.');
@@ -1235,7 +1326,7 @@ class AdminResourcesController extends GetxController {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      initialValue: itemId,
+                      value: itemId,
                       decoration: const InputDecoration(labelText: 'Item'),
                       items: inventoryItems
                           .map(
@@ -1250,7 +1341,7 @@ class AdminResourcesController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      initialValue: type,
+                      value: type,
                       decoration: const InputDecoration(labelText: 'Type'),
                       items: const ['IN', 'OUT']
                           .map(
@@ -1340,7 +1431,9 @@ class AdminResourcesController extends GetxController {
     purchaseOrders.assignAll(
       (map['purchaseOrders'] as List<dynamic>? ?? const <dynamic>[])
           .whereType<Map>()
-          .map((e) => AdminPurchaseOrderRecord.fromJson(e.cast<String, dynamic>()))
+          .map(
+            (e) => AdminPurchaseOrderRecord.fromJson(e.cast<String, dynamic>()),
+          )
           .toList(),
     );
   }
@@ -1366,31 +1459,63 @@ class AdminResourcesController extends GetxController {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextField(controller: code, decoration: const InputDecoration(labelText: 'Asset code')),
-                  const SizedBox(height: 10),
-                  TextField(controller: name, decoration: const InputDecoration(labelText: 'Asset name')),
-                  const SizedBox(height: 10),
-                  TextField(controller: category, decoration: const InputDecoration(labelText: 'Category')),
-                  const SizedBox(height: 10),
-                  TextField(controller: assigned, decoration: const InputDecoration(labelText: 'Assigned to')),
-                  const SizedBox(height: 10),
-                  DropdownButtonFormField<String>(
-                    initialValue: status,
-                    decoration: const InputDecoration(labelText: 'Status'),
-                    items: const ['AVAILABLE', 'ASSIGNED', 'MAINTENANCE', 'RETIRED']
-                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                        .toList(),
-                    onChanged: (value) => setState(() => status = value ?? 'AVAILABLE'),
+                  TextField(
+                    controller: code,
+                    decoration: const InputDecoration(labelText: 'Asset code'),
                   ),
                   const SizedBox(height: 10),
-                  TextField(controller: date, decoration: const InputDecoration(labelText: 'Purchase date (YYYY-MM-DD)')),
+                  TextField(
+                    controller: name,
+                    decoration: const InputDecoration(labelText: 'Asset name'),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: category,
+                    decoration: const InputDecoration(labelText: 'Category'),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: assigned,
+                    decoration: const InputDecoration(labelText: 'Assigned to'),
+                  ),
+                  const SizedBox(height: 10),
+                  DropdownButtonFormField<String>(
+                    value: status,
+                    decoration: const InputDecoration(labelText: 'Status'),
+                    items:
+                        const [
+                              'AVAILABLE',
+                              'ASSIGNED',
+                              'MAINTENANCE',
+                              'RETIRED',
+                            ]
+                            .map(
+                              (e) => DropdownMenuItem(value: e, child: Text(e)),
+                            )
+                            .toList(),
+                    onChanged: (value) =>
+                        setState(() => status = value ?? 'AVAILABLE'),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: date,
+                    decoration: const InputDecoration(
+                      labelText: 'Purchase date (YYYY-MM-DD)',
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+            TextButton(
+              onPressed: () => Get.back(result: false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Get.back(result: true),
+              child: const Text('Save'),
+            ),
           ],
         ),
       ),
@@ -1440,15 +1565,32 @@ class AdminResourcesController extends GetxController {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextField(controller: name, decoration: const InputDecoration(labelText: 'Vendor name')),
+                  TextField(
+                    controller: name,
+                    decoration: const InputDecoration(labelText: 'Vendor name'),
+                  ),
                   const SizedBox(height: 10),
-                  TextField(controller: contact, decoration: const InputDecoration(labelText: 'Contact person')),
+                  TextField(
+                    controller: contact,
+                    decoration: const InputDecoration(
+                      labelText: 'Contact person',
+                    ),
+                  ),
                   const SizedBox(height: 10),
-                  TextField(controller: phone, decoration: const InputDecoration(labelText: 'Phone')),
+                  TextField(
+                    controller: phone,
+                    decoration: const InputDecoration(labelText: 'Phone'),
+                  ),
                   const SizedBox(height: 10),
-                  TextField(controller: email, decoration: const InputDecoration(labelText: 'Email')),
+                  TextField(
+                    controller: email,
+                    decoration: const InputDecoration(labelText: 'Email'),
+                  ),
                   const SizedBox(height: 10),
-                  TextField(controller: address, decoration: const InputDecoration(labelText: 'Address')),
+                  TextField(
+                    controller: address,
+                    decoration: const InputDecoration(labelText: 'Address'),
+                  ),
                   const SizedBox(height: 8),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
@@ -1461,8 +1603,14 @@ class AdminResourcesController extends GetxController {
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+            TextButton(
+              onPressed: () => Get.back(result: false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Get.back(result: true),
+              child: const Text('Save'),
+            ),
           ],
         ),
       ),
@@ -1495,7 +1643,9 @@ class AdminResourcesController extends GetxController {
     AppToast.show('Vendor deleted.');
   }
 
-  Future<void> openPurchaseOrderDialog({AdminPurchaseOrderRecord? existing}) async {
+  Future<void> openPurchaseOrderDialog({
+    AdminPurchaseOrderRecord? existing,
+  }) async {
     if (vendors.isEmpty) {
       AppToast.show('Add vendors first.');
       return;
@@ -1503,20 +1653,27 @@ class AdminResourcesController extends GetxController {
     String vendorId = existing?.vendorId.isNotEmpty == true
         ? existing!.vendorId
         : vendors.first.id;
-    final itemSummary = TextEditingController(text: existing?.itemSummary ?? '');
+    final itemSummary = TextEditingController(
+      text: existing?.itemSummary ?? '',
+    );
     final amount = TextEditingController(
       text: existing?.totalAmount.toStringAsFixed(2) ?? '',
     );
     final expected = TextEditingController(
       text: existing?.expectedDate.isNotEmpty == true
           ? existing!.expectedDate
-          : DateTime.now().add(const Duration(days: 7)).toIso8601String().substring(0, 10),
+          : DateTime.now()
+                .add(const Duration(days: 7))
+                .toIso8601String()
+                .substring(0, 10),
     );
     String status = existing?.status ?? 'DRAFT';
     final ok = await Get.dialog<bool>(
       StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: Text(existing == null ? 'Create Purchase Order' : 'Edit Purchase Order'),
+          title: Text(
+            existing == null ? 'Create Purchase Order' : 'Edit Purchase Order',
+          ),
           content: SizedBox(
             width: 500,
             child: SingleChildScrollView(
@@ -1524,35 +1681,73 @@ class AdminResourcesController extends GetxController {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DropdownButtonFormField<String>(
-                    initialValue: vendorId,
+                    value: vendorId,
                     decoration: const InputDecoration(labelText: 'Vendor'),
                     items: vendors
-                        .map((e) => DropdownMenuItem(value: e.id, child: Text(e.name)))
+                        .map(
+                          (e) => DropdownMenuItem(
+                            value: e.id,
+                            child: Text(e.name),
+                          ),
+                        )
                         .toList(),
-                    onChanged: (value) => setState(() => vendorId = value ?? ''),
+                    onChanged: (value) =>
+                        setState(() => vendorId = value ?? ''),
                   ),
                   const SizedBox(height: 10),
-                  TextField(controller: itemSummary, decoration: const InputDecoration(labelText: 'Item summary')),
+                  TextField(
+                    controller: itemSummary,
+                    decoration: const InputDecoration(
+                      labelText: 'Item summary',
+                    ),
+                  ),
                   const SizedBox(height: 10),
-                  TextField(controller: amount, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Total amount')),
+                  TextField(
+                    controller: amount,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Total amount',
+                    ),
+                  ),
                   const SizedBox(height: 10),
-                  TextField(controller: expected, decoration: const InputDecoration(labelText: 'Expected date (YYYY-MM-DD)')),
+                  TextField(
+                    controller: expected,
+                    decoration: const InputDecoration(
+                      labelText: 'Expected date (YYYY-MM-DD)',
+                    ),
+                  ),
                   const SizedBox(height: 10),
                   DropdownButtonFormField<String>(
-                    initialValue: status,
+                    value: status,
                     decoration: const InputDecoration(labelText: 'Status'),
-                    items: const ['DRAFT', 'APPROVED', 'ORDERED', 'RECEIVED', 'CANCELLED']
-                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                        .toList(),
-                    onChanged: (value) => setState(() => status = value ?? 'DRAFT'),
+                    items:
+                        const [
+                              'DRAFT',
+                              'APPROVED',
+                              'ORDERED',
+                              'RECEIVED',
+                              'CANCELLED',
+                            ]
+                            .map(
+                              (e) => DropdownMenuItem(value: e, child: Text(e)),
+                            )
+                            .toList(),
+                    onChanged: (value) =>
+                        setState(() => status = value ?? 'DRAFT'),
                   ),
                 ],
               ),
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save')),
+            TextButton(
+              onPressed: () => Get.back(result: false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Get.back(result: true),
+              child: const Text('Save'),
+            ),
           ],
         ),
       ),
@@ -1568,7 +1763,8 @@ class AdminResourcesController extends GetxController {
       ...purchaseOrders.where((e) => e.id != existing?.id),
       AdminPurchaseOrderRecord(
         id: existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        poNumber: existing?.poNumber ??
+        poNumber:
+            existing?.poNumber ??
             'PO-${DateTime.now().millisecondsSinceEpoch.toString().substring(6)}',
         vendorId: vendorId,
         vendorName: vendorName,

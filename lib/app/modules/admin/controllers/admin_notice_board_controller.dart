@@ -40,12 +40,12 @@ class StaffChatThread {
   final String updatedAt;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'staffName': staffName,
-        'topic': topic,
-        'lastMessage': lastMessage,
-        'updatedAt': updatedAt,
-      };
+    'id': id,
+    'staffName': staffName,
+    'topic': topic,
+    'lastMessage': lastMessage,
+    'updatedAt': updatedAt,
+  };
 
   factory StaffChatThread.fromJson(Map<String, dynamic> json) {
     return StaffChatThread(
@@ -78,14 +78,14 @@ class ChannelCampaignRecord {
   final String createdAt;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'message': message,
-        'channel': channel,
-        'audience': audience,
-        'status': status,
-        'createdAt': createdAt,
-      };
+    'id': id,
+    'title': title,
+    'message': message,
+    'channel': channel,
+    'audience': audience,
+    'status': status,
+    'createdAt': createdAt,
+  };
 
   factory ChannelCampaignRecord.fromJson(Map<String, dynamic> json) {
     return ChannelCampaignRecord(
@@ -118,13 +118,13 @@ class ParentCommunicationRecord {
   final String updatedAt;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'parentName': parentName,
-        'subject': subject,
-        'message': message,
-        'status': status,
-        'updatedAt': updatedAt,
-      };
+    'id': id,
+    'parentName': parentName,
+    'subject': subject,
+    'message': message,
+    'status': status,
+    'updatedAt': updatedAt,
+  };
 
   factory ParentCommunicationRecord.fromJson(Map<String, dynamic> json) {
     return ParentCommunicationRecord(
@@ -180,13 +180,15 @@ class AdminNoticeBoardController extends GetxController {
               title: item['title']?.toString() ?? '',
               description: item['content']?.toString() ?? '',
               status: item['status']?.toString() ?? 'DRAFT',
-              time: item['updatedAt']?.toString() ?? item['createdAt']?.toString() ?? '',
-              audiences:
-                  (item['audience']?.toString() ?? '')
-                      .split(',')
-                      .map((e) => e.trim())
-                      .where((e) => e.isNotEmpty)
-                      .toList(),
+              time:
+                  item['updatedAt']?.toString() ??
+                  item['createdAt']?.toString() ??
+                  '',
+              audiences: (item['audience']?.toString() ?? '')
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
             ),
           )
           .toList();
@@ -219,19 +221,25 @@ class AdminNoticeBoardController extends GetxController {
       smsCampaigns.assignAll(
         (map['smsCampaigns'] as List<dynamic>? ?? const <dynamic>[])
             .whereType<Map>()
-            .map((e) => ChannelCampaignRecord.fromJson(e.cast<String, dynamic>()))
+            .map(
+              (e) => ChannelCampaignRecord.fromJson(e.cast<String, dynamic>()),
+            )
             .toList(),
       );
       emailCampaigns.assignAll(
         (map['emailCampaigns'] as List<dynamic>? ?? const <dynamic>[])
             .whereType<Map>()
-            .map((e) => ChannelCampaignRecord.fromJson(e.cast<String, dynamic>()))
+            .map(
+              (e) => ChannelCampaignRecord.fromJson(e.cast<String, dynamic>()),
+            )
             .toList(),
       );
       appNotifications.assignAll(
         (map['appNotifications'] as List<dynamic>? ?? const <dynamic>[])
             .whereType<Map>()
-            .map((e) => ChannelCampaignRecord.fromJson(e.cast<String, dynamic>()))
+            .map(
+              (e) => ChannelCampaignRecord.fromJson(e.cast<String, dynamic>()),
+            )
             .toList(),
       );
       parentCommunications.assignAll(
@@ -303,7 +311,9 @@ class AdminNoticeBoardController extends GetxController {
     final message = TextEditingController(text: existing?.lastMessage ?? '');
     final ok = await Get.dialog<bool>(
       AlertDialog(
-        title: Text(existing == null ? 'Start Staff Chat' : 'Update Staff Chat'),
+        title: Text(
+          existing == null ? 'Start Staff Chat' : 'Update Staff Chat',
+        ),
         content: SizedBox(
           width: 460,
           child: Column(
@@ -377,9 +387,11 @@ class AdminNoticeBoardController extends GetxController {
     final ok = await Get.dialog<bool>(
       StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: Text(existing == null
-              ? 'Create $channel Campaign'
-              : 'Update $channel Campaign'),
+          title: Text(
+            existing == null
+                ? 'Create $channel Campaign'
+                : 'Update $channel Campaign',
+          ),
           content: SizedBox(
             width: 480,
             child: SingleChildScrollView(
@@ -404,7 +416,7 @@ class AdminNoticeBoardController extends GetxController {
                   ),
                   const SizedBox(height: 10),
                   DropdownButtonFormField<String>(
-                    initialValue: status,
+                    value: status,
                     decoration: const InputDecoration(labelText: 'Status'),
                     items: const ['DRAFT', 'SCHEDULED', 'SENT']
                         .map(
@@ -434,7 +446,9 @@ class AdminNoticeBoardController extends GetxController {
         ),
       ),
     );
-    if (ok != true || title.text.trim().isEmpty || message.text.trim().isEmpty) {
+    if (ok != true ||
+        title.text.trim().isEmpty ||
+        message.text.trim().isEmpty) {
       if (ok == true) AppToast.show('Title and message are required.');
       return;
     }
@@ -523,9 +537,11 @@ class AdminNoticeBoardController extends GetxController {
     final ok = await Get.dialog<bool>(
       StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: Text(existing == null
-              ? 'New Parent Communication'
-              : 'Update Parent Communication'),
+          title: Text(
+            existing == null
+                ? 'New Parent Communication'
+                : 'Update Parent Communication',
+          ),
           content: SizedBox(
             width: 480,
             child: SingleChildScrollView(
@@ -550,7 +566,7 @@ class AdminNoticeBoardController extends GetxController {
                   ),
                   const SizedBox(height: 10),
                   DropdownButtonFormField<String>(
-                    initialValue: status,
+                    value: status,
                     decoration: const InputDecoration(labelText: 'Status'),
                     items: const ['OPEN', 'REPLIED', 'CLOSED']
                         .map(
@@ -580,7 +596,9 @@ class AdminNoticeBoardController extends GetxController {
         ),
       ),
     );
-    if (ok != true || parent.text.trim().isEmpty || subject.text.trim().isEmpty) {
+    if (ok != true ||
+        parent.text.trim().isEmpty ||
+        subject.text.trim().isEmpty) {
       if (ok == true) AppToast.show('Parent name and subject are required.');
       return;
     }
@@ -606,8 +624,9 @@ class AdminNoticeBoardController extends GetxController {
         'smsCampaigns': smsCampaigns.map((e) => e.toJson()).toList(),
         'emailCampaigns': emailCampaigns.map((e) => e.toJson()).toList(),
         'appNotifications': appNotifications.map((e) => e.toJson()).toList(),
-        'parentCommunications':
-            parentCommunications.map((e) => e.toJson()).toList(),
+        'parentCommunications': parentCommunications
+            .map((e) => e.toJson())
+            .toList(),
       },
     });
   }
@@ -709,7 +728,8 @@ class AdminNoticeBoardController extends GetxController {
     );
 
     if (ok != true) return;
-    if (titleController.text.trim().isEmpty || contentController.text.trim().isEmpty) {
+    if (titleController.text.trim().isEmpty ||
+        contentController.text.trim().isEmpty) {
       AppToast.show('Title and content are required.');
       return;
     }
@@ -740,8 +760,14 @@ class AdminNoticeBoardController extends GetxController {
         title: Text(notice.title),
         content: const Text('Select action'),
         actions: [
-          TextButton(onPressed: () => Get.back(result: 'close'), child: const Text('Close')),
-          FilledButton(onPressed: () => Get.back(result: 'send'), child: const Text('Send Now')),
+          TextButton(
+            onPressed: () => Get.back(result: 'close'),
+            child: const Text('Close'),
+          ),
+          FilledButton(
+            onPressed: () => Get.back(result: 'send'),
+            child: const Text('Send Now'),
+          ),
         ],
       ),
     );
