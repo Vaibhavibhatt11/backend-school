@@ -40,6 +40,10 @@ class _AdminReportDetailViewState extends State<AdminReportDetailView> {
         return controller.loadStaffDetail(force: true);
       case AdminReportKind.transport:
         return controller.loadTransportDetail(force: true);
+      case AdminReportKind.productivity:
+        return controller.loadProductivityDetail(force: true);
+      case AdminReportKind.progress:
+        return controller.loadProgressDetail(force: true);
       case AdminReportKind.all:
         return controller.loadAllDetail(force: true);
     }
@@ -49,6 +53,7 @@ class _AdminReportDetailViewState extends State<AdminReportDetailView> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
+      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
       appBar: AppBar(
         title: Text(widget.kind.title),
         actions: [
@@ -71,15 +76,14 @@ class _AdminReportDetailViewState extends State<AdminReportDetailView> {
           AdminReportKind.academic => controller.isAcademicDetailLoading.value,
           AdminReportKind.staff => controller.isStaffDetailLoading.value,
           AdminReportKind.transport => controller.isTransportDetailLoading.value,
+          AdminReportKind.productivity => controller.isProductivityDetailLoading.value,
+          AdminReportKind.progress => controller.isProgressDetailLoading.value,
           AdminReportKind.all => controller.isAllDetailLoading.value,
         };
         final error = switch (widget.kind) {
           AdminReportKind.attendance => controller.attendanceDetailError.value,
           AdminReportKind.fees => controller.feesDetailError.value,
-          AdminReportKind.academic => '',
-          AdminReportKind.staff => '',
-          AdminReportKind.transport => '',
-          AdminReportKind.all => '',
+          _ => '',
         };
         final payload = switch (widget.kind) {
           AdminReportKind.attendance => controller.attendanceDetail.value,
@@ -87,6 +91,8 @@ class _AdminReportDetailViewState extends State<AdminReportDetailView> {
           AdminReportKind.academic => controller.academicDetail.value,
           AdminReportKind.staff => controller.staffDetail.value,
           AdminReportKind.transport => controller.transportDetail.value,
+          AdminReportKind.productivity => controller.productivityDetail.value,
+          AdminReportKind.progress => controller.progressDetail.value,
           AdminReportKind.all => controller.allDetail.value,
         };
 
@@ -100,106 +106,202 @@ class _AdminReportDetailViewState extends State<AdminReportDetailView> {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16),
             children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: isDark ? AppColors.surfaceDark : Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.kind.title,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      payload?.subtitle ?? '${controller.selectedRange.value} • ${controller.selectedClass.value}',
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                    if (payload != null) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        'Generated ${_formatDate(payload.generatedAt)}',
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
+              _buildReportHeader(payload, isDark),
               if (error.isNotEmpty && payload == null) ...[
                 const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.red.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.red.shade100),
-                  ),
-                  child: Text(
-                    error,
-                    style: TextStyle(color: Colors.red.shade800),
-                  ),
-                ),
+                _buildErrorCard(error),
               ],
               if (payload != null) ...[
-                const SizedBox(height: 16),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: payload.metrics
-                      .map(
-                        (metric) => _MetricCard(metric: metric, isDark: isDark),
-                      )
-                      .toList(),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => controller.onPDFExport(widget.kind),
-                        icon: const Icon(Icons.picture_as_pdf_outlined),
-                        label: const Text('PDF Export'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => controller.onExcelExport(widget.kind),
-                        icon: const Icon(Icons.table_view_outlined),
-                        label: const Text('Excel Export'),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
+                _buildMetricsGrid(payload, isDark),
+                const SizedBox(height: 24),
+                _buildActionButtons(isDark),
+                const SizedBox(height: 24),
                 if (!payload.hasContent)
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: isDark ? AppColors.surfaceDark : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade200),
+                  _buildEmptyState(payload, isDark)
+                else
+                  ...payload.sections.map(
+                    (section) => Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: _SectionTable(section: section, isDark: isDark),
                     ),
-                    child: Text(payload.emptyMessage),
                   ),
-                ...payload.sections.map(
-                  (section) => Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: _SectionTable(section: section, isDark: isDark),
-                  ),
-                ),
+                const SizedBox(height: 60),
               ],
             ],
           ),
         );
       }),
+    );
+  }
+
+  Widget _buildReportHeader(AdminReportPayload? payload, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark 
+              ? [AppColors.surfaceDark, AppColors.surfaceDark.withValues(alpha: 0.8)]
+              : [Colors.white, Colors.white.withValues(alpha: 0.9)],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.analytics_rounded, color: AppColors.primary),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.kind.title,
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
+                    ),
+                    Text(
+                      payload?.subtitle ?? '${controller.selectedRange.value} • ${controller.selectedClass.value}',
+                      style: TextStyle(color: isDark ? AppColors.textSecondaryDark : Colors.grey[600], fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (payload != null) ...[
+            const Divider(height: 32),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'GENERATED AT',
+                  style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1.1, color: Colors.grey[500]),
+                ),
+                Text(
+                  _formatDate(payload.generatedAt),
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetricsGrid(AdminReportPayload payload, bool isDark) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: payload.metrics.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 1.4,
+      ),
+      itemBuilder: (context, index) => _MetricCard(metric: payload.metrics[index], isDark: isDark),
+    );
+  }
+
+  Widget _buildActionButtons(bool isDark) {
+    return Row(
+      children: [
+        Expanded(
+          child: _actionButton(
+            label: 'PDF Report',
+            icon: Icons.picture_as_pdf_rounded,
+            onTap: () => controller.onPDFExport(widget.kind),
+            color: AppColors.primary,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _actionButton(
+            label: 'Excel Export',
+            icon: Icons.table_chart_rounded,
+            onTap: () => controller.onExcelExport(widget.kind),
+            color: Colors.green,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _actionButton({
+    required String label,
+    required IconData icon,
+    required VoidCallback onTap,
+    required Color color,
+  }) {
+    return OutlinedButton.icon(
+      onPressed: onTap,
+      icon: Icon(icon, size: 18, color: color),
+      label: Text(label, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        side: BorderSide(color: color.withValues(alpha: 0.5)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
+  Widget _buildErrorCard(String error) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.red.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline_rounded, color: Colors.red),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(error, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w500)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(AdminReportPayload payload, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.query_stats_rounded, size: 48, color: Colors.grey[400]),
+          const SizedBox(height: 16),
+          Text(
+            payload.emptyMessage,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
     );
   }
 
@@ -223,39 +325,42 @@ class _MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 164,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.surfaceDark : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            metric.label.toUpperCase(),
+            style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.grey[500], letterSpacing: 0.8),
+          ),
+          const Spacer(),
+          Text(
+            metric.value,
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.primary),
+          ),
+          if (metric.helper != null && metric.helper!.isNotEmpty) ...[
+            const SizedBox(height: 4),
             Text(
-              metric.label,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
+              metric.helper!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 10, color: isDark ? Colors.grey[400] : Colors.grey[600]),
             ),
-            const SizedBox(height: 6),
-            Text(
-              metric.value,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            if (metric.helper != null && metric.helper!.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(
-                metric.helper!,
-                style: const TextStyle(fontSize: 11, color: Colors.grey),
-              ),
-            ],
           ],
-        ),
+        ],
       ),
     );
   }
@@ -273,40 +378,58 @@ class _SectionTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            section.title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            child: Text(
+              section.title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
             ),
           ),
-          const SizedBox(height: 10),
+          const Divider(),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: DataTable(
+              headingRowColor: WidgetStateProperty.all(AppColors.primary.withValues(alpha: 0.03)),
               columns: section.columns
-                  .map((column) => DataColumn(label: Text(column)))
+                  .map((column) => DataColumn(
+                    label: Text(
+                      column.toUpperCase(),
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 0.5),
+                    ),
+                  ))
                   .toList(),
               rows: section.rows
                   .map(
                     (row) => DataRow(
                       cells: row
-                          .map((value) => DataCell(Text(value.isEmpty ? '-' : value)))
+                          .map((value) => DataCell(
+                            Text(
+                              value.isEmpty ? '-' : value,
+                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                            ),
+                          ))
                           .toList(),
                     ),
                   )
                   .toList(),
             ),
           ),
+          const SizedBox(height: 8),
         ],
       ),
     );

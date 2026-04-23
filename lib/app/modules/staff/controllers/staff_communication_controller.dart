@@ -52,10 +52,23 @@ class StaffCommunicationController extends GetxController {
   Future<void> loadCommunication() async {
     isLoading.value = true;
     errorMessage.value = '';
+    Object? summaryError;
     try {
-      await _loadCommunicationSummary();
+      try {
+        await _loadCommunicationSummary();
+      } catch (e) {
+        summaryError = e;
+      }
       await loadAnnouncements(showErrors: false);
       await loadNotifications(showErrors: false);
+      if (summaryError != null &&
+          announcementItems.isEmpty &&
+          notificationItems.isEmpty &&
+          conversationThreads.isEmpty &&
+          meetingSchedules.isEmpty) {
+        errorMessage.value = dioOrApiErrorMessage(summaryError);
+        AppToast.show(errorMessage.value);
+      }
     } catch (e) {
       errorMessage.value = dioOrApiErrorMessage(e);
       AppToast.show(errorMessage.value);
@@ -335,21 +348,12 @@ class StaffCommunicationController extends GetxController {
       meetings.assignAll(
         rawMeetings.whereType<Map>().map((e) {
           final item = e.cast<String, dynamic>();
-          final title = _firstNonEmptyString([item['title'], 'Meeting']);
-          final timeText = _firstNonEmptyString([item['time']]);
-          nextMeetings.add(
-            StaffMeetingSchedule(
-              id: item['id']?.toString() ?? 'meeting-${nextMeetings.length}',
-              parentName: title,
-              studentName: '',
-              purpose: title,
-              dateTime: _parseDate(item['scheduledAt'] ?? item['time']),
-              mode: 'Saved note',
-              status: _firstNonEmptyString([item['status'], 'Saved']),
-              note: timeText,
-            ),
-          );
-          return {'title': title, 'time': timeText};
+          final parsed = _parseMeetingRecord(item, nextMeetings.length);
+          nextMeetings.add(parsed);
+          return {
+            'title': parsed.title,
+            'time': _formatMeetingSummary(parsed),
+          };
         }).toList(),
       );
     } else {
@@ -688,7 +692,12 @@ class StaffCommunicationController extends GetxController {
         location: location,
         note: note,
       );
-      await _staffService.saveMeetingNote(title: title, note: noteBody);
+      try {
+        await _staffService.saveMeetingNote(title: title, note: noteBody);
+      } catch (_) {
+        // Keep the meeting scheduled locally even if the note endpoint
+        // is temporarily unavailable.
+      }
 
       final meeting = StaffMeetingSchedule(
         id: 'local-meeting-${DateTime.now().millisecondsSinceEpoch}',
@@ -972,6 +981,63 @@ class StaffCommunicationController extends GetxController {
     return '${_formatDate(meeting.dateTime)} | ${_formatTime(meeting.dateTime)}';
   }
 
+  StaffMeetingSchedule _parseMeetingRecord(
+    Map<String, dynamic> item,
+    int index,
+  ) {
+    final title = _firstNonEmptyString([item['title'], 'Meeting']);
+    final noteText = _firstNonEmptyString([
+      item['note'],
+      item['body'],
+      item['message'],
+      item['time'],
+    ]);
+    final lines = noteText
+        .split('\n')
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty)
+        .toList(growable: false);
+    final values = <String, String>{};
+    for (final line in lines) {
+      final divider = line.indexOf(':');
+      if (divider <= 0) continue;
+      final key = line.substring(0, divider).trim().toLowerCase();
+      final value = line.substring(divider + 1).trim();
+      if (key.isNotEmpty && value.isNotEmpty) {
+        values[key] = value;
+      }
+    }
+    final purpose = values['purpose'];
+    final parentName = values['parent'];
+    final studentName = values['student'];
+    final dateText = values['date'];
+    final timeOnly = values['time'];
+    final note = values['note'] ?? noteText;
+    final mode = values['mode'];
+    final location = values['location'];
+
+    DateTime scheduledAt = _parseDate(item['scheduledAt'] ?? item['time']);
+    if (dateText != null && dateText.isNotEmpty) {
+      final rebuilt = _parseMeetingDateTime(dateText, timeOnly);
+      if (rebuilt != null) {
+        scheduledAt = rebuilt;
+      }
+    }
+
+    final fallbackSummary = _firstNonEmptyString([item['time'], noteText]);
+    return StaffMeetingSchedule(
+      id: item['id']?.toString() ?? 'meeting-$index',
+      parentName: parentName ?? title,
+      studentName: studentName == 'N/A' ? '' : (studentName ?? ''),
+      purpose: purpose ?? title,
+      dateTime: scheduledAt,
+      mode: mode ?? 'Saved note',
+      status: _firstNonEmptyString([item['status'], 'Saved']),
+      note: note.isEmpty ? fallbackSummary : note,
+      location: location ?? '',
+    );
+  }
+
   String _firstNonEmptyString(List<dynamic> values) {
     for (final value in values) {
       if (value == null) continue;
@@ -986,6 +1052,74 @@ class StaffCommunicationController extends GetxController {
     final text = value.toString().trim();
     if (text.isEmpty) return DateTime.now();
     return DateTime.tryParse(text)?.toLocal() ?? DateTime.now();
+  }
+
+  DateTime? _parseMeetingDateTime(String dateText, String? timeText) {
+    final parsedDate = _parseFormattedDate(dateText);
+    if (parsedDate == null) return null;
+    final parsedTime = _parseFormattedTime(timeText);
+    if (parsedTime == null) {
+      return parsedDate;
+    }
+    return DateTime(
+      parsedDate.year,
+      parsedDate.month,
+      parsedDate.day,
+      parsedTime.hour,
+      parsedTime.minute,
+    );
+  }
+
+  DateTime? _parseFormattedDate(String value) {
+    final raw = value.trim();
+    if (raw.isEmpty) return null;
+    final months = <String, int>{
+      'jan': 1,
+      'feb': 2,
+      'mar': 3,
+      'apr': 4,
+      'may': 5,
+      'jun': 6,
+      'jul': 7,
+      'aug': 8,
+      'sep': 9,
+      'oct': 10,
+      'nov': 11,
+      'dec': 12,
+    };
+    final parts = raw.split(RegExp(r'\s+'));
+    if (parts.length < 3) {
+      return DateTime.tryParse(raw)?.toLocal();
+    }
+    final day = int.tryParse(parts[0]);
+    final monthToken = parts[1].length >= 3 ? parts[1].substring(0, 3) : parts[1];
+    final month = months[monthToken.toLowerCase()];
+    final year = int.tryParse(parts[2]);
+    if (day == null || month == null || year == null) {
+      return DateTime.tryParse(raw)?.toLocal();
+    }
+    return DateTime(year, month, day);
+  }
+
+  DateTime? _parseFormattedTime(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+    final raw = value.trim().toUpperCase();
+    final match = RegExp(r'^(\d{1,2}):(\d{2})\s*(AM|PM)$').firstMatch(raw);
+    if (match == null) {
+      return DateTime.tryParse(value)?.toLocal();
+    }
+    final hourValue = int.tryParse(match.group(1) ?? '');
+    final minute = int.tryParse(match.group(2) ?? '');
+    final suffix = match.group(3);
+    if (hourValue == null || minute == null || suffix == null) {
+      return null;
+    }
+    final normalizedHour = suffix == 'PM'
+        ? (hourValue % 12) + 12
+        : (hourValue % 12);
+    return DateTime(2000, 1, 1, normalizedHour, minute);
   }
 
   String _formatDate(DateTime value) {

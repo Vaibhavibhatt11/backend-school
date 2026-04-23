@@ -74,7 +74,7 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
                     final it = controller.todayScheduleItems[i];
                     final subj = it['subject'] ?? '';
                     final cls = it['classLabel'] ?? '';
-                    final line = cls.isNotEmpty ? '$subj · $cls' : subj;
+                    final line = cls.isNotEmpty ? '$subj - $cls' : subj;
                     return _scheduleChip(it['time'] ?? '', line, isDark);
                   },
                 ),
@@ -158,7 +158,7 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
             children: [
               _quickAction('Dashboard', Icons.dashboard_rounded, Colors.green, 'dashboard'),
               _quickAction('Profile', Icons.badge_rounded, Colors.blue, 'profile'),
-              _quickAction('Communication', Icons.support_agent_rounded, Colors.orange, 'communication'),
+              _quickAction('Communication', Icons.support_agent_rounded, Colors.orange, 'communication_ai'),
               _quickAction('Reports', Icons.bar_chart_rounded, Colors.purple, 'reports'),
             ],
           ),
@@ -520,4 +520,3 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
     );
   }
 }
-

@@ -8,50 +8,55 @@ class AdminOperationsView extends GetView<AdminOperationsController> {
 
   @override
   Widget build(BuildContext context) {
-    final args = (Get.arguments as Map?)?.cast<String, dynamic>() ?? const {};
-    final initialTab = _opsInitialTab(args);
-    final scope = (args['scope']?.toString() ?? '').toLowerCase();
-    final isHostelOnly = scope == 'hostel';
-    final isEventsOnly = scope == 'events';
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final tabCount = (isHostelOnly || isEventsOnly) ? 1 : 2;
-    final mappedInitialIndex = tabCount == 1 ? 0 : initialTab;
 
-    return DefaultTabController(
-      length: tabCount,
-      initialIndex: mappedInitialIndex,
-      child: Scaffold(
-        backgroundColor: isDark
-            ? AppColors.backgroundDark
-            : AppColors.backgroundLight,
-        appBar: AppBar(
-          title: const Text('Operations'),
-          backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
-          bottom: tabCount == 1
-              ? null
-              : TabBar(
-                  onTap: (value) => controller.changeTab(value),
-                  tabs: const [
-                    Tab(text: 'Hostel'),
-                    Tab(text: 'Events'),
-                  ],
-                ),
-          actions: [
-            IconButton(
-              onPressed: controller.refreshCurrentTab,
-              icon: const Icon(Icons.refresh_rounded),
+    return Scaffold(
+      backgroundColor: isDark
+          ? AppColors.backgroundDark
+          : AppColors.backgroundLight,
+      appBar: AppBar(
+        title: const Text('Operations'),
+        backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
+        actions: [
+          IconButton(
+            onPressed: controller.refreshCurrentTab,
+            icon: const Icon(Icons.refresh_rounded),
+          ),
+        ],
+      ),
+      body: Obx(() {
+        return IndexedStack(
+          index: controller.currentTab.value,
+          children: [
+            _HostelTab(controller: controller),
+            _EventsTab(controller: controller),
+            _TransportTab(controller: controller),
+            _InventoryTab(controller: controller),
+          ],
+        );
+      }),
+      bottomNavigationBar: Obx(
+        () => BottomNavigationBar(
+          currentIndex: controller.currentTab.value,
+          onTap: controller.changeTab,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.hotel_rounded),
+              label: 'Hostel',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.event_rounded),
+              label: 'Events',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.directions_bus_rounded),
+              label: 'Transport',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.inventory_2_rounded),
+              label: 'Inventory',
             ),
           ],
-        ),
-        body: TabBarView(
-          children: isHostelOnly
-              ? [_HostelTab(controller: controller)]
-              : isEventsOnly
-              ? [_EventsTab(controller: controller)]
-              : [
-                  _HostelTab(controller: controller),
-                  _EventsTab(controller: controller),
-                ],
         ),
       ),
     );
@@ -67,7 +72,7 @@ class _HostelTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return DefaultTabController(
-      length: 4,
+      length: 5,
       child: Column(
         children: [
           Container(
@@ -96,6 +101,7 @@ class _HostelTab extends StatelessWidget {
                 Tab(text: 'Hostel Attendance'),
                 Tab(text: 'Visitor Logs'),
                 Tab(text: 'Hostel Fee'),
+                Tab(text: 'Complaints'),
               ],
             ),
           ),
@@ -122,6 +128,7 @@ class _HostelTab extends StatelessWidget {
                   _HostelAttendanceTab(controller: controller),
                   _HostelVisitorsTab(controller: controller),
                   _HostelFeesTab(controller: controller),
+                  _HostelComplaintsTab(controller: controller),
                 ],
               );
             }),
@@ -408,6 +415,81 @@ class _HostelFeesTab extends StatelessWidget {
   }
 }
 
+class _HostelComplaintsTab extends StatelessWidget {
+  const _HostelComplaintsTab({required this.controller});
+  final AdminOperationsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final openCount = controller.hostelComplaints
+        .where((item) => item.status == 'OPEN' || item.status == 'IN_PROGRESS')
+        .length;
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _OpsChip(
+              label: 'Complaints',
+              value: '${controller.hostelComplaints.length}',
+            ),
+            _OpsChip(label: 'Open', value: '$openCount'),
+            FilledButton.icon(
+              onPressed: () => controller.openHostelComplaintDialog(),
+              icon: const Icon(Icons.report_problem_rounded),
+              label: const Text('Add Complaint'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        if (controller.hostelComplaints.isEmpty)
+          const _OpsCard(
+            title: 'No complaints',
+            subtitle: '',
+            details: ['Create and track hostel complaints lifecycle.'],
+            actions: [],
+          )
+        else
+          ...controller.hostelComplaints.map(
+            (item) => _OpsCard(
+              title: item.studentLabel,
+              subtitle: '${item.category} | ${item.status}',
+              details: [
+                item.description,
+                'Created: ${item.createdAt}',
+                if (item.resolutionNote.isNotEmpty)
+                  'Resolution: ${item.resolutionNote}',
+              ],
+              actions: [
+                OutlinedButton(
+                  onPressed: () =>
+                      controller.openHostelComplaintDialog(existing: item),
+                  child: const Text('Edit'),
+                ),
+                OutlinedButton(
+                  onPressed: () =>
+                      controller.setHostelComplaintStatus(item, 'IN_PROGRESS'),
+                  child: const Text('In Progress'),
+                ),
+                OutlinedButton(
+                  onPressed: () =>
+                      controller.setHostelComplaintStatus(item, 'RESOLVED'),
+                  child: const Text('Resolve'),
+                ),
+                FilledButton.tonal(
+                  onPressed: () => controller.deleteHostelComplaint(item),
+                  child: const Text('Delete'),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 class _EventsTab extends StatelessWidget {
   const _EventsTab({required this.controller});
 
@@ -543,7 +625,7 @@ class _EventRegistrationsTab extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       children: [
         DropdownButtonFormField<String>(
-          value: selected.isEmpty ? null : selected,
+          initialValue: selected.isEmpty ? null : selected,
           decoration: const InputDecoration(labelText: 'Select event'),
           items: controller.events
               .map(
@@ -678,7 +760,7 @@ class _EventGalleryTab extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       children: [
         DropdownButtonFormField<String>(
-          value: selected.isEmpty ? null : selected,
+          initialValue: selected.isEmpty ? null : selected,
           decoration: const InputDecoration(labelText: 'Select event'),
           items: controller.events
               .map(
@@ -878,14 +960,397 @@ class _OpsError extends StatelessWidget {
   }
 }
 
+class _TransportTab extends StatelessWidget {
+  const _TransportTab({required this.controller});
+
+  final AdminOperationsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return DefaultTabController(
+      length: 3,
+      child: Column(
+        children: [
+          Container(
+            margin: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.surfaceDark : Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isDark ? AppColors.borderDark : AppColors.borderLight,
+              ),
+            ),
+            child: TabBar(
+              indicator: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              dividerColor: Colors.transparent,
+              labelColor: AppColors.primary,
+              unselectedLabelColor: isDark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight,
+              tabs: const [
+                Tab(text: 'Routes'),
+                Tab(text: 'Drivers'),
+                Tab(text: 'Allocations'),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading.value &&
+                  controller.transportRoutes.isEmpty &&
+                  controller.transportDrivers.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return TabBarView(
+                children: [
+                  _TransportRoutesTab(controller: controller),
+                  _TransportDriversTab(controller: controller),
+                  _TransportAllocationsTab(controller: controller),
+                ],
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TransportRoutesTab extends StatelessWidget {
+  const _TransportRoutesTab({required this.controller});
+  final AdminOperationsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Row(
+          children: [
+            const _OpsTitle(title: 'Routes'),
+            const Spacer(),
+            FilledButton.icon(
+              onPressed: () => controller.openTransportRouteDialog(),
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Add Route'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        if (controller.transportRoutes.isEmpty)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: Text('No routes found.'),
+            ),
+          )
+        else
+          ...controller.transportRoutes.map(
+            (item) => _OpsCard(
+              title: item.name,
+              subtitle: 'Code: ${item.routeCode}',
+              details: ['Status: ${item.isActive ? 'Active' : 'Inactive'}'],
+              actions: [
+                OutlinedButton.icon(
+                  onPressed: () =>
+                      controller.openTransportRouteDialog(existing: item),
+                  icon: const Icon(Icons.edit_rounded, size: 18),
+                  label: const Text('Edit'),
+                ),
+                IconButton(
+                  onPressed: () => controller.deleteTransportRoute(item),
+                  icon: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: Colors.red,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _TransportDriversTab extends StatelessWidget {
+  const _TransportDriversTab({required this.controller});
+  final AdminOperationsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Row(
+          children: [
+            const _OpsTitle(title: 'Drivers'),
+            const Spacer(),
+            FilledButton.icon(
+              onPressed: () => controller.openTransportDriverDialog(),
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Add Driver'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        if (controller.transportDrivers.isEmpty)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: Text('No drivers found.'),
+            ),
+          )
+        else
+          ...controller.transportDrivers.map(
+            (item) => _OpsCard(
+              title: item.fullName,
+              subtitle: 'Phone: ${item.phone}',
+              details: [
+                'License: ${item.licenseNo}',
+                if (item.routeName.isNotEmpty) 'Route: ${item.routeName}',
+                'Status: ${item.isActive ? 'Active' : 'Inactive'}',
+              ],
+              actions: [
+                OutlinedButton.icon(
+                  onPressed: () =>
+                      controller.openTransportDriverDialog(existing: item),
+                  icon: const Icon(Icons.edit_rounded, size: 18),
+                  label: const Text('Edit'),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _TransportAllocationsTab extends StatelessWidget {
+  const _TransportAllocationsTab({required this.controller});
+  final AdminOperationsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Row(
+          children: [
+            const _OpsTitle(title: 'Student Allocations'),
+            const Spacer(),
+            FilledButton.icon(
+              onPressed: () => controller.openTransportAllocationDialog(),
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('New Allocation'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        if (controller.transportAllocations.isEmpty)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: Text('No allocations found.'),
+            ),
+          )
+        else
+          ...controller.transportAllocations.map(
+            (item) => _OpsCard(
+              title: item.studentLabel,
+              subtitle: 'Route: ${item.routeName}',
+              details: ['Stop: ${item.stopName}', 'Fee: ₹${item.feeAmount}'],
+              actions: [
+                OutlinedButton.icon(
+                  onPressed: () =>
+                      controller.openTransportAllocationDialog(existing: item),
+                  icon: const Icon(Icons.edit_rounded, size: 18),
+                  label: const Text('Edit'),
+                ),
+                IconButton(
+                  onPressed: () => controller.deleteTransportAllocation(item),
+                  icon: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: Colors.red,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _InventoryTab extends StatelessWidget {
+  const _InventoryTab({required this.controller});
+
+  final AdminOperationsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          Container(
+            margin: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.surfaceDark : Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isDark ? AppColors.borderDark : AppColors.borderLight,
+              ),
+            ),
+            child: TabBar(
+              indicator: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              dividerColor: Colors.transparent,
+              labelColor: AppColors.primary,
+              unselectedLabelColor: isDark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight,
+              tabs: const [
+                Tab(text: 'Items'),
+                Tab(text: 'Transactions'),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading.value &&
+                  controller.inventoryItems.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return TabBarView(
+                children: [
+                  _InventoryItemsTab(controller: controller),
+                  _InventoryTransactionsTab(controller: controller),
+                ],
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InventoryItemsTab extends StatelessWidget {
+  const _InventoryItemsTab({required this.controller});
+  final AdminOperationsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Row(
+          children: [
+            const _OpsTitle(title: 'Inventory Stock'),
+            const Spacer(),
+            FilledButton.icon(
+              onPressed: () => controller.openInventoryItemDialog(),
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Add Item'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        if (controller.inventoryItems.isEmpty)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: Text('No items found.'),
+            ),
+          )
+        else
+          ...controller.inventoryItems.map(
+            (item) => _OpsCard(
+              title: item.name,
+              subtitle: 'SKU: ${item.sku} | Category: ${item.category}',
+              details: [
+                'Quantity: ${item.qty} ${item.unit}',
+                'Status: ${item.isActive ? 'Active' : 'Inactive'}',
+                if (item.isLowStock)
+                  'Status: LOW STOCK (Threshold: ${item.lowStockThreshold})',
+              ],
+              actions: [
+                OutlinedButton.icon(
+                  onPressed: () =>
+                      controller.openInventoryItemDialog(existing: item),
+                  icon: const Icon(Icons.edit_rounded, size: 18),
+                  label: const Text('Edit'),
+                ),
+                IconButton(
+                  onPressed: () => controller.deleteInventoryItem(item),
+                  icon: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: Colors.red,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _InventoryTransactionsTab extends StatelessWidget {
+  const _InventoryTransactionsTab({required this.controller});
+  final AdminOperationsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Row(
+          children: [
+            const _OpsTitle(title: 'Recent Transactions'),
+            const Spacer(),
+            FilledButton.icon(
+              onPressed: () => controller.openInventoryTransactionDialog(),
+              icon: const Icon(Icons.history_rounded),
+              label: const Text('Record Transaction'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        if (controller.inventoryTransactions.isEmpty)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: Text('No transactions found.'),
+            ),
+          )
+        else
+          ...controller.inventoryTransactions.map(
+            (item) => _OpsCard(
+              title: item.itemName,
+              subtitle: 'Type: ${item.type} | Qty: ${item.qty}',
+              details: [
+                'Date: ${_opsDate(item.createdAt)}',
+                if (item.note.isNotEmpty) 'Note: ${item.note}',
+              ],
+              actions: const [],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 String _opsDate(DateTime? value) {
   if (value == null) return '-';
   return value.toIso8601String().substring(0, 10);
-}
-
-int _opsInitialTab(Map<String, dynamic> args) {
-  final value = (args['initialTab'] as num?)?.toInt() ?? 0;
-  if (value < 0) return 0;
-  if (value > 1) return 1;
-  return value;
 }

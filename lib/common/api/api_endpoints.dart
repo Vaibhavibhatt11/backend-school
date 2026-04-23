@@ -177,6 +177,8 @@ class ApiEndpoints {
   static String schoolTransportRouteById(String id) =>
       '/school/transport/routes/$id';
   static const String schoolTransportDrivers = '/school/transport/drivers';
+  static String schoolTransportDriverById(String id) =>
+      '/school/transport/drivers/$id';
   static const String schoolTransportAllocations =
       '/school/transport/allocations';
   static String schoolTransportAllocationById(String id) =>

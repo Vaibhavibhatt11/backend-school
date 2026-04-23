@@ -416,7 +416,7 @@ class AdminNoticeBoardController extends GetxController {
                   ),
                   const SizedBox(height: 10),
                   DropdownButtonFormField<String>(
-                    value: status,
+                    initialValue: status,
                     decoration: const InputDecoration(labelText: 'Status'),
                     items: const ['DRAFT', 'SCHEDULED', 'SENT']
                         .map(
@@ -566,7 +566,7 @@ class AdminNoticeBoardController extends GetxController {
                   ),
                   const SizedBox(height: 10),
                   DropdownButtonFormField<String>(
-                    value: status,
+                    initialValue: status,
                     decoration: const InputDecoration(labelText: 'Status'),
                     items: const ['OPEN', 'REPLIED', 'CLOSED']
                         .map(

@@ -13,7 +13,8 @@ class AdminStudyMaterialDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<AdminStudyMaterialController>();
-    final rawArgs = (Get.arguments as Map?)?.cast<String, dynamic>() ?? const {};
+    final rawArgs =
+        (Get.arguments as Map?)?.cast<String, dynamic>() ?? const {};
     final materialId = rawArgs['materialId']?.toString() ?? '';
     final item = controller.findMaterial(materialId);
 
@@ -24,7 +25,11 @@ class AdminStudyMaterialDetailView extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline_rounded, size: 48, color: Colors.grey),
+              const Icon(
+                Icons.error_outline_rounded,
+                size: 48,
+                color: Colors.grey,
+              ),
               const SizedBox(height: 16),
               const Text('The requested material could not be found.'),
               const SizedBox(height: 16),
@@ -42,7 +47,9 @@ class AdminStudyMaterialDetailView extends StatelessWidget {
     final color = adminStudyMaterialColor(item.category);
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: isDark
+          ? AppColors.backgroundDark
+          : AppColors.backgroundLight,
       appBar: CustomAppBar(title: item.category.singularLabel),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -68,7 +75,10 @@ class AdminStudyMaterialDetailView extends StatelessWidget {
                         color: color.withValues(alpha: 0.14),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Icon(adminStudyMaterialIcon(item.category), color: color),
+                      child: Icon(
+                        adminStudyMaterialIcon(item.category),
+                        color: color,
+                      ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -80,7 +90,9 @@ class AdminStudyMaterialDetailView extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
-                              color: isDark ? AppColors.textDark : AppColors.textLight,
+                              color: isDark
+                                  ? AppColors.textDark
+                                  : AppColors.textLight,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -98,11 +110,41 @@ class AdminStudyMaterialDetailView extends StatelessWidget {
                     ),
                   ],
                 ),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _DetailBadge(
+                      label: item.category.singularLabel.toUpperCase(),
+                      color: color,
+                    ),
+                    _DetailBadge(
+                      label: item.subjectName.isEmpty
+                          ? 'GENERAL SUBJECT'
+                          : item.subjectName.toUpperCase(),
+                      color: AppColors.primary,
+                    ),
+                    _DetailBadge(
+                      label: item.classLabel.isEmpty
+                          ? 'ALL CLASSES'
+                          : item.classLabel.toUpperCase(),
+                      color: Colors.green,
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 20),
                 _DetailRow(
                   icon: Icons.calendar_today_rounded,
                   label: 'Published on',
                   value: _formatDate(item.createdAt),
+                ),
+                _DetailRow(
+                  icon: Icons.groups_rounded,
+                  label: 'Visibility',
+                  value: item.classLabel.isEmpty
+                      ? 'All classes'
+                      : item.classLabel,
                 ),
                 if (item.subjectName.isNotEmpty)
                   _DetailRow(
@@ -110,12 +152,11 @@ class AdminStudyMaterialDetailView extends StatelessWidget {
                     label: 'Subject',
                     value: item.subjectName,
                   ),
-                if (item.classLabel.isNotEmpty)
-                  _DetailRow(
-                    icon: Icons.school_rounded,
-                    label: 'Target Class',
-                    value: item.classLabel,
-                  ),
+                _DetailRow(
+                  icon: Icons.language_rounded,
+                  label: 'Source',
+                  value: _resourceHost(item.url),
+                ),
                 const Divider(height: 32),
                 Text(
                   'Resource Link',
@@ -130,17 +171,28 @@ class AdminStudyMaterialDetailView extends StatelessWidget {
                   onTap: () => _launchURL(item.url),
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
-                      color: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+                      color: isDark
+                          ? AppColors.backgroundDark
+                          : AppColors.backgroundLight,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                        color: isDark
+                            ? AppColors.borderDark
+                            : AppColors.borderLight,
                       ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.link_rounded, size: 20, color: AppColors.primary),
+                        const Icon(
+                          Icons.link_rounded,
+                          size: 20,
+                          color: AppColors.primary,
+                        ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
@@ -172,7 +224,9 @@ class AdminStudyMaterialDetailView extends StatelessWidget {
                   Text(
                     item.description,
                     style: TextStyle(
-                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                      color: isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondaryLight,
                       height: 1.5,
                     ),
                   ),
@@ -188,7 +242,9 @@ class AdminStudyMaterialDetailView extends StatelessWidget {
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
               icon: const Icon(Icons.open_in_new_rounded),
               label: const Text('Open Resource'),
@@ -216,6 +272,12 @@ class AdminStudyMaterialDetailView extends StatelessWidget {
     return '${date.day}/${date.month}/${date.year}';
   }
 
+  String _resourceHost(String url) {
+    final uri = Uri.tryParse(url);
+    if (uri == null || uri.host.trim().isEmpty) return 'Hosted resource';
+    return uri.host.toLowerCase();
+  }
+
   Future<void> _launchURL(String url) async {
     final uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
@@ -223,16 +285,19 @@ class AdminStudyMaterialDetailView extends StatelessWidget {
     }
   }
 
-  void _confirmDelete(BuildContext context, AdminStudyMaterialController controller, AdminStudyMaterialRecord item) {
+  void _confirmDelete(
+    BuildContext context,
+    AdminStudyMaterialController controller,
+    AdminStudyMaterialRecord item,
+  ) {
     Get.dialog(
       AlertDialog(
         title: const Text('Delete Material?'),
-        content: Text('Are you sure you want to delete "${item.title}"? This action cannot be undone.'),
+        content: Text(
+          'Are you sure you want to delete "${item.title}"? This action cannot be undone.',
+        ),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
           TextButton(
             onPressed: () async {
               Get.back();
@@ -244,6 +309,32 @@ class AdminStudyMaterialDetailView extends StatelessWidget {
             child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _DetailBadge extends StatelessWidget {
+  const _DetailBadge({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
@@ -289,4 +380,3 @@ class _DetailRow extends StatelessWidget {
     );
   }
 }
-

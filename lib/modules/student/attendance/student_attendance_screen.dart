@@ -26,7 +26,10 @@ class StudentAttendanceScreen extends GetView<StudentAttendanceController> {
           children: [
             Obx(() {
               final selectedPeriod = controller.reportPeriod.value;
-              return _PeriodSelector(controller: controller, selectedPeriod: selectedPeriod);
+              return _PeriodSelector(
+                controller: controller,
+                selectedPeriod: selectedPeriod,
+              );
             }),
             SizedBox(height: Responsive.h(context, 20)),
             _AttendancePinchHint(),
@@ -44,7 +47,10 @@ class StudentAttendanceScreen extends GetView<StudentAttendanceController> {
 }
 
 class _PeriodSelector extends StatelessWidget {
-  const _PeriodSelector({required this.controller, required this.selectedPeriod});
+  const _PeriodSelector({
+    required this.controller,
+    required this.selectedPeriod,
+  });
   final StudentAttendanceController controller;
   final String selectedPeriod;
 
@@ -69,8 +75,12 @@ class _PeriodSelector extends StatelessWidget {
                     vertical: Responsive.h(context, 10),
                   ),
                   decoration: BoxDecoration(
-                    color: selected ? AppColor.primary : AppColor.cardBackground,
-                    borderRadius: BorderRadius.circular(Responsive.w(context, 20)),
+                    color: selected
+                        ? AppColor.primary
+                        : AppColor.cardBackground,
+                    borderRadius: BorderRadius.circular(
+                      Responsive.w(context, 20),
+                    ),
                     border: Border.all(
                       color: selected ? AppColor.primary : AppColor.borderLight,
                       width: 1,
@@ -93,11 +103,35 @@ class _PeriodSelector extends StatelessWidget {
 }
 
 /// Shows a bottom sheet with the selected day's attendance report.
-void _showDayReportSheet(BuildContext context, DayRecord record, StudentAttendanceController controller) {
+void _showDayReportSheet(
+  BuildContext context,
+  DayRecord record,
+  StudentAttendanceController controller,
+) {
   final date = record.date;
-  final weekdayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  final monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'];
+  final weekdayNames = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
+  final monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
   final dayName = weekdayNames[date.weekday - 1];
   final dateStr = '${date.day} ${monthNames[date.month - 1]} ${date.year}';
   String status;
@@ -129,7 +163,9 @@ void _showDayReportSheet(BuildContext context, DayRecord record, StudentAttendan
       ),
       decoration: BoxDecoration(
         color: AppColor.base,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Responsive.w(ctx, 20))),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(Responsive.w(ctx, 20)),
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -146,7 +182,10 @@ void _showDayReportSheet(BuildContext context, DayRecord record, StudentAttendan
             ),
           ),
           SizedBox(height: Responsive.h(ctx, 20)),
-          Text(dayName, style: AppTextStyle.label(ctx).copyWith(color: AppColor.textMuted)),
+          Text(
+            dayName,
+            style: AppTextStyle.label(ctx).copyWith(color: AppColor.textMuted),
+          ),
           SizedBox(height: Responsive.h(ctx, 4)),
           Text(dateStr, style: AppTextStyle.headlineSmall(ctx)),
           SizedBox(height: Responsive.h(ctx, 16)),
@@ -154,7 +193,10 @@ void _showDayReportSheet(BuildContext context, DayRecord record, StudentAttendan
             children: [
               Icon(icon, color: color, size: Responsive.w(ctx, 28)),
               SizedBox(width: Responsive.w(ctx, 12)),
-              Text(status, style: AppTextStyle.titleLarge(ctx).copyWith(color: color)),
+              Text(
+                status,
+                style: AppTextStyle.titleLarge(ctx).copyWith(color: color),
+              ),
             ],
           ),
           SizedBox(height: Responsive.h(ctx, 24)),
@@ -165,11 +207,12 @@ void _showDayReportSheet(BuildContext context, DayRecord record, StudentAttendan
                 Navigator.pop(ctx);
                 controller.goToWeekView(date);
               },
-              icon: Icon(Icons.calendar_view_week_rounded, size: Responsive.w(ctx, 20)),
-              label: const Text('View week'),
-              style: TextButton.styleFrom(
-                foregroundColor: AppColor.primary,
+              icon: Icon(
+                Icons.calendar_view_week_rounded,
+                size: Responsive.w(ctx, 20),
               ),
+              label: const Text('View week'),
+              style: TextButton.styleFrom(foregroundColor: AppColor.primary),
             ),
           ),
         ],
@@ -197,7 +240,20 @@ class _LeaveApplicationsCard extends StatelessWidget {
   final StudentAttendanceController controller;
 
   static String _fmt(DateTime d) {
-    const m = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const m = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return '${d.day} ${m[d.month - 1]} ${d.year}';
   }
 
@@ -212,9 +268,9 @@ class _LeaveApplicationsCard extends StatelessWidget {
             children: [
               Text(
                 'Apply and view leave requests',
-                style: AppTextStyle.titleSmall(context).copyWith(
-                  color: AppColor.textSecondary,
-                ),
+                style: AppTextStyle.titleSmall(
+                  context,
+                ).copyWith(color: AppColor.textSecondary),
               ),
               TextButton.icon(
                 onPressed: () => _showApplyLeaveSheet(context, controller),
@@ -229,7 +285,9 @@ class _LeaveApplicationsCard extends StatelessWidget {
             final leaves = controller.leaveApplications;
             if (leaves.isEmpty) {
               return Padding(
-                padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 8)),
+                padding: EdgeInsets.symmetric(
+                  vertical: Responsive.h(context, 8),
+                ),
                 child: Text(
                   'No leave applications yet.',
                   style: AppTextStyle.bodySmall(context),
@@ -251,8 +309,12 @@ class _LeaveApplicationsCard extends StatelessWidget {
                   padding: EdgeInsets.all(Responsive.w(context, 12)),
                   decoration: BoxDecoration(
                     color: AppColor.base,
-                    borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
-                    border: Border.all(color: AppColor.border.withValues(alpha: 0.8)),
+                    borderRadius: BorderRadius.circular(
+                      Responsive.w(context, 12),
+                    ),
+                    border: Border.all(
+                      color: AppColor.border.withValues(alpha: 0.8),
+                    ),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,7 +323,10 @@ class _LeaveApplicationsCard extends StatelessWidget {
                         width: 8,
                         height: 8,
                         margin: EdgeInsets.only(top: Responsive.h(context, 6)),
-                        decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle),
+                        decoration: BoxDecoration(
+                          color: statusColor,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                       SizedBox(width: Responsive.w(context, 10)),
                       Expanded(
@@ -307,7 +372,10 @@ class _LeaveApplicationsCard extends StatelessWidget {
   }
 }
 
-void _showApplyLeaveSheet(BuildContext context, StudentAttendanceController controller) {
+void _showApplyLeaveSheet(
+  BuildContext context,
+  StudentAttendanceController controller,
+) {
   String leaveType = 'Sick';
   DateTime? fromDate;
   DateTime? toDate;
@@ -343,7 +411,20 @@ void _showApplyLeaveSheet(BuildContext context, StudentAttendanceController cont
         builder: (ctx, setSheet) {
           String dateText(DateTime? d) {
             if (d == null) return 'Select date';
-            const m = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const m = [
+              'Jan',
+              'Feb',
+              'Mar',
+              'Apr',
+              'May',
+              'Jun',
+              'Jul',
+              'Aug',
+              'Sep',
+              'Oct',
+              'Nov',
+              'Dec',
+            ];
             return '${d.day} ${m[d.month - 1]} ${d.year}';
           }
 
@@ -356,7 +437,9 @@ void _showApplyLeaveSheet(BuildContext context, StudentAttendanceController cont
             ),
             decoration: BoxDecoration(
               color: AppColor.base,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(Responsive.w(ctx, 20))),
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(Responsive.w(ctx, 20)),
+              ),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -376,7 +459,7 @@ void _showApplyLeaveSheet(BuildContext context, StudentAttendanceController cont
                 Text('Apply leave', style: AppTextStyle.titleLarge(ctx)),
                 SizedBox(height: Responsive.h(ctx, 12)),
                 DropdownButtonFormField<String>(
-                  value: leaveType,
+                  initialValue: leaveType,
                   items: const ['Sick', 'Casual', 'Emergency', 'Other']
                       .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                       .toList(),
@@ -389,14 +472,20 @@ void _showApplyLeaveSheet(BuildContext context, StudentAttendanceController cont
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => pickDate(true, setSheet),
-                        child: Text('From: ${dateText(fromDate)}', overflow: TextOverflow.ellipsis),
+                        child: Text(
+                          'From: ${dateText(fromDate)}',
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ),
                     SizedBox(width: Responsive.w(ctx, 8)),
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => pickDate(false, setSheet),
-                        child: Text('To: ${dateText(toDate)}', overflow: TextOverflow.ellipsis),
+                        child: Text(
+                          'To: ${dateText(toDate)}',
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ),
                   ],
@@ -453,7 +542,8 @@ class _AttendancePinchWrapper extends StatefulWidget {
   final StudentAttendanceController controller;
 
   @override
-  State<_AttendancePinchWrapper> createState() => _AttendancePinchWrapperState();
+  State<_AttendancePinchWrapper> createState() =>
+      _AttendancePinchWrapperState();
 }
 
 class _AttendancePinchWrapperState extends State<_AttendancePinchWrapper> {
@@ -501,7 +591,10 @@ class _AttendancePinchWrapperState extends State<_AttendancePinchWrapper> {
                 opacity: animation,
                 child: ScaleTransition(
                   scale: Tween<double>(begin: 0.94, end: 1.0).animate(
-                    CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+                    CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeOutCubic,
+                    ),
                   ),
                   child: child,
                 ),
@@ -517,13 +610,25 @@ class _AttendancePinchWrapperState extends State<_AttendancePinchWrapper> {
   Widget _viewForLevel(int level) {
     switch (level) {
       case 1:
-        return _WeekCalendarView(key: const ValueKey<int>(1), controller: widget.controller);
+        return _WeekCalendarView(
+          key: const ValueKey<int>(1),
+          controller: widget.controller,
+        );
       case 2:
-        return _MonthCalendarView(key: const ValueKey<int>(2), controller: widget.controller);
+        return _MonthCalendarView(
+          key: const ValueKey<int>(2),
+          controller: widget.controller,
+        );
       case 3:
-        return _YearSummarySection(key: const ValueKey<int>(3), controller: widget.controller);
+        return _YearSummarySection(
+          key: const ValueKey<int>(3),
+          controller: widget.controller,
+        );
       default:
-        return _TodayBoxView(key: const ValueKey<int>(0), controller: widget.controller);
+        return _TodayBoxView(
+          key: const ValueKey<int>(0),
+          controller: widget.controller,
+        );
     }
   }
 }
@@ -534,11 +639,27 @@ class _TodayBoxView extends StatelessWidget {
   final StudentAttendanceController controller;
 
   static const List<String> _weekdays = [
-    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
   ];
   static const List<String> _months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
 
   @override
@@ -573,7 +694,9 @@ class _TodayBoxView extends StatelessWidget {
           children: [
             Container(
               width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 12)),
+              padding: EdgeInsets.symmetric(
+                vertical: Responsive.h(context, 12),
+              ),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -599,7 +722,9 @@ class _TodayBoxView extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 28)),
+              padding: EdgeInsets.symmetric(
+                vertical: Responsive.h(context, 28),
+              ),
               child: Column(
                 children: [
                   Text(
@@ -617,7 +742,9 @@ class _TodayBoxView extends StatelessWidget {
                     height: Responsive.w(context, 80),
                     decoration: BoxDecoration(
                       color: AppColor.primary,
-                      borderRadius: BorderRadius.circular(Responsive.w(context, 40)),
+                      borderRadius: BorderRadius.circular(
+                        Responsive.w(context, 40),
+                      ),
                       boxShadow: [
                         BoxShadow(
                           color: AppColor.primary.withValues(alpha: 0.4),
@@ -659,7 +786,9 @@ class _TodayBoxView extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: color.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(Responsive.w(context, 24)),
+                      borderRadius: BorderRadius.circular(
+                        Responsive.w(context, 24),
+                      ),
                       border: Border.all(
                         color: color.withValues(alpha: 0.4),
                         width: 1.5,
@@ -668,14 +797,17 @@ class _TodayBoxView extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(icon, color: color, size: Responsive.w(context, 24)),
+                        Icon(
+                          icon,
+                          color: color,
+                          size: Responsive.w(context, 24),
+                        ),
                         SizedBox(width: Responsive.w(context, 10)),
                         Text(
                           status,
-                          style: AppTextStyle.titleMedium(context).copyWith(
-                            color: color,
-                            fontWeight: FontWeight.w700,
-                          ),
+                          style: AppTextStyle.titleMedium(
+                            context,
+                          ).copyWith(color: color, fontWeight: FontWeight.w700),
                         ),
                       ],
                     ),
@@ -695,7 +827,15 @@ class _WeekCalendarView extends StatelessWidget {
   const _WeekCalendarView({super.key, required this.controller});
   final StudentAttendanceController controller;
 
-  static const List<String> _dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  static const List<String> _dayNames = [
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat',
+    'Sun',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -706,7 +846,8 @@ class _WeekCalendarView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _PeriodNav(
-            label: '${report.weekStart.day} – ${report.weekEnd.day} ${_monthName(report.weekStart.month)} ${report.weekStart.year}',
+            label:
+                '${report.weekStart.day} – ${report.weekEnd.day} ${_monthName(report.weekStart.month)} ${report.weekStart.year}',
             onPrev: controller.previousWeek,
             onNext: controller.nextWeek,
           ),
@@ -733,7 +874,9 @@ class _WeekCalendarView extends StatelessWidget {
               children: [
                 Container(
                   width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 10)),
+                  padding: EdgeInsets.symmetric(
+                    vertical: Responsive.h(context, 10),
+                  ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -746,17 +889,21 @@ class _WeekCalendarView extends StatelessWidget {
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: _dayNames.map((d) => Expanded(
-                      child: Text(
-                        d,
-                        style: TextStyle(
-                          fontSize: Responsive.sp(context, 11),
-                          fontWeight: FontWeight.w700,
-                          color: AppColor.base.withValues(alpha: 0.95),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    )).toList(),
+                    children: _dayNames
+                        .map(
+                          (d) => Expanded(
+                            child: Text(
+                              d,
+                              style: TextStyle(
+                                fontSize: Responsive.sp(context, 11),
+                                fontWeight: FontWeight.w700,
+                                color: AppColor.base.withValues(alpha: 0.95),
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        )
+                        .toList(),
                   ),
                 ),
                 Padding(
@@ -766,15 +913,20 @@ class _WeekCalendarView extends StatelessWidget {
                   ),
                   child: Row(
                     children: List.generate(7, (i) {
-                      final r = report.dayRecords.length > i ? report.dayRecords[i] : null;
+                      final r = report.dayRecords.length > i
+                          ? report.dayRecords[i]
+                          : null;
                       if (r == null) return const Expanded(child: SizedBox());
                       final isToday = _isSameDay(r.date, DateTime.now());
-                      final isWeekend = r.date.weekday == 6 || r.date.weekday == 7;
+                      final isWeekend =
+                          r.date.weekday == 6 || r.date.weekday == 7;
                       final Color dotColor;
                       if (r.isHoliday) {
                         dotColor = AppColor.tokenYellowFont;
                       } else if (r.isPresent) {
-                        dotColor = r.isLate ? AppColor.orange : AppColor.success;
+                        dotColor = r.isLate
+                            ? AppColor.orange
+                            : AppColor.success;
                       } else {
                         dotColor = AppColor.error;
                       }
@@ -782,26 +934,41 @@ class _WeekCalendarView extends StatelessWidget {
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(
-                            onTap: () => _showDayReportSheet(context, r, controller),
-                            borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
+                            onTap: () =>
+                                _showDayReportSheet(context, r, controller),
+                            borderRadius: BorderRadius.circular(
+                              Responsive.w(context, 12),
+                            ),
                             child: Container(
                               margin: EdgeInsets.symmetric(horizontal: 2),
-                              padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 8)),
+                              padding: EdgeInsets.symmetric(
+                                vertical: Responsive.h(context, 8),
+                              ),
                               decoration: BoxDecoration(
                                 color: isToday
                                     ? AppColor.primary.withValues(alpha: 0.12)
-                                    : (isWeekend ? AppColor.border.withValues(alpha: 0.3) : null),
-                                borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
+                                    : (isWeekend
+                                          ? AppColor.border.withValues(
+                                              alpha: 0.3,
+                                            )
+                                          : null),
+                                borderRadius: BorderRadius.circular(
+                                  Responsive.w(context, 12),
+                                ),
                                 border: isToday
                                     ? Border.all(
-                                        color: AppColor.primary.withValues(alpha: 0.5),
+                                        color: AppColor.primary.withValues(
+                                          alpha: 0.5,
+                                        ),
                                         width: 1.5,
                                       )
                                     : null,
                                 boxShadow: isToday
                                     ? [
                                         BoxShadow(
-                                          color: AppColor.primary.withValues(alpha: 0.2),
+                                          color: AppColor.primary.withValues(
+                                            alpha: 0.2,
+                                          ),
                                           blurRadius: 8,
                                           offset: const Offset(0, 2),
                                         ),
@@ -815,10 +982,14 @@ class _WeekCalendarView extends StatelessWidget {
                                     '${r.date.day}',
                                     style: TextStyle(
                                       fontSize: Responsive.sp(context, 16),
-                                      fontWeight: isToday ? FontWeight.w700 : FontWeight.w600,
+                                      fontWeight: isToday
+                                          ? FontWeight.w700
+                                          : FontWeight.w600,
                                       color: isToday
                                           ? AppColor.primary
-                                          : (isWeekend ? AppColor.textMuted : AppColor.textPrimary),
+                                          : (isWeekend
+                                                ? AppColor.textMuted
+                                                : AppColor.textPrimary),
                                     ),
                                   ),
                                   SizedBox(height: Responsive.h(context, 6)),
@@ -830,7 +1001,9 @@ class _WeekCalendarView extends StatelessWidget {
                                       shape: BoxShape.circle,
                                       boxShadow: [
                                         BoxShadow(
-                                          color: dotColor.withValues(alpha: 0.4),
+                                          color: dotColor.withValues(
+                                            alpha: 0.4,
+                                          ),
                                           blurRadius: 4,
                                         ),
                                       ],
@@ -854,7 +1027,20 @@ class _WeekCalendarView extends StatelessWidget {
   }
 
   static String _monthName(int m) {
-    const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const names = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return names[m - 1];
   }
 
@@ -867,7 +1053,15 @@ class _MonthCalendarView extends StatelessWidget {
   const _MonthCalendarView({super.key, required this.controller});
   final StudentAttendanceController controller;
 
-  static const List<String> _weekHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  static const List<String> _weekHeaders = [
+    'Sun',
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -914,7 +1108,9 @@ class _MonthCalendarView extends StatelessWidget {
               children: [
                 Container(
                   width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 12)),
+                  padding: EdgeInsets.symmetric(
+                    vertical: Responsive.h(context, 12),
+                  ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -926,18 +1122,22 @@ class _MonthCalendarView extends StatelessWidget {
                     ),
                   ),
                   child: Row(
-                    children: _weekHeaders.map((h) => Expanded(
-                      child: Text(
-                        h.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: Responsive.sp(context, 11),
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.8,
-                          color: AppColor.base.withValues(alpha: 0.95),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    )).toList(),
+                    children: _weekHeaders
+                        .map(
+                          (h) => Expanded(
+                            child: Text(
+                              h.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: Responsive.sp(context, 11),
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.8,
+                                color: AppColor.base.withValues(alpha: 0.95),
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        )
+                        .toList(),
                   ),
                 ),
                 LayoutBuilder(
@@ -981,7 +1181,11 @@ class _MonthCalendarView extends StatelessWidget {
                                     ? AppColor.border.withValues(alpha: 0.25)
                                     : Colors.transparent,
                                 child: InkWell(
-                                  onTap: () => _showDayReportSheet(context, dayRecord, controller),
+                                  onTap: () => _showDayReportSheet(
+                                    context,
+                                    dayRecord,
+                                    controller,
+                                  ),
                                   child: Center(
                                     child: Container(
                                       width: cellSize * 0.65,
@@ -991,7 +1195,8 @@ class _MonthCalendarView extends StatelessWidget {
                                               gradient: LinearGradient(
                                                 colors: [
                                                   AppColor.primary,
-                                                  AppColor.primaryDark.withValues(alpha: 0.9),
+                                                  AppColor.primaryDark
+                                                      .withValues(alpha: 0.9),
                                                 ],
                                                 begin: Alignment.topLeft,
                                                 end: Alignment.bottomRight,
@@ -999,7 +1204,8 @@ class _MonthCalendarView extends StatelessWidget {
                                               shape: BoxShape.circle,
                                               boxShadow: [
                                                 BoxShadow(
-                                                  color: AppColor.primary.withValues(alpha: 0.4),
+                                                  color: AppColor.primary
+                                                      .withValues(alpha: 0.4),
                                                   blurRadius: 10,
                                                   offset: const Offset(0, 3),
                                                 ),
@@ -1010,11 +1216,18 @@ class _MonthCalendarView extends StatelessWidget {
                                         child: Text(
                                           '$day',
                                           style: TextStyle(
-                                            fontSize: Responsive.sp(context, 14),
-                                            fontWeight: isToday ? FontWeight.w700 : FontWeight.w500,
+                                            fontSize: Responsive.sp(
+                                              context,
+                                              14,
+                                            ),
+                                            fontWeight: isToday
+                                                ? FontWeight.w700
+                                                : FontWeight.w500,
                                             color: isToday
                                                 ? AppColor.base
-                                                : (isWeekend ? AppColor.textMuted : AppColor.textPrimary),
+                                                : (isWeekend
+                                                      ? AppColor.textMuted
+                                                      : AppColor.textPrimary),
                                           ),
                                         ),
                                       ),
@@ -1109,15 +1322,35 @@ class _YearSummarySection extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _YearStatRow('Working days', '${report.totalWorkingDays}', AppColor.textPrimary),
+                      _YearStatRow(
+                        'Working days',
+                        '${report.totalWorkingDays}',
+                        AppColor.textPrimary,
+                      ),
                       SizedBox(height: Responsive.h(context, 8)),
-                      _YearStatRow('Present', '${report.totalPresentDays}', AppColor.success),
+                      _YearStatRow(
+                        'Present',
+                        '${report.totalPresentDays}',
+                        AppColor.success,
+                      ),
                       SizedBox(height: Responsive.h(context, 8)),
-                      _YearStatRow('Absent', '${report.totalAbsentDays}', AppColor.error),
+                      _YearStatRow(
+                        'Absent',
+                        '${report.totalAbsentDays}',
+                        AppColor.error,
+                      ),
                       SizedBox(height: Responsive.h(context, 8)),
-                      _YearStatRow('Holidays', '${report.totalHolidays}', AppColor.tokenYellowFont),
+                      _YearStatRow(
+                        'Holidays',
+                        '${report.totalHolidays}',
+                        AppColor.tokenYellowFont,
+                      ),
                       SizedBox(height: Responsive.h(context, 8)),
-                      _YearStatRow('Late entries', '${report.totalLateEntries}', AppColor.orange),
+                      _YearStatRow(
+                        'Late entries',
+                        '${report.totalLateEntries}',
+                        AppColor.orange,
+                      ),
                       SizedBox(height: Responsive.h(context, 14)),
                       Container(
                         padding: EdgeInsets.symmetric(
@@ -1126,8 +1359,12 @@ class _YearSummarySection extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: AppColor.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
-                          border: Border.all(color: AppColor.primary.withValues(alpha: 0.3)),
+                          borderRadius: BorderRadius.circular(
+                            Responsive.w(context, 12),
+                          ),
+                          border: Border.all(
+                            color: AppColor.primary.withValues(alpha: 0.3),
+                          ),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1157,7 +1394,9 @@ class _YearSummarySection extends StatelessWidget {
             padding: EdgeInsets.only(bottom: Responsive.h(context, 8)),
             child: Text(
               'Tap a month to view',
-              style: AppTextStyle.titleSmall(context).copyWith(color: AppColor.textSecondary),
+              style: AppTextStyle.titleSmall(
+                context,
+              ).copyWith(color: AppColor.textSecondary),
             ),
           ),
           _YearMonthGrid(controller: controller, months: report.months),
@@ -1178,8 +1417,18 @@ class _YearStatRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: AppTextStyle.bodyMedium(context).copyWith(color: AppColor.textSecondary)),
-        Text(value, style: AppTextStyle.bodyMedium(context).copyWith(fontWeight: FontWeight.w600, color: valueColor)),
+        Text(
+          label,
+          style: AppTextStyle.bodyMedium(
+            context,
+          ).copyWith(color: AppColor.textSecondary),
+        ),
+        Text(
+          value,
+          style: AppTextStyle.bodyMedium(
+            context,
+          ).copyWith(fontWeight: FontWeight.w600, color: valueColor),
+        ),
       ],
     );
   }
@@ -1201,13 +1450,19 @@ class _PeriodNav extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         IconButton(
-          icon: Icon(Icons.chevron_left_rounded, size: Responsive.w(context, 28)),
+          icon: Icon(
+            Icons.chevron_left_rounded,
+            size: Responsive.w(context, 28),
+          ),
           onPressed: onPrev,
           color: AppColor.primary,
         ),
         Text(label, style: AppTextStyle.titleMedium(context)),
         IconButton(
-          icon: Icon(Icons.chevron_right_rounded, size: Responsive.w(context, 28)),
+          icon: Icon(
+            Icons.chevron_right_rounded,
+            size: Responsive.w(context, 28),
+          ),
           onPressed: onNext,
           color: AppColor.primary,
         ),
@@ -1225,7 +1480,9 @@ class _YearMonthGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final crossCount = constraints.maxWidth > Breakpoints.lg ? 4 : (constraints.maxWidth > Breakpoints.sm ? 3 : 2);
+        final crossCount = constraints.maxWidth > Breakpoints.lg
+            ? 4
+            : (constraints.maxWidth > Breakpoints.sm ? 3 : 2);
         final ratio = constraints.maxWidth > Breakpoints.lg
             ? 1.35
             : (constraints.maxWidth > Breakpoints.sm ? 1.22 : 1.05);
@@ -1249,7 +1506,9 @@ class _YearMonthGrid extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     color: AppColor.base,
-                    borderRadius: BorderRadius.circular(Responsive.w(context, 16)),
+                    borderRadius: BorderRadius.circular(
+                      Responsive.w(context, 16),
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: AppColor.primary.withValues(alpha: 0.05),
@@ -1297,7 +1556,8 @@ class _YearMonthGrid extends StatelessWidget {
                           child: LayoutBuilder(
                             builder: (context, box) {
                               final compact = box.maxHeight < 46;
-                              final percentText = '${m.attendancePercent.toStringAsFixed(0)}%';
+                              final percentText =
+                                  '${m.attendancePercent.toStringAsFixed(0)}%';
 
                               if (compact) {
                                 // Compact mode prevents RenderFlex overflow on very short tiles.
@@ -1305,10 +1565,11 @@ class _YearMonthGrid extends StatelessWidget {
                                   alignment: Alignment.centerLeft,
                                   child: Text(
                                     percentText,
-                                    style: AppTextStyle.titleSmall(context).copyWith(
-                                      color: AppColor.primary,
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                                    style: AppTextStyle.titleSmall(context)
+                                        .copyWith(
+                                          color: AppColor.primary,
+                                          fontWeight: FontWeight.w700,
+                                        ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -1316,22 +1577,26 @@ class _YearMonthGrid extends StatelessWidget {
                               }
 
                               return Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     '${m.presentDays} / ${m.workingDays} days',
-                                    style: AppTextStyle.caption(context).copyWith(color: AppColor.textSecondary),
+                                    style: AppTextStyle.caption(
+                                      context,
+                                    ).copyWith(color: AppColor.textSecondary),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   SizedBox(height: Responsive.h(context, 6)),
                                   Text(
                                     percentText,
-                                    style: AppTextStyle.titleSmall(context).copyWith(
-                                      color: AppColor.primary,
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                                    style: AppTextStyle.titleSmall(context)
+                                        .copyWith(
+                                          color: AppColor.primary,
+                                          fontWeight: FontWeight.w700,
+                                        ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),

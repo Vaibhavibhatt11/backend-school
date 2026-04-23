@@ -78,6 +78,22 @@ class RoleSelectionView extends GetView<RoleController> {
                   onTap: () => controller.selectRole(UserRole.admin),
                   isDark: isDark,
                 ),
+                const SizedBox(height: 16),
+                _buildRoleCard(
+                  icon: Icons.local_library_rounded,
+                  title: 'Librarian',
+                  subtitle: 'Manage library catalog and circulation',
+                  onTap: () => controller.selectRole(UserRole.librarian),
+                  isDark: isDark,
+                ),
+                const SizedBox(height: 16),
+                _buildRoleCard(
+                  icon: Icons.meeting_room_rounded,
+                  title: 'Hostel Warden',
+                  subtitle: 'Manage hostel rooms, visitors and complaints',
+                  onTap: () => controller.selectRole(UserRole.hostelWarden),
+                  isDark: isDark,
+                ),
                 const SizedBox(height: 40),
                 Text(
                   'STEP 1 OF 2',

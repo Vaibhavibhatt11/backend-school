@@ -2,6 +2,7 @@ import 'package:erp_frontend/app/modules/staff/widgets/staff_ai_assistant_sheet.
 import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:erp_frontend/app/modules/staff/utils/staff_portal_navigation.dart';
 import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
+import 'package:erp_frontend/common/services/staff/staff_portal_store_service.dart';
 import 'package:erp_frontend/common/services/staff/staff_service.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:erp_frontend/common/utils/safe_navigation.dart';
@@ -9,9 +10,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class StaffDashboardController extends GetxController {
-  StaffDashboardController(this._staffService);
+  StaffDashboardController(this._staffService, this._store);
 
   final StaffService _staffService;
+  final StaffPortalStoreService _store;
   final isLoading = false.obs;
   final errorMessage = ''.obs;
 
@@ -58,6 +60,10 @@ class StaffDashboardController extends GetxController {
       notifications.assignAll(_asStringList(data['notifications']));
       homeworkStatus.assignAll(_asStringList(data['homeworkStatus']));
       _buildDashboardRecords();
+      try {
+        await _applyStoredRecords();
+        _rebuildSummaryListsFromRecords();
+      } catch (_) {}
     } catch (e) {
       errorMessage.value = dioOrApiErrorMessage(e);
       AppToast.show(errorMessage.value);
@@ -79,6 +85,10 @@ class StaffDashboardController extends GetxController {
       homeworkRecords.clear();
       examRecords.clear();
       meetingRecords.clear();
+      try {
+        await _applyStoredRecords();
+        _rebuildSummaryListsFromRecords();
+      } catch (_) {}
     } finally {
       isLoading.value = false;
     }
@@ -158,7 +168,7 @@ class StaffDashboardController extends GetxController {
                 ),
                 const SizedBox(height: 10),
                 DropdownButtonFormField<String>(
-                  value: status,
+                  initialValue: status,
                   decoration: const InputDecoration(labelText: 'Status'),
                   items: const ['PENDING', 'IN_PROGRESS', 'DONE']
                       .map((e) => DropdownMenuItem(value: e, child: Text(e)))
@@ -188,22 +198,28 @@ class StaffDashboardController extends GetxController {
       'title': title.text.trim(),
       'status': status,
     });
+    await _persistDashboardRecords();
   }
 
-  void updateRecordStatus(
+  Future<void> updateRecordStatus(
     RxList<Map<String, String>> source,
     String id,
     String nextStatus,
-  ) {
+  ) async {
     source.assignAll(
       source
           .map((e) => e['id'] == id ? {...e, 'status': nextStatus} : e)
           .toList(),
     );
+    await _persistDashboardRecords();
   }
 
-  void deleteRecord(RxList<Map<String, String>> source, String id) {
+  Future<void> deleteRecord(
+    RxList<Map<String, String>> source,
+    String id,
+  ) async {
     source.removeWhere((e) => e['id'] == id);
+    await _persistDashboardRecords();
   }
 
   List<String> _asStringList(dynamic value) {
@@ -237,9 +253,94 @@ class StaffDashboardController extends GetxController {
     'Reports',
   ];
 
-  void goToModules() => SafeNavigation.offNamed(AppRoutes.STAFF_HOME);
+  void goToModules() => SafeNavigation.offNamed(AppRoutes.STAFF_MODULES);
 
   void openModule(String moduleId) {
     StaffPortalNavigation.openModule(moduleId);
+  }
+
+  Future<void> _applyStoredRecords() async {
+    final module = await _store.readModule('dashboard');
+    _mergeStoredList(taskRecords, module['taskRecords']);
+    _mergeStoredList(alertRecords, module['alertRecords']);
+    _mergeStoredList(notificationRecords, module['notificationRecords']);
+    _mergeStoredList(homeworkRecords, module['homeworkRecords']);
+    _mergeStoredList(examRecords, module['examRecords']);
+    _mergeStoredList(meetingRecords, module['meetingRecords']);
+  }
+
+  Future<void> _persistDashboardRecords() {
+    return _store.patchModule('dashboard', {
+      'taskRecords': _dynamicRows(taskRecords),
+      'alertRecords': _dynamicRows(alertRecords),
+      'notificationRecords': _dynamicRows(notificationRecords),
+      'homeworkRecords': _dynamicRows(homeworkRecords),
+      'examRecords': _dynamicRows(examRecords),
+      'meetingRecords': _dynamicRows(meetingRecords),
+    });
+  }
+
+  void _mergeStoredList(RxList<Map<String, String>> target, dynamic raw) {
+    if (raw is! List || raw.isEmpty) {
+      return;
+    }
+    final merged = <String, Map<String, String>>{};
+    for (final row in target) {
+      final id = row['id'] ?? '';
+      if (id.isNotEmpty) {
+        merged[id] = {...row};
+      }
+    }
+    for (final rawRow in raw.whereType<Map>()) {
+      final row = rawRow.map(
+        (key, value) => MapEntry(key.toString(), value?.toString() ?? ''),
+      );
+      final id = row['id'] ?? '';
+      if (id.isNotEmpty) {
+        merged[id] = {...?merged[id], ...row};
+      } else {
+        merged['local-${merged.length}'] = row;
+      }
+    }
+    target.assignAll(merged.values.toList(growable: false));
+  }
+
+  List<Map<String, dynamic>> _dynamicRows(List<Map<String, String>> rows) {
+    return rows
+        .map((row) => row.map((key, value) => MapEntry(key, value)))
+        .toList(growable: false);
+  }
+
+  void _rebuildSummaryListsFromRecords() {
+    pendingTasks.assignAll(
+      taskRecords
+          .map((row) => row['title'] ?? '')
+          .where((item) => item.isNotEmpty),
+    );
+    studentAlerts.assignAll(
+      alertRecords
+          .map((row) => row['title'] ?? '')
+          .where((item) => item.isNotEmpty),
+    );
+    notifications.assignAll(
+      notificationRecords
+          .map((row) => row['title'] ?? '')
+          .where((item) => item.isNotEmpty),
+    );
+    homeworkStatus.assignAll(
+      homeworkRecords
+          .map((row) => row['title'] ?? '')
+          .where((item) => item.isNotEmpty),
+    );
+    upcomingExams.assignAll(
+      examRecords
+          .map((row) => row['title'] ?? '')
+          .where((item) => item.isNotEmpty),
+    );
+    meetings.assignAll(
+      meetingRecords
+          .map((row) => row['title'] ?? '')
+          .where((item) => item.isNotEmpty),
+    );
   }
 }

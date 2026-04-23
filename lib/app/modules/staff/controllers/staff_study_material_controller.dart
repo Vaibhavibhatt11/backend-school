@@ -129,7 +129,10 @@ class StaffStudyMaterialController extends GetxController {
 
           final subject = item['subject'] as Map<String, dynamic>? ?? const {};
           final classData = item['class'] as Map<String, dynamic>? ?? const {};
-          final classId = _firstNonEmptyString([item['classId'], classData['id']]);
+          final classId = _firstNonEmptyString([
+            item['classId'],
+            classData['id'],
+          ]);
           final className = _firstNonEmptyString([
             classData['name'],
             item['className'],
@@ -141,8 +144,8 @@ class StaffStudyMaterialController extends GetxController {
           final classLabel = section.isEmpty
               ? className
               : className.isEmpty
-                  ? ''
-                  : '$className - $section';
+              ? ''
+              : '$className - $section';
 
           next.add(
             StaffStudyMaterialRecord(
@@ -157,7 +160,10 @@ class StaffStudyMaterialController extends GetxController {
               ]),
               classId: classId,
               classLabel: classLabel,
-              subjectId: _firstNonEmptyString([item['subjectId'], subject['id']]),
+              subjectId: _firstNonEmptyString([
+                item['subjectId'],
+                subject['id'],
+              ]),
               subjectName: _firstNonEmptyString([
                 subject['name'],
                 item['subjectName'],
@@ -207,8 +213,7 @@ class StaffStudyMaterialController extends GetxController {
           '${item.title} ${item.subjectName} ${item.classLabel} ${item.type} ${item.description}'
               .toLowerCase();
       return haystack.contains(trimmedQuery);
-    }).toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }).toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
   List<StaffStudyMaterialRecord> recentMaterials({int limit = 4}) {
@@ -237,11 +242,13 @@ class StaffStudyMaterialController extends GetxController {
     required StaffStudyMaterialCategory category,
     required String title,
     required String url,
+    String description = '',
     String classId = '',
     String subjectId = '',
   }) async {
     final trimmedTitle = title.trim();
     final normalizedUrl = normalizeUrl(url);
+    final trimmedDescription = description.trim();
 
     if (trimmedTitle.isEmpty) {
       AppToast.show('${category.singularLabel} title is required.');
@@ -263,6 +270,7 @@ class StaffStudyMaterialController extends GetxController {
         'type': category.apiType,
         'url': normalizedUrl,
         'isPublished': true,
+        if (trimmedDescription.isNotEmpty) 'description': trimmedDescription,
         if (classId.trim().isNotEmpty) 'classId': classId.trim(),
         if (subjectId.trim().isNotEmpty) 'subjectId': subjectId.trim(),
       });

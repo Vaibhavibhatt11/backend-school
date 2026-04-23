@@ -205,17 +205,16 @@ class AdminPortalNavigation {
       case 'library':
         return const [
           AdminPortalScreen(
-            title: 'Library Desk',
-            description: 'Manage books, issue flows, and returns.',
-            route: AppRoutes.ADMIN_RESOURCES,
-            arguments: {'initialTab': 0, 'scope': 'library'},
+            title: 'Librarian Portal',
+            description:
+                'Dedicated library operations flow for catalog, issue/return, and membership.',
+            route: AppRoutes.LIBRARIAN_HOME,
           ),
           AdminPortalScreen(
-            title: 'Reports',
-            description:
-                'Use live reporting to monitor library-linked activity.',
-            route: AppRoutes.ADMIN_REPORTS,
-            arguments: {'tabIndex': 2},
+            title: 'Admin Library Desk',
+            description: 'Open admin resources view for library controls.',
+            route: AppRoutes.ADMIN_RESOURCES,
+            arguments: {'initialTab': 0, 'scope': 'library'},
           ),
         ];
       case 'transport':
@@ -230,8 +229,14 @@ class AdminPortalNavigation {
       case 'hostel':
         return const [
           AdminPortalScreen(
-            title: 'Hostel Desk',
-            description: 'Manage rooms, allocations, attendance, and visitors.',
+            title: 'Hostel Warden Portal',
+            description:
+                'Dedicated hostel operations flow for rooming, attendance, visitors, and complaints.',
+            route: AppRoutes.HOSTEL_WARDEN_HOME,
+          ),
+          AdminPortalScreen(
+            title: 'Admin Hostel Desk',
+            description: 'Open admin operations hostel workspace.',
             route: AppRoutes.ADMIN_OPERATIONS,
             arguments: {'initialTab': 0, 'scope': 'hostel'},
           ),
@@ -262,10 +267,14 @@ class AdminPortalNavigation {
       case 'events':
         return const [
           AdminPortalScreen(
-            title: 'Event Desk',
-            description: 'Create events, registrations, and gallery updates.',
-            route: AppRoutes.ADMIN_OPERATIONS,
-            arguments: {'initialTab': 1, 'scope': 'events'},
+            title: 'Events Hub',
+            description: 'Manage school events, competitions, and registrations.',
+            route: AppRoutes.ADMIN_EVENTS_HUB,
+          ),
+          AdminPortalScreen(
+            title: 'Reports',
+            description: 'Analytics for event participation and statistics.',
+            route: AppRoutes.ADMIN_EVENTS_REPORTS,
           ),
         ];
       case 'reports':
@@ -426,15 +435,11 @@ class AdminPortalNavigation {
       );
       return;
     }
-    if (m == 'events' || has('event') || has('activity') || has('gallery')) {
-      SafeNavigation.toNamed(
-        AppRoutes.ADMIN_OPERATIONS,
-        arguments: {'initialTab': 1, 'scope': 'events'},
-      );
+    if (m == 'events' || has('event') || has('activity') || has('gallery') || has('competition')) {
+      SafeNavigation.toNamed(AppRoutes.ADMIN_EVENTS_HUB);
       return;
     }
     if (m == 'communication' ||
-        m == 'events' ||
         has('announce') ||
         has('broadcast') ||
         has('notif') ||

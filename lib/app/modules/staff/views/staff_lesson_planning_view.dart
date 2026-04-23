@@ -108,7 +108,7 @@ class StaffLessonPlanningView extends GetView<StaffLessonPlanningController> {
           ...controller.lessonPlans.map((row) => ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.menu_book_rounded, color: AppColors.primary),
-                title: Text('${row['className']} · ${row['subject']}'),
+                title: Text('${row['className']} - ${row['subject']}'),
                 subtitle: Text('${row['objective']}'),
               )),
         ],
@@ -134,8 +134,8 @@ class StaffLessonPlanningView extends GetView<StaffLessonPlanningController> {
           ...controller.topicSchedules.map((row) => ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.event_note_rounded, color: AppColors.primary),
-                title: Text('${row['topic']} · ${row['className']}'),
-                subtitle: Text('${row['date']} · ${row['period']}'),
+                title: Text('${row['topic']} - ${row['className']}'),
+                subtitle: Text('${row['date']} - ${row['period']}'),
               )),
         ],
       ),

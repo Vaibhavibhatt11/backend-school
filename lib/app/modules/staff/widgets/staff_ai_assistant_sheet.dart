@@ -105,18 +105,26 @@ class _StaffAiAssistantSheetState extends State<StaffAiAssistantSheet> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    const Icon(Icons.smart_toy_rounded, color: AppColors.primary),
+                    const Icon(
+                      Icons.smart_toy_rounded,
+                      color: AppColors.primary,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'AI Teaching Assistant',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: isDark ? AppColors.textDark : AppColors.textLight,
+                        color: isDark
+                            ? AppColors.textDark
+                            : AppColors.textLight,
                       ),
                     ),
                     const Spacer(),
-                    IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close_rounded)),
+                    IconButton(
+                      onPressed: () => Get.back(),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
                   ],
                 ),
                 Text(
@@ -125,15 +133,22 @@ class _StaffAiAssistantSheetState extends State<StaffAiAssistantSheet> {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: _contextType,
+                  initialValue: _contextType,
                   decoration: const InputDecoration(
                     labelText: 'Context',
                     border: OutlineInputBorder(),
                   ),
                   items: _contexts.entries
-                      .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e.key,
+                          child: Text(e.value),
+                        ),
+                      )
                       .toList(),
-                  onChanged: _loading ? null : (v) => setState(() => _contextType = v ?? 'general'),
+                  onChanged: _loading
+                      ? null
+                      : (v) => setState(() => _contextType = v ?? 'general'),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -141,7 +156,8 @@ class _StaffAiAssistantSheetState extends State<StaffAiAssistantSheet> {
                   maxLines: 4,
                   decoration: const InputDecoration(
                     labelText: 'What do you need?',
-                    hintText: 'e.g. Draft a 40-minute lesson on fractions for Grade 7',
+                    hintText:
+                        'e.g. Draft a 40-minute lesson on fractions for Grade 7',
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -152,14 +168,23 @@ class _StaffAiAssistantSheetState extends State<StaffAiAssistantSheet> {
                       ? const SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
                         )
                       : const Icon(Icons.auto_awesome_rounded),
                   label: Text(_loading ? 'Working…' : 'Get AI response'),
                 ),
                 if (_reply.isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  Text('Response', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
+                  Text(
+                    'Response',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   SelectableText(_reply),
                 ],

@@ -253,6 +253,12 @@ class _StaffCommunicationAnnouncementsViewState
       setState(() {});
     }
   }
+
+  void updateFilter(String filter) {
+    setState(() {
+      _selectedFilter = filter;
+    });
+  }
 }
 
 class _AnnouncementFilterChip extends StatelessWidget {
@@ -270,9 +276,7 @@ class _AnnouncementFilterChip extends StatelessWidget {
       selected: selected,
       onSelected: (_) {
         if (state == null) return;
-        state.setState(() {
-          state._selectedFilter = filter;
-        });
+        state.updateFilter(filter);
       },
       selectedColor: AppColors.primary,
       labelStyle: TextStyle(color: selected ? Colors.white : null),

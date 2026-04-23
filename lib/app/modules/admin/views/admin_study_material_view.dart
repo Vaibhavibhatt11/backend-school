@@ -15,8 +15,9 @@ class AdminStudyMaterialView extends GetView<AdminStudyMaterialController> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor:
-          isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: isDark
+          ? AppColors.backgroundDark
+          : AppColors.backgroundLight,
       appBar: const CustomAppBar(title: 'Study Material Management'),
       body: Obx(() {
         if (controller.isLoading.value && controller.materials.isEmpty) {
@@ -76,6 +77,22 @@ class AdminStudyMaterialView extends GetView<AdminStudyMaterialController> {
                           )
                           .toList(),
                     ),
+                    const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: categories
+                          .map(
+                            (category) => _QuickPublishChip(
+                              category: category,
+                              onTap: () => SafeNavigation.toNamed(
+                                AppRoutes.ADMIN_STUDY_MATERIAL_COMPOSER,
+                                arguments: {'category': category.value},
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
                   ],
                 ),
               ),
@@ -84,10 +101,14 @@ class AdminStudyMaterialView extends GetView<AdminStudyMaterialController> {
                 builder: (context, constraints) {
                   final wide = constraints.maxWidth > 900;
                   final medium = constraints.maxWidth > 620;
-                  final crossAxisCount = wide ? 2 : medium ? 2 : 1;
+                  final crossAxisCount = wide
+                      ? 2
+                      : medium
+                      ? 2
+                      : 1;
                   final itemWidth =
                       (constraints.maxWidth - ((crossAxisCount - 1) * 12)) /
-                          crossAxisCount;
+                      crossAxisCount;
                   return Wrap(
                     spacing: 12,
                     runSpacing: 12,
@@ -118,9 +139,7 @@ class AdminStudyMaterialView extends GetView<AdminStudyMaterialController> {
               ),
               const SizedBox(height: 10),
               if (recentItems.isEmpty)
-                _EmptyStateCard(
-                  label: 'No study materials published yet.',
-                )
+                _EmptyStateCard(label: 'No study materials published yet.')
               else
                 ...recentItems.map(
                   (item) => _MaterialTile(
@@ -182,10 +201,7 @@ class _ActionCard extends StatelessWidget {
                       color: color.withValues(alpha: 0.14),
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: Icon(
-                      adminStudyMaterialIcon(category),
-                      color: color,
-                    ),
+                    child: Icon(adminStudyMaterialIcon(category), color: color),
                   ),
                   const Spacer(),
                   Text(
@@ -263,7 +279,9 @@ class _MaterialTile extends StatelessWidget {
           ),
         ),
         subtitle: Text(
-          item.subtitleParts.isEmpty ? item.category.singularLabel : item.subtitleParts,
+          item.subtitleParts.isEmpty
+              ? item.category.singularLabel
+              : item.subtitleParts,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
@@ -291,10 +309,7 @@ class _MaterialTile extends StatelessWidget {
                 ),
               ),
             ),
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.primary,
-            ),
+            const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
           ],
         ),
       ),
@@ -369,6 +384,47 @@ class _SummaryChip extends StatelessWidget {
   }
 }
 
+class _QuickPublishChip extends StatelessWidget {
+  const _QuickPublishChip({required this.category, required this.onTap});
+
+  final AdminStudyMaterialCategory category;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.14),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              adminStudyMaterialIcon(category),
+              color: Colors.white,
+              size: 18,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Add ${category.singularLabel}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _EmptyStateCard extends StatelessWidget {
   const _EmptyStateCard({required this.label});
 
@@ -397,4 +453,3 @@ class _EmptyStateCard extends StatelessWidget {
     );
   }
 }
-

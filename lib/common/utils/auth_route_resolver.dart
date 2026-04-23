@@ -58,10 +58,12 @@ class AuthRouteResolver {
       case 'ACCOUNTANT':
       case 'ADMIN':
       case 'LIBRARIAN':
+        return AppRoutes.LIBRARIAN_HOME;
       case 'TRANSPORT':
-      case 'HOSTEL_WARDEN':
       case 'INVENTORY':
         return AppRoutes.ADMIN_HOME;
+      case 'HOSTEL_WARDEN':
+        return AppRoutes.HOSTEL_WARDEN_HOME;
     }
     final lower = role.trim().toLowerCase();
     switch (lower) {
@@ -73,6 +75,11 @@ class AuthRouteResolver {
         return AppRoutes.STAFF_HOME;
       case 'admin':
         return AppRoutes.ADMIN_HOME;
+      case 'librarian':
+        return AppRoutes.LIBRARIAN_HOME;
+      case 'hostel_warden':
+      case 'hostelwarden':
+        return AppRoutes.HOSTEL_WARDEN_HOME;
     }
     return null;
   }

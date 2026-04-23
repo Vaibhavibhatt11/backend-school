@@ -49,7 +49,8 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
                     subtitle: 'Daily reminder for pending homework',
                     icon: Icons.assignment_turned_in_rounded,
                     value: controller.homeworkReminderEnabled.value,
-                    onChanged: (v) => controller.homeworkReminderEnabled.value = v,
+                    onChanged: (v) =>
+                        controller.homeworkReminderEnabled.value = v,
                   ),
                 ],
               ),
@@ -111,7 +112,8 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
               title: 'Help & Support',
               subtitle: 'Contact school support team',
               icon: Icons.support_agent_rounded,
-              onTap: () => AppToast.show('Please contact: support@schoolapp.com'),
+              onTap: () =>
+                  AppToast.show('Please contact: support@schoolapp.com'),
             ),
             SizedBox(height: Responsive.h(context, 14)),
             _sectionTitle(context, 'Account'),
@@ -143,7 +145,10 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
       padding: EdgeInsets.all(Responsive.w(context, 16)),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColor.primary, AppColor.primaryDark.withValues(alpha: 0.9)],
+          colors: [
+            AppColor.primary,
+            AppColor.primaryDark.withValues(alpha: 0.9),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -164,7 +169,11 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
               color: AppColor.base.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
             ),
-            child: Icon(Icons.settings_suggest_rounded, color: AppColor.base, size: Responsive.w(context, 24)),
+            child: Icon(
+              Icons.settings_suggest_rounded,
+              color: AppColor.base,
+              size: Responsive.w(context, 24),
+            ),
           ),
           SizedBox(width: Responsive.w(context, 12)),
           Expanded(
@@ -173,17 +182,16 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
               children: [
                 Text(
                   'App settings',
-                  style: AppTextStyle.titleLarge(context).copyWith(
-                    color: AppColor.base,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: AppTextStyle.titleLarge(
+                    context,
+                  ).copyWith(color: AppColor.base, fontWeight: FontWeight.w700),
                 ),
                 SizedBox(height: Responsive.h(context, 4)),
                 Text(
                   'Manage privacy and preferences',
-                  style: AppTextStyle.bodySmall(context).copyWith(
-                    color: AppColor.base.withValues(alpha: 0.9),
-                  ),
+                  style: AppTextStyle.bodySmall(
+                    context,
+                  ).copyWith(color: AppColor.base.withValues(alpha: 0.9)),
                 ),
               ],
             ),
@@ -198,10 +206,9 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
       padding: EdgeInsets.only(bottom: Responsive.h(context, 8)),
       child: Text(
         title,
-        style: AppTextStyle.titleSmall(context).copyWith(
-          color: AppColor.textSecondary,
-          fontWeight: FontWeight.w700,
-        ),
+        style: AppTextStyle.titleSmall(
+          context,
+        ).copyWith(color: AppColor.textSecondary, fontWeight: FontWeight.w700),
       ),
     );
   }
@@ -232,18 +239,29 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
               color: AppColor.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: AppColor.primary, size: Responsive.w(context, 20)),
+            child: Icon(
+              icon,
+              color: AppColor.primary,
+              size: Responsive.w(context, 20),
+            ),
           ),
           SizedBox(width: Responsive.w(context, 10)),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTextStyle.bodyMedium(context).copyWith(fontWeight: FontWeight.w600)),
+                Text(
+                  title,
+                  style: AppTextStyle.bodyMedium(
+                    context,
+                  ).copyWith(fontWeight: FontWeight.w600),
+                ),
                 SizedBox(height: Responsive.h(context, 2)),
                 Text(
                   subtitle,
-                  style: AppTextStyle.caption(context).copyWith(color: AppColor.textSecondary),
+                  style: AppTextStyle.caption(
+                    context,
+                  ).copyWith(color: AppColor.textSecondary),
                 ),
               ],
             ),
@@ -252,7 +270,7 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
             value: value,
             onChanged: onChanged,
             activeTrackColor: AppColor.primary.withValues(alpha: 0.5),
-            activeColor: AppColor.primary,
+            activeThumbColor: AppColor.primary,
           ),
         ],
       ),
@@ -289,18 +307,29 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
                   color: AppColor.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, color: AppColor.primary, size: Responsive.w(context, 20)),
+                child: Icon(
+                  icon,
+                  color: AppColor.primary,
+                  size: Responsive.w(context, 20),
+                ),
               ),
               SizedBox(width: Responsive.w(context, 10)),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: AppTextStyle.bodyMedium(context).copyWith(fontWeight: FontWeight.w600)),
+                    Text(
+                      title,
+                      style: AppTextStyle.bodyMedium(
+                        context,
+                      ).copyWith(fontWeight: FontWeight.w600),
+                    ),
                     SizedBox(height: Responsive.h(context, 2)),
                     Text(
                       subtitle,
-                      style: AppTextStyle.caption(context).copyWith(color: AppColor.textSecondary),
+                      style: AppTextStyle.caption(
+                        context,
+                      ).copyWith(color: AppColor.textSecondary),
                     ),
                   ],
                 ),
@@ -343,7 +372,11 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
                   color: AppColor.error.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, color: AppColor.error, size: Responsive.w(context, 20)),
+                child: Icon(
+                  icon,
+                  color: AppColor.error,
+                  size: Responsive.w(context, 20),
+                ),
               ),
               SizedBox(width: Responsive.w(context, 10)),
               Expanded(
@@ -360,7 +393,9 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
                     SizedBox(height: Responsive.h(context, 2)),
                     Text(
                       subtitle,
-                      style: AppTextStyle.caption(context).copyWith(color: AppColor.textSecondary),
+                      style: AppTextStyle.caption(
+                        context,
+                      ).copyWith(color: AppColor.textSecondary),
                     ),
                   ],
                 ),
@@ -378,7 +413,9 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
       context: context,
       backgroundColor: AppColor.base,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Responsive.w(context, 18))),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(Responsive.w(context, 18)),
+        ),
       ),
       builder: (ctx) => SafeArea(
         child: Obx(
@@ -392,7 +429,9 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
                   Navigator.of(ctx).pop();
                 },
                 leading: Icon(
-                  selected ? Icons.check_circle_rounded : Icons.language_rounded,
+                  selected
+                      ? Icons.check_circle_rounded
+                      : Icons.language_rounded,
                   color: selected ? AppColor.primary : AppColor.textMuted,
                 ),
                 title: Text(lang, style: AppTextStyle.bodyMedium(ctx)),
@@ -419,7 +458,9 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
         ),
         decoration: BoxDecoration(
           color: AppColor.base,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(Responsive.w(ctx, 22))),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(Responsive.w(ctx, 22)),
+          ),
         ),
         child: Padding(
           padding: EdgeInsets.fromLTRB(
@@ -434,7 +475,9 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
               children: [
                 Text(
                   title,
-                  style: AppTextStyle.titleLarge(ctx).copyWith(fontWeight: FontWeight.w700),
+                  style: AppTextStyle.titleLarge(
+                    ctx,
+                  ).copyWith(fontWeight: FontWeight.w700),
                 ),
                 SizedBox(height: Responsive.h(ctx, 10)),
                 Text(
@@ -482,10 +525,7 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
               Get.back();
               await controller.deleteAccount();
             },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

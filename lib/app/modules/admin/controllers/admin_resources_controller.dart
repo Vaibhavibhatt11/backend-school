@@ -741,7 +741,7 @@ class AdminResourcesController extends GetxController {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      value: bookId,
+                      initialValue: bookId,
                       decoration: const InputDecoration(labelText: 'Book'),
                       items: libraryBooks
                           .map(
@@ -756,7 +756,7 @@ class AdminResourcesController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: borrowerType,
+                      initialValue: borrowerType,
                       decoration: const InputDecoration(
                         labelText: 'Borrower type',
                       ),
@@ -782,7 +782,9 @@ class AdminResourcesController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: borrowerRefId.isEmpty ? null : borrowerRefId,
+                      initialValue: borrowerRefId.isEmpty
+                          ? null
+                          : borrowerRefId,
                       decoration: const InputDecoration(labelText: 'Borrower'),
                       items: borrowerItems
                           .map(
@@ -980,7 +982,7 @@ class AdminResourcesController extends GetxController {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      value: studentId.isEmpty ? null : studentId,
+                      initialValue: studentId.isEmpty ? null : studentId,
                       decoration: const InputDecoration(labelText: 'Student'),
                       items: studentOptions
                           .map(
@@ -1088,7 +1090,7 @@ class AdminResourcesController extends GetxController {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DropdownButtonFormField<String>(
-                    value: type,
+                    initialValue: type,
                     decoration: const InputDecoration(labelText: 'Fine type'),
                     items: const [
                       DropdownMenuItem(
@@ -1326,7 +1328,7 @@ class AdminResourcesController extends GetxController {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      value: itemId,
+                      initialValue: itemId,
                       decoration: const InputDecoration(labelText: 'Item'),
                       items: inventoryItems
                           .map(
@@ -1341,7 +1343,7 @@ class AdminResourcesController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: type,
+                      initialValue: type,
                       decoration: const InputDecoration(labelText: 'Type'),
                       items: const ['IN', 'OUT']
                           .map(
@@ -1480,7 +1482,7 @@ class AdminResourcesController extends GetxController {
                   ),
                   const SizedBox(height: 10),
                   DropdownButtonFormField<String>(
-                    value: status,
+                    initialValue: status,
                     decoration: const InputDecoration(labelText: 'Status'),
                     items:
                         const [
@@ -1681,7 +1683,7 @@ class AdminResourcesController extends GetxController {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DropdownButtonFormField<String>(
-                    value: vendorId,
+                    initialValue: vendorId,
                     decoration: const InputDecoration(labelText: 'Vendor'),
                     items: vendors
                         .map(
@@ -1718,7 +1720,7 @@ class AdminResourcesController extends GetxController {
                   ),
                   const SizedBox(height: 10),
                   DropdownButtonFormField<String>(
-                    value: status,
+                    initialValue: status,
                     decoration: const InputDecoration(labelText: 'Status'),
                     items:
                         const [

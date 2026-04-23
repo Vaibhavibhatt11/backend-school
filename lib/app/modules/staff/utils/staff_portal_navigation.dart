@@ -219,6 +219,34 @@ class StaffPortalNavigation {
             route: AppRoutes.STAFF_STUDY_MATERIAL,
           ),
           StaffPortalScreen(
+            title: 'Upload Notes',
+            description:
+                'Create and manage classroom notes and written resources.',
+            route: AppRoutes.STAFF_STUDY_MATERIAL_LIBRARY,
+            arguments: {'category': 'notes'},
+          ),
+          StaffPortalScreen(
+            title: 'Upload Videos',
+            description:
+                'Publish lesson videos, explainers, and recorded walkthroughs.',
+            route: AppRoutes.STAFF_STUDY_MATERIAL_LIBRARY,
+            arguments: {'category': 'videos'},
+          ),
+          StaffPortalScreen(
+            title: 'Upload PDFs',
+            description:
+                'Manage PDF handouts, worksheets, and printable packs.',
+            route: AppRoutes.STAFF_STUDY_MATERIAL_LIBRARY,
+            arguments: {'category': 'pdfs'},
+          ),
+          StaffPortalScreen(
+            title: 'Learning Resources',
+            description:
+                'Curate website links and external learning references.',
+            route: AppRoutes.STAFF_STUDY_MATERIAL_LIBRARY,
+            arguments: {'category': 'resources'},
+          ),
+          StaffPortalScreen(
             title: 'Reports',
             description: 'Track material-related reporting visibility.',
             route: AppRoutes.STAFF_HOME,
@@ -242,16 +270,16 @@ class StaffPortalNavigation {
       case 'library':
         return const [
           StaffPortalScreen(
-            title: 'Reports',
+            title: 'Librarian Portal',
+            description:
+                'Open the dedicated library workflow for catalog and circulation.',
+            route: AppRoutes.LIBRARIAN_HOME,
+          ),
+          StaffPortalScreen(
+            title: 'Library Reports',
             description: 'Use current analytics for library-linked activity.',
             route: AppRoutes.STAFF_HOME,
             arguments: {'tabIndex': 3},
-          ),
-          StaffPortalScreen(
-            title: 'Staff Dashboard',
-            description: 'Stay aligned with the latest operational snapshot.',
-            route: AppRoutes.STAFF_HOME,
-            arguments: {'tabIndex': 0},
           ),
         ];
       case 'transport':
@@ -272,31 +300,39 @@ class StaffPortalNavigation {
       case 'hostel':
         return const [
           StaffPortalScreen(
-            title: 'Reports',
+            title: 'Hostel Warden Portal',
+            description:
+                'Open dedicated hostel workflow for rooms, attendance, visitors, and complaints.',
+            route: AppRoutes.HOSTEL_WARDEN_HOME,
+          ),
+          StaffPortalScreen(
+            title: 'Hostel Reports',
             description: 'Review hostel-linked operational summaries.',
             route: AppRoutes.STAFF_HOME,
             arguments: {'tabIndex': 3},
-          ),
-          StaffPortalScreen(
-            title: 'Communication Center',
-            description: 'Coordinate meetings and hostel notices.',
-            route: AppRoutes.STAFF_HOME,
-            arguments: {'tabIndex': 2},
           ),
         ];
       case 'inventory_lab':
         return const [
           StaffPortalScreen(
-            title: 'Reports',
-            description: 'Monitor inventory-linked reporting and trends.',
-            route: AppRoutes.STAFF_HOME,
-            arguments: {'tabIndex': 3},
+            title: 'Inventory & Lab Hub',
+            description: 'Dashboard for lab equipment and stock management.',
+            route: AppRoutes.STAFF_INVENTORY_HUB,
           ),
           StaffPortalScreen(
-            title: 'Staff Dashboard',
-            description: 'Use the live dashboard for workload context.',
-            route: AppRoutes.STAFF_HOME,
-            arguments: {'tabIndex': 0},
+            title: 'Lab Equipment',
+            description: 'Track and manage lab assets and equipment.',
+            route: AppRoutes.STAFF_INVENTORY_EQUIPMENT,
+          ),
+          StaffPortalScreen(
+            title: 'Inventory Tracking',
+            description: 'Monitor stock levels and record stock movements.',
+            route: AppRoutes.STAFF_INVENTORY_TRACKING,
+          ),
+          StaffPortalScreen(
+            title: 'Purchase Orders',
+            description: 'Raise PO requests and manage vendor details.',
+            route: AppRoutes.STAFF_INVENTORY_PURCHASE_ORDERS,
           ),
         ];
       case 'payroll_hr':

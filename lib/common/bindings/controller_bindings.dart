@@ -12,6 +12,7 @@ import '../services/parent/parent_finance_service.dart';
 import '../services/parent/parent_profile_service.dart';
 import '../services/parent/parent_settings_service.dart';
 import '../services/admin/admin_service.dart';
+import '../services/staff/staff_portal_store_service.dart';
 import '../services/staff/staff_service.dart';
 import '../../app/data/repositories/user_repository.dart';
 
@@ -86,6 +87,15 @@ class ControllerBinding extends Bindings {
     }
     if (!Get.isRegistered<StaffService>()) {
       Get.put<StaffService>(StaffService(Get.find<ApiClient>()), permanent: true);
+    }
+    if (!Get.isRegistered<StaffPortalStoreService>()) {
+      Get.put<StaffPortalStoreService>(
+        StaffPortalStoreService(
+          Get.find<AdminService>(),
+          Get.find<StaffService>(),
+        ),
+        permanent: true,
+      );
     }
     if (!Get.isRegistered<UserRepository>()) {
       Get.put<UserRepository>(UserRepository(), permanent: true);

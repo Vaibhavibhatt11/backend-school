@@ -11,7 +11,9 @@ import 'package:erp_frontend/app/modules/staff/controllers/staff_performance_mon
 import 'package:erp_frontend/app/modules/staff/controllers/staff_profile_controller.dart';
 import 'package:erp_frontend/app/modules/staff/controllers/staff_reports_controller.dart';
 import 'package:erp_frontend/app/modules/staff/controllers/staff_settings_controller.dart';
+import 'package:erp_frontend/app/modules/staff/controllers/staff_study_material_controller.dart';
 import 'package:erp_frontend/app/modules/staff/models/staff_module_catalog.dart';
+import 'package:erp_frontend/app/modules/staff/models/staff_study_material_models.dart';
 import 'package:erp_frontend/app/modules/staff/utils/staff_portal_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -314,6 +316,7 @@ Future<void> _refreshStaffModule(String moduleId) async {
   final homeworkAssignment = Get.find<StaffHomeworkAssignmentController>();
   final examAssessment = Get.find<StaffExamAssessmentController>();
   final performanceMonitoring = Get.find<StaffPerformanceMonitoringController>();
+  final studyMaterial = Get.find<StaffStudyMaterialController>();
 
   switch (moduleId) {
     case 'dashboard':
@@ -321,27 +324,58 @@ Future<void> _refreshStaffModule(String moduleId) async {
       return;
     case 'attendance_leave':
       attendanceLeave.setTab(0);
-      await Future.wait([dashboard.loadDashboard(), reports.loadReports()]);
+      await Future.wait([
+        attendanceLeave.loadData(),
+        dashboard.loadDashboard(),
+        reports.loadReports(),
+      ]);
       return;
     case 'class_teaching':
       classTeaching.setTab(0);
-      await Future.wait([dashboard.loadDashboard(), reports.loadReports()]);
+      await Future.wait([
+        classTeaching.loadData(),
+        dashboard.loadDashboard(),
+        reports.loadReports(),
+      ]);
       return;
     case 'lesson_planning':
       lessonPlanning.setTab(0);
-      await Future.wait([dashboard.loadDashboard(), reports.loadReports()]);
+      await Future.wait([
+        lessonPlanning.loadData(),
+        dashboard.loadDashboard(),
+        reports.loadReports(),
+      ]);
       return;
     case 'homework_assignment':
       homeworkAssignment.setTab(0);
-      await Future.wait([dashboard.loadDashboard(), reports.loadReports()]);
+      await Future.wait([
+        homeworkAssignment.loadData(),
+        dashboard.loadDashboard(),
+        reports.loadReports(),
+      ]);
       return;
     case 'exam_assessment':
       examAssessment.setTab(0);
-      await Future.wait([dashboard.loadDashboard(), reports.loadReports()]);
+      await Future.wait([
+        examAssessment.loadData(),
+        dashboard.loadDashboard(),
+        reports.loadReports(),
+      ]);
       return;
     case 'performance':
       performanceMonitoring.setTab(0);
-      await Future.wait([dashboard.loadDashboard(), reports.loadReports()]);
+      await Future.wait([
+        performanceMonitoring.loadData(),
+        dashboard.loadDashboard(),
+        reports.loadReports(),
+      ]);
+      return;
+    case 'study_material':
+      await Future.wait([
+        studyMaterial.loadInitialData(showErrors: false),
+        dashboard.loadDashboard(),
+        reports.loadReports(),
+      ]);
       return;
     case 'profile':
     case 'payroll_hr':
@@ -400,6 +434,7 @@ List<_StaffMetric> _buildStaffMetrics(String moduleId) {
   final homeworkAssignment = Get.find<StaffHomeworkAssignmentController>();
   final examAssessment = Get.find<StaffExamAssessmentController>();
   final performanceMonitoring = Get.find<StaffPerformanceMonitoringController>();
+  final studyMaterial = Get.find<StaffStudyMaterialController>();
 
   final documentsCount = profile.documentRows.isNotEmpty
       ? profile.documentRows.length
@@ -576,24 +611,27 @@ List<_StaffMetric> _buildStaffMetrics(String moduleId) {
     case 'study_material':
       return [
         _StaffMetric(
-          label: 'Assigned Classes',
-          value: '${dashboard.assignedClasses.length}',
-          caption: 'Classes tied to teaching work',
+          label: 'Materials',
+          value: '${studyMaterial.materials.length}',
+          caption: 'Published study material records',
         ),
         _StaffMetric(
-          label: 'Pending Tasks',
-          value: '${dashboard.pendingTasks.length}',
-          caption: 'Open teaching actions',
+          label: 'Notes',
+          value:
+              '${studyMaterial.countForCategory(StaffStudyMaterialCategory.notes)}',
+          caption: 'Uploaded notes available',
         ),
         _StaffMetric(
-          label: 'Reports',
-          value: '${reports.reportTiles.length}',
-          caption: 'Current academic report cards',
+          label: 'Videos & PDFs',
+          value:
+              '${studyMaterial.countForCategory(StaffStudyMaterialCategory.videos) + studyMaterial.countForCategory(StaffStudyMaterialCategory.pdfs)}',
+          caption: 'Multimedia learning assets',
         ),
         _StaffMetric(
-          label: 'Announcements',
-          value: '${communication.announcements.length}',
-          caption: 'Available communication records',
+          label: 'Resources',
+          value:
+              '${studyMaterial.countForCategory(StaffStudyMaterialCategory.resources)}',
+          caption: 'Reference links and resources',
         ),
       ];
     case 'performance':

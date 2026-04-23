@@ -127,8 +127,8 @@ class StaffHomeworkAssignmentView
                 Icons.assignment_rounded,
                 color: AppColors.primary,
               ),
-              title: Text('${row['title']} · ${row['className']}'),
-              subtitle: Text('${row['subject']} · ${row['status']}'),
+              title: Text('${row['title']} - ${row['className']}'),
+              subtitle: Text('${row['subject']} - ${row['status']}'),
             ),
           ),
         ],
@@ -159,7 +159,7 @@ class StaffHomeworkAssignmentView
                 color: AppColors.primary,
               ),
               title: Text('${row['assignmentTitle']}'),
-              subtitle: Text('Due ${row['dueDate']} · ${row['dueTime']}'),
+              subtitle: Text('Due ${row['dueDate']} - ${row['dueTime']}'),
             ),
           ),
         ],
@@ -190,7 +190,7 @@ class StaffHomeworkAssignmentView
                 color: AppColors.primary,
               ),
               title: Text('${row['studentName']}'),
-              subtitle: Text('${row['assignmentTitle']} · ${row['status']}'),
+              subtitle: Text('${row['assignmentTitle']} - ${row['status']}'),
             ),
           ),
         ],
@@ -226,7 +226,7 @@ class StaffHomeworkAssignmentView
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${row['studentName']} · ${row['assignmentTitle']}',
+                    '${row['studentName']} - ${row['assignmentTitle']}',
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 4),
@@ -354,7 +354,7 @@ class StaffHomeworkAssignmentView
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: status,
+                initialValue: status,
                 decoration: const InputDecoration(labelText: 'Status'),
                 items: const ['SUBMITTED', 'PENDING', 'LATE']
                     .map((e) => DropdownMenuItem(value: e, child: Text(e)))

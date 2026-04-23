@@ -1,6 +1,5 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/modules/admin/controllers/admin_admissions_controller.dart';
-import 'package:erp_frontend/app/modules/admin/views/admin_registration_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

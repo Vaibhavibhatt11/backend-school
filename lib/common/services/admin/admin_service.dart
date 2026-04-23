@@ -1652,6 +1652,40 @@ class AdminService {
     );
   }
 
+  Future<Map<String, dynamic>> getStaffProductivityReport({
+    String? staffId,
+    String? dateFrom,
+    String? dateTo,
+  }) {
+    return _get(
+      '/school/reports/staff-productivity',
+      query: {
+        if (staffId != null && staffId.trim().isNotEmpty)
+          'staffId': staffId.trim(),
+        if (dateFrom != null && dateFrom.trim().isNotEmpty)
+          'dateFrom': dateFrom.trim(),
+        if (dateTo != null && dateTo.trim().isNotEmpty) 'dateTo': dateTo.trim(),
+      },
+      context: 'staff productivity report',
+    );
+  }
+
+  Future<Map<String, dynamic>> getSyllabusProgressReport({
+    String? classId,
+    String? subjectId,
+  }) {
+    return _get(
+      '/school/reports/syllabus-progress',
+      query: {
+        if (classId != null && classId.trim().isNotEmpty)
+          'classId': classId.trim(),
+        if (subjectId != null && subjectId.trim().isNotEmpty)
+          'subjectId': subjectId.trim(),
+      },
+      context: 'syllabus progress report',
+    );
+  }
+
   Future<Map<String, dynamic>> generateReport(Map<String, dynamic> payload) {
     return _post(
       ApiEndpoints.schoolReportGenerate,
@@ -2390,6 +2424,17 @@ class AdminService {
       data: payload,
     );
     return extractApiData(res.data, context: 'create transport driver');
+  }
+
+  Future<Map<String, dynamic>> updateTransportDriver({
+    required String id,
+    required Map<String, dynamic> payload,
+  }) async {
+    final res = await _apiClient.put(
+      ApiEndpoints.schoolTransportDriverById(id),
+      data: payload,
+    );
+    return extractApiData(res.data, context: 'update transport driver');
   }
 
   Future<Map<String, dynamic>> getTransportAllocations({

@@ -174,7 +174,7 @@ class StaffClassTeachingView extends GetView<StaffClassTeachingController> {
           ...controller.subjectAssignments.map((row) => ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.menu_book_rounded, color: AppColors.primary),
-                title: Text('${row['className']} · ${row['subject']}'),
+                title: Text('${row['className']} - ${row['subject']}'),
                 subtitle: Text('Teacher: ${row['teacher']}'),
               )),
         ],
@@ -200,8 +200,8 @@ class StaffClassTeachingView extends GetView<StaffClassTeachingController> {
           ...controller.classroomSchedule.map((row) => ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.calendar_today_rounded, color: AppColors.primary),
-                title: Text('${row['className']} · ${row['subject']}'),
-                subtitle: Text('${row['day']} · ${row['period']}'),
+                title: Text('${row['className']} - ${row['subject']}'),
+                subtitle: Text('${row['day']} - ${row['period']}'),
               )),
         ],
       ),

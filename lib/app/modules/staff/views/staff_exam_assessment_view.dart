@@ -116,8 +116,8 @@ class StaffExamAssessmentView extends GetView<StaffExamAssessmentController> {
           ...controller.exams.map((row) => ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.quiz_rounded, color: AppColors.primary),
-                title: Text('${row['name']} · ${row['className']}'),
-                subtitle: Text('${row['date']} · ${row['status']}'),
+                title: Text('${row['name']} - ${row['className']}'),
+                subtitle: Text('${row['date']} - ${row['status']}'),
               )),
         ],
       ),
@@ -142,8 +142,8 @@ class StaffExamAssessmentView extends GetView<StaffExamAssessmentController> {
           ...controller.questionPapers.map((row) => ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.description_rounded, color: AppColors.primary),
-                title: Text('${row['examName']} · ${row['subject']}'),
-                subtitle: Text('${row['fileName']} · ${row['status']}'),
+                title: Text('${row['examName']} - ${row['subject']}'),
+                subtitle: Text('${row['fileName']} - ${row['status']}'),
               )),
         ],
       ),
@@ -168,7 +168,7 @@ class StaffExamAssessmentView extends GetView<StaffExamAssessmentController> {
           ...controller.marksEntries.map((row) => ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.person_rounded, color: AppColors.primary),
-                title: Text('${row['studentName']} · ${row['examName']}'),
+                title: Text('${row['studentName']} - ${row['examName']}'),
                 subtitle: Text('Marks: ${row['marks']}'),
               )),
         ],
@@ -220,8 +220,8 @@ class StaffExamAssessmentView extends GetView<StaffExamAssessmentController> {
           ...controller.results.map((row) => ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.campaign_rounded, color: AppColors.primary),
-                title: Text('${row['examName']} · ${row['className']}'),
-                subtitle: Text('${row['status']} · ${row['publishedOn']}'),
+                title: Text('${row['examName']} - ${row['className']}'),
+                subtitle: Text('${row['status']} - ${row['publishedOn']}'),
               )),
         ],
       ),

@@ -115,7 +115,7 @@ class StaffPerformanceMonitoringView
           ...controller.marks.map((row) => ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.quiz_rounded, color: AppColors.primary),
-                title: Text('${row['studentName']} · ${row['subject']}'),
+                title: Text('${row['studentName']} - ${row['subject']}'),
                 subtitle: Text('Score: ${row['score']}'),
               )),
         ],
@@ -175,7 +175,7 @@ class StaffPerformanceMonitoringView
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('${row['studentName']} · ${row['term']}',
+                    Text('${row['studentName']} - ${row['term']}',
                         style: const TextStyle(fontWeight: FontWeight.w700)),
                     const SizedBox(height: 4),
                     Text('${row['summary']}'),

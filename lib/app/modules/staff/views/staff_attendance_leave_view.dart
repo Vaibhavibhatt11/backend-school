@@ -140,7 +140,7 @@ class StaffAttendanceLeaveView extends GetView<StaffAttendanceLeaveController> {
                   Icons.calendar_today_rounded,
                   color: AppColors.primary,
                 ),
-                title: Text('${row['date']} · ${row['checkIn']}'),
+                title: Text('${row['date']} - ${row['checkIn']}'),
                 subtitle: Text('Status: ${row['status']}'),
               ),
             ),
@@ -178,7 +178,7 @@ class StaffAttendanceLeaveView extends GetView<StaffAttendanceLeaveController> {
                   title: Text(
                     '${row['type']} leave (${row['fromDate']} to ${row['toDate']})',
                   ),
-                  subtitle: Text('${row['reason']} · ${row['status']}'),
+                  subtitle: Text('${row['reason']} - ${row['status']}'),
                 ),
               ),
             ),
@@ -203,7 +203,7 @@ class StaffAttendanceLeaveView extends GetView<StaffAttendanceLeaveController> {
             ),
             child: ListTile(
               title: Text(
-                '${row['type']} · ${row['fromDate']} to ${row['toDate']}',
+                '${row['type']} - ${row['fromDate']} to ${row['toDate']}',
               ),
               subtitle: Text('Status: ${row['status']}'),
               trailing: Wrap(
@@ -300,9 +300,9 @@ class StaffAttendanceLeaveView extends GetView<StaffAttendanceLeaveController> {
                   Icons.watch_later_outlined,
                   color: AppColors.primary,
                 ),
-                title: Text('${row['date']} · Check-in ${row['checkIn']}'),
+                title: Text('${row['date']} - Check-in ${row['checkIn']}'),
                 subtitle: Text(
-                  'Late: ${row['minutesLate']} mins · ${row['status']}',
+                  'Late: ${row['minutesLate']} mins - ${row['status']}',
                 ),
                 trailing: FilledButton.tonal(
                   onPressed: open && id.isNotEmpty
@@ -345,7 +345,7 @@ class StaffAttendanceLeaveView extends GetView<StaffAttendanceLeaveController> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: status,
+                initialValue: status,
                 decoration: const InputDecoration(labelText: 'Status'),
                 items: const ['PRESENT', 'LATE', 'ABSENT']
                     .map((e) => DropdownMenuItem(value: e, child: Text(e)))
@@ -392,7 +392,7 @@ class StaffAttendanceLeaveView extends GetView<StaffAttendanceLeaveController> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 DropdownButtonFormField<String>(
-                  value: type,
+                  initialValue: type,
                   decoration: const InputDecoration(labelText: 'Leave Type'),
                   items: const ['Casual', 'Sick', 'Emergency']
                       .map((e) => DropdownMenuItem(value: e, child: Text(e)))

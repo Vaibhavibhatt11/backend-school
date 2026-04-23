@@ -39,11 +39,14 @@ class SettingsView extends GetView<SettingsController> {
                           child: Text(
                             controller.userName.value.isNotEmpty
                                 ? controller.userName.value
-                                    .trim()
-                                    .split(RegExp(r'\s+'))
-                                    .take(2)
-                                    .map((p) => p.isEmpty ? '' : p[0].toUpperCase())
-                                    .join()
+                                      .trim()
+                                      .split(RegExp(r'\s+'))
+                                      .take(2)
+                                      .map(
+                                        (p) =>
+                                            p.isEmpty ? '' : p[0].toUpperCase(),
+                                      )
+                                      .join()
                                 : 'PU',
                             style: const TextStyle(
                               color: Colors.white,
@@ -181,7 +184,10 @@ class SettingsView extends GetView<SettingsController> {
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: _confirmDeleteAccount,
-                icon: const Icon(Icons.delete_forever_rounded, color: Colors.red),
+                icon: const Icon(
+                  Icons.delete_forever_rounded,
+                  color: Colors.red,
+                ),
                 label: const Text(
                   'Delete Account',
                   style: TextStyle(color: Colors.red),
@@ -248,10 +254,7 @@ class SettingsView extends GetView<SettingsController> {
               Get.back();
               controller.deleteAccount();
             },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -325,12 +328,11 @@ class SettingsView extends GetView<SettingsController> {
             return Switch(
               value: currentValue,
               onChanged: onChanged,
-              activeColor: AppColors.primary,
+              activeThumbColor: AppColors.primary,
             );
           }),
         ],
       ),
     );
   }
-
 }

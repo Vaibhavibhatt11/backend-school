@@ -7,7 +7,6 @@ import 'package:erp_frontend/app/modules/admin/views/admin_add_document_view.dar
 import 'package:erp_frontend/app/modules/admin/views/admin_document_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class AdminAdmissionApplication {
   const AdminAdmissionApplication({
@@ -70,7 +69,8 @@ class AdminAdmissionApplication {
   final String permanentAddress;
   final String telephone;
 
-  String get fullName => '$firstName $middleName $lastName'.replaceAll(RegExp(r'\s+'), ' ').trim();
+  String get fullName =>
+      '$firstName $middleName $lastName'.replaceAll(RegExp(r'\s+'), ' ').trim();
   String get classLabel =>
       appliedSection.isEmpty ? appliedClass : '$appliedClass - $appliedSection';
   bool get canReview => status == 'UNDER_REVIEW';
@@ -145,14 +145,18 @@ class AdminAdmissionsController extends GetxController {
   }
 
   Future<void> openSetFeesDialog() async {
-    final feeController = TextEditingController(text: currentAdmissionFee.value.toString());
+    final feeController = TextEditingController(
+      text: currentAdmissionFee.value.toString(),
+    );
     final confirmed = await Get.dialog<bool>(
       AlertDialog(
         title: const Text('Set Admission Fees'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Enter the fee amount to be accepted for new admissions:'),
+            const Text(
+              'Enter the fee amount to be accepted for new admissions:',
+            ),
             const SizedBox(height: 16),
             TextField(
               controller: feeController,
@@ -166,8 +170,14 @@ class AdminAdmissionsController extends GetxController {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Get.back(result: true), child: const Text('Save Fees')),
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Get.back(result: true),
+            child: const Text('Save Fees'),
+          ),
         ],
       ),
     );
@@ -191,9 +201,14 @@ class AdminAdmissionsController extends GetxController {
     final confirmed = await Get.dialog<bool>(
       AlertDialog(
         title: const Text('Delete Application'),
-        content: Text('Are you sure you want to permanently delete the application for ${item.fullName}?'),
+        content: Text(
+          'Are you sure you want to permanently delete the application for ${item.fullName}?',
+        ),
         actions: [
-          TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             onPressed: () => Get.back(result: true),
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
@@ -227,7 +242,7 @@ class AdminAdmissionsController extends GetxController {
     try {
       isLoading.value = true;
       errorMessage.value = '';
-      
+
       // Fetch classes, applications, and school settings
       final results = await Future.wait([
         loadClassOptions(),
@@ -237,14 +252,18 @@ class AdminAdmissionsController extends GetxController {
 
       // Handle settings data
       final rawData = results[2] as Map<String, dynamic>;
-      final settings = (rawData['settings'] as Map<String, dynamic>?) ?? rawData;
-      
+      final settings =
+          (rawData['settings'] as Map<String, dynamic>?) ?? rawData;
+
       if (settings.containsKey('admissionFee')) {
-        currentAdmissionFee.value = double.tryParse(settings['admissionFee'].toString()) ?? 0.0;
+        currentAdmissionFee.value =
+            double.tryParse(settings['admissionFee'].toString()) ?? 0.0;
       } else if (settings.containsKey('admission_fee')) {
-        currentAdmissionFee.value = double.tryParse(settings['admission_fee'].toString()) ?? 0.0;
+        currentAdmissionFee.value =
+            double.tryParse(settings['admission_fee'].toString()) ?? 0.0;
       } else if (settings.containsKey('admission_fees')) {
-        currentAdmissionFee.value = double.tryParse(settings['admission_fees'].toString()) ?? 0.0;
+        currentAdmissionFee.value =
+            double.tryParse(settings['admission_fees'].toString()) ?? 0.0;
       }
     } catch (e) {
       errorMessage.value = dioOrApiErrorMessage(e);
@@ -360,7 +379,7 @@ class AdminAdmissionsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<AdminClassOption>(
-                      value: selectedClass,
+                      initialValue: selectedClass,
                       decoration: const InputDecoration(
                         labelText: 'Applied class',
                       ),
@@ -517,115 +536,211 @@ class AdminAdmissionsController extends GetxController {
   Future<void> openDetails(AdminAdmissionApplication item) async {
     try {
       final data = await _adminService.getAdmissionApplicationById(item.id);
-      final documents = (data['documents'] as List<dynamic>? ?? const <dynamic>[])
-          .whereType<Map>()
-          .map((doc) => doc.cast<String, dynamic>())
-          .toList();
+      final documents =
+          (data['documents'] as List<dynamic>? ?? const <dynamic>[])
+              .whereType<Map>()
+              .map((doc) => doc.cast<String, dynamic>())
+              .toList();
 
       final fullItem = AdminAdmissionApplication.fromJson(data);
       final isDark = Get.isDarkMode;
 
-      await Get.to(() => Scaffold(
-        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
-        body: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              expandedHeight: 200,
-              pinned: true,
-              flexibleSpace: FlexibleSpaceBar(
-                title: Text(
-                  fullItem.fullName,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+      await Get.to(
+        () => Scaffold(
+          backgroundColor: isDark
+              ? AppColors.backgroundDark
+              : AppColors.backgroundLight,
+          body: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 200,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  title: Text(
+                    fullItem.fullName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+                    ),
+                  ),
+                  background: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [AppColors.primary, AppColors.primaryDark],
+                      ),
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.person_add_alt_1_rounded,
+                        size: 80,
+                        color: Colors.white.withValues(alpha: 0.2),
+                      ),
+                    ),
                   ),
                 ),
-                background: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [AppColors.primary, AppColors.primaryDark],
-                    ),
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.person_add_alt_1_rounded,
-                      size: 80,
-                      color: Colors.white.withValues(alpha: 0.2),
-                    ),
+                actions: [
+                  _buildStatusPill(fullItem.status),
+                  const SizedBox(width: 16),
+                ],
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildPremiumSection(
+                        context: Get.context!,
+                        title: 'Admission Info',
+                        children: [
+                          _buildPremiumRow(
+                            Icons.tag_rounded,
+                            'App No',
+                            fullItem.applicationNo.isEmpty
+                                ? 'Pending'
+                                : fullItem.applicationNo,
+                          ),
+                          _buildPremiumRow(
+                            Icons.school_rounded,
+                            'Applied Class',
+                            fullItem.classLabel,
+                          ),
+                          if (fullItem.registrationNo.isNotEmpty)
+                            _buildPremiumRow(
+                              Icons.badge_rounded,
+                              'Reg No',
+                              fullItem.registrationNo,
+                              color: AppColors.primary,
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      _buildPremiumSection(
+                        context: Get.context!,
+                        title: 'Student Details',
+                        children: [
+                          _buildPremiumRow(
+                            Icons.person_rounded,
+                            'Full Name',
+                            fullItem.fullName,
+                          ),
+                          _buildPremiumRow(
+                            Icons.email_rounded,
+                            'Email',
+                            fullItem.email,
+                          ),
+                          _buildPremiumRow(
+                            Icons.phone_rounded,
+                            'Phone',
+                            fullItem.phone,
+                          ),
+                          _buildPremiumRow(
+                            Icons.wc_rounded,
+                            'Gender',
+                            fullItem.gender,
+                          ),
+                          _buildPremiumRow(
+                            Icons.cake_rounded,
+                            'Date of Birth',
+                            fullItem.dob,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      _buildPremiumSection(
+                        context: Get.context!,
+                        title: 'Parent Details',
+                        children: [
+                          _buildPremiumRow(
+                            Icons.man_rounded,
+                            'Father\'s Name',
+                            fullItem.fatherName,
+                          ),
+                          _buildPremiumRow(
+                            Icons.woman_rounded,
+                            'Mother\'s Name',
+                            fullItem.motherName,
+                          ),
+                          _buildPremiumRow(
+                            Icons.work_rounded,
+                            'Father\'s Job',
+                            fullItem.fatherOccupation,
+                          ),
+                          _buildPremiumRow(
+                            Icons.work_outline_rounded,
+                            'Mother\'s Job',
+                            fullItem.motherOccupation,
+                          ),
+                          _buildPremiumRow(
+                            Icons.contact_phone_rounded,
+                            'Contact 1',
+                            fullItem.contact1,
+                          ),
+                          _buildPremiumRow(
+                            Icons.contact_phone_rounded,
+                            'Contact 2',
+                            fullItem.contact2,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      _buildPremiumSection(
+                        context: Get.context!,
+                        title: 'Address',
+                        children: [
+                          _buildPremiumRow(
+                            Icons.home_rounded,
+                            'Current',
+                            fullItem.address,
+                          ),
+                          _buildPremiumRow(
+                            Icons.location_on_rounded,
+                            'Permanent',
+                            fullItem.permanentAddress,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Documents',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextButton.icon(
+                            onPressed: () => addDocument(fullItem),
+                            icon: const Icon(
+                              Icons.add_circle_outline_rounded,
+                              size: 20,
+                            ),
+                            label: const Text('Upload Document'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      if (documents.isEmpty)
+                        const Center(child: Text('No documents uploaded yet.'))
+                      else
+                        ...documents.map((doc) => _buildDocumentCard(doc)),
+                      const SizedBox(height: 100),
+                    ],
                   ),
                 ),
               ),
-              actions: [
-                _buildStatusPill(fullItem.status),
-                const SizedBox(width: 16),
-              ],
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildPremiumSection(context: Get.context!, title: 'Admission Info', children: [
-                      _buildPremiumRow(Icons.tag_rounded, 'App No', fullItem.applicationNo.isEmpty ? 'Pending' : fullItem.applicationNo),
-                      _buildPremiumRow(Icons.school_rounded, 'Applied Class', fullItem.classLabel),
-                      if (fullItem.registrationNo.isNotEmpty)
-                        _buildPremiumRow(Icons.badge_rounded, 'Reg No', fullItem.registrationNo, color: AppColors.primary),
-                    ]),
-                    const SizedBox(height: 24),
-                    _buildPremiumSection(context: Get.context!, title: 'Student Details', children: [
-                      _buildPremiumRow(Icons.person_rounded, 'Full Name', fullItem.fullName),
-                      _buildPremiumRow(Icons.email_rounded, 'Email', fullItem.email),
-                      _buildPremiumRow(Icons.phone_rounded, 'Phone', fullItem.phone),
-                      _buildPremiumRow(Icons.wc_rounded, 'Gender', fullItem.gender),
-                      _buildPremiumRow(Icons.cake_rounded, 'Date of Birth', fullItem.dob),
-                    ]),
-                    const SizedBox(height: 24),
-                    _buildPremiumSection(context: Get.context!, title: 'Parent Details', children: [
-                      _buildPremiumRow(Icons.man_rounded, 'Father\'s Name', fullItem.fatherName),
-                      _buildPremiumRow(Icons.woman_rounded, 'Mother\'s Name', fullItem.motherName),
-                      _buildPremiumRow(Icons.work_rounded, 'Father\'s Job', fullItem.fatherOccupation),
-                      _buildPremiumRow(Icons.work_outline_rounded, 'Mother\'s Job', fullItem.motherOccupation),
-                      _buildPremiumRow(Icons.contact_phone_rounded, 'Contact 1', fullItem.contact1),
-                      _buildPremiumRow(Icons.contact_phone_rounded, 'Contact 2', fullItem.contact2),
-                    ]),
-                    const SizedBox(height: 24),
-                    _buildPremiumSection(context: Get.context!, title: 'Address', children: [
-                      _buildPremiumRow(Icons.home_rounded, 'Current', fullItem.address),
-                      _buildPremiumRow(Icons.location_on_rounded, 'Permanent', fullItem.permanentAddress),
-                    ]),
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Documents',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        TextButton.icon(
-                          onPressed: () => addDocument(fullItem),
-                          icon: const Icon(Icons.add_circle_outline_rounded, size: 20),
-                          label: const Text('Upload Document'),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    if (documents.isEmpty)
-                      const Center(child: Text('No documents uploaded yet.'))
-                    else
-                      ...documents.map((doc) => _buildDocumentCard(doc)),
-                    const SizedBox(height: 100),
-                  ],
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
+          bottomNavigationBar: fullItem.status != 'ONBOARDED'
+              ? _buildActionBar(fullItem)
+              : null,
         ),
-        bottomNavigationBar: fullItem.status != 'ONBOARDED' ? _buildActionBar(fullItem) : null,
-      ));
+      );
     } catch (e) {
       AppToast.show(dioOrApiErrorMessage(e));
     }
@@ -637,7 +752,11 @@ class AdminAdmissionsController extends GetxController {
       decoration: BoxDecoration(
         color: Get.isDarkMode ? AppColors.surfaceDark : Colors.white,
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, -2)),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
         ],
       ),
       child: Row(
@@ -645,7 +764,10 @@ class AdminAdmissionsController extends GetxController {
           Expanded(
             child: OutlinedButton(
               onPressed: () => reviewApplication(item, 'REJECTED'),
-              style: OutlinedButton.styleFrom(foregroundColor: Colors.red, side: const BorderSide(color: Colors.red)),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.red,
+                side: const BorderSide(color: Colors.red),
+              ),
               child: const Text('Reject'),
             ),
           ),
@@ -653,7 +775,10 @@ class AdminAdmissionsController extends GetxController {
           Expanded(
             child: OutlinedButton(
               onPressed: () => reviewApplication(item, 'WAITING'),
-              style: OutlinedButton.styleFrom(foregroundColor: Colors.orange, side: const BorderSide(color: Colors.orange)),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.orange,
+                side: const BorderSide(color: Colors.orange),
+              ),
               child: const Text('Waitlist'),
             ),
           ),
@@ -670,19 +795,32 @@ class AdminAdmissionsController extends GetxController {
     );
   }
 
-  Widget _buildPremiumSection({required BuildContext context, required String title, required List<Widget> children}) {
+  Widget _buildPremiumSection({
+    required BuildContext context,
+    required String title,
+    required List<Widget> children,
+  }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary)),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
+          ),
           const SizedBox(height: 16),
           ...children,
         ],
@@ -690,7 +828,12 @@ class AdminAdmissionsController extends GetxController {
     );
   }
 
-  Widget _buildPremiumRow(IconData icon, String label, String value, {Color? color}) {
+  Widget _buildPremiumRow(
+    IconData icon,
+    String label,
+    String value, {
+    Color? color,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -702,10 +845,17 @@ class AdminAdmissionsController extends GetxController {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                Text(
+                  label,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
                 Text(
                   value.isEmpty ? 'N/A' : value,
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: color),
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                  ),
                 ),
               ],
             ),
@@ -719,12 +869,24 @@ class AdminAdmissionsController extends GetxController {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        leading: const Icon(Icons.description_outlined, color: AppColors.primary),
-        title: Text(doc['name']?.toString() ?? 'Document', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-        subtitle: Text(doc['type']?.toString() ?? 'document', style: const TextStyle(fontSize: 12)),
+        leading: const Icon(
+          Icons.description_outlined,
+          color: AppColors.primary,
+        ),
+        title: Text(
+          doc['name']?.toString() ?? 'Document',
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(
+          doc['type']?.toString() ?? 'document',
+          style: const TextStyle(fontSize: 12),
+        ),
         trailing: IconButton(
           icon: const Icon(Icons.open_in_new_rounded),
-          onPressed: () => _viewDocument(doc['url']?.toString() ?? '', doc['name']?.toString() ?? 'Document'),
+          onPressed: () => _viewDocument(
+            doc['url']?.toString() ?? '',
+            doc['name']?.toString() ?? 'Document',
+          ),
         ),
       ),
     );
@@ -737,35 +899,6 @@ class AdminAdmissionsController extends GetxController {
       return;
     }
     Get.to(() => AdminDocumentView(url: normalizedUrl, title: title));
-  }
-
-  Future<void> _openDocumentUrl(String url) async {
-    final normalizedUrl = url.trim();
-    if (normalizedUrl.isEmpty) {
-      AppToast.show('Document URL is missing.');
-      return;
-    }
-    final uri = Uri.tryParse(normalizedUrl);
-    if (uri == null || !uri.hasScheme) {
-      AppToast.show('Document URL is invalid.');
-      return;
-    }
-    try {
-      if (!await canLaunchUrl(uri)) {
-        AppToast.show('Unable to open this document.');
-        return;
-      }
-      // Use inAppBrowserView for a full-screen integrated experience
-      final launched = await launchUrl(
-        uri,
-        mode: LaunchMode.inAppBrowserView,
-      );
-      if (!launched) {
-        AppToast.show('Unable to open this document.');
-      }
-    } catch (_) {
-      AppToast.show('Unable to open this document.');
-    }
   }
 
   Widget _buildStatusPill(String label) {
@@ -784,7 +917,11 @@ class AdminAdmissionsController extends GetxController {
       ),
       child: Text(
         label == 'UNDER_REVIEW' ? 'PENDING' : label,
-        style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

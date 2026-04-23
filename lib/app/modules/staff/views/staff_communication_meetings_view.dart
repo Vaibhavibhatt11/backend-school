@@ -26,7 +26,10 @@ class _StaffCommunicationMeetingsViewState
     controller = Get.find<StaffCommunicationController>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.loadRecipients(StaffMessageAudience.parent, showErrors: false);
-      controller.loadRecipients(StaffMessageAudience.student, showErrors: false);
+      controller.loadRecipients(
+        StaffMessageAudience.student,
+        showErrors: false,
+      );
       controller.loadCommunication();
     });
   }
@@ -41,8 +44,9 @@ class _StaffCommunicationMeetingsViewState
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor:
-          isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: isDark
+          ? AppColors.backgroundDark
+          : AppColors.backgroundLight,
       appBar: CustomAppBar(
         title: 'Parent-Teacher Meetings',
         actions: [
@@ -104,18 +108,23 @@ class _StaffCommunicationMeetingsViewState
                       hintText: 'Search parent, student, or purpose',
                       prefixIcon: const Icon(Icons.search_rounded),
                       filled: true,
-                      fillColor:
-                          isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+                      fillColor: isDark
+                          ? AppColors.backgroundDark
+                          : AppColors.backgroundLight,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide(
-                          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                          color: isDark
+                              ? AppColors.borderDark
+                              : AppColors.borderLight,
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide(
-                          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                          color: isDark
+                              ? AppColors.borderDark
+                              : AppColors.borderLight,
                         ),
                       ),
                     ),
@@ -124,10 +133,12 @@ class _StaffCommunicationMeetingsViewState
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: const ['ALL', 'UPCOMING', 'SCHEDULED', 'COMPLETED']
-                        .map((filter) {
-                      return _MeetingFilterChip._internal(filter);
-                    }).toList(),
+                    children:
+                        const ['ALL', 'UPCOMING', 'SCHEDULED', 'COMPLETED'].map(
+                          (filter) {
+                            return _MeetingFilterChip._internal(filter);
+                          },
+                        ).toList(),
                   ),
                 ],
               ),
@@ -211,7 +222,7 @@ class _StaffCommunicationMeetingsViewState
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      value: parentId,
+                      initialValue: parentId,
                       decoration: const InputDecoration(labelText: 'Parent'),
                       items: controller.parentRecipients
                           .map(
@@ -224,11 +235,12 @@ class _StaffCommunicationMeetingsViewState
                             ),
                           )
                           .toList(),
-                      onChanged: (value) => setDialogState(() => parentId = value),
+                      onChanged: (value) =>
+                          setDialogState(() => parentId = value),
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String?>(
-                      value: studentId,
+                      initialValue: studentId,
                       decoration: const InputDecoration(
                         labelText: 'Student (optional)',
                       ),
@@ -247,7 +259,8 @@ class _StaffCommunicationMeetingsViewState
                           ),
                         ),
                       ],
-                      onChanged: (value) => setDialogState(() => studentId = value),
+                      onChanged: (value) =>
+                          setDialogState(() => studentId = value),
                     ),
                     const SizedBox(height: 12),
                     TextField(
@@ -259,7 +272,7 @@ class _StaffCommunicationMeetingsViewState
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
-                      value: mode,
+                      initialValue: mode,
                       decoration: const InputDecoration(labelText: 'Mode'),
                       items: const ['In person', 'Phone call', 'Video call']
                           .map(
@@ -318,8 +331,9 @@ class _StaffCommunicationMeetingsViewState
                           final prompt = noteController.text.trim().isEmpty
                               ? 'Draft a short professional note for a parent-teacher meeting about ${purposeController.text.trim().isEmpty ? 'student progress' : purposeController.text.trim()}.'
                               : 'Improve this parent-teacher meeting note: ${noteController.text.trim()}';
-                          final reply =
-                              await controller.generateAiDraft(prompt: prompt);
+                          final reply = await controller.generateAiDraft(
+                            prompt: prompt,
+                          );
                           if (reply == null || reply.isEmpty) return;
                           noteController.text = reply;
                         },
@@ -390,11 +404,17 @@ class _StaffCommunicationMeetingsViewState
     final hour = value.hour == 0
         ? 12
         : value.hour > 12
-            ? value.hour - 12
-            : value.hour;
+        ? value.hour - 12
+        : value.hour;
     final suffix = value.hour >= 12 ? 'PM' : 'AM';
     final minute = value.minute.toString().padLeft(2, '0');
     return '${value.day} ${months[value.month - 1]} ${value.year} | $hour:$minute $suffix';
+  }
+
+  void updateFilter(String filter) {
+    setState(() {
+      _selectedFilter = filter;
+    });
   }
 }
 
@@ -405,17 +425,15 @@ class _MeetingFilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.findAncestorStateOfType<
-        _StaffCommunicationMeetingsViewState>();
+    final state = context
+        .findAncestorStateOfType<_StaffCommunicationMeetingsViewState>();
     final selected = state?._selectedFilter == filter;
     return ChoiceChip(
       label: Text(filter),
       selected: selected,
       onSelected: (_) {
         if (state == null) return;
-        state.setState(() {
-          state._selectedFilter = filter;
-        });
+        state.updateFilter(filter);
       },
       selectedColor: AppColors.primary,
       labelStyle: TextStyle(color: selected ? Colors.white : null),
@@ -447,8 +465,10 @@ class _MeetingCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(999),
@@ -538,8 +558,8 @@ class _MeetingCard extends StatelessWidget {
     final hour = local.hour == 0
         ? 12
         : local.hour > 12
-            ? local.hour - 12
-            : local.hour;
+        ? local.hour - 12
+        : local.hour;
     final suffix = local.hour >= 12 ? 'PM' : 'AM';
     final minute = local.minute.toString().padLeft(2, '0');
     return '${local.day} ${months[local.month - 1]} ${local.year} | $hour:$minute $suffix';

@@ -4,6 +4,8 @@ enum AdminReportKind {
   academic,
   staff,
   transport,
+  productivity,
+  progress,
   all,
 }
 
@@ -17,9 +19,13 @@ extension AdminReportKindLabel on AdminReportKind {
       case AdminReportKind.academic:
         return 'Academic Report';
       case AdminReportKind.staff:
-        return 'Staff Report';
+        return 'Staff Directory';
       case AdminReportKind.transport:
         return 'Transport Report';
+      case AdminReportKind.productivity:
+        return 'Staff Productivity';
+      case AdminReportKind.progress:
+        return 'Student Progress';
       case AdminReportKind.all:
         return 'All Reports Dashboard';
     }
@@ -37,6 +43,10 @@ extension AdminReportKindLabel on AdminReportKind {
         return 'staff-report';
       case AdminReportKind.transport:
         return 'transport-report';
+      case AdminReportKind.productivity:
+        return 'staff-productivity';
+      case AdminReportKind.progress:
+        return 'student-progress';
       case AdminReportKind.all:
         return 'all-reports-dashboard';
     }

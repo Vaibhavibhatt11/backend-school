@@ -81,6 +81,10 @@ class UserRepository {
       case 'TEACHER':
       case 'STAFF':
         return UserRole.teacher;
+      case 'LIBRARIAN':
+        return UserRole.librarian;
+      case 'HOSTEL_WARDEN':
+        return UserRole.hostelWarden;
       case 'PARENT':
       default:
         return UserRole.parent;

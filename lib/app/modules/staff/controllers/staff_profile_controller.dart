@@ -1,12 +1,14 @@
 import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
+import 'package:erp_frontend/common/services/staff/staff_portal_store_service.dart';
 import 'package:erp_frontend/common/services/staff/staff_service.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
 import 'package:get/get.dart';
 
 class StaffProfileController extends GetxController {
-  StaffProfileController(this._staffService);
+  StaffProfileController(this._staffService, this._store);
 
   final StaffService _staffService;
+  final StaffPortalStoreService _store;
   final isLoading = false.obs;
   final isSaving = false.obs;
   final errorMessage = ''.obs;
@@ -32,34 +34,39 @@ class StaffProfileController extends GetxController {
     isLoading.value = true;
     errorMessage.value = '';
     try {
-      final data = await _staffService.getProfile();
-      name.value = (data['name'] ?? '').toString();
-      department.value = (data['department'] ?? '').toString();
-      qualification.value = (data['qualification'] ?? '').toString();
-      experience.value = (data['experience'] ?? '').toString();
-      contact.value = (data['contact'] ?? '').toString();
-      email.value = (data['email'] ?? '').toString();
-      staffId.value = (data['staffId'] ?? '').toString();
-      final rawDocs = data['documents'];
-      if (rawDocs is List) {
-        documents.assignAll(rawDocs.map((e) => e.toString()));
-      } else {
-        documents.clear();
-      }
-      documentRows.clear();
-      final rows = data['documentRows'];
-      if (rows is List) {
-        for (final e in rows) {
-          if (e is Map) {
-            documentRows.add({
-              'id': (e['id'] ?? '').toString(),
-              'name': (e['name'] ?? '').toString(),
-              'url': (e['url'] ?? '').toString(),
-              'type': (e['type'] ?? '').toString(),
-            });
-          }
-        }
-      }
+      Map<String, dynamic> data = const {};
+      try {
+        data = await _staffService.getProfile();
+      } catch (_) {}
+      final backup = await _store.readModule('profile');
+
+      name.value = _stringValue(data['name'], backup['name']);
+      department.value = _stringValue(data['department'], backup['department']);
+      qualification.value = _stringValue(
+        data['qualification'],
+        backup['qualification'],
+      );
+      experience.value = _stringValue(data['experience'], backup['experience']);
+      contact.value = _stringValue(data['contact'], backup['contact']);
+      email.value = _stringValue(data['email'], backup['email']);
+      staffId.value = _stringValue(data['staffId'], backup['staffId']);
+
+      final liveRows = _parseDocumentRows(data['documentRows']);
+      final backupRows = _parseDocumentRows(backup['documentRows']);
+      documentRows.assignAll(liveRows.isNotEmpty ? liveRows : backupRows);
+
+      final liveDocs = _parseDocuments(data['documents']);
+      final backupDocs = _parseDocuments(backup['documents']);
+      documents.assignAll(
+        liveDocs.isNotEmpty
+            ? liveDocs
+            : (documentRows.isNotEmpty
+                  ? documentRows
+                        .map((row) => row['name'] ?? '')
+                        .where((item) => item.trim().isNotEmpty)
+                        .toList()
+                  : backupDocs),
+      );
     } catch (e) {
       errorMessage.value = dioOrApiErrorMessage(e);
       AppToast.show(errorMessage.value);
@@ -110,19 +117,27 @@ class StaffProfileController extends GetxController {
       'documentRows': nextDocumentRows,
     };
     try {
-      await _staffService.updateProfile(payload: payload);
+      var syncedPrimary = false;
+      try {
+        await _staffService.updateProfile(payload: payload);
+        syncedPrimary = true;
+      } catch (_) {}
+      await _store.patchModule('profile', payload);
       _applyLocalProfile(payload);
-      AppToast.show('Profile updated successfully');
+      AppToast.show(
+        syncedPrimary
+            ? 'Profile updated successfully'
+            : 'Profile saved in staff workspace',
+      );
       return true;
     } catch (e) {
-      _applyLocalProfile(payload);
       final apiError = dioOrApiErrorMessage(e);
       AppToast.show(
         apiError.isEmpty
-            ? 'Saved locally. Profile update API unavailable.'
-            : '$apiError. Saved locally.',
+            ? 'Profile update failed.'
+            : apiError,
       );
-      return true;
+      return false;
     } finally {
       isSaving.value = false;
     }
@@ -137,12 +152,12 @@ class StaffProfileController extends GetxController {
     email.value = (payload['email'] ?? '').toString();
   }
 
-  void upsertDocument({
+  Future<void> upsertDocument({
     required String? documentId,
     required String name,
     required String type,
     required String url,
-  }) {
+  }) async {
     final cleanName = name.trim();
     if (cleanName.isEmpty) {
       AppToast.show('Document name is required');
@@ -164,13 +179,63 @@ class StaffProfileController extends GetxController {
       documentRows.add(entry);
     }
     documents.assignAll(documentRows.map((e) => e['name'] ?? '').whereType<String>());
+    await _store.patchModule('profile', _profileSnapshot());
     AppToast.show(index >= 0 ? 'Document updated' : 'Document added');
   }
 
-  void deleteDocument(String id) {
+  Future<void> deleteDocument(String id) async {
     documentRows.removeWhere((row) => row['id'] == id);
     documents.assignAll(documentRows.map((e) => e['name'] ?? '').whereType<String>());
+    await _store.patchModule('profile', _profileSnapshot());
     AppToast.show('Document removed');
+  }
+
+  Map<String, dynamic> _profileSnapshot() {
+    return {
+      'name': name.value,
+      'department': department.value,
+      'qualification': qualification.value,
+      'experience': experience.value,
+      'contact': contact.value,
+      'email': email.value,
+      'staffId': staffId.value,
+      'documents': documents.toList(),
+      'documentRows': documentRows
+          .map((row) => <String, dynamic>{...row})
+          .toList(growable: false),
+    };
+  }
+
+  List<Map<String, String>> _parseDocumentRows(dynamic value) {
+    if (value is! List) {
+      return const <Map<String, String>>[];
+    }
+    return value.whereType<Map>().map((row) {
+      return <String, String>{
+        'id': (row['id'] ?? '').toString(),
+        'name': (row['name'] ?? '').toString(),
+        'url': (row['url'] ?? '').toString(),
+        'type': (row['type'] ?? '').toString(),
+      };
+    }).toList(growable: false);
+  }
+
+  List<String> _parseDocuments(dynamic value) {
+    if (value is! List) {
+      return const <String>[];
+    }
+    return value
+        .map((item) => item.toString().trim())
+        .where((item) => item.isNotEmpty)
+        .toList(growable: false);
+  }
+
+  String _stringValue(dynamic primary, dynamic backup) {
+    final primaryText = primary?.toString().trim() ?? '';
+    if (primaryText.isNotEmpty) {
+      return primaryText;
+    }
+    return backup?.toString().trim() ?? '';
   }
 }
 

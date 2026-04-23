@@ -1,4 +1,3 @@
-import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/modules/admin/models/admin_class_option.dart';
 import 'package:erp_frontend/common/services/admin/admin_service.dart';
 import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
@@ -246,7 +245,7 @@ class AdminStudentsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<AdminClassOption>(
-                      value: selectedClass,
+                      initialValue: selectedClass,
                       decoration: const InputDecoration(labelText: 'Class'),
                       items: classOptions
                           .map(
@@ -280,7 +279,7 @@ class AdminStudentsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: status,
+                      initialValue: status,
                       decoration: const InputDecoration(labelText: 'Status'),
                       items: const ['ACTIVE', 'INACTIVE']
                           .map(
@@ -481,7 +480,7 @@ class AdminStudentsController extends GetxController {
             content: SizedBox(
               width: 420,
               child: DropdownButtonFormField<AdminClassOption>(
-                value: selectedClass,
+                initialValue: selectedClass,
                 decoration: const InputDecoration(labelText: 'New class'),
                 items: classOptions
                     .map(

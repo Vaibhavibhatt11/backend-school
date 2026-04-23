@@ -54,6 +54,12 @@ class RoleController extends GetxController {
       case UserRole.admin:
         _safeOffNamed(AppRoutes.ADMIN_HOME);
         break;
+      case UserRole.librarian:
+        _safeOffNamed(AppRoutes.LIBRARIAN_HOME);
+        break;
+      case UserRole.hostelWarden:
+        _safeOffNamed(AppRoutes.HOSTEL_WARDEN_HOME);
+        break;
     }
   }
 
@@ -70,6 +76,10 @@ class RoleController extends GetxController {
             u == 'HR' ||
             u == 'ACCOUNTANT' ||
             u == 'ADMIN';
+      case UserRole.librarian:
+        return u == 'LIBRARIAN' || u == 'STAFF' || u == 'SCHOOLADMIN';
+      case UserRole.hostelWarden:
+        return u == 'HOSTEL_WARDEN' || u == 'SCHOOLADMIN' || u == 'ADMIN';
     }
   }
 }

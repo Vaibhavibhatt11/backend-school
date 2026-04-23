@@ -27,7 +27,8 @@ class _StaffStudyMaterialLibraryViewState
   void initState() {
     super.initState();
     controller = Get.find<StaffStudyMaterialController>();
-    final rawArgs = (Get.arguments as Map?)?.cast<String, dynamic>() ?? const {};
+    final rawArgs =
+        (Get.arguments as Map?)?.cast<String, dynamic>() ?? const {};
     category = StaffStudyMaterialCategoryX.fromValue(
       (rawArgs['category'] ?? 'notes').toString(),
     );
@@ -51,14 +52,15 @@ class _StaffStudyMaterialLibraryViewState
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final color = staffStudyMaterialColor(category);
     return Scaffold(
-      backgroundColor:
-          isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: isDark
+          ? AppColors.backgroundDark
+          : AppColors.backgroundLight,
       appBar: CustomAppBar(
         title: category.title,
         actions: [
           IconButton(
             tooltip: 'Refresh',
-            onPressed: () => controller.loadMaterials(showErrors: true),
+            onPressed: () => controller.loadInitialData(showErrors: true),
             icon: const Icon(Icons.refresh_rounded),
           ),
         ],
@@ -88,7 +90,9 @@ class _StaffStudyMaterialLibraryViewState
                   color: isDark ? AppColors.surfaceDark : Colors.white,
                   borderRadius: BorderRadius.circular(22),
                   border: Border.all(
-                    color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                    color: isDark
+                        ? AppColors.borderDark
+                        : AppColors.borderLight,
                   ),
                 ),
                 child: Column(
@@ -154,18 +158,23 @@ class _StaffStudyMaterialLibraryViewState
                                 icon: const Icon(Icons.close_rounded),
                               ),
                         filled: true,
-                        fillColor:
-                            isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+                        fillColor: isDark
+                            ? AppColors.backgroundDark
+                            : AppColors.backgroundLight,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide(
-                            color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                            color: isDark
+                                ? AppColors.borderDark
+                                : AppColors.borderLight,
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide(
-                            color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                            color: isDark
+                                ? AppColors.borderDark
+                                : AppColors.borderLight,
                           ),
                         ),
                       ),
@@ -175,7 +184,7 @@ class _StaffStudyMaterialLibraryViewState
                       children: [
                         Expanded(
                           child: DropdownButtonFormField<String>(
-                            value: _selectedClassId,
+                            initialValue: _selectedClassId,
                             decoration: const InputDecoration(
                               labelText: 'Class filter',
                             ),
@@ -204,7 +213,7 @@ class _StaffStudyMaterialLibraryViewState
                         const SizedBox(width: 12),
                         Expanded(
                           child: DropdownButtonFormField<String>(
-                            value: _selectedSubjectId,
+                            initialValue: _selectedSubjectId,
                             decoration: const InputDecoration(
                               labelText: 'Subject filter',
                             ),
@@ -415,10 +424,7 @@ class _EmptyLibraryState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          FilledButton.tonal(
-            onPressed: onTap,
-            child: Text(ctaLabel),
-          ),
+          FilledButton.tonal(onPressed: onTap, child: Text(ctaLabel)),
         ],
       ),
     );

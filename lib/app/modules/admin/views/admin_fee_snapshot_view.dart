@@ -154,8 +154,9 @@ class _StructureTab extends StatelessWidget {
       actionLabel: 'Add Structure',
       onAction: () => _openStructureDialog(context, controller),
       child: Obx(() {
-        if (controller.structures.isEmpty)
+        if (controller.structures.isEmpty) {
           return const _EmptyState(text: 'No fee structures configured.');
+        }
         return Column(
           children: controller.structures
               .map(
@@ -186,8 +187,9 @@ class _InstallmentsTab extends StatelessWidget {
       actionLabel: 'Add Installment Plan',
       onAction: () => _openInstallmentDialog(context, controller),
       child: Obx(() {
-        if (controller.installmentPlans.isEmpty)
+        if (controller.installmentPlans.isEmpty) {
           return const _EmptyState(text: 'No installment plans configured.');
+        }
         return Column(
           children: controller.installmentPlans
               .map(
@@ -222,8 +224,9 @@ class _CategoriesTab extends StatelessWidget {
       actionLabel: 'Add Category',
       onAction: () => _openCategoryDialog(context, controller),
       child: Obx(() {
-        if (controller.categoryConfigs.isEmpty)
+        if (controller.categoryConfigs.isEmpty) {
           return const _EmptyState(text: 'No fee categories configured.');
+        }
         return Column(
           children: controller.categoryConfigs
               .map(
@@ -316,10 +319,11 @@ class _ReceiptsTab extends StatelessWidget {
         _SectionTitle(title: 'Fee Receipts'),
         const SizedBox(height: 12),
         Obx(() {
-          if (controller.receipts.isEmpty)
+          if (controller.receipts.isEmpty) {
             return const _EmptyState(
               text: 'No receipts found for current range.',
             );
+          }
           return Column(
             children: controller.receipts
                 .map(
@@ -385,8 +389,9 @@ class _RemindersTab extends StatelessWidget {
       actionLabel: 'Send Reminder',
       onAction: () => _openReminderDialog(context, controller),
       child: Obx(() {
-        if (controller.reminderLogs.isEmpty)
+        if (controller.reminderLogs.isEmpty) {
           return const _EmptyState(text: 'No reminder logs found.');
+        }
         return Column(
           children: controller.reminderLogs
               .map(
@@ -865,7 +870,7 @@ Future<void> _openLateFeeDialog(
               mainAxisSize: MainAxisSize.min,
               children: [
                 DropdownButtonFormField<String>(
-                  value: type,
+                  initialValue: type,
                   decoration: const InputDecoration(
                     labelText: 'Calculation type',
                   ),

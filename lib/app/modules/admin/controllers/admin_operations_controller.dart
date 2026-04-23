@@ -34,6 +34,7 @@ class AdminTransportDriverRecord {
     required this.phone,
     required this.licenseNo,
     required this.routeId,
+    required this.routeName,
     required this.isActive,
   });
 
@@ -42,15 +43,27 @@ class AdminTransportDriverRecord {
   final String phone;
   final String licenseNo;
   final String routeId;
+  final String routeName;
   final bool isActive;
 
   factory AdminTransportDriverRecord.fromJson(Map<String, dynamic> json) {
+    final route = json['route'] as Map?;
+    final routeName = json['routeName']?.toString() ?? '';
+    final nestedRouteName = route == null
+        ? ''
+        : [
+            if ((route['name']?.toString() ?? '').isNotEmpty)
+              route['name'].toString(),
+            if ((route['routeCode']?.toString() ?? '').isNotEmpty)
+              '(${route['routeCode']})',
+          ].join(' ');
     return AdminTransportDriverRecord(
       id: json['id']?.toString() ?? '',
       fullName: json['fullName']?.toString() ?? '',
       phone: json['phone']?.toString() ?? '',
       licenseNo: json['licenseNo']?.toString() ?? '',
       routeId: json['routeId']?.toString() ?? '',
+      routeName: routeName.isNotEmpty ? routeName : nestedRouteName,
       isActive: json['isActive'] != false,
     );
   }
@@ -75,6 +88,8 @@ class AdminTransportAllocationRecord {
   final String stopName;
   final double? feeAmount;
 
+  String get routeName => routeLabel;
+
   factory AdminTransportAllocationRecord.fromJson(Map<String, dynamic> json) {
     final student =
         json['student'] as Map<String, dynamic>? ?? const <String, dynamic>{};
@@ -83,9 +98,12 @@ class AdminTransportAllocationRecord {
     final studentLabel =
         '${student['firstName']?.toString() ?? ''} ${student['lastName']?.toString() ?? ''} (${student['admissionNo']?.toString() ?? ''})'
             .trim();
-    final routeLabel =
-        '${route['name']?.toString() ?? ''} (${route['routeCode']?.toString() ?? ''})'
-            .trim();
+    final routeLabel = json['routeLabel']?.toString().isNotEmpty == true
+        ? json['routeLabel'].toString()
+        : json['routeName']?.toString().isNotEmpty == true
+        ? json['routeName'].toString()
+        : '${route['name']?.toString() ?? ''} (${route['routeCode']?.toString() ?? ''})'
+              .trim();
     return AdminTransportAllocationRecord(
       id: json['id']?.toString() ?? '',
       studentId: json['studentId']?.toString() ?? '',
@@ -310,6 +328,52 @@ class AdminHostelFeePaymentRecord {
   }
 }
 
+class AdminHostelComplaintRecord {
+  const AdminHostelComplaintRecord({
+    required this.id,
+    required this.studentId,
+    required this.studentLabel,
+    required this.category,
+    required this.description,
+    required this.status,
+    required this.createdAt,
+    required this.resolutionNote,
+  });
+
+  final String id;
+  final String studentId;
+  final String studentLabel;
+  final String category;
+  final String description;
+  final String status;
+  final String createdAt;
+  final String resolutionNote;
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'studentId': studentId,
+    'studentLabel': studentLabel,
+    'category': category,
+    'description': description,
+    'status': status,
+    'createdAt': createdAt,
+    'resolutionNote': resolutionNote,
+  };
+
+  factory AdminHostelComplaintRecord.fromJson(Map<String, dynamic> json) {
+    return AdminHostelComplaintRecord(
+      id: json['id']?.toString() ?? '',
+      studentId: json['studentId']?.toString() ?? '',
+      studentLabel: json['studentLabel']?.toString() ?? '',
+      category: json['category']?.toString() ?? 'GENERAL',
+      description: json['description']?.toString() ?? '',
+      status: json['status']?.toString() ?? 'OPEN',
+      createdAt: json['createdAt']?.toString() ?? '',
+      resolutionNote: json['resolutionNote']?.toString() ?? '',
+    );
+  }
+}
+
 class AdminEventRecord {
   const AdminEventRecord({
     required this.id,
@@ -451,6 +515,71 @@ class AdminCompetitionRecord {
   }
 }
 
+class AdminInventoryItemRecord {
+  const AdminInventoryItemRecord({
+    required this.id,
+    required this.sku,
+    required this.name,
+    required this.category,
+    required this.qty,
+    required this.unit,
+    required this.lowStockThreshold,
+    required this.isActive,
+  });
+  final String id;
+  final String sku;
+  final String name;
+  final String category;
+  final int qty;
+  final String unit;
+  final int lowStockThreshold;
+  final bool isActive;
+  bool get isLowStock => qty <= lowStockThreshold;
+
+  factory AdminInventoryItemRecord.fromJson(Map<String, dynamic> json) {
+    return AdminInventoryItemRecord(
+      id: json['id']?.toString() ?? '',
+      sku: json['sku']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      category: json['category']?.toString() ?? '',
+      qty: (json['qty'] as num?)?.toInt() ?? 0,
+      unit: json['unit']?.toString() ?? 'pcs',
+      lowStockThreshold: (json['lowStockThreshold'] as num?)?.toInt() ?? 0,
+      isActive: json['isActive'] != false,
+    );
+  }
+}
+
+class AdminInventoryTransactionRecord {
+  const AdminInventoryTransactionRecord({
+    required this.id,
+    required this.itemName,
+    required this.type,
+    required this.qty,
+    required this.note,
+    required this.createdAt,
+  });
+  final String id;
+  final String itemName;
+  final String type;
+  final int qty;
+  final String note;
+  final DateTime? createdAt;
+
+  factory AdminInventoryTransactionRecord.fromJson(Map<String, dynamic> json) {
+    final item =
+        json['item'] as Map<String, dynamic>? ?? const <String, dynamic>{};
+    return AdminInventoryTransactionRecord(
+      id: json['id']?.toString() ?? '',
+      itemName: item['name']?.toString() ?? '',
+      type: json['type']?.toString() ?? '',
+      qty: (json['qty'] as num?)?.toInt() ?? 0,
+      note: json['note']?.toString() ?? '',
+      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? ''),
+    );
+  }
+}
+
 class AdminOperationsController extends GetxController {
   AdminOperationsController(this._adminService);
 
@@ -470,16 +599,21 @@ class AdminOperationsController extends GetxController {
   final hostelVisitorCheckoutById = <String, String>{}.obs;
   final hostelFeeStructures = <AdminHostelFeeStructureRecord>[].obs;
   final hostelFeePayments = <AdminHostelFeePaymentRecord>[].obs;
+  final hostelComplaints = <AdminHostelComplaintRecord>[].obs;
   final hostelAttendanceDate = ''.obs;
   final events = <AdminEventRecord>[].obs;
   final eventRegistrations = <AdminEventRegistrationRecord>[].obs;
   final eventGallery = <AdminEventGalleryRecord>[].obs;
   final competitions = <AdminCompetitionRecord>[].obs;
   final selectedEventId = ''.obs;
+  final inventoryItems = <AdminInventoryItemRecord>[].obs;
+  final inventoryTransactions = <AdminInventoryTransactionRecord>[].obs;
   final studentOptions = <Map<String, String>>[].obs;
 
   bool _hostelLoaded = false;
   bool _eventsLoaded = false;
+  bool _transportLoaded = false;
+  bool _inventoryLoaded = false;
 
   @override
   void onInit() {
@@ -516,10 +650,27 @@ class AdminOperationsController extends GetxController {
           ]);
           _hostelLoaded = true;
         }
-      } else {
+      } else if (currentTab.value == 1) {
         if (force || !_eventsLoaded) {
           await Future.wait([loadEvents(), loadEventsWorkbenchSettings()]);
           _eventsLoaded = true;
+        }
+      } else if (currentTab.value == 2) {
+        if (force || !_transportLoaded) {
+          await Future.wait([
+            loadTransportRoutes(),
+            loadTransportDrivers(),
+            loadTransportAllocations(),
+          ]);
+          _transportLoaded = true;
+        }
+      } else {
+        if (force || !_inventoryLoaded) {
+          await Future.wait([
+            loadInventoryItems(),
+            loadInventoryTransactions(),
+          ]);
+          _inventoryLoaded = true;
         }
       }
     } catch (e) {
@@ -751,6 +902,16 @@ class AdminOperationsController extends GetxController {
           )
           .toList(),
     );
+    hostelComplaints.assignAll(
+      (map['complaints'] as List<dynamic>? ?? const <dynamic>[])
+          .whereType<Map>()
+          .map(
+            (item) => AdminHostelComplaintRecord.fromJson(
+              item.cast<String, dynamic>(),
+            ),
+          )
+          .toList(),
+    );
   }
 
   Future<void> loadEvents() async {
@@ -841,6 +1002,46 @@ class AdminOperationsController extends GetxController {
     );
   }
 
+  Future<void> loadInventoryItems() async {
+    final data = await _adminService.getInventoryItems(page: 1, limit: 100);
+    final rawItems = data['items'];
+    if (rawItems is! List) {
+      inventoryItems.clear();
+      return;
+    }
+    inventoryItems.assignAll(
+      rawItems
+          .whereType<Map>()
+          .map(
+            (item) =>
+                AdminInventoryItemRecord.fromJson(item.cast<String, dynamic>()),
+          )
+          .toList(),
+    );
+  }
+
+  Future<void> loadInventoryTransactions() async {
+    final data = await _adminService.getInventoryTransactions(
+      page: 1,
+      limit: 50,
+    );
+    final rawItems = data['items'];
+    if (rawItems is! List) {
+      inventoryTransactions.clear();
+      return;
+    }
+    inventoryTransactions.assignAll(
+      rawItems
+          .whereType<Map>()
+          .map(
+            (item) => AdminInventoryTransactionRecord.fromJson(
+              item.cast<String, dynamic>(),
+            ),
+          )
+          .toList(),
+    );
+  }
+
   Future<void> openCompetitionDialog({AdminCompetitionRecord? existing}) async {
     if (events.isEmpty) {
       AppToast.show('Create an event first.');
@@ -872,7 +1073,7 @@ class AdminOperationsController extends GetxController {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      value: eventId,
+                      initialValue: eventId,
                       decoration: const InputDecoration(labelText: 'Event'),
                       items: events
                           .map(
@@ -899,7 +1100,7 @@ class AdminOperationsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: status,
+                      initialValue: status,
                       decoration: const InputDecoration(labelText: 'Status'),
                       items:
                           const ['PLANNED', 'ONGOING', 'COMPLETED', 'CANCELLED']
@@ -1106,7 +1307,7 @@ class AdminOperationsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: routeId,
+                      initialValue: routeId,
                       decoration: const InputDecoration(labelText: 'Route'),
                       items: transportRoutes
                           .map(
@@ -1194,7 +1395,7 @@ class AdminOperationsController extends GetxController {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      value: studentId,
+                      initialValue: studentId,
                       decoration: const InputDecoration(labelText: 'Student'),
                       items: studentOptions
                           .map(
@@ -1209,7 +1410,7 @@ class AdminOperationsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: routeId,
+                      initialValue: routeId,
                       decoration: const InputDecoration(labelText: 'Route'),
                       items: transportRoutes
                           .map(
@@ -1426,7 +1627,7 @@ class AdminOperationsController extends GetxController {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      value: studentId,
+                      initialValue: studentId,
                       decoration: const InputDecoration(labelText: 'Student'),
                       items: studentOptions
                           .map(
@@ -1441,7 +1642,7 @@ class AdminOperationsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: roomId,
+                      initialValue: roomId,
                       decoration: const InputDecoration(labelText: 'Room'),
                       items: hostelRooms
                           .map(
@@ -1532,7 +1733,7 @@ class AdminOperationsController extends GetxController {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      value: studentId,
+                      initialValue: studentId,
                       decoration: const InputDecoration(labelText: 'Student'),
                       items: studentOptions
                           .map(
@@ -1547,7 +1748,7 @@ class AdminOperationsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: status,
+                      initialValue: status,
                       decoration: const InputDecoration(labelText: 'Status'),
                       items: const ['PRESENT', 'ABSENT', 'LEAVE']
                           .map(
@@ -1644,7 +1845,7 @@ class AdminOperationsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: studentId.isEmpty ? null : studentId,
+                      initialValue: studentId.isEmpty ? null : studentId,
                       decoration: const InputDecoration(labelText: 'Student'),
                       items: studentOptions
                           .map(
@@ -1761,7 +1962,7 @@ class AdminOperationsController extends GetxController {
                   ),
                   const SizedBox(height: 10),
                   DropdownButtonFormField<String>(
-                    value: frequency,
+                    initialValue: frequency,
                     decoration: const InputDecoration(labelText: 'Frequency'),
                     items: const ['MONTHLY', 'QUARTERLY', 'YEARLY']
                         .map(
@@ -1864,7 +2065,7 @@ class AdminOperationsController extends GetxController {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      value: studentId,
+                      initialValue: studentId,
                       decoration: const InputDecoration(labelText: 'Student'),
                       items: studentOptions
                           .map(
@@ -1879,7 +2080,7 @@ class AdminOperationsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: structureId,
+                      initialValue: structureId,
                       decoration: const InputDecoration(labelText: 'Fee'),
                       items: hostelFeeStructures
                           .map(
@@ -1900,7 +2101,7 @@ class AdminOperationsController extends GetxController {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: status,
+                      initialValue: status,
                       decoration: const InputDecoration(
                         labelText: 'Payment status',
                       ),
@@ -1972,6 +2173,174 @@ class AdminOperationsController extends GetxController {
     AppToast.show('Hostel fee payment recorded.');
   }
 
+  Future<void> openHostelComplaintDialog({
+    AdminHostelComplaintRecord? existing,
+  }) async {
+    if (studentOptions.isEmpty) {
+      AppToast.show('No active students available.');
+      return;
+    }
+    String studentId = existing?.studentId.isNotEmpty == true
+        ? existing!.studentId
+        : studentOptions.first['id']!;
+    final categoryController = TextEditingController(
+      text: existing?.category ?? 'GENERAL',
+    );
+    final descriptionController = TextEditingController(
+      text: existing?.description ?? '',
+    );
+    String status = existing?.status ?? 'OPEN';
+    final resolutionController = TextEditingController(
+      text: existing?.resolutionNote ?? '',
+    );
+
+    final ok = await Get.dialog<bool>(
+      StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text(
+              existing == null ? 'Add Complaint' : 'Update Complaint',
+            ),
+            content: SizedBox(
+              width: 500,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      initialValue: studentId,
+                      decoration: const InputDecoration(labelText: 'Student'),
+                      items: studentOptions
+                          .map(
+                            (item) => DropdownMenuItem<String>(
+                              value: item['id'],
+                              child: Text(item['label'] ?? ''),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) =>
+                          setState(() => studentId = value ?? ''),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: categoryController,
+                      decoration: const InputDecoration(
+                        labelText: 'Category (e.g. Maintenance, Safety)',
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: descriptionController,
+                      maxLines: 3,
+                      decoration: const InputDecoration(
+                        labelText: 'Complaint description',
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    DropdownButtonFormField<String>(
+                      initialValue: status,
+                      decoration: const InputDecoration(labelText: 'Status'),
+                      items: const ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED']
+                          .map(
+                            (item) => DropdownMenuItem<String>(
+                              value: item,
+                              child: Text(item),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) =>
+                          setState(() => status = value ?? 'OPEN'),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: resolutionController,
+                      maxLines: 2,
+                      decoration: const InputDecoration(
+                        labelText: 'Resolution note',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(result: false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Get.back(result: true),
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    if (ok != true || descriptionController.text.trim().isEmpty) {
+      if (ok == true) AppToast.show('Complaint description is required.');
+      return;
+    }
+    final studentLabel =
+        studentOptions.firstWhereOrNull(
+          (item) => item['id'] == studentId,
+        )?['label'] ??
+        studentId;
+    final next = [
+      ...hostelComplaints.where((item) => item.id != existing?.id),
+      AdminHostelComplaintRecord(
+        id: existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        studentId: studentId,
+        studentLabel: studentLabel,
+        category: categoryController.text.trim().isEmpty
+            ? 'GENERAL'
+            : categoryController.text.trim(),
+        description: descriptionController.text.trim(),
+        status: status,
+        createdAt: existing?.createdAt.isNotEmpty == true
+            ? existing!.createdAt
+            : DateTime.now().toIso8601String().substring(0, 10),
+        resolutionNote: resolutionController.text.trim(),
+      ),
+    ];
+    hostelComplaints.assignAll(next);
+    await _saveHostelManagementSettings();
+    AppToast.show('Hostel complaint saved.');
+  }
+
+  Future<void> setHostelComplaintStatus(
+    AdminHostelComplaintRecord item,
+    String status,
+  ) async {
+    hostelComplaints.assignAll(
+      hostelComplaints
+          .map(
+            (entry) => entry.id == item.id
+                ? AdminHostelComplaintRecord(
+                    id: entry.id,
+                    studentId: entry.studentId,
+                    studentLabel: entry.studentLabel,
+                    category: entry.category,
+                    description: entry.description,
+                    status: status,
+                    createdAt: entry.createdAt,
+                    resolutionNote: entry.resolutionNote,
+                  )
+                : entry,
+          )
+          .toList(),
+    );
+    await _saveHostelManagementSettings();
+    AppToast.show('Complaint status updated.');
+  }
+
+  Future<void> deleteHostelComplaint(AdminHostelComplaintRecord item) async {
+    if (!await _confirm('Delete hostel complaint?')) return;
+    hostelComplaints.removeWhere((entry) => entry.id == item.id);
+    await _saveHostelManagementSettings();
+    AppToast.show('Hostel complaint deleted.');
+  }
+
   Future<void> _saveHostelManagementSettings() async {
     await _adminService.patchSchoolSettings({
       'hostelManagement': {
@@ -1979,6 +2348,7 @@ class AdminOperationsController extends GetxController {
         'visitorCheckoutById': hostelVisitorCheckoutById,
         'feeStructures': hostelFeeStructures.map((e) => e.toJson()).toList(),
         'feePayments': hostelFeePayments.map((e) => e.toJson()).toList(),
+        'complaints': hostelComplaints.map((e) => e.toJson()).toList(),
       },
     });
   }
@@ -2149,7 +2519,7 @@ class AdminOperationsController extends GetxController {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DropdownButtonFormField<String>(
-                    value: studentId,
+                    initialValue: studentId,
                     decoration: const InputDecoration(labelText: 'Student'),
                     items: studentOptions
                         .map(
@@ -2342,9 +2712,406 @@ class AdminOperationsController extends GetxController {
     return confirmed == true;
   }
 
+  Future<void> openTransportRouteDialog({
+    AdminTransportRouteRecord? existing,
+  }) async {
+    final nameController = TextEditingController(text: existing?.name ?? '');
+    final codeController = TextEditingController(
+      text: existing?.routeCode ?? '',
+    );
+    bool isActive = existing?.isActive ?? true;
+
+    final ok = await Get.dialog<bool>(
+      StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text(existing == null ? 'Add Route' : 'Edit Route'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: 'Route name'),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: codeController,
+                  decoration: const InputDecoration(labelText: 'Route code'),
+                ),
+                const SizedBox(height: 8),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: isActive,
+                  onChanged: (value) => setState(() => isActive = value),
+                  title: const Text('Active'),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(result: false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Get.back(result: true),
+                child: Text(existing == null ? 'Add' : 'Save'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    if (ok != true || nameController.text.trim().isEmpty) return;
+    try {
+      final payload = {
+        'name': nameController.text.trim(),
+        'routeCode': codeController.text.trim(),
+        'isActive': isActive,
+      };
+      if (existing == null) {
+        await _adminService.createTransportRoute(payload);
+        AppToast.show('Route created.');
+      } else {
+        await _adminService.updateTransportRoute(
+          id: existing.id,
+          payload: payload,
+        );
+        AppToast.show('Route updated.');
+      }
+      await loadTransportRoutes();
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    }
+  }
+
+  Future<void> deleteTransportRoute(AdminTransportRouteRecord item) async {
+    if (!await _confirm('Delete route ${item.name}?')) return;
+    try {
+      await _adminService.deleteTransportRoute(item.id);
+      AppToast.show('Route deleted.');
+      await loadTransportRoutes();
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    }
+  }
+
+  Future<void> openTransportDriverDialog({
+    AdminTransportDriverRecord? existing,
+  }) async {
+    final nameController = TextEditingController(
+      text: existing?.fullName ?? '',
+    );
+    final phoneController = TextEditingController(text: existing?.phone ?? '');
+    final licenseController = TextEditingController(
+      text: existing?.licenseNo ?? '',
+    );
+    String? selectedRouteId = existing?.routeId;
+    if (selectedRouteId != null && selectedRouteId.isEmpty) {
+      selectedRouteId = null;
+    }
+    bool isActive = existing?.isActive ?? true;
+
+    final ok = await Get.dialog<bool>(
+      StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text(existing == null ? 'Add Driver' : 'Edit Driver'),
+            content: SizedBox(
+              width: 440,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: nameController,
+                      decoration: const InputDecoration(labelText: 'Full name'),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: phoneController,
+                      decoration: const InputDecoration(labelText: 'Phone'),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: licenseController,
+                      decoration: const InputDecoration(
+                        labelText: 'License no',
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedRouteId,
+                      decoration: const InputDecoration(
+                        labelText: 'Assigned route',
+                      ),
+                      items: transportRoutes
+                          .map(
+                            (r) => DropdownMenuItem<String>(
+                              value: r.id,
+                              child: Text(r.name),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (v) => setState(() => selectedRouteId = v),
+                    ),
+                    const SizedBox(height: 8),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      value: isActive,
+                      onChanged: (value) => setState(() => isActive = value),
+                      title: const Text('Active'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(result: false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Get.back(result: true),
+                child: Text(existing == null ? 'Add' : 'Save'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    if (ok != true || nameController.text.trim().isEmpty) return;
+    try {
+      final payload = {
+        'fullName': nameController.text.trim(),
+        'phone': phoneController.text.trim(),
+        'licenseNo': licenseController.text.trim(),
+        'routeId': selectedRouteId,
+        'isActive': isActive,
+      };
+      if (existing == null) {
+        await _adminService.createTransportDriver(payload);
+        AppToast.show('Driver created.');
+      } else {
+        await _adminService.updateTransportDriver(
+          id: existing.id,
+          payload: payload,
+        );
+        AppToast.show('Driver updated.');
+      }
+      await loadTransportDrivers();
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    }
+  }
+
+  Future<void> openInventoryItemDialog({
+    AdminInventoryItemRecord? existing,
+  }) async {
+    final skuController = TextEditingController(text: existing?.sku ?? '');
+    final nameController = TextEditingController(text: existing?.name ?? '');
+    final categoryController = TextEditingController(
+      text: existing?.category ?? '',
+    );
+    final unitController = TextEditingController(text: existing?.unit ?? 'pcs');
+    final thresholdController = TextEditingController(
+      text: existing?.lowStockThreshold.toString() ?? '5',
+    );
+    bool isActive = existing?.isActive ?? true;
+
+    final ok = await Get.dialog<bool>(
+      StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text(existing == null ? 'Add Item' : 'Edit Item'),
+            content: SizedBox(
+              width: 440,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: skuController,
+                      decoration: const InputDecoration(labelText: 'SKU'),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: nameController,
+                      decoration: const InputDecoration(labelText: 'Item name'),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: categoryController,
+                      decoration: const InputDecoration(labelText: 'Category'),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: unitController,
+                            decoration: const InputDecoration(
+                              labelText: 'Unit',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            controller: thresholdController,
+                            decoration: const InputDecoration(
+                              labelText: 'Low threshold',
+                            ),
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      value: isActive,
+                      onChanged: (value) => setState(() => isActive = value),
+                      title: const Text('Active'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(result: false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Get.back(result: true),
+                child: Text(existing == null ? 'Add' : 'Save'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    if (ok != true || nameController.text.trim().isEmpty) return;
+    try {
+      final payload = {
+        'sku': skuController.text.trim(),
+        'name': nameController.text.trim(),
+        'category': categoryController.text.trim(),
+        'unit': unitController.text.trim(),
+        'lowStockThreshold': int.tryParse(thresholdController.text) ?? 5,
+        'isActive': isActive,
+      };
+      if (existing == null) {
+        await _adminService.createInventoryItem(payload);
+        AppToast.show('Item created.');
+      } else {
+        await _adminService.updateInventoryItem(
+          id: existing.id,
+          payload: payload,
+        );
+        AppToast.show('Item updated.');
+      }
+      await loadInventoryItems();
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    }
+  }
+
+  Future<void> deleteInventoryItem(AdminInventoryItemRecord item) async {
+    if (!await _confirm('Delete inventory item ${item.name}?')) return;
+    try {
+      await _adminService.deleteInventoryItem(item.id);
+      AppToast.show('Item deleted.');
+      await loadInventoryItems();
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    }
+  }
+
+  Future<void> openInventoryTransactionDialog() async {
+    String? selectedItemId;
+    final typeController = TextEditingController(text: 'IN');
+    final qtyController = TextEditingController();
+    final noteController = TextEditingController();
+
+    final ok = await Get.dialog<bool>(
+      StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Inventory Transaction'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<String>(
+                  initialValue: selectedItemId,
+                  decoration: const InputDecoration(labelText: 'Item'),
+                  items: inventoryItems
+                      .map(
+                        (i) => DropdownMenuItem<String>(
+                          value: i.id,
+                          child: Text('${i.name} (${i.sku})'),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (v) => setState(() => selectedItemId = v),
+                ),
+                const SizedBox(height: 10),
+                DropdownButtonFormField<String>(
+                  initialValue: typeController.text,
+                  decoration: const InputDecoration(labelText: 'Type'),
+                  items: const [
+                    DropdownMenuItem(value: 'IN', child: Text('Stock In')),
+                    DropdownMenuItem(value: 'OUT', child: Text('Stock Out')),
+                  ],
+                  onChanged: (v) => setState(() => typeController.text = v!),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: qtyController,
+                  decoration: const InputDecoration(labelText: 'Quantity'),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: noteController,
+                  decoration: const InputDecoration(labelText: 'Note'),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(result: false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Get.back(result: true),
+                child: const Text('Record'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    if (ok != true || selectedItemId == null || qtyController.text.isEmpty) {
+      return;
+    }
+    try {
+      await _adminService.createInventoryTransaction({
+        'itemId': selectedItemId,
+        'type': typeController.text,
+        'qty': int.tryParse(qtyController.text) ?? 0,
+        'note': noteController.text.trim(),
+      });
+      AppToast.show('Transaction recorded.');
+      await Future.wait([loadInventoryItems(), loadInventoryTransactions()]);
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    }
+  }
+
   int _opsTab(int value) {
     if (value < 0) return 0;
-    if (value > 1) return 1;
+    if (value > 3) return 3;
     return value;
   }
 }

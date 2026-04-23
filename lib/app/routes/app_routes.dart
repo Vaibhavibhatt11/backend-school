@@ -56,16 +56,30 @@ abstract class AppRoutes {
   static const STAFF_STUDY_MATERIAL_LIBRARY = '/staff-study-material-library';
   static const STAFF_STUDY_MATERIAL_COMPOSER = '/staff-study-material-composer';
   static const STAFF_STUDY_MATERIAL_DETAIL = '/staff-study-material-detail';
-  static const STAFF_COMMUNICATION_RECIPIENTS =
-      '/staff-communication-recipients';
-  static const STAFF_COMMUNICATION_CONVERSATION =
-      '/staff-communication-conversation';
-  static const STAFF_COMMUNICATION_ANNOUNCEMENTS =
-      '/staff-communication-announcements';
-  static const STAFF_COMMUNICATION_NOTIFICATIONS =
-      '/staff-communication-notifications';
-  static const STAFF_COMMUNICATION_MEETINGS =
-      '/staff-communication-meetings';
+  static const STAFF_COMMUNICATION_RECIPIENTS = '/staff-communication-recipients';
+  static const STAFF_COMMUNICATION_CONVERSATION = '/staff-communication-conversation';
+  static const STAFF_COMMUNICATION_ANNOUNCEMENTS = '/staff-communication-announcements';
+  static const STAFF_COMMUNICATION_NOTIFICATIONS = '/staff-communication-notifications';
+  static const STAFF_COMMUNICATION_MEETINGS = '/staff-communication-meetings';
+  static const STAFF_INVENTORY_HUB = '/staff-inventory-hub';
+  static const STAFF_INVENTORY_EQUIPMENT = '/staff-inventory-equipment';
+  static const STAFF_INVENTORY_TRACKING = '/staff-inventory-tracking';
+  static const STAFF_INVENTORY_PURCHASE_ORDERS = '/staff-inventory-purchase-orders';
+
+  // Librarian Module
+  static const LIBRARIAN_HOME = '/librarian-home';
+  static const LIBRARIAN_BOOK_CATALOG = '/librarian-book-catalog';
+  static const LIBRARIAN_BOOK_ISSUE = '/librarian-book-issue';
+  static const LIBRARIAN_BOOK_RETURN = '/librarian-book-return';
+  static const LIBRARIAN_FINE_MANAGEMENT = '/librarian-fine-management';
+  static const LIBRARIAN_MEMBERSHIP = '/librarian-membership';
+
+  // Hostel Warden Module
+  static const HOSTEL_WARDEN_HOME = '/hostel-warden-home';
+  static const HOSTEL_WARDEN_ROOM_ALLOCATION = '/hostel-warden-room-allocation';
+  static const HOSTEL_WARDEN_ATTENDANCE = '/hostel-warden-attendance';
+  static const HOSTEL_WARDEN_VISITORS = '/hostel-warden-visitors';
+  static const HOSTEL_WARDEN_COMPLAINTS = '/hostel-warden-complaints';
 
   // Admin Module
   static const ADMIN_HOME = '/admin-dashboard';
@@ -92,4 +106,10 @@ abstract class AppRoutes {
   static const ADMIN_STUDY_MATERIAL_LIBRARY = '/admin-study-material-library';
   static const ADMIN_STUDY_MATERIAL_COMPOSER = '/admin-study-material-composer';
   static const ADMIN_STUDY_MATERIAL_DETAIL = '/admin-study-material-detail';
+  static const ADMIN_EVENTS_HUB = '/admin-events-hub';
+  static const ADMIN_EVENTS_CALENDAR = '/admin-events-calendar';
+  static const ADMIN_EVENTS_COMPETITIONS = '/admin-events-competitions';
+  static const ADMIN_EVENTS_REGISTRATIONS = '/admin-events-registrations';
+  static const ADMIN_EVENTS_REPORTS = '/admin-events-reports';
+  static const ADMIN_REPORTS_DETAIL = '/admin-reports-detail';
 }
