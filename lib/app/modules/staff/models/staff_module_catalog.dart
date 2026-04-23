@@ -73,11 +73,7 @@ const List<StaffModuleItem> kStaffModules = [
     id: 'lesson_planning',
     title: 'Lesson Planning',
     icon: Icons.event_note_rounded,
-    features: [
-      'Create lesson plans',
-      'Topic scheduling',
-      'Lesson notes',
-    ],
+    features: ['Create lesson plans', 'Topic scheduling', 'Lesson notes'],
   ),
   StaffModuleItem(
     id: 'homework_assignment',
@@ -195,18 +191,6 @@ const List<StaffModuleItem> kStaffModules = [
     ],
   ),
   StaffModuleItem(
-    id: 'payroll_hr',
-    title: 'Payroll & HR Management',
-    icon: Icons.account_balance_wallet_rounded,
-    features: [
-      'Salary records',
-      'Payroll processing',
-      'Staff benefits',
-      'Tax reports',
-      'ITR tracking',
-    ],
-  ),
-  StaffModuleItem(
     id: 'reports',
     title: 'Reports & Analytics',
     icon: Icons.bar_chart_rounded,
@@ -215,19 +199,6 @@ const List<StaffModuleItem> kStaffModules = [
       'Attendance reports',
       'Staff productivity reports',
       'Student progress reports',
-    ],
-  ),
-  StaffModuleItem(
-    id: 'ai_teaching_assistant',
-    title: 'AI Teaching Assistant (Edvieye)',
-    icon: Icons.smart_toy_rounded,
-    features: [
-      'AI lesson generator',
-      'AI quiz generator',
-      'AI question generator',
-      'AI answer explanations',
-      'Teaching assistant chat (live LLM when API key configured)',
-      'Homework & communication drafting helpers',
     ],
   ),
   StaffModuleItem(
@@ -242,4 +213,3 @@ const List<StaffModuleItem> kStaffModules = [
     ],
   ),
 ];
-

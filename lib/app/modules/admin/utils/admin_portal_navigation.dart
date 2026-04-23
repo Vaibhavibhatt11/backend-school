@@ -268,7 +268,8 @@ class AdminPortalNavigation {
         return const [
           AdminPortalScreen(
             title: 'Events Hub',
-            description: 'Manage school events, competitions, and registrations.',
+            description:
+                'Manage school events, competitions, and registrations.',
             route: AppRoutes.ADMIN_EVENTS_HUB,
           ),
           AdminPortalScreen(
@@ -435,7 +436,11 @@ class AdminPortalNavigation {
       );
       return;
     }
-    if (m == 'events' || has('event') || has('activity') || has('gallery') || has('competition')) {
+    if (m == 'events' ||
+        has('event') ||
+        has('activity') ||
+        has('gallery') ||
+        has('competition')) {
       SafeNavigation.toNamed(AppRoutes.ADMIN_EVENTS_HUB);
       return;
     }
@@ -473,14 +478,6 @@ class AdminPortalNavigation {
       SafeNavigation.toNamed(AppRoutes.ADMIN_HOME, arguments: {'tabIndex': 0});
       return;
     }
-    if (m == 'payroll') {
-      SafeNavigation.toNamed(
-        AppRoutes.ADMIN_REPORTS,
-        arguments: {'tabIndex': 2},
-      );
-      return;
-    }
-
     final screens = screensForModule(moduleId);
     if (screens.isNotEmpty) {
       openScreen(screens.first);

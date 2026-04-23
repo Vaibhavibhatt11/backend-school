@@ -315,7 +315,8 @@ Future<void> _refreshStaffModule(String moduleId) async {
   final lessonPlanning = Get.find<StaffLessonPlanningController>();
   final homeworkAssignment = Get.find<StaffHomeworkAssignmentController>();
   final examAssessment = Get.find<StaffExamAssessmentController>();
-  final performanceMonitoring = Get.find<StaffPerformanceMonitoringController>();
+  final performanceMonitoring =
+      Get.find<StaffPerformanceMonitoringController>();
   final studyMaterial = Get.find<StaffStudyMaterialController>();
 
   switch (moduleId) {
@@ -378,7 +379,6 @@ Future<void> _refreshStaffModule(String moduleId) async {
       ]);
       return;
     case 'profile':
-    case 'payroll_hr':
       await Future.wait([profile.loadProfile(), settings.loadSettings()]);
       return;
     case 'communication_ai':
@@ -415,7 +415,6 @@ String _staffSnapshotTitle(String moduleId) {
     case 'communication_ai':
     case 'reports':
     case 'settings':
-    case 'ai_teaching_assistant':
       return 'Live Module Snapshot';
     default:
       return 'Live Staff Snapshot';
@@ -433,7 +432,8 @@ List<_StaffMetric> _buildStaffMetrics(String moduleId) {
   final lessonPlanning = Get.find<StaffLessonPlanningController>();
   final homeworkAssignment = Get.find<StaffHomeworkAssignmentController>();
   final examAssessment = Get.find<StaffExamAssessmentController>();
-  final performanceMonitoring = Get.find<StaffPerformanceMonitoringController>();
+  final performanceMonitoring =
+      Get.find<StaffPerformanceMonitoringController>();
   final studyMaterial = Get.find<StaffStudyMaterialController>();
 
   final documentsCount = profile.documentRows.isNotEmpty
@@ -725,29 +725,6 @@ List<_StaffMetric> _buildStaffMetrics(String moduleId) {
           label: 'Today Schedule',
           value: '${dashboard.todayScheduleItems.length}',
           caption: 'Timetable context for reports',
-        ),
-      ];
-    case 'ai_teaching_assistant':
-      return [
-        _StaffMetric(
-          label: 'Pending Tasks',
-          value: '${dashboard.pendingTasks.length}',
-          caption: 'Tasks AI can help draft or prioritize',
-        ),
-        _StaffMetric(
-          label: 'Notifications',
-          value: '${dashboard.notifications.length}',
-          caption: 'Items to respond to faster',
-        ),
-        _StaffMetric(
-          label: 'Assigned Classes',
-          value: '${dashboard.assignedClasses.length}',
-          caption: 'Teaching scope for prompts',
-        ),
-        _StaffMetric(
-          label: 'Reports',
-          value: '${reports.reportTiles.length}',
-          caption: 'Analytics context available to staff',
         ),
       ];
     case 'settings':

@@ -335,21 +335,6 @@ class StaffPortalNavigation {
             route: AppRoutes.STAFF_INVENTORY_PURCHASE_ORDERS,
           ),
         ];
-      case 'payroll_hr':
-        return const [
-          StaffPortalScreen(
-            title: 'Staff Profile',
-            description: 'Review live staff identity and role details.',
-            route: AppRoutes.STAFF_HOME,
-            arguments: {'tabIndex': 1},
-          ),
-          StaffPortalScreen(
-            title: 'Settings',
-            description: 'Check account preferences and session controls.',
-            route: AppRoutes.STAFF_HOME,
-            arguments: {'tabIndex': 4},
-          ),
-        ];
       case 'reports':
         return const [
           StaffPortalScreen(
@@ -361,20 +346,6 @@ class StaffPortalNavigation {
           StaffPortalScreen(
             title: 'Staff Dashboard',
             description: 'Pair analytics with current workload context.',
-            route: AppRoutes.STAFF_HOME,
-            arguments: {'tabIndex': 0},
-          ),
-        ];
-      case 'ai_teaching_assistant':
-        return const [
-          StaffPortalScreen(
-            title: 'AI Teaching Assistant',
-            description: 'Open the live assistant backed by the server.',
-            opensAssistant: true,
-          ),
-          StaffPortalScreen(
-            title: 'Staff Dashboard',
-            description: 'Return to the main dashboard after AI actions.',
             route: AppRoutes.STAFF_HOME,
             arguments: {'tabIndex': 0},
           ),
