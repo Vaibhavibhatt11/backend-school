@@ -1289,7 +1289,10 @@ class AdminService {
   Future<Map<String, dynamic>> createSyllabus(
     Map<String, dynamic> payload,
   ) async {
-    final res = await _apiClient.post(ApiEndpoints.schoolSyllabus, data: payload);
+    final res = await _apiClient.post(
+      ApiEndpoints.schoolSyllabus,
+      data: payload,
+    );
     return extractApiData(res.data, context: 'create syllabus');
   }
 
@@ -1297,19 +1300,27 @@ class AdminService {
     String id,
     Map<String, dynamic> payload,
   ) async {
-    final res = await _apiClient.put(ApiEndpoints.schoolSyllabusById(id), data: payload);
+    final res = await _apiClient.put(
+      ApiEndpoints.schoolSyllabusById(id),
+      data: payload,
+    );
     return extractApiData(res.data, context: 'update syllabus');
   }
 
   Future<Map<String, dynamic>> deleteSyllabus(String id) async {
-    final res = await _apiClient.dio.delete(ApiEndpoints.schoolSyllabusById(id));
+    final res = await _apiClient.dio.delete(
+      ApiEndpoints.schoolSyllabusById(id),
+    );
     return extractApiData(res.data, context: 'delete syllabus');
   }
 
   Future<Map<String, dynamic>> createLessonPlan(
     Map<String, dynamic> payload,
   ) async {
-    final res = await _apiClient.post(ApiEndpoints.schoolLessonPlans, data: payload);
+    final res = await _apiClient.post(
+      ApiEndpoints.schoolLessonPlans,
+      data: payload,
+    );
     return extractApiData(res.data, context: 'create lesson plan');
   }
 
@@ -1317,12 +1328,17 @@ class AdminService {
     String id,
     Map<String, dynamic> payload,
   ) async {
-    final res = await _apiClient.put(ApiEndpoints.schoolLessonPlanById(id), data: payload);
+    final res = await _apiClient.put(
+      ApiEndpoints.schoolLessonPlanById(id),
+      data: payload,
+    );
     return extractApiData(res.data, context: 'update lesson plan');
   }
 
   Future<Map<String, dynamic>> deleteLessonPlan(String id) async {
-    final res = await _apiClient.dio.delete(ApiEndpoints.schoolLessonPlanById(id));
+    final res = await _apiClient.dio.delete(
+      ApiEndpoints.schoolLessonPlanById(id),
+    );
     return extractApiData(res.data, context: 'delete lesson plan');
   }
 
@@ -1525,62 +1541,6 @@ class AdminService {
       payload: payload,
       context: 'patch offline sync record',
     );
-  }
-
-  Future<Map<String, dynamic>> _academicManagementSettings() async {
-    final settings = await getSchoolSettings();
-    final raw = settings['academicManagement'];
-    if (raw is Map) return Map<String, dynamic>.from(raw);
-    return <String, dynamic>{};
-  }
-
-  List<Map<String, dynamic>> _academicItems(
-    Map<String, dynamic> settings,
-    String key,
-  ) {
-    final raw = settings[key];
-    if (raw is! List) return <Map<String, dynamic>>[];
-    return raw
-        .whereType<Map>()
-        .map((item) => Map<String, dynamic>.from(item))
-        .toList();
-  }
-
-  Future<Map<String, dynamic>> _upsertAcademicItem({
-    required String collectionKey,
-    String? id,
-    required Map<String, dynamic> payload,
-  }) async {
-    final settings = await _academicManagementSettings();
-    final items = _academicItems(settings, collectionKey);
-    final itemId = (id == null || id.trim().isEmpty)
-        ? DateTime.now().millisecondsSinceEpoch.toString()
-        : id.trim();
-    final nextItem = {
-      ...payload,
-      'id': itemId,
-      'updatedAt': DateTime.now().toIso8601String(),
-    };
-    final next = [
-      ...items.where((item) => item['id']?.toString() != itemId),
-      nextItem,
-    ];
-    settings[collectionKey] = next;
-    await patchSchoolSettings({'academicManagement': settings});
-    return nextItem;
-  }
-
-  Future<Map<String, dynamic>> _deleteAcademicItem({
-    required String collectionKey,
-    required String id,
-  }) async {
-    final settings = await _academicManagementSettings();
-    final items = _academicItems(settings, collectionKey);
-    settings[collectionKey] = items
-        .where((item) => item['id']?.toString() != id)
-        .toList();
-    await patchSchoolSettings({'academicManagement': settings});
-    return {'id': id};
   }
 
   Future<Map<String, dynamic>> getAttendanceReport({

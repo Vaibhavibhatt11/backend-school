@@ -112,71 +112,71 @@ model School {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
-  branches             Branch[]
-  users                User[]
-  staff                Staff[]
-  classes              ClassRoom[]
-  subjects             Subject[]
-  students             Student[]
-  parents              Parent[]
-  feeStructures        FeeStructure[]
-  invoices             Invoice[]
-  payments             Payment[]
-  announcements        Announcement[]
-  tickets              SupportTicket[]
-  aiFaqs               AiFaq[]
-  faceLogs             FaceCheckinLog[]
-  liveSessions         LiveClassSession[]
-  exams                Exam[]
-  reportJobs           ReportJob[]
-  subscription         SchoolSubscription?
-  schoolRoles          SchoolRole[]
-  hrSetting            HrSetting?
-  hrRolePolicies       HrRolePolicy[]
-  leaveRequests        LeaveRequest[]
-  leaveRequestComments LeaveRequestComment[]
-  studentDocuments     StudentDocument[]
-  auditLogs            AuditLog[]
-  studentAttendanceLog StudentAttendance[]
-  staffAttendanceLog   StaffAttendance[]
-  invitations          Invitation[]
-  academicYears        AcademicYear[]
-  terms                SchoolTerm[]
-  holidays             Holiday[]
-  sections             Section[]
-  permissionMatrix     PermissionMatrix?
-  staffDocuments       StaffDocument[]
-  timetablePeriods     TimetablePeriod[]
-  feeDiscountRules     FeeDiscountRule[]
-  paymentRefunds       PaymentRefund[]
-  reportCardTemplates  ReportCardTemplate[]
+  branches              Branch[]
+  users                 User[]
+  staff                 Staff[]
+  classes               ClassRoom[]
+  subjects              Subject[]
+  students              Student[]
+  parents               Parent[]
+  feeStructures         FeeStructure[]
+  invoices              Invoice[]
+  payments              Payment[]
+  announcements         Announcement[]
+  tickets               SupportTicket[]
+  aiFaqs                AiFaq[]
+  faceLogs              FaceCheckinLog[]
+  liveSessions          LiveClassSession[]
+  exams                 Exam[]
+  reportJobs            ReportJob[]
+  subscription          SchoolSubscription?
+  schoolRoles           SchoolRole[]
+  hrSetting             HrSetting?
+  hrRolePolicies        HrRolePolicy[]
+  leaveRequests         LeaveRequest[]
+  leaveRequestComments  LeaveRequestComment[]
+  studentDocuments      StudentDocument[]
+  auditLogs             AuditLog[]
+  studentAttendanceLog  StudentAttendance[]
+  staffAttendanceLog    StaffAttendance[]
+  invitations           Invitation[]
+  academicYears         AcademicYear[]
+  terms                 SchoolTerm[]
+  holidays              Holiday[]
+  sections              Section[]
+  permissionMatrix      PermissionMatrix?
+  staffDocuments        StaffDocument[]
+  timetablePeriods      TimetablePeriod[]
+  feeDiscountRules      FeeDiscountRule[]
+  paymentRefunds        PaymentRefund[]
+  reportCardTemplates   ReportCardTemplate[]
   notificationTemplates NotificationTemplate[]
-  notificationLogs     NotificationLog[]
-  documentCategories   DocumentCategory[]
-  backupExportJobs     BackupExportJob[]
-  libraryBooks         LibraryBook[]
-  libraryBorrows       LibraryBorrow[]
-  inventoryItems       InventoryItem[]
+  notificationLogs      NotificationLog[]
+  documentCategories    DocumentCategory[]
+  backupExportJobs      BackupExportJob[]
+  libraryBooks          LibraryBook[]
+  libraryBorrows        LibraryBorrow[]
+  inventoryItems        InventoryItem[]
   inventoryTransactions InventoryTransaction[]
-  offlineSyncRecords   OfflineSyncRecord[]
+  offlineSyncRecords    OfflineSyncRecord[]
   admissionApplications AdmissionApplication[]
   transportRoutes       TransportRoute[]
-  transportDrivers     TransportDriver[]
-  transportAllocations TransportAllocation[]
-  hostelRooms          HostelRoom[]
-  hostelAllocations    HostelAllocation[]
-  hostelAttendance     HostelAttendance[]
-  hostelVisitors       HostelVisitor[]
-  events               Event[]
-  eventRegistrations   EventRegistration[]
-  homework             Homework[]
-  studyMaterials       StudyMaterial[]
-  studentAchievements  StudentAchievement[]
-  studentLeaveRequests StudentLeaveRequest[]
-  meetingRequests      MeetingRequest[]
-  studentSettings      StudentSettings[]
-  syllabuses           Syllabus[]
-  lessonPlans          LessonPlan[]
+  transportDrivers      TransportDriver[]
+  transportAllocations  TransportAllocation[]
+  hostelRooms           HostelRoom[]
+  hostelAllocations     HostelAllocation[]
+  hostelAttendance      HostelAttendance[]
+  hostelVisitors        HostelVisitor[]
+  events                Event[]
+  eventRegistrations    EventRegistration[]
+  homework              Homework[]
+  studyMaterials        StudyMaterial[]
+  studentAchievements   StudentAchievement[]
+  studentLeaveRequests  StudentLeaveRequest[]
+  meetingRequests       MeetingRequest[]
+  studentSettings       StudentSettings[]
+  syllabuses            Syllabus[]
+  lessonPlans           LessonPlan[]
 }
 
 model StudentLeaveRequest {
@@ -261,45 +261,45 @@ model User {
   branch Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
 
   refreshTokens           RefreshToken[]
-  markedStudentAttendance StudentAttendance[]   @relation("StudentAttendanceMarkedBy")
-  markedStaffAttendance   StaffAttendance[]     @relation("StaffAttendanceMarkedBy")
-  collectedPayments       Payment[]             @relation("PaymentCollectedBy")
-  createdAnnouncements    Announcement[]        @relation("AnnouncementCreatedBy")
-  createdTickets          SupportTicket[]       @relation("TicketCreatedBy")
-  assignedTickets         SupportTicket[]       @relation("TicketAssignedTo")
+  markedStudentAttendance StudentAttendance[]      @relation("StudentAttendanceMarkedBy")
+  markedStaffAttendance   StaffAttendance[]        @relation("StaffAttendanceMarkedBy")
+  collectedPayments       Payment[]                @relation("PaymentCollectedBy")
+  createdAnnouncements    Announcement[]           @relation("AnnouncementCreatedBy")
+  createdTickets          SupportTicket[]          @relation("TicketCreatedBy")
+  assignedTickets         SupportTicket[]          @relation("TicketAssignedTo")
   ticketMessages          TicketMessage[]
-  createdFaqs             AiFaq[]               @relation("FaqCreatedBy")
-  reviewedFaceLogs        FaceCheckinLog[]      @relation("FaceLogReviewedBy")
-  reportJobs              ReportJob[]           @relation("ReportJobCreatedBy")
-  createdSchoolRoles      SchoolRole[]          @relation("SchoolRoleCreatedBy")
-  updatedSchoolRoles      SchoolRole[]          @relation("SchoolRoleUpdatedBy")
-  updatedHrSettings       HrSetting[]           @relation("HrSettingUpdatedBy")
-  updatedHrRolePolicies   HrRolePolicy[]        @relation("HrRolePolicyUpdatedBy")
-  createdLeaveRequests    LeaveRequest[]        @relation("LeaveRequestCreatedBy")
-  reviewedLeaveRequests   LeaveRequest[]        @relation("LeaveRequestReviewedBy")
-  leaveRequestComments    LeaveRequestComment[] @relation("LeaveRequestCommentActor")
-  uploadedStudentDocs     StudentDocument[]     @relation("StudentDocumentUploadedBy")
-  auditLogs               AuditLog[]            @relation("AuditActor")
-  staffProfile            Staff?                @relation("StaffUser")
-  sentInvitations         Invitation[]          @relation("InvitationInvitedBy")
+  createdFaqs             AiFaq[]                  @relation("FaqCreatedBy")
+  reviewedFaceLogs        FaceCheckinLog[]         @relation("FaceLogReviewedBy")
+  reportJobs              ReportJob[]              @relation("ReportJobCreatedBy")
+  createdSchoolRoles      SchoolRole[]             @relation("SchoolRoleCreatedBy")
+  updatedSchoolRoles      SchoolRole[]             @relation("SchoolRoleUpdatedBy")
+  updatedHrSettings       HrSetting[]              @relation("HrSettingUpdatedBy")
+  updatedHrRolePolicies   HrRolePolicy[]           @relation("HrRolePolicyUpdatedBy")
+  createdLeaveRequests    LeaveRequest[]           @relation("LeaveRequestCreatedBy")
+  reviewedLeaveRequests   LeaveRequest[]           @relation("LeaveRequestReviewedBy")
+  leaveRequestComments    LeaveRequestComment[]    @relation("LeaveRequestCommentActor")
+  uploadedStudentDocs     StudentDocument[]        @relation("StudentDocumentUploadedBy")
+  auditLogs               AuditLog[]               @relation("AuditActor")
+  staffProfile            Staff?                   @relation("StaffUser")
+  sentInvitations         Invitation[]             @relation("InvitationInvitedBy")
   notifications           SuperadminNotification[] @relation("NotificationUser")
-  uploadedFirebaseCreds   FirebaseCredential[]  @relation("FirebaseCredentialUploadedBy")
-  studentProfile         Student?              @relation("StudentUser")
+  uploadedFirebaseCreds   FirebaseCredential[]     @relation("FirebaseCredentialUploadedBy")
+  studentProfile          Student?                 @relation("StudentUser")
 
   @@index([schoolId])
   @@index([schoolId, role])
 }
 
 model RefreshToken {
-  id        String    @id @default(cuid())
-  userId    String
-  tokenHash String    @unique
-  expiresAt DateTime
-  revokedAt DateTime?
+  id         String    @id @default(cuid())
+  userId     String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  revokedAt  DateTime?
   lastUsedAt DateTime?
-  ipAddress String?
-  userAgent String?
-  createdAt DateTime  @default(now())
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -333,14 +333,14 @@ model SubscriptionPlan {
 }
 
 model SchoolSubscription {
-  schoolId   String    @id
-  planCode   String
-  autoRenew  Boolean   @default(false)
-  validUntil DateTime?
+  schoolId      String                    @id
+  planCode      String
+  autoRenew     Boolean                   @default(false)
+  validUntil    DateTime?
   paymentStatus SubscriptionPaymentStatus @default(PAID)
   status        SubscriptionStatus        @default(ACTIVE)
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
 
   school School           @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   plan   SubscriptionPlan @relation(fields: [planCode], references: [planCode], onDelete: Restrict)
@@ -370,18 +370,18 @@ model PlatformConfiguration {
 }
 
 model SecuritySetting {
-  id                 String   @id
-  enforce2FA         Boolean  @default(false)
-  passwordMinLength  Int      @default(8)
-  passwordUppercase  Boolean  @default(true)
-  passwordSpecial    Boolean  @default(true)
-  passwordExpiryDays Int      @default(90)
-  jwtExpiryMinutes   Int      @default(15)
-  refreshExpiryDays  Int      @default(7)
-  apiKeyVersion      Int      @default(1)
+  id                 String    @id
+  enforce2FA         Boolean   @default(false)
+  passwordMinLength  Int       @default(8)
+  passwordUppercase  Boolean   @default(true)
+  passwordSpecial    Boolean   @default(true)
+  passwordExpiryDays Int       @default(90)
+  jwtExpiryMinutes   Int       @default(15)
+  refreshExpiryDays  Int       @default(7)
+  apiKeyVersion      Int       @default(1)
   lastKeyRotationAt  DateTime?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 }
 
 model Invitation {
@@ -407,14 +407,14 @@ model Invitation {
 }
 
 model SuperadminNotification {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
   title     String
   message   String
-  type      String   @default("INFO")
+  type      String    @default("INFO")
   readAt    DateTime?
   meta      Json?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   user User @relation("NotificationUser", fields: [userId], references: [id], onDelete: Cascade)
 
@@ -531,6 +531,7 @@ model ClassRoom {
   exams           Exam[]
   liveSessions    LiveClassSession[] @relation("LiveSessionClass")
   sections        Section[]
+  syllabuses      Syllabus[]
 
   @@unique([schoolId, name, section])
   @@index([schoolId])
@@ -545,10 +546,12 @@ model Subject {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  school   School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  mappings ClassSubject[]
-  exams    Exam[]
-  sessions LiveClassSession[] @relation("LiveSessionSubject")
+  school      School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  mappings    ClassSubject[]
+  exams       Exam[]
+  sessions    LiveClassSession[] @relation("LiveSessionSubject")
+  syllabuses  Syllabus[]
+  lessonPlans LessonPlan[]
 
   @@unique([schoolId, code])
   @@index([schoolId])
@@ -587,15 +590,15 @@ model Student {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
-  school      School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  class       ClassRoom?          @relation(fields: [classId], references: [id], onDelete: SetNull)
-  parents       StudentParent[]
-  attendance    StudentAttendance[]
-  documents     StudentDocument[]
-  invoices      Invoice[]
-  payments      Payment[]
-  examResults   ExamResult[]
-  userId        String?   @unique
+  school              School                @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  class               ClassRoom?            @relation(fields: [classId], references: [id], onDelete: SetNull)
+  parents             StudentParent[]
+  attendance          StudentAttendance[]
+  documents           StudentDocument[]
+  invoices            Invoice[]
+  payments            Payment[]
+  examResults         ExamResult[]
+  userId              String?               @unique
   transportAllocation TransportAllocation?
   hostelAllocation    HostelAllocation?
   homeworkSubmissions HomeworkSubmission[]
@@ -804,10 +807,10 @@ model Payment {
   notes          String?
   createdAt      DateTime      @default(now())
 
-  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  invoice     Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
-  collectedBy User?    @relation("PaymentCollectedBy", fields: [collectedById], references: [id], onDelete: SetNull)
+  school      School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  student     Student         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  invoice     Invoice?        @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  collectedBy User?           @relation("PaymentCollectedBy", fields: [collectedById], references: [id], onDelete: SetNull)
   refunds     PaymentRefund[]
 
   @@unique([schoolId, receiptNo])
@@ -828,8 +831,8 @@ model Announcement {
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
 
-  school    School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  createdBy User?  @relation("AnnouncementCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  school           School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  createdBy        User?             @relation("AnnouncementCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   notificationLogs NotificationLog[]
 
   @@index([schoolId, status])
@@ -994,7 +997,7 @@ model AcademicYear {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  school School      @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  school School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   terms  SchoolTerm[]
 
   @@unique([schoolId, name])
@@ -1043,7 +1046,7 @@ model Section {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  school    School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  school    School     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   classRoom ClassRoom? @relation(fields: [classId], references: [id], onDelete: SetNull)
 
   @@unique([schoolId, classId, name])
@@ -1152,7 +1155,7 @@ model NotificationTemplate {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  school School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   logs   NotificationLog[]
 
   @@unique([schoolId, code])
@@ -1211,36 +1214,36 @@ model BackupExportJob {
 }
 
 model LibraryBook {
-  id             String   @id @default(cuid())
-  schoolId       String
-  isbn           String?
-  title          String
-  author         String?
-  category       String?
-  totalCopies    Int      @default(1)
-  availableCopies Int     @default(1)
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id              String   @id @default(cuid())
+  schoolId        String
+  isbn            String?
+  title           String
+  author          String?
+  category        String?
+  totalCopies     Int      @default(1)
+  availableCopies Int      @default(1)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  school  School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  school  School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   borrows LibraryBorrow[]
 
   @@index([schoolId, title])
 }
 
 model LibraryBorrow {
-  id          String   @id @default(cuid())
-  schoolId    String
-  bookId      String
-  borrowerType String
+  id            String    @id @default(cuid())
+  schoolId      String
+  bookId        String
+  borrowerType  String
   borrowerRefId String
-  issuedAt    DateTime @default(now())
-  dueDate     DateTime
-  returnedAt  DateTime?
-  status      String   @default("BORROWED")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  issuedAt      DateTime  @default(now())
+  dueDate       DateTime
+  returnedAt    DateTime?
+  status        String    @default("BORROWED")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   school School      @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   book   LibraryBook @relation(fields: [bookId], references: [id], onDelete: Cascade)
@@ -1285,18 +1288,18 @@ model InventoryTransaction {
 }
 
 model OfflineSyncRecord {
-  id         String   @id @default(cuid())
-  schoolId   String
-  deviceId   String
-  module     String
-  action     String
-  payload    Json?
-  status     String   @default("PENDING")
-  syncedAt   DateTime?
+  id          String    @id @default(cuid())
+  schoolId    String
+  deviceId    String
+  module      String
+  action      String
+  payload     Json?
+  status      String    @default("PENDING")
+  syncedAt    DateTime?
   attemptedAt DateTime?
-  retryCount Int      @default(0)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  retryCount  Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
@@ -1334,26 +1337,26 @@ enum AdmissionStatus {
 }
 
 model AdmissionApplication {
-  id            String          @id @default(cuid())
-  schoolId      String
-  applicationNo String
-  firstName     String
-  lastName      String
-  email         String?
-  phone         String?
-  dob           DateTime?
-  gender        String?
-  appliedClass   String
-  appliedSection String?
-  status        AdmissionStatus @default(SUBMITTED)
-  admissionFeePaid Boolean       @default(false)
-  registrationNo  String?
-  studentId     String?
-  meta          Json?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id               String          @id @default(cuid())
+  schoolId         String
+  applicationNo    String
+  firstName        String
+  lastName         String
+  email            String?
+  phone            String?
+  dob              DateTime?
+  gender           String?
+  appliedClass     String
+  appliedSection   String?
+  status           AdmissionStatus @default(SUBMITTED)
+  admissionFeePaid Boolean         @default(false)
+  registrationNo   String?
+  studentId        String?
+  meta             Json?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 
-  school   School               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  school    School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   documents AdmissionDocument[]
 
   @@unique([schoolId, applicationNo])
@@ -1361,12 +1364,12 @@ model AdmissionApplication {
 }
 
 model AdmissionDocument {
-  id         String   @id @default(cuid())
+  id            String   @id @default(cuid())
   applicationId String
-  name       String
-  url        String
-  type       String
-  createdAt  DateTime @default(now())
+  name          String
+  url           String
+  type          String
+  createdAt     DateTime @default(now())
 
   application AdmissionApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
@@ -1384,7 +1387,7 @@ model TransportRoute {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  school      School               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  school      School                @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   allocations TransportAllocation[]
 
   @@unique([schoolId, routeCode])
@@ -1452,9 +1455,9 @@ model HostelAllocation {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  school School     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  student Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  room   HostelRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  school  School     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  student Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  room    HostelRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   @@index([schoolId, roomId])
 }
@@ -1475,15 +1478,15 @@ model HostelAttendance {
 }
 
 model HostelVisitor {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   schoolId    String
   visitorName String
   studentId   String?
   purpose     String?
   idProof     String?
-  inTime      DateTime @default(now())
+  inTime      DateTime  @default(now())
   outTime     DateTime?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
   school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
@@ -1492,17 +1495,17 @@ model HostelVisitor {
 
 // ----- Events -----
 model Event {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   schoolId    String
   title       String
   description String?
-  eventType   String   @default("GENERAL")
+  eventType   String    @default("GENERAL")
   startDate   DateTime
   endDate     DateTime?
   location    String?
-  isPublished Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isPublished Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   school        School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   registrations EventRegistration[]
@@ -1521,7 +1524,7 @@ model EventRegistration {
   status    String   @default("REGISTERED")
   createdAt DateTime @default(now())
 
-  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  event  Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
   school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
   @@unique([eventId, studentId])
@@ -1562,16 +1565,16 @@ model Homework {
 }
 
 model HomeworkSubmission {
-  id         String    @id @default(cuid())
-  homeworkId String
-  studentId  String
-  url        String?
-  fileUrls   String[]
-  status     String    @default("SUBMITTED")
+  id          String   @id @default(cuid())
+  homeworkId  String
+  studentId   String
+  url         String?
+  fileUrls    String[]
+  status      String   @default("SUBMITTED")
   submittedAt DateTime @default(now())
-  feedback   String?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  feedback    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   homework Homework @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
   student  Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
@@ -1581,18 +1584,18 @@ model HomeworkSubmission {
 }
 
 model StudyMaterial {
-  id        String   @id @default(cuid())
-  schoolId  String
-  classId   String?
-  subjectId String?
-  title     String
+  id          String   @id @default(cuid())
+  schoolId    String
+  classId     String?
+  subjectId   String?
+  title       String
   description String?
-  url       String
-  type      String   @default("PDF")
-  chapter   String?
-  isPublished Boolean @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  url         String
+  type        String   @default("PDF")
+  chapter     String?
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
@@ -1616,6 +1619,7 @@ model StudentAchievement {
 
   @@index([schoolId, studentId])
 }
+
 // ----- Syllabus & Lesson Plans -----
 model Syllabus {
   id        String   @id @default(cuid())
@@ -1628,9 +1632,9 @@ model Syllabus {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  school      School     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  classRoom   ClassRoom? @relation(fields: [classId], references: [id], onDelete: SetNull)
-  subject     Subject?   @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  school      School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  classRoom   ClassRoom?   @relation(fields: [classId], references: [id], onDelete: SetNull)
+  subject     Subject?     @relation(fields: [subjectId], references: [id], onDelete: SetNull)
   lessonPlans LessonPlan[]
 
   @@index([schoolId, classId, subjectId])

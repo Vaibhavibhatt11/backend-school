@@ -203,14 +203,18 @@ class _AdminStudyMaterialComposeViewState
                                 Text(
                                   _pickedFileName!,
                                   style: const TextStyle(
-                                      fontWeight: FontWeight.bold, fontSize: 13),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 Text(
                                   _pickedFileSize ?? '',
                                   style: TextStyle(
-                                      color: Colors.grey[600], fontSize: 11),
+                                    color: Colors.grey[600],
+                                    fontSize: 11,
+                                  ),
                                 ),
                               ],
                             ),
@@ -230,7 +234,9 @@ class _AdminStudyMaterialComposeViewState
                   OutlinedButton.icon(
                     onPressed: _pickFile,
                     icon: const Icon(Icons.file_present_rounded),
-                    label: Text(_pickedFileName == null ? 'Upload File' : 'Change File'),
+                    label: Text(
+                      _pickedFileName == null ? 'Upload File' : 'Change File',
+                    ),
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 48),
                       side: BorderSide(color: color),
@@ -456,28 +462,26 @@ class _AdminStudyMaterialComposeViewState
                         ),
                       )
                     : const Icon(Icons.cloud_upload_rounded),
-                label: Text(
-                  controller.isPublishing.value
-                      ? Column(
-                          children: [
-                            Text(
-                              controller.isUploading.value
-                                  ? 'Uploading File...'
-                                  : 'Publishing...',
-                              style: const TextStyle(color: Colors.white),
+                label: controller.isPublishing.value
+                    ? Column(
+                        children: [
+                          Text(
+                            controller.isUploading.value
+                                ? 'Uploading File...'
+                                : 'Publishing...',
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          if (controller.isUploading.value) ...[
+                            const SizedBox(height: 8),
+                            LinearProgressIndicator(
+                              value: controller.uploadProgress.value,
+                              backgroundColor: Colors.white24,
+                              color: Colors.white,
                             ),
-                            if (controller.isUploading.value) ...[
-                              const SizedBox(height: 8),
-                              LinearProgressIndicator(
-                                value: controller.uploadProgress.value,
-                                backgroundColor: Colors.white24,
-                                color: Colors.white,
-                              ),
-                            ],
                           ],
-                        )
-                      : Text('Publish ${category.singularLabel}'),
-                ),
+                        ],
+                      )
+                    : Text('Publish ${category.singularLabel}'),
               ),
             ),
           ],
@@ -490,7 +494,9 @@ class _AdminStudyMaterialComposeViewState
     final created = await controller.createMaterial(
       category: category,
       title: _titleController.text,
-      url: _urlController.text.trim().isEmpty ? null : _urlController.text.trim(),
+      url: _urlController.text.trim().isEmpty
+          ? null
+          : _urlController.text.trim(),
       fileBytes: _pickedFileBytes,
       fileName: _pickedFileName,
       description: _descriptionController.text,
