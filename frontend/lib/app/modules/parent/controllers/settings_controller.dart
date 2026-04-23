@@ -1,10 +1,13 @@
 import 'package:get/get.dart';
+import 'package:flutter/material.dart';
 import '../../../../common/routes/common_routes_screens.dart';
 import '../../../services/app_storage.dart';
 import '../../../../common/services/auth_service.dart';
 import '../../../../common/services/session_storage_service.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
 import '../../../../common/services/parent/parent_settings_service.dart';
+import '../views/personal_information_view.dart';
+import '../views/settings_option_view.dart';
 
 class SettingsController extends GetxController {
   final _storage = AppStorage();
@@ -16,9 +19,18 @@ class SettingsController extends GetxController {
   final userName = 'Parent User'.obs;
   final userRole = 'Parent'.obs;
   final userId = '-'.obs;
-  final faceIdEnabled = true.obs;
   final pushNotificationsEnabled = true.obs;
   final selectedLanguage = 'English (US)'.obs;
+  final emailNotificationsEnabled = true.obs;
+  final smsNotificationsEnabled = false.obs;
+  final profileVisibilityPrivate = true.obs;
+  final analyticsSharingEnabled = false.obs;
+  final languageOptions = <String>[
+    'English (US)',
+    'English (UK)',
+    'Hindi',
+    'Gujarati',
+  ];
 
   @override
   void onInit() {
@@ -46,9 +58,6 @@ class SettingsController extends GetxController {
       if (data['pushNotificationsEnabled'] is bool) {
         pushNotificationsEnabled.value = data['pushNotificationsEnabled'] as bool;
       }
-      if (data['faceIdEnabled'] is bool) {
-        faceIdEnabled.value = data['faceIdEnabled'] as bool;
-      }
       if (data['selectedLanguage'] != null) {
         selectedLanguage.value = data['selectedLanguage'].toString();
       }
@@ -57,13 +66,33 @@ class SettingsController extends GetxController {
     }
   }
 
-  void toggleFaceId(bool value) {
-    faceIdEnabled.value = value;
+  void togglePushNotifications(bool value) {
+    pushNotificationsEnabled.value = value;
     _saveSettings();
   }
 
-  void togglePushNotifications(bool value) {
-    pushNotificationsEnabled.value = value;
+  void toggleEmailNotifications(bool value) {
+    emailNotificationsEnabled.value = value;
+    _saveSettings();
+  }
+
+  void toggleSmsNotifications(bool value) {
+    smsNotificationsEnabled.value = value;
+    _saveSettings();
+  }
+
+  void toggleProfilePrivacy(bool value) {
+    profileVisibilityPrivate.value = value;
+    _saveSettings();
+  }
+
+  void toggleAnalyticsSharing(bool value) {
+    analyticsSharingEnabled.value = value;
+    _saveSettings();
+  }
+
+  void updateLanguage(String language) {
+    selectedLanguage.value = language;
     _saveSettings();
   }
 
@@ -71,7 +100,10 @@ class SettingsController extends GetxController {
     try {
       await _settingsService.updateSettings({
         'pushNotificationsEnabled': pushNotificationsEnabled.value,
-        'faceIdEnabled': faceIdEnabled.value,
+        'emailNotificationsEnabled': emailNotificationsEnabled.value,
+        'smsNotificationsEnabled': smsNotificationsEnabled.value,
+        'profileVisibilityPrivate': profileVisibilityPrivate.value,
+        'analyticsSharingEnabled': analyticsSharingEnabled.value,
         'selectedLanguage': selectedLanguage.value,
       }, childId: _parentContext.selectedChildId.value);
     } catch (_) {
@@ -91,8 +123,40 @@ class SettingsController extends GetxController {
     Get.offAllNamed(CommonScreenRoutes.loginScreen);
   }
 
-  void goToPersonalInfo() {}
-  void goToPasswordSecurity() {}
-  void goToHelpCenter() {}
-  void goToPrivacyPolicy() {}
+  void goToPersonalInfo() {
+    Get.to(() => const PersonalInformationView());
+  }
+
+  void goToPasswordSecurity() {
+    Get.to(
+      () => const SettingsOptionView(
+        title: 'Password & Security',
+        description:
+            'Update password and review account security preferences.',
+        icon: Icons.lock,
+      ),
+    );
+  }
+
+  void goToHelpCenter() {
+    Get.to(
+      () => const SettingsOptionView(
+        title: 'Help Center',
+        description:
+            'Get support, FAQs, and guidance for using the parent module.',
+        icon: Icons.help_outline,
+      ),
+    );
+  }
+
+  void goToPrivacyPolicy() {
+    Get.to(
+      () => const SettingsOptionView(
+        title: 'Privacy Policy',
+        description:
+            'Read how your data is handled and protected in this app.',
+        icon: Icons.description,
+      ),
+    );
+  }
 }

@@ -32,6 +32,8 @@ class ApiEndpoints {
   static const String parentMeetingsRequest = '/parent/meetings/request';
   static const String parentProgressReports = '/parent/progress-reports';
   static const String parentLiveClasses = '/parent/live-classes';
+  static const String parentExamTimetable = '/parent/exam-timetable';
+  static const String parentEventTimetable = '/parent/event-timetable';
   static const String parentProfileHub = '/parent/profile-hub';
   static const String parentLibrary = '/parent/library';
   static const String parentDocuments = '/parent/documents';

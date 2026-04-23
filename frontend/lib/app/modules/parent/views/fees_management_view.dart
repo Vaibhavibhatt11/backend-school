@@ -121,6 +121,14 @@ class FeesManagementView extends GetView<FeesController> {
                 ),
               ],
             ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: () => Get.toNamed(AppRoutes.PARENT_FINANCE_HUB),
+                icon: const Icon(Icons.account_balance_wallet_outlined),
+                label: const Text('Open Finance Center'),
+              ),
+            ),
             const SizedBox(height: 8),
             // Invoices list
             Obx(

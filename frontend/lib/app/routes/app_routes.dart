@@ -18,6 +18,9 @@ abstract class AppRoutes {
   static const PARENT_FEES = '/parent-fees';
   static const PARENT_INVOICE_DETAIL = '/parent-invoice-detail';
   static const PARENT_TIMETABLE = '/parent-timetable';
+  static const PARENT_TIMETABLE_MONTHLY = '/parent-timetable-monthly';
+  static const PARENT_EXAM_TIMETABLE = '/parent-exam-timetable';
+  static const PARENT_EVENT_TIMETABLE = '/parent-event-timetable';
   static const PARENT_PROFILE = '/parent-profile';
   static const PARENT_CHILD_SWITCHER = '/parent-child-switcher';
   static const PARENT_ANNOUNCEMENTS = '/parent-announcements';
@@ -25,7 +28,14 @@ abstract class AppRoutes {
   static const PARENT_LIVE_CLASS = '/parent-live-class';
   static const PARENT_LIBRARY = '/parent-library';
   static const PARENT_DOCUMENT_VIEWER = '/parent-document-viewer';
+  static const PARENT_STUDENT_ID_CARD = '/parent-student-id-card';
   static const PARENT_NOTIFICATIONS = '/parent-notifications';
+  static const PARENT_COMMUNICATION = '/parent-communication';
+  static const PARENT_EVENTS_HUB = '/parent-events-hub';
+  // Transport module commented for now.
+  // static const PARENT_TRANSPORT = '/parent-transport';
+  static const PARENT_ACHIEVEMENTS = '/parent-achievements';
+  static const PARENT_FINANCE_HUB = '/parent-finance-hub';
   static const PARENT_SETTINGS = '/parent-settings';
 
   // Teacher Module

@@ -37,3 +37,37 @@ class PastExam {
 
   double get percentage => maxMarks > 0 ? (marksObtained / maxMarks) * 100 : 0;
 }
+
+class ReportCardItem {
+  const ReportCardItem({
+    required this.id,
+    required this.term,
+    required this.academicYear,
+    required this.overallPercentage,
+    required this.overallGrade,
+    required this.publishedOn,
+    required this.pdfName,
+  });
+
+  final String id;
+  final String term;
+  final String academicYear;
+  final double overallPercentage;
+  final String overallGrade;
+  final DateTime publishedOn;
+  final String pdfName;
+}
+
+class SubjectPerformanceItem {
+  const SubjectPerformanceItem({
+    required this.subject,
+    required this.averagePercentage,
+    required this.currentGrade,
+    required this.examsTaken,
+  });
+
+  final String subject;
+  final double averagePercentage;
+  final String currentGrade;
+  final int examsTaken;
+}

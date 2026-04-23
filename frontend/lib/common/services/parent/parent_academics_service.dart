@@ -77,5 +77,23 @@ class ParentAcademicsService {
     );
     return extractApiData(res.data, context: 'live classes');
   }
+
+  Future<Map<String, dynamic>> getExamTimetable({
+    String? childId,
+    String? month,
+  }) async {
+    final scopedChildId = (childId == null || childId.isEmpty)
+        ? await _parentContext.ensureSelectedChildId()
+        : childId;
+    final query = <String, dynamic>{
+      if (scopedChildId != null && scopedChildId.isNotEmpty) 'childId': scopedChildId,
+      if (month != null && month.isNotEmpty) 'month': month,
+    };
+    final res = await _apiClient.get(
+      ApiEndpoints.parentExamTimetable,
+      query: query.isEmpty ? null : query,
+    );
+    return extractApiData(res.data, context: 'exam timetable');
+  }
 }
 

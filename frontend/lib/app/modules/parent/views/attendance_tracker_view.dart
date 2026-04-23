@@ -25,299 +25,96 @@ class AttendanceTrackerView extends GetView<AttendanceController> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+      body: DefaultTabController(
+        length: 4,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 16),
-            // Student info card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                children: [
-                  Obx(
-                    () => AppUserAvatar(
-                      radius: 30,
-                      photoUrl: controller.studentPhotoUrl.value.isEmpty
-                          ? null
-                          : controller.studentPhotoUrl.value,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Obx(
-                        () => Text(
-                          controller.studentName.value,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Obx(
-                        () => Text(
-                          controller.studentClass.value,
-                          style: TextStyle(
-                            color: isDark
-                                ? AppColors.textSecondaryDark
-                                : Colors.grey[600],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Month selector
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Obx(
-                  () => Text(
-                    controller.month.value,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.chevron_left),
-                      onPressed: controller.previousMonth,
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.chevron_right),
-                      onPressed: controller.nextMonth,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            // Calendar grid
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.surfaceDark : Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isDark ? AppColors.borderDark : AppColors.borderLight,
-                ),
-              ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
               child: Column(
                 children: [
-                  // Weekday headers
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-                        .map(
-                          (day) => Expanded(
-                            child: Text(
-                              day,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                  const SizedBox(height: 8),
-                  // Calendar days grid (5 rows x 7 columns)
-
-                  // Assuming controller.calendarDays is a list of 35 items (some null)
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 7,
-                          childAspectRatio: 1,
-                        ),
-                    itemCount: 35,
-                    itemBuilder: (context, index) {
-                      final day = controller.calendarDays[index];
-                      if (day == null) {
-                        return Container();
-                      }
-                      // Determine status from API-backed attendance map in controller.
-                      String status = controller.getStatusForDay(day);
-                      Color bgColor;
-                      Color textColor;
-                      if (status == 'present') {
-                        bgColor = Colors.green.withValues(alpha: 0.1);
-                        textColor = Colors.green;
-                      } else if (status == 'absent') {
-                        bgColor = Colors.red.withValues(alpha: 0.1);
-                        textColor = Colors.red;
-                      } else if (status == 'late') {
-                        bgColor = Colors.orange.withValues(alpha: 0.1);
-                        textColor = Colors.orange;
-                      } else {
-                        bgColor = Colors.transparent;
-                        textColor = isDark ? Colors.white : Colors.black;
-                      }
-                      return Container(
-                        margin: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          color: bgColor,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Center(
-                          child: Text(
-                            day.toString(),
-                            style: TextStyle(
-                              color: textColor,
-                              fontWeight: status.isNotEmpty
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                            ),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      children: [
+                        Obx(
+                          () => AppUserAvatar(
+                            radius: 30,
+                            photoUrl: controller.studentPhotoUrl.value.isEmpty
+                                ? null
+                                : controller.studentPhotoUrl.value,
                           ),
                         ),
-                      );
-                    },
-                  ),
-
-                  const SizedBox(height: 16),
-                  // Legend
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildLegendItem(Colors.green, 'Present'),
-                      _buildLegendItem(Colors.red, 'Absent'),
-                      _buildLegendItem(Colors.orange, 'Late'),
-                      _buildLegendItem(Colors.grey, 'Holiday'),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Performance summary
-            const Text(
-              'Performance Summary',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFF0F172A), // dark card
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      // Circular progress
-                      Obx(() {
-                        final present =
-                            controller.attendanceStats['present'] ?? 0;
-                        final absent =
-                            controller.attendanceStats['absent'] ?? 0;
-                        final late = controller.attendanceStats['late'] ?? 0;
-                        final total = present + absent + late;
-                        final percent = total > 0 ? (present / total) : 0.0;
-                        return SizedBox(
-                          width: 80,
-                          height: 80,
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              CircularProgressIndicator(
-                                value: percent,
-                                strokeWidth: 8,
-                                backgroundColor: Colors.white10,
-                                valueColor: const AlwaysStoppedAnimation(
-                                  AppColors.primary,
-                                ),
-                              ),
-                              Center(
-                                child: Text(
-                                  '${(percent * 100).round()}%',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Obx(() {
-                          final absent =
-                              controller.attendanceStats['absent'] ?? 0;
-                          return Column(
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Attendance Overview',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                absent == 0
-                                    ? 'Great consistency this month.'
-                                    : '$absent absences recorded this month.',
-                                style: const TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 12,
-                                ),
-                              ),
+                              Obx(() => Text(
+                                    controller.studentName.value,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  )),
+                              Obx(() => Text(
+                                    controller.studentClass.value,
+                                    style: TextStyle(
+                                      color: isDark ? AppColors.textSecondaryDark : Colors.grey[600],
+                                    ),
+                                  )),
                             ],
-                          );
-                        }),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  // Stats grid
-                  Obx(
-                    () => Row(
-                      children: [
-                        _buildStatItem(
-                          'Present',
-                          controller.attendanceStats['present'].toString(),
-                          Colors.green,
+                          ),
                         ),
-                        _buildStatItem(
-                          'Absent',
-                          controller.attendanceStats['absent'].toString(),
-                          Colors.red,
-                        ),
-                        _buildStatItem(
-                          'Late',
-                          controller.attendanceStats['late'].toString(),
-                          Colors.orange,
+                        Row(
+                          children: [
+                            IconButton(icon: const Icon(Icons.chevron_left), onPressed: controller.previousMonth),
+                            IconButton(icon: const Icon(Icons.chevron_right), onPressed: controller.nextMonth),
+                          ],
                         ),
                       ],
                     ),
                   ),
+                  const SizedBox(height: 10),
+                  const TabBar(
+                    isScrollable: true,
+                    tabs: [
+                      Tab(text: 'Daily Record'),
+                      Tab(text: 'Monthly Report'),
+                      Tab(text: 'Late Entry'),
+                      Tab(text: 'Leave Applications'),
+                    ],
+                  ),
                 ],
               ),
             ),
-            const SizedBox(height: 80),
+            Expanded(
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (controller.errorMessage.value.isNotEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(controller.errorMessage.value, textAlign: TextAlign.center),
+                    ),
+                  );
+                }
+                return TabBarView(
+                  children: [
+                    _dailyRecordTab(isDark),
+                    _monthlyReportTab(isDark),
+                    _lateEntryTab(isDark),
+                    _leaveTab(isDark),
+                  ],
+                );
+              }),
+            ),
           ],
         ),
       ),
@@ -327,42 +124,289 @@ class AttendanceTrackerView extends GetView<AttendanceController> {
     );
   }
 
-  Widget _buildLegendItem(Color color, String label) {
-    return Row(
+  Widget _dailyRecordTab(bool isDark) {
+    return Obx(() => ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemCount: controller.dailyRecords.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 8),
+          itemBuilder: (_, i) {
+            final item = controller.dailyRecords[i];
+            final status = (item['status'] ?? '').toString();
+            final statusColor = status == 'present'
+                ? Colors.green
+                : status == 'late'
+                    ? Colors.orange
+                    : status == 'absent'
+                        ? Colors.red
+                        : Colors.grey;
+            return Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.surfaceDark : Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text((item['date'] ?? '-').toString(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 4),
+                        Text('In: ${(item['checkIn'] ?? '-').toString()}  Out: ${(item['checkOut'] ?? '-').toString()}'),
+                        if ((item['teacher'] ?? '').toString().isNotEmpty)
+                          Text('Teacher: ${(item['teacher'] ?? '').toString()}'),
+                        if ((item['room'] ?? '').toString().isNotEmpty)
+                          Text('Classroom: ${(item['room'] ?? '').toString()}'),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(status.toUpperCase(), style: TextStyle(color: statusColor, fontWeight: FontWeight.w700)),
+                  ),
+                ],
+              ),
+            );
+          },
+        ));
+  }
+
+  Widget _monthlyReportTab(bool isDark) {
+    return Obx(() {
+      final report = controller.monthlyReport;
+      final percent = (report['attendancePercent'] is num) ? (report['attendancePercent'] as num).toDouble() : 0.0;
+      return ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text(
+            report['month']?.toString() ?? controller.month.value,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.surfaceDark : Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(child: _metric('Present', '${report['present'] ?? 0}', Colors.green)),
+                    Expanded(child: _metric('Absent', '${report['absent'] ?? 0}', Colors.red)),
+                    Expanded(child: _metric('Late', '${report['late'] ?? 0}', Colors.orange)),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                LinearProgressIndicator(
+                  value: (percent / 100).clamp(0.0, 1.0),
+                  backgroundColor: Colors.grey.withValues(alpha: 0.2),
+                  valueColor: const AlwaysStoppedAnimation(AppColors.primary),
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text('Attendance: ${percent.toStringAsFixed(1)}%'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _lateEntryTab(bool isDark) {
+    return Obx(() {
+      if (controller.lateEntryRecords.isEmpty) {
+        return const Center(child: Text('No late entry records for this month.'));
+      }
+      return ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: controller.lateEntryRecords.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 8),
+        itemBuilder: (_, i) {
+          final item = controller.lateEntryRecords[i];
+          return Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.surfaceDark : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.schedule, color: Colors.orange),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    '${(item['date'] ?? '-').toString()}  •  In: ${(item['checkIn'] ?? '-').toString()}',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    });
+  }
+
+  Widget _leaveTab(bool isDark) {
+    return Column(
       children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _openLeaveDialog,
+              icon: const Icon(Icons.add),
+              label: const Text('Apply Leave'),
+            ),
+          ),
         ),
-        const SizedBox(width: 4),
-        Text(label, style: const TextStyle(fontSize: 10)),
+        Expanded(
+          child: Obx(() {
+            if (controller.leaveApplications.isEmpty) {
+              return const Center(child: Text('No leave applications yet.'));
+            }
+            return ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: controller.leaveApplications.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              itemBuilder: (_, i) {
+                final item = controller.leaveApplications[i];
+                final status = (item['status'] ?? 'pending').toString();
+                final color = status == 'approved'
+                    ? Colors.green
+                    : status == 'rejected'
+                        ? Colors.red
+                        : Colors.orange;
+                return Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.surfaceDark : Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${item['fromDate']} to ${item['toDate']}',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: color.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(status.toUpperCase(), style: TextStyle(color: color)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text((item['reason'] ?? '').toString()),
+                      const SizedBox(height: 4),
+                      Text('Applied on: ${(item['appliedOn'] ?? '-').toString()}', style: const TextStyle(color: Colors.grey)),
+                    ],
+                  ),
+                );
+              },
+            );
+          }),
+        ),
       ],
     );
   }
 
-  Widget _buildStatItem(String label, String value, Color color) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            Text(
-              label,
-              style: const TextStyle(color: Colors.white70, fontSize: 10),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: TextStyle(
-                color: color,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+  Widget _metric(String label, String value, Color color) {
+    return Column(
+      children: [
+        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+        const SizedBox(height: 4),
+        Text(value, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 18)),
+      ],
+    );
+  }
+
+  Future<void> _openLeaveDialog() async {
+    final reasonCtrl = TextEditingController();
+    DateTime fromDate = DateTime.now();
+    DateTime toDate = DateTime.now();
+    await Get.dialog(
+      StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Apply Leave'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('From Date'),
+                subtitle: Text(fromDate.toIso8601String().split('T').first),
+                onTap: () async {
+                  final d = await showDatePicker(
+                    context: context,
+                    initialDate: fromDate,
+                    firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                  );
+                  if (d != null) setState(() => fromDate = d);
+                },
               ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('To Date'),
+                subtitle: Text(toDate.toIso8601String().split('T').first),
+                onTap: () async {
+                  final d = await showDatePicker(
+                    context: context,
+                    initialDate: toDate,
+                    firstDate: fromDate,
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                  );
+                  if (d != null) setState(() => toDate = d);
+                },
+              ),
+              TextField(
+                controller: reasonCtrl,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Reason',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+            ElevatedButton(
+              onPressed: () async {
+                final reason = reasonCtrl.text.trim();
+                if (reason.isEmpty) return;
+                await controller.applyLeave(
+                  fromDate: fromDate,
+                  toDate: toDate,
+                  reason: reason,
+                );
+                Get.back();
+              },
+              child: const Text('Submit'),
             ),
           ],
         ),

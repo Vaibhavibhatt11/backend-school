@@ -76,28 +76,39 @@ class DocumentViewerView extends GetView<DocumentViewerController> {
           Container(
             padding: const EdgeInsets.all(16),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 IconButton(
                   icon: const Icon(Icons.remove),
                   onPressed: controller.prevPage,
                 ),
-                Obx(
-                  () => Text(
-                    'Page ${controller.currentPage.value} of ${controller.totalPages.value}',
+                Expanded(
+                  child: Obx(
+                    () => Text(
+                      controller.documents.isEmpty
+                          ? 'No documents'
+                          : 'Document ${controller.selectedIndex.value + 1} of ${controller.documents.length}',
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.add),
                   onPressed: controller.nextPage,
                 ),
-                const SizedBox(width: 20),
-                ElevatedButton.icon(
-                  onPressed: controller.download,
-                  icon: const Icon(Icons.download),
-                  label: const Text('Download'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                const SizedBox(width: 8),
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: ElevatedButton.icon(
+                      onPressed: controller.download,
+                      icon: const Icon(Icons.download),
+                      label: const Text('Download'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -116,7 +127,11 @@ class DocumentViewerView extends GetView<DocumentViewerController> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.insert_drive_file, size: 80, color: Colors.grey.shade600),
+            Icon(
+              Icons.insert_drive_file,
+              size: 80,
+              color: Colors.grey.shade600,
+            ),
             const SizedBox(height: 12),
             Text(
               'Preview appears when the API includes a document URL (url / fileUrl / previewUrl).',

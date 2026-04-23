@@ -18,9 +18,22 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
         }
         return RefreshIndicator(
           onRefresh: controller.loadDashboard,
-          child: ListView(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final horizontalPadding = constraints.maxWidth >= 1000
+                  ? 24.0
+                  : constraints.maxWidth >= 700
+                      ? 20.0
+                      : 16.0;
+              final quickGridCount = constraints.maxWidth >= 1100
+                  ? 4
+                  : constraints.maxWidth >= 700
+                      ? 3
+                      : 2;
+              final wideStats = constraints.maxWidth >= 540;
+              return ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(horizontalPadding),
             children: [
             if (controller.dashboardError.value != null) ...[
               Material(
@@ -170,10 +183,10 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
             GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
+              crossAxisCount: quickGridCount,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: 1.2,
+              childAspectRatio: constraints.maxWidth >= 700 ? 1.3 : 1.15,
               children:
                   controller.quickActions
                       .map((action) => _buildQuickAction(action))
@@ -181,25 +194,41 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
             ),
             const SizedBox(height: 24),
             // Secondary stats
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatCard(
-                    'Total Students',
-                    '${controller.totalStudents.value}',
-                    controller.dashboardError.value != null ? '—' : 'Live',
+            wideStats
+                ? Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatCard(
+                          'Total Students',
+                          '${controller.totalStudents.value}',
+                          controller.dashboardError.value != null ? '—' : 'Live',
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildStatCard(
+                          'Teacher Presence',
+                          '${controller.teacherPresence.value.toStringAsFixed(1)}%',
+                          '${controller.teacherPresent.value}/${controller.teacherTotal.value}',
+                        ),
+                      ),
+                    ],
+                  )
+                : Column(
+                    children: [
+                      _buildStatCard(
+                        'Total Students',
+                        '${controller.totalStudents.value}',
+                        controller.dashboardError.value != null ? '—' : 'Live',
+                      ),
+                      const SizedBox(height: 12),
+                      _buildStatCard(
+                        'Teacher Presence',
+                        '${controller.teacherPresence.value.toStringAsFixed(1)}%',
+                        '${controller.teacherPresent.value}/${controller.teacherTotal.value}',
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildStatCard(
-                    'Teacher Presence',
-                    '${controller.teacherPresence.value.toStringAsFixed(1)}%',
-                    '${controller.teacherPresent.value}/${controller.teacherTotal.value}',
-                  ),
-                ),
-              ],
-            ),
             const SizedBox(height: 16),
             // Pending approvals
             GestureDetector(
@@ -309,6 +338,8 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
                       .toList(),
             ),
             ],
+          );
+            },
           ),
         );
       }),

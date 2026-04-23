@@ -5,6 +5,7 @@ import '../../../common/theme/app_color.dart';
 import '../../../common/utils/responsive.dart';
 import '../../../widgets/app_scaffold.dart';
 import 'models/study_material_models.dart';
+import 'student_ai_learning_tools_screen.dart';
 import 'student_study_material_detail_screen.dart';
 import 'student_study_materials_controller.dart';
 
@@ -30,6 +31,8 @@ class StudentStudyMaterialsScreen
               _buildFilterChips(context),
               SizedBox(height: Responsive.h(context, 18)),
               _buildSummaryCards(context),
+              SizedBox(height: Responsive.h(context, 20)),
+              _buildAiToolsSection(context),
               SizedBox(height: Responsive.h(context, 20)),
               _buildSectionTitle(context),
               SizedBox(height: Responsive.h(context, 12)),
@@ -184,6 +187,7 @@ class StudentStudyMaterialsScreen
       StudyMaterialCategory.videos,
       StudyMaterialCategory.pdfs,
       StudyMaterialCategory.resources,
+      StudyMaterialCategory.chapterResources,
     ];
     return Wrap(
       spacing: Responsive.w(context, 10),
@@ -240,12 +244,48 @@ class StudentStudyMaterialsScreen
         ),
         SizedBox(width: Responsive.w(context, 12)),
         Text(
-          'Available Materials',
+          'Lecture Materials',
           style: AppTextStyle.titleLarge(
             context,
           ).copyWith(fontWeight: FontWeight.w700),
         ),
       ],
+    );
+  }
+
+  Widget _buildAiToolsSection(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(Responsive.w(context, 14)),
+      decoration: BoxDecoration(
+        color: AppColor.base,
+        borderRadius: BorderRadius.circular(Responsive.w(context, 16)),
+        border: Border.all(color: AppColor.borderLight),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'AI Learning Assistant',
+            style: AppTextStyle.titleMedium(context).copyWith(fontWeight: FontWeight.w700),
+          ),
+          SizedBox(height: Responsive.h(context, 4)),
+          Text(
+            'Explain math problems, summarize chapters, solve doubts, and create quiz/paper.',
+            style: AppTextStyle.bodySmall(context).copyWith(color: AppColor.textSecondary),
+          ),
+          SizedBox(height: Responsive.h(context, 10)),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => Get.to(
+                () => StudentAiLearningToolsScreen(items: controller.materials.toList()),
+              ),
+              icon: const Icon(Icons.auto_awesome_rounded),
+              label: const Text('Open AI Student Assistant'),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -300,6 +340,8 @@ class StudentStudyMaterialsScreen
         return AppColor.error;
       case StudyMaterialCategory.resources:
         return AppColor.info;
+      case StudyMaterialCategory.chapterResources:
+        return AppColor.success;
     }
   }
 }
@@ -459,6 +501,8 @@ class _MaterialCard extends StatelessWidget {
         return AppColor.error;
       case StudyMaterialCategory.resources:
         return AppColor.info;
+      case StudyMaterialCategory.chapterResources:
+        return AppColor.success;
     }
   }
 
@@ -473,6 +517,8 @@ class _MaterialCard extends StatelessWidget {
         return Icons.picture_as_pdf_rounded;
       case StudyMaterialCategory.resources:
         return Icons.link_rounded;
+      case StudyMaterialCategory.chapterResources:
+        return Icons.topic_rounded;
     }
   }
 }

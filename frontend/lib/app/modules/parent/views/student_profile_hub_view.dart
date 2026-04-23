@@ -25,115 +25,112 @@ class StudentProfileHubView extends GetView<ProfileController> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'parent-profile-library-fab',
         onPressed: controller.goToLibrary,
         child: const Icon(Icons.my_library_books),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Profile header
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.primary, Color(0xFF429BEE)],
-                ),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                children: [
-                  Obx(
-                    () => AppUserAvatar(
-                      radius: 40,
-                      photoUrl: controller.studentPhotoUrl.value.isEmpty
-                          ? null
-                          : controller.studentPhotoUrl.value,
-                    ),
+      body: DefaultTabController(
+        length: 4,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Profile header
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primary, Color(0xFF429BEE)],
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Obx(
-                          () => Text(
-                            controller.studentName.value,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        Obx(
-                          () => Text(
-                            controller.studentClass.value,
-                            style: const TextStyle(color: Colors.white70),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Obx(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    Obx(
+                      () => AppUserAvatar(
+                        radius: 40,
+                        photoUrl: controller.studentPhotoUrl.value.isEmpty
+                            ? null
+                            : controller.studentPhotoUrl.value,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Obx(
                             () => Text(
-                              controller.academicYear.value,
+                              controller.studentName.value,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
                                 color: Colors.white,
-                                fontSize: 10,
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                          Obx(
+                            () => Text(
+                              controller.studentClass.value,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(color: Colors.white70),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Obx(
+                              () => Text(
+                                controller.academicYear.value,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              const TabBar(
+                isScrollable: true,
+                labelColor: AppColors.primary,
+                unselectedLabelColor: Colors.grey,
+                tabs: [
+                  Tab(text: 'Personal'),
+                  Tab(text: 'Academic History'),
+                  Tab(text: 'Documents'),
+                  Tab(text: 'Activities'),
                 ],
               ),
-            ),
-            const SizedBox(height: 24),
-            // Tabs
-            DefaultTabController(
-              length: 4,
-              child: Column(
-                children: [
-                  const TabBar(
-                    isScrollable: true,
-                    labelColor: AppColors.primary,
-                    unselectedLabelColor: Colors.grey,
-                    tabs: [
-                      Tab(text: 'Personal'),
-                      Tab(text: 'Academic History'),
-                      Tab(text: 'Documents'),
-                      Tab(text: 'Activities'),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  // Personal tab content
-                  SizedBox(
-                    height:
-                        600, // fixed height, but we'll use SingleChildScrollView inside
-                    child: TabBarView(
-                      children: [
-                        _buildPersonalTab(isDark),
-                        _buildAcademicTab(isDark),
-                        _buildDocumentsTab(isDark),
-                        _buildActivitiesTab(isDark),
-                      ],
-                    ),
-                  ),
-                ],
+              const SizedBox(height: 12),
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    _buildPersonalTab(isDark),
+                    _buildAcademicTab(isDark),
+                    _buildDocumentsTab(isDark),
+                    _buildActivitiesTab(isDark),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: embedded
@@ -154,9 +151,18 @@ class StudentProfileHubView extends GetView<ProfileController> {
                 'Personal Details',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              TextButton(
-                onPressed: controller.editPersonal,
-                child: const Text('Edit'),
+              Wrap(
+                spacing: 4,
+                children: [
+                  TextButton(
+                    onPressed: controller.goToStudentIdCard,
+                    child: const Text('ID Card'),
+                  ),
+                  TextButton(
+                    onPressed: controller.editPersonal,
+                    child: const Text('Edit'),
+                  ),
+                ],
               ),
             ],
           ),
@@ -348,10 +354,10 @@ class StudentProfileHubView extends GetView<ProfileController> {
                 'Quick Documents',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-
-              const SizedBox(height: 16),
-
-              TextButton(onPressed: null, child: Text('View All')),
+              TextButton(
+                onPressed: controller.viewAllDocuments,
+                child: const Text('View All'),
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -406,9 +412,14 @@ class StudentProfileHubView extends GetView<ProfileController> {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.download),
-                        onPressed: () =>
-                            controller.downloadDocument(doc['name']!),
+                        icon: const Icon(Icons.visibility_outlined),
+                        onPressed: () => controller.viewDocument(doc['name']!),
+                        tooltip: 'Open',
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.download_outlined),
+                        onPressed: () => controller.downloadDocument(doc['name']!),
+                        tooltip: 'Download',
                       ),
                     ],
                   ),

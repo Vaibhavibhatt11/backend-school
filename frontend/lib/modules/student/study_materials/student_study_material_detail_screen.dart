@@ -206,6 +206,59 @@ class StudentStudyMaterialDetailScreen extends StatelessWidget {
                 ],
               ),
             ),
+            SizedBox(height: Responsive.h(context, 14)),
+            _SectionCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'AI Learning Actions',
+                    style: AppTextStyle.titleMedium(
+                      context,
+                    ).copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  SizedBox(height: Responsive.h(context, 10)),
+                  Wrap(
+                    spacing: Responsive.w(context, 8),
+                    runSpacing: Responsive.h(context, 8),
+                    children: [
+                      _AiActionChip(
+                        label: 'AI chapter summary',
+                        onTap: () => _showAiResult(
+                          context,
+                          'AI chapter summary',
+                          _generateSummary(item),
+                        ),
+                      ),
+                      _AiActionChip(
+                        label: 'AI concept explanation',
+                        onTap: () => _showAiResult(
+                          context,
+                          'AI concept explanation',
+                          _generateConcept(item),
+                        ),
+                      ),
+                      _AiActionChip(
+                        label: 'AI flashcards',
+                        onTap: () => _showAiResult(
+                          context,
+                          'AI flashcards',
+                          _generateFlashcards(item),
+                        ),
+                      ),
+                      _AiActionChip(
+                        label: 'AI revision notes',
+                        onTap: () => _showAiResult(
+                          context,
+                          'AI revision notes',
+                          _generateRevision(item),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
             SizedBox(height: Responsive.h(context, 20)),
             SizedBox(
               width: double.infinity,
@@ -249,6 +302,58 @@ class StudentStudyMaterialDetailScreen extends StatelessWidget {
     return '${date.day}/${date.month}/${date.year}';
   }
 
+  static String _generateSummary(StudyMaterialItem item) {
+    final base = item.description.isEmpty ? item.subject : item.description;
+    return 'Chapter: ${item.title}\n\nSummary:\n- Core idea: ${item.subject.isEmpty ? 'General topic' : item.subject}\n- Key context: $base\n- Important takeaway: Revise concept flow and examples.\n- Exam tip: Practice 2 application-based questions.';
+  }
+
+  static String _generateConcept(StudyMaterialItem item) {
+    return 'Concept Explanation for "${item.title}"\n\n1) What it means\n2) Why it matters\n3) Where it is used\n4) Example\n5) Common confusion and correction';
+  }
+
+  static String _generateFlashcards(StudyMaterialItem item) {
+    return 'Flashcards\n\nQ1: Define the key idea in "${item.title}".\nA1: ...\n\nQ2: Give one practical example.\nA2: ...\n\nQ3: What is a common mistake?\nA3: ...';
+  }
+
+  static String _generateRevision(StudyMaterialItem item) {
+    return 'Revision Notes\n\nTopic: ${item.title}\n- Important terms\n- Formula/rule checkpoints\n- 3 quick recap bullets\n- Last-minute revision checklist';
+  }
+
+  static void _showAiResult(BuildContext context, String title, String content) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => Container(
+        constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(ctx).height * 0.78),
+        decoration: BoxDecoration(
+          color: AppColor.base,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(Responsive.w(ctx, 22)),
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            Responsive.w(ctx, 16),
+            Responsive.h(ctx, 16),
+            Responsive.w(ctx, 16),
+            MediaQuery.of(ctx).padding.bottom + Responsive.h(ctx, 16),
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: AppTextStyle.titleLarge(ctx).copyWith(fontWeight: FontWeight.w700)),
+                SizedBox(height: Responsive.h(ctx, 10)),
+                Text(content, style: AppTextStyle.bodyMedium(ctx).copyWith(height: 1.45)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   static IconData _iconForCategory(StudyMaterialCategory category) {
     switch (category) {
       case StudyMaterialCategory.all:
@@ -260,6 +365,8 @@ class StudentStudyMaterialDetailScreen extends StatelessWidget {
         return Icons.picture_as_pdf_rounded;
       case StudyMaterialCategory.resources:
         return Icons.link_rounded;
+      case StudyMaterialCategory.chapterResources:
+        return Icons.topic_rounded;
     }
   }
 
@@ -274,7 +381,41 @@ class StudentStudyMaterialDetailScreen extends StatelessWidget {
         return AppColor.error;
       case StudyMaterialCategory.resources:
         return AppColor.info;
+      case StudyMaterialCategory.chapterResources:
+        return AppColor.success;
     }
+  }
+}
+
+class _AiActionChip extends StatelessWidget {
+  const _AiActionChip({required this.label, required this.onTap});
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: Responsive.w(context, 12),
+          vertical: Responsive.h(context, 8),
+        ),
+        decoration: BoxDecoration(
+          color: AppColor.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: AppColor.primary.withValues(alpha: 0.25)),
+        ),
+        child: Text(
+          label,
+          style: AppTextStyle.caption(context).copyWith(
+            color: AppColor.primary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
   }
 }
 

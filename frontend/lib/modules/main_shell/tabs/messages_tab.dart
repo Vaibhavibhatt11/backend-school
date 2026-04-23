@@ -18,6 +18,7 @@ class MessagesTab extends StatelessWidget {
       backgroundColor: Colors.transparent,
       body: const StudentCommunicationScreen(embedded: true),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'student-messages-schedule-meeting-fab',
         onPressed: () => Get.to(() => const ScheduleMeetingScreen()),
         backgroundColor: AppColor.primary,
         foregroundColor: AppColor.base,

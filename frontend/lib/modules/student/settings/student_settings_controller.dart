@@ -7,7 +7,6 @@ class StudentSettingsController extends GetxController {
   final SessionStorageService _sessionStorage = Get.find<SessionStorageService>();
   final AppStorage _appStorage = AppStorage();
   final RxBool notificationsEnabled = true.obs;
-  final RxBool biometricEnabled = false.obs;
   final RxBool examReminderEnabled = true.obs;
   final RxBool homeworkReminderEnabled = true.obs;
   final RxString language = 'English'.obs;

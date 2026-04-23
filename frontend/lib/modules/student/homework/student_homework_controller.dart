@@ -22,7 +22,7 @@ class StudentHomeworkController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    homeworkList.clear();
+    homeworkList.assignAll(_seedHomework());
   }
 
   void setViewMode(String mode) => viewMode.value = mode;
@@ -102,5 +102,76 @@ class StudentHomeworkController extends GetxController {
     final m = int.tryParse(parts[1]) ?? 0;
     if (m < 1 || m > 12) return key;
     return '${parts[2]} ${months[m - 1]} ${parts[0]}';
+  }
+
+  Future<void> submitHomework({
+    required String homeworkId,
+    required List<String> files,
+  }) async {
+    final index = homeworkList.indexWhere((h) => h.id == homeworkId);
+    if (index < 0) return;
+    final score = _plagiarismScore(files.join('|') + homeworkId);
+    final flag = score < 20
+        ? 'Low'
+        : score < 45
+            ? 'Medium'
+            : 'High';
+    homeworkList[index] = homeworkList[index].copyWith(
+      status: HomeworkStatus.submitted,
+      submittedAt: DateTime.now(),
+      submissionFiles: files,
+      aiPlagiarismScore: score,
+      aiPlagiarismFlag: flag,
+      teacherFeedback: score < 45
+          ? 'Submission received. Content originality looks acceptable.'
+          : 'Submission received. Please review citation quality before final grading.',
+    );
+    homeworkList.refresh();
+  }
+
+  double _plagiarismScore(String seed) {
+    final hash = seed.codeUnits.fold<int>(0, (prev, e) => (prev + (e * 13)) % 1000);
+    final score = (hash % 80) + 5; // 5..84
+    return score.toDouble();
+  }
+
+  List<HomeworkItem> _seedHomework() {
+    final now = DateTime.now();
+    return [
+      HomeworkItem(
+        id: 'hw_math_1',
+        title: 'Algebra worksheet chapter 6',
+        subject: 'Mathematics',
+        dueDate: now.add(const Duration(days: 1)),
+        description: 'Solve all worksheet questions and upload a single PDF.',
+      ),
+      HomeworkItem(
+        id: 'hw_sci_1',
+        title: 'Science practical observation report',
+        subject: 'Science',
+        dueDate: now.add(const Duration(days: 3)),
+        description: 'Attach lab notes with diagrams.',
+      ),
+      HomeworkItem(
+        id: 'hw_eng_1',
+        title: 'English essay on climate action',
+        subject: 'English',
+        dueDate: now.subtract(const Duration(days: 1)),
+        description: '500-700 words with references.',
+      ),
+      HomeworkItem(
+        id: 'hw_hist_1',
+        title: 'History timeline chart',
+        subject: 'History',
+        dueDate: now.add(const Duration(days: 6)),
+        status: HomeworkStatus.graded,
+        description: 'Prepare timeline from chapter 3.',
+        submittedAt: now.subtract(const Duration(days: 2)),
+        submissionFiles: const ['history_timeline.pdf'],
+        aiPlagiarismScore: 12,
+        aiPlagiarismFlag: 'Low',
+        teacherFeedback: 'Good visual structure and references. Keep handwriting clearer.',
+      ),
+    ];
   }
 }

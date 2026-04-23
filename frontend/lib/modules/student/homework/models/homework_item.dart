@@ -8,6 +8,11 @@ class HomeworkItem {
     required this.dueDate,
     this.status = HomeworkStatus.pending,
     this.description,
+    this.submittedAt,
+    this.submissionFiles = const [],
+    this.aiPlagiarismScore,
+    this.aiPlagiarismFlag,
+    this.teacherFeedback,
   });
 
   final String id;
@@ -16,6 +21,39 @@ class HomeworkItem {
   final DateTime dueDate;
   final HomeworkStatus status;
   final String? description;
+  final DateTime? submittedAt;
+  final List<String> submissionFiles;
+  final double? aiPlagiarismScore;
+  final String? aiPlagiarismFlag;
+  final String? teacherFeedback;
+
+  HomeworkItem copyWith({
+    String? id,
+    String? title,
+    String? subject,
+    DateTime? dueDate,
+    HomeworkStatus? status,
+    String? description,
+    DateTime? submittedAt,
+    List<String>? submissionFiles,
+    double? aiPlagiarismScore,
+    String? aiPlagiarismFlag,
+    String? teacherFeedback,
+  }) {
+    return HomeworkItem(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      subject: subject ?? this.subject,
+      dueDate: dueDate ?? this.dueDate,
+      status: status ?? this.status,
+      description: description ?? this.description,
+      submittedAt: submittedAt ?? this.submittedAt,
+      submissionFiles: submissionFiles ?? this.submissionFiles,
+      aiPlagiarismScore: aiPlagiarismScore ?? this.aiPlagiarismScore,
+      aiPlagiarismFlag: aiPlagiarismFlag ?? this.aiPlagiarismFlag,
+      teacherFeedback: teacherFeedback ?? this.teacherFeedback,
+    );
+  }
 
   String get dueLabel {
     final now = DateTime.now();

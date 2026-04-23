@@ -60,15 +60,6 @@ class StudentSettingsScreen extends GetView<StudentSettingsController> {
             Obx(
               () => Column(
                 children: [
-                  _switchTile(
-                    context,
-                    title: 'Biometric lock',
-                    subtitle: 'Use fingerprint/face unlock (demo)',
-                    icon: Icons.fingerprint_rounded,
-                    value: controller.biometricEnabled.value,
-                    onChanged: (v) => controller.biometricEnabled.value = v,
-                  ),
-                  SizedBox(height: Responsive.h(context, 8)),
                   _menuTile(
                     context,
                     title: 'Language',

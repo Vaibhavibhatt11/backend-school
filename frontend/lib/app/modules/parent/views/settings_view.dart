@@ -110,7 +110,7 @@ class SettingsView extends GetView<SettingsController> {
             _buildSettingsItem(
               icon: Icons.person,
               iconColor: Colors.blue,
-              label: 'Personal Information',
+              label: 'Account Settings',
               onTap: controller.goToPersonalInfo,
             ),
             _buildSettingsItem(
@@ -119,33 +119,123 @@ class SettingsView extends GetView<SettingsController> {
               label: 'Password & Security',
               onTap: controller.goToPasswordSecurity,
             ),
-            _buildSwitchItem(
-              icon: Icons.fingerprint,
-              iconColor: Colors.purple,
-              label: 'Use FaceID Login',
-              value: controller.faceIdEnabled.value,
-              onChanged: controller.toggleFaceId,
-            ),
             const SizedBox(height: 24),
-            // Preferences
+            // Notification preferences
             const Text(
-              'PREFERENCES',
+              'NOTIFICATION PREFERENCES',
               style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
             ),
             const SizedBox(height: 8),
-            _buildSwitchItem(
-              icon: Icons.notifications,
-              iconColor: Colors.amber,
-              label: 'Push Notifications',
-              value: controller.pushNotificationsEnabled.value,
-              onChanged: controller.togglePushNotifications,
+            Obx(
+              () => _buildSettingsItem(
+                icon: Icons.notifications_active_outlined,
+                iconColor: Colors.orange,
+                label: 'Push Notifications',
+                trailing: Switch(
+                  value: controller.pushNotificationsEnabled.value,
+                  onChanged: controller.togglePushNotifications,
+                ),
+                onTap: () => controller.togglePushNotifications(
+                  !controller.pushNotificationsEnabled.value,
+                ),
+              ),
             ),
-            _buildSettingsItem(
-              icon: Icons.language,
-              iconColor: Colors.indigo,
-              label: 'Language',
-              trailing: Obx(() => Text(controller.selectedLanguage.value)),
-              onTap: () {},
+            Obx(
+              () => _buildSettingsItem(
+                icon: Icons.email_outlined,
+                iconColor: Colors.indigo,
+                label: 'Email Notifications',
+                trailing: Switch(
+                  value: controller.emailNotificationsEnabled.value,
+                  onChanged: controller.toggleEmailNotifications,
+                ),
+                onTap: () => controller.toggleEmailNotifications(
+                  !controller.emailNotificationsEnabled.value,
+                ),
+              ),
+            ),
+            Obx(
+              () => _buildSettingsItem(
+                icon: Icons.sms_outlined,
+                iconColor: Colors.teal,
+                label: 'SMS Notifications',
+                trailing: Switch(
+                  value: controller.smsNotificationsEnabled.value,
+                  onChanged: controller.toggleSmsNotifications,
+                ),
+                onTap: () => controller.toggleSmsNotifications(
+                  !controller.smsNotificationsEnabled.value,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Privacy controls
+            const Text(
+              'PRIVACY CONTROLS',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+            ),
+            const SizedBox(height: 8),
+            Obx(
+              () => _buildSettingsItem(
+                icon: Icons.privacy_tip_outlined,
+                iconColor: Colors.purple,
+                label: 'Private Profile Visibility',
+                trailing: Switch(
+                  value: controller.profileVisibilityPrivate.value,
+                  onChanged: controller.toggleProfilePrivacy,
+                ),
+                onTap: () => controller.toggleProfilePrivacy(
+                  !controller.profileVisibilityPrivate.value,
+                ),
+              ),
+            ),
+            Obx(
+              () => _buildSettingsItem(
+                icon: Icons.insights_outlined,
+                iconColor: Colors.brown,
+                label: 'Allow Analytics Sharing',
+                trailing: Switch(
+                  value: controller.analyticsSharingEnabled.value,
+                  onChanged: controller.toggleAnalyticsSharing,
+                ),
+                onTap: () => controller.toggleAnalyticsSharing(
+                  !controller.analyticsSharingEnabled.value,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Language settings
+            const Text(
+              'LANGUAGE SETTINGS',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.surfaceDark : Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Obx(
+                () => DropdownButtonFormField<String>(
+                  value: controller.selectedLanguage.value,
+                  items: controller.languageOptions
+                      .map(
+                        (lang) => DropdownMenuItem<String>(
+                          value: lang,
+                          child: Text(lang),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (v) {
+                    if (v != null) controller.updateLanguage(v);
+                  },
+                  decoration: const InputDecoration(
+                    labelText: 'App Language',
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 24),
             // Help & Support
@@ -287,52 +377,4 @@ class SettingsView extends GetView<SettingsController> {
     );
   }
 
-  Widget _buildSwitchItem({
-    required IconData icon,
-    required Color iconColor,
-    required String label,
-    required bool value,
-    required Function(bool) onChanged,
-  }) {
-    final isDark = Theme.of(Get.context!).brightness == Brightness.dark;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, color: iconColor),
-          ),
-          const SizedBox(width: 16),
-          Expanded(child: Text(label)),
-          Obx(() {
-            bool currentValue;
-            if (label == 'Use FaceID Login') {
-              currentValue = controller.faceIdEnabled.value;
-            } else {
-              currentValue = controller.pushNotificationsEnabled.value;
-            }
-            return Switch(
-              value: currentValue,
-              onChanged: onChanged,
-              activeThumbColor: AppColors.primary,
-            );
-          }),
-        ],
-      ),
-    );
-  }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:file_picker/file_picker.dart';
 import '../../../common/theme/app_color.dart';
 import '../../../common/fonts/common_textstyle.dart';
 import '../../../common/utils/responsive.dart';
@@ -304,7 +305,7 @@ class _HomeworkCard extends StatelessWidget {
             ],
           ),
           child: InkWell(
-            onTap: () => _showHomeworkDetailsSheet(context, item, subjectColor),
+            onTap: () => _showHomeworkDetailsSheet(context, item, subjectColor, controller),
             borderRadius: BorderRadius.circular(Responsive.w(context, 14)),
             child: Padding(
               padding: EdgeInsets.all(Responsive.w(context, 14)),
@@ -395,7 +396,12 @@ class _HomeworkCard extends StatelessWidget {
   }
 }
 
-void _showHomeworkDetailsSheet(BuildContext context, HomeworkItem item, Color subjectColor) {
+void _showHomeworkDetailsSheet(
+  BuildContext context,
+  HomeworkItem item,
+  Color subjectColor,
+  StudentHomeworkController controller,
+) {
   final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   final dueDate = '${item.dueDate.day} ${months[item.dueDate.month - 1]} ${item.dueDate.year}';
   final description = (item.description ?? '').trim().isEmpty
@@ -514,18 +520,235 @@ void _showHomeworkDetailsSheet(BuildContext context, HomeworkItem item, Color su
             description,
             style: AppTextStyle.bodySmall(ctx).copyWith(height: 1.45),
           ),
-          SizedBox(height: Responsive.h(ctx, 14)),
-          SizedBox(
+          SizedBox(height: Responsive.h(ctx, 12)),
+          Container(
             width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Close'),
+            padding: EdgeInsets.all(Responsive.w(ctx, 10)),
+            decoration: BoxDecoration(
+              color: AppColor.cardBackground,
+              borderRadius: BorderRadius.circular(Responsive.w(ctx, 10)),
+              border: Border.all(color: AppColor.border.withValues(alpha: 0.7)),
             ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Deadline',
+                  style: AppTextStyle.bodySmall(ctx).copyWith(
+                    color: AppColor.textSecondary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                SizedBox(height: Responsive.h(ctx, 4)),
+                Text(
+                  item.isOverdue ? 'Overdue' : item.dueLabel,
+                  style: AppTextStyle.bodyMedium(ctx).copyWith(
+                    color: item.isOverdue ? AppColor.error : AppColor.primaryDark,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (item.submissionFiles.isNotEmpty) ...[
+            SizedBox(height: Responsive.h(ctx, 12)),
+            Text(
+              'Uploaded files',
+              style: AppTextStyle.titleSmall(ctx).copyWith(fontWeight: FontWeight.w700),
+            ),
+            SizedBox(height: Responsive.h(ctx, 6)),
+            ...item.submissionFiles.map(
+              (f) => Padding(
+                padding: EdgeInsets.only(bottom: Responsive.h(ctx, 4)),
+                child: Text('• $f', style: AppTextStyle.bodySmall(ctx)),
+              ),
+            ),
+          ],
+          if (item.aiPlagiarismScore != null) ...[
+            SizedBox(height: Responsive.h(ctx, 10)),
+            Text(
+              'AI plagiarism detection',
+              style: AppTextStyle.titleSmall(ctx).copyWith(fontWeight: FontWeight.w700),
+            ),
+            SizedBox(height: Responsive.h(ctx, 6)),
+            Text(
+              'Score: ${item.aiPlagiarismScore!.toStringAsFixed(1)}%  •  Risk: ${item.aiPlagiarismFlag ?? '-'}',
+              style: AppTextStyle.bodySmall(ctx).copyWith(
+                color: AppColor.textSecondary,
+              ),
+            ),
+          ],
+          if ((item.teacherFeedback ?? '').trim().isNotEmpty) ...[
+            SizedBox(height: Responsive.h(ctx, 10)),
+            Text(
+              'Teacher feedback',
+              style: AppTextStyle.titleSmall(ctx).copyWith(fontWeight: FontWeight.w700),
+            ),
+            SizedBox(height: Responsive.h(ctx, 6)),
+            Text(
+              item.teacherFeedback!,
+              style: AppTextStyle.bodySmall(ctx).copyWith(height: 1.45),
+            ),
+          ],
+          SizedBox(height: Responsive.h(ctx, 14)),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('Close'),
+                ),
+              ),
+              SizedBox(width: Responsive.w(ctx, 8)),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: item.status == HomeworkStatus.graded
+                      ? null
+                      : () async {
+                          Navigator.of(ctx).pop();
+                          await showModalBottomSheet<void>(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (sheetCtx) => _SubmitHomeworkSheet(
+                              item: item,
+                              controller: controller,
+                            ),
+                          );
+                        },
+                  icon: const Icon(Icons.upload_file_rounded),
+                  label: Text(item.status == HomeworkStatus.pending ? 'Submit' : 'Resubmit'),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: Responsive.h(ctx, 6)),
+          Text(
+            'Submission supports file upload and photo-to-PDF option.',
+            style: AppTextStyle.caption(ctx).copyWith(color: AppColor.textSecondary),
           ),
         ],
       ),
     ),
   );
+}
+
+class _SubmitHomeworkSheet extends StatefulWidget {
+  const _SubmitHomeworkSheet({required this.item, required this.controller});
+  final HomeworkItem item;
+  final StudentHomeworkController controller;
+
+  @override
+  State<_SubmitHomeworkSheet> createState() => _SubmitHomeworkSheetState();
+}
+
+class _SubmitHomeworkSheetState extends State<_SubmitHomeworkSheet> {
+  final List<String> _files = [];
+  bool _photoToPdf = true;
+  bool _isSubmitting = false;
+
+  Future<void> _pickFiles() async {
+    final result = await FilePicker.platform.pickFiles(
+      allowMultiple: true,
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'],
+    );
+    if (result == null) return;
+    setState(() {
+      _files.addAll(result.files.map((f) => f.name));
+    });
+  }
+
+  Future<void> _submit() async {
+    if (_files.isEmpty) {
+      Get.snackbar('Missing files', 'Please upload at least one file.');
+      return;
+    }
+    setState(() => _isSubmitting = true);
+    final normalized = _files.map((f) {
+      final lower = f.toLowerCase();
+      final isPhoto = lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png');
+      if (_photoToPdf && isPhoto) {
+        return '${f.split('.').first}_converted.pdf';
+      }
+      return f;
+    }).toList();
+    await widget.controller.submitHomework(
+      homeworkId: widget.item.id,
+      files: normalized,
+    );
+    if (!mounted) return;
+    Navigator.of(context).pop();
+    Get.snackbar('Submitted', 'Assignment uploaded successfully.');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColor.base,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Responsive.w(context, 20))),
+      ),
+      padding: EdgeInsets.fromLTRB(
+        Responsive.w(context, 16),
+        Responsive.h(context, 16),
+        Responsive.w(context, 16),
+        MediaQuery.of(context).padding.bottom + Responsive.h(context, 16),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Submit Assignment',
+            style: AppTextStyle.titleLarge(context).copyWith(fontWeight: FontWeight.w700),
+          ),
+          SizedBox(height: Responsive.h(context, 8)),
+          Text(widget.item.title, style: AppTextStyle.bodySmall(context).copyWith(color: AppColor.textSecondary)),
+          SizedBox(height: Responsive.h(context, 12)),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Convert photos to PDF'),
+            subtitle: const Text('If enabled, JPG/PNG uploads will be submitted as PDF.'),
+            value: _photoToPdf,
+            onChanged: (v) => setState(() => _photoToPdf = v),
+          ),
+          SizedBox(height: Responsive.h(context, 6)),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _pickFiles,
+              icon: const Icon(Icons.attach_file_rounded),
+              label: const Text('Upload files'),
+            ),
+          ),
+          SizedBox(height: Responsive.h(context, 10)),
+          if (_files.isEmpty)
+            Text('No files selected yet.', style: AppTextStyle.bodySmall(context).copyWith(color: AppColor.textSecondary))
+          else
+            ..._files.map((f) => Padding(
+                  padding: EdgeInsets.only(bottom: Responsive.h(context, 4)),
+                  child: Text('• $f', style: AppTextStyle.bodySmall(context)),
+                )),
+          SizedBox(height: Responsive.h(context, 14)),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _isSubmitting ? null : _submit,
+              icon: _isSubmitting
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.send_rounded),
+              label: Text(_isSubmitting ? 'Submitting...' : 'Submit assignment'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _EmptyState extends StatelessWidget {

@@ -88,7 +88,14 @@ class ParentHomeController extends GetxController {
 
   void goToChildSwitcher() => SafeNavigation.toNamed(AppRoutes.PARENT_CHILD_SWITCHER);
   void goToNotifications() => SafeNavigation.toNamed(AppRoutes.PARENT_NOTIFICATIONS);
+  void goToCommunication() => SafeNavigation.toNamed(AppRoutes.PARENT_COMMUNICATION);
+  void goToEventsHub() => SafeNavigation.toNamed(AppRoutes.PARENT_EVENTS_HUB);
+  // Transport module commented for now.
+  // void goToTransport() => SafeNavigation.toNamed(AppRoutes.PARENT_TRANSPORT);
+  void goToAchievements() => SafeNavigation.toNamed(AppRoutes.PARENT_ACHIEVEMENTS);
+  void goToFinanceHub() => SafeNavigation.toNamed(AppRoutes.PARENT_FINANCE_HUB);
   void goToAnnouncements() => SafeNavigation.toNamed(AppRoutes.PARENT_ANNOUNCEMENTS);
   void goToPerformance() => SafeNavigation.toNamed(AppRoutes.PARENT_PERFORMANCE);
   void goToLiveClass() => SafeNavigation.toNamed(AppRoutes.PARENT_LIVE_CLASS);
+  void goToStudentIdCard() => SafeNavigation.toNamed(AppRoutes.PARENT_STUDENT_ID_CARD);
 }

@@ -18,8 +18,20 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
         }
         return Stack(
           children: [
-            ListView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final horizontalPadding = constraints.maxWidth >= 1000
+                    ? 24.0
+                    : constraints.maxWidth >= 700
+                        ? 20.0
+                        : 16.0;
+                final quickGridCount = constraints.maxWidth >= 1050
+                    ? 4
+                    : constraints.maxWidth >= 700
+                        ? 3
+                        : 2;
+                return ListView(
+        padding: EdgeInsets.fromLTRB(horizontalPadding, 16, horizontalPadding, 88),
         children: [
           Row(
             children: [
@@ -151,10 +163,10 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
+            crossAxisCount: quickGridCount,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
-            childAspectRatio: 1.15,
+            childAspectRatio: constraints.maxWidth >= 700 ? 1.25 : 1.1,
             children: [
               _quickAction('Dashboard', Icons.dashboard_rounded, Colors.green, 'dashboard'),
               _quickAction('Profile', Icons.badge_rounded, Colors.blue, 'profile'),
@@ -171,6 +183,8 @@ class StaffDashboardView extends GetView<StaffDashboardController> {
           _miniTile('Meetings', controller.meetings, isDark),
           const SizedBox(height: 12),
         ],
+            );
+              },
             ),
           ],
         );

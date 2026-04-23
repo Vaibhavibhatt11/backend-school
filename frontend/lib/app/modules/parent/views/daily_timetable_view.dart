@@ -56,6 +56,28 @@ class DailyTimetableView extends GetView<TimetableController> {
                 ),
               ],
             ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: controller.goToMonthlyTimetable,
+                  icon: const Icon(Icons.calendar_month, size: 16),
+                  label: const Text('Monthly Timetable'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: controller.goToExamTimetable,
+                  icon: const Icon(Icons.quiz_outlined, size: 16),
+                  label: const Text('Exam Timetable'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: controller.goToEventTimetable,
+                  icon: const Icon(Icons.event_note, size: 16),
+                  label: const Text('Event Timetable'),
+                ),
+              ],
+            ),
             const SizedBox(height: 20),
             // Weekday selectors
             SizedBox(
@@ -194,6 +216,7 @@ class DailyTimetableView extends GetView<TimetableController> {
           ? null
           : const ParentBottomNavBar(currentIndex: 3),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'parent-timetable-toggle-view-fab',
         onPressed: controller.toggleView,
         child: const Icon(Icons.grid_view),
       ),

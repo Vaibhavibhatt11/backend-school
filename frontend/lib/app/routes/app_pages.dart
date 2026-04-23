@@ -29,10 +29,19 @@ import 'package:erp_frontend/app/modules/parent/views/invoice_detail_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/library_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/live_classroom_portal_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/notifications_center_view.dart';
+import 'package:erp_frontend/app/modules/parent/views/communication_hub_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/parent_shell_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/progress_reports_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/school_announcements_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/settings_view.dart';
+import 'package:erp_frontend/app/modules/parent/views/monthly_timetable_view.dart';
+import 'package:erp_frontend/app/modules/parent/views/exam_timetable_view.dart';
+import 'package:erp_frontend/app/modules/parent/views/event_timetable_view.dart';
+import 'package:erp_frontend/app/modules/parent/views/events_hub_view.dart';
+// import 'package:erp_frontend/app/modules/parent/views/transport_hub_view.dart'; // Transport module commented for now.
+import 'package:erp_frontend/app/modules/parent/views/achievements_hub_view.dart';
+import 'package:erp_frontend/app/modules/parent/views/finance_hub_view.dart';
+import 'package:erp_frontend/app/modules/parent/views/student_id_card_view.dart';
 import 'package:erp_frontend/app/modules/teacher/bindings/teacher_binding.dart';
 import 'package:erp_frontend/app/modules/teacher/views/announcements_view.dart';
 import 'package:erp_frontend/app/modules/teacher/views/mark_attendance_view.dart';
@@ -158,6 +167,21 @@ class AppPages {
       binding: ParentBinding(),
     ),
     GetPage(
+      name: AppRoutes.PARENT_TIMETABLE_MONTHLY,
+      page: () => const MonthlyTimetableView(),
+      binding: ParentBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.PARENT_EXAM_TIMETABLE,
+      page: () => const ExamTimetableView(),
+      binding: ParentBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.PARENT_EVENT_TIMETABLE,
+      page: () => const EventTimetableView(),
+      binding: ParentBinding(),
+    ),
+    GetPage(
       name: AppRoutes.PARENT_PROFILE,
       page: () => const ParentShellView(),
       binding: ParentBinding(),
@@ -193,8 +217,39 @@ class AppPages {
       binding: ParentBinding(),
     ),
     GetPage(
+      name: AppRoutes.PARENT_STUDENT_ID_CARD,
+      page: () => const StudentIdCardView(),
+      binding: ParentBinding(),
+    ),
+    GetPage(
       name: AppRoutes.PARENT_NOTIFICATIONS,
       page: () => const NotificationsCenterView(),
+      binding: ParentBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.PARENT_COMMUNICATION,
+      page: () => const CommunicationHubView(),
+      binding: ParentBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.PARENT_EVENTS_HUB,
+      page: () => const EventsHubView(),
+      binding: ParentBinding(),
+    ),
+    // Transport module route commented for now.
+    // GetPage(
+    //   name: AppRoutes.PARENT_TRANSPORT,
+    //   page: () => const TransportHubView(),
+    //   binding: ParentBinding(),
+    // ),
+    GetPage(
+      name: AppRoutes.PARENT_ACHIEVEMENTS,
+      page: () => const AchievementsHubView(),
+      binding: ParentBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.PARENT_FINANCE_HUB,
+      page: () => const FinanceHubView(),
       binding: ParentBinding(),
     ),
     GetPage(

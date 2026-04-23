@@ -194,7 +194,8 @@ class LiveClassroomPortalView extends GetView<LiveClassController> {
                   const SizedBox(height: 8),
                   Obx(
                     () => Text(
-                      controller.liveClass['title']! as String,
+                      (controller.liveClass['title'] ?? 'No live class right now')
+                          .toString(),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -214,9 +215,14 @@ class LiveClassroomPortalView extends GetView<LiveClassController> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(controller.liveClass['teacher']! as String),
+                          Obx(
+                            () => Text(
+                              (controller.liveClass['teacher'] ?? 'Teacher')
+                                  .toString(),
+                            ),
+                          ),
                           Text(
-                            controller.liveClass['time']! as String,
+                            (controller.liveClass['time'] ?? 'TBA').toString(),
                             style: const TextStyle(color: Colors.grey),
                           ),
                         ],
@@ -248,6 +254,12 @@ class LiveClassroomPortalView extends GetView<LiveClassController> {
               () => Column(
                 children:
                     controller.upcomingClasses.map((cls) {
+                      final rawTime = (cls['time'] ?? '').toString();
+                      final parts = rawTime.trim().split(RegExp(r'\s+'));
+                      final timeMain = parts.isNotEmpty && parts.first.isNotEmpty
+                          ? parts.first
+                          : 'TBA';
+                      final timeMeta = parts.length > 1 ? parts.sublist(1).join(' ') : '';
                       return Container(
                         margin: const EdgeInsets.only(bottom: 12),
                         padding: const EdgeInsets.all(16),
@@ -266,13 +278,13 @@ class LiveClassroomPortalView extends GetView<LiveClassController> {
                             Column(
                               children: [
                                 Text(
-                                  cls['time']!.split(' ')[0],
+                                  timeMain,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 Text(
-                                  cls['time']!.split(' ')[1],
+                                  timeMeta,
                                   style: const TextStyle(
                                     fontSize: 10,
                                     color: Colors.grey,
@@ -286,13 +298,13 @@ class LiveClassroomPortalView extends GetView<LiveClassController> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    cls['subject']!,
+                                    (cls['subject'] ?? 'Upcoming class').toString(),
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   Text(
-                                    '${cls['teacher']} • ${cls['room']}',
+                                    '${(cls['teacher'] ?? 'Teacher')} • ${(cls['room'] ?? 'Room TBA')}',
                                     style: const TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey,

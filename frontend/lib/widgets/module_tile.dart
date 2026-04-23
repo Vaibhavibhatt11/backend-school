@@ -44,7 +44,12 @@ class ModuleTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(title, style: AppTextStyle.titleMedium(context)),
+                Text(
+                  title,
+                  style: AppTextStyle.titleMedium(context),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 if (subtitle != null) ...[
                   SizedBox(height: Responsive.h(context, 2)),
                   Text(

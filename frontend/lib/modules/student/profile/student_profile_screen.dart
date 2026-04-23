@@ -43,13 +43,12 @@ class StudentProfileScreen extends GetView<StudentProfileController> {
               onTap: () => Get.toNamed(CommonScreenRoutes.profileClassSection),
             ),
             SizedBox(height: Responsive.h(context, 8)),
-            // ID card section commented for now
-            // ModuleTile(
-            //   title: 'Student ID card',
-            //   icon: Icons.badge_rounded,
-            //   onTap: () => Get.toNamed(CommonScreenRoutes.profileIdCard),
-            // ),
-            // SizedBox(height: Responsive.h(context, 8)),
+            ModuleTile(
+              title: 'Student ID card',
+              icon: Icons.badge_rounded,
+              onTap: () => Get.toNamed(CommonScreenRoutes.profileIdCard),
+            ),
+            SizedBox(height: Responsive.h(context, 8)),
             ModuleTile(
               title: 'Academic records',
               icon: Icons.school_rounded,

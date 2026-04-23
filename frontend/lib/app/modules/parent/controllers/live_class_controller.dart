@@ -12,7 +12,12 @@ class LiveClassController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    subject.value = Get.arguments['subject'] ?? '';
+    final args = Get.arguments;
+    if (args is Map) {
+      subject.value = (args['subject'] ?? '').toString();
+    } else {
+      subject.value = '';
+    }
     _childWorker = ever<String?>(
       _parentContext.selectedChildId,
       (_) => loadLiveClasses(),

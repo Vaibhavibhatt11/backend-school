@@ -17,6 +17,10 @@ class AttendanceController extends GetxController {
   final calendarDays = <int?>[].obs;
   final attendanceStats = <String, int>{'present': 0, 'absent': 0, 'late': 0}.obs;
   final dayStatusMap = <int, String>{}.obs;
+  final dailyRecords = <Map<String, dynamic>>[].obs;
+  final lateEntryRecords = <Map<String, dynamic>>[].obs;
+  final leaveApplications = <Map<String, dynamic>>[].obs;
+  final monthlyReport = <String, dynamic>{}.obs;
   final errorMessage = ''.obs;
   Worker? _childWorker;
 
@@ -110,11 +114,86 @@ class AttendanceController extends GetxController {
           calendarDays.assignAll(days.map((e) => e == null ? null : _asInt(e)));
         }
       }
+      _mapAttendanceModules(data);
     } catch (e) {
       errorMessage.value = dioOrApiErrorMessage(e);
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void _mapAttendanceModules(Map<String, dynamic> data) {
+    final records = data['dailyRecords'] ?? data['records'] ?? data['attendanceRecords'];
+    if (records is List) {
+      dailyRecords.assignAll(
+        records.whereType<Map>().map((e) {
+          final m = Map<String, dynamic>.from(e);
+          return {
+            'date': (m['date'] ?? '').toString(),
+            'day': (m['day'] ?? '').toString(),
+            'status': (m['status'] ?? '').toString().toLowerCase(),
+            'checkIn': (m['checkIn'] ?? m['inTime'] ?? '-').toString(),
+            'checkOut': (m['checkOut'] ?? m['outTime'] ?? '-').toString(),
+            'subject': (m['subject'] ?? '').toString(),
+            'teacher': (m['teacher'] ?? '').toString(),
+            'room': (m['room'] ?? '').toString(),
+          };
+        }),
+      );
+    } else {
+      // fallback from calendar data for frontend flow continuity
+      final mapped = <Map<String, dynamic>>[];
+      dayStatusMap.forEach((day, status) {
+        mapped.add({
+          'date': '${_monthParam()}-${day.toString().padLeft(2, '0')}',
+          'day': day.toString(),
+          'status': status,
+          'checkIn': '-',
+          'checkOut': '-',
+          'subject': '',
+          'teacher': '',
+          'room': '',
+        });
+      });
+      mapped.sort((a, b) => (a['date'] ?? '').toString().compareTo((b['date'] ?? '').toString()));
+      dailyRecords.assignAll(mapped);
+    }
+
+    lateEntryRecords.assignAll(
+      dailyRecords
+          .where((e) => (e['status'] ?? '').toString().toLowerCase() == 'late')
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList(),
+    );
+
+    final leave = data['leaveApplications'] ?? data['leaves'];
+    if (leave is List) {
+      leaveApplications.assignAll(
+        leave.whereType<Map>().map((e) {
+          final m = Map<String, dynamic>.from(e);
+          return {
+            'fromDate': (m['fromDate'] ?? m['startDate'] ?? '').toString(),
+            'toDate': (m['toDate'] ?? m['endDate'] ?? '').toString(),
+            'reason': (m['reason'] ?? '').toString(),
+            'status': (m['status'] ?? 'pending').toString().toLowerCase(),
+            'appliedOn': (m['appliedOn'] ?? m['createdAt'] ?? '').toString(),
+          };
+        }),
+      );
+    }
+
+    final present = attendanceStats['present'] ?? 0;
+    final absent = attendanceStats['absent'] ?? 0;
+    final late = attendanceStats['late'] ?? 0;
+    final total = present + absent + late;
+    monthlyReport.assignAll({
+      'present': present,
+      'absent': absent,
+      'late': late,
+      'totalWorkingDays': total,
+      'attendancePercent': total > 0 ? ((present + late) / total) * 100 : 0.0,
+      'month': month.value,
+    });
   }
 
   int _asInt(dynamic value) {
@@ -141,6 +220,20 @@ class AttendanceController extends GetxController {
     _setMonthLabel();
     _generateDays();
     loadAttendance();
+  }
+
+  Future<void> applyLeave({
+    required DateTime fromDate,
+    required DateTime toDate,
+    required String reason,
+  }) async {
+    leaveApplications.insert(0, {
+      'fromDate': fromDate.toIso8601String().split('T').first,
+      'toDate': toDate.toIso8601String().split('T').first,
+      'reason': reason.trim(),
+      'status': 'pending',
+      'appliedOn': DateTime.now().toIso8601String().split('T').first,
+    });
   }
 
   @override

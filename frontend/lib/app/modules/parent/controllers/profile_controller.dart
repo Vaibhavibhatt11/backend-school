@@ -1,6 +1,7 @@
 import 'package:erp_frontend/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../common/services/parent/parent_api_utils.dart';
 import '../../../../common/services/parent/parent_context_service.dart';
 import '../../../../common/services/parent/parent_profile_service.dart';
@@ -127,10 +128,42 @@ class ProfileController extends GetxController {
       'motherName': motherCtrl.text.trim(),
     });
   }
-  Future<void> viewAllDocuments() async => loadProfile();
-  Future<void> downloadDocument(String docName) async => loadProfile();
+  Future<void> viewAllDocuments() async {
+    await Get.toNamed(
+      AppRoutes.PARENT_DOCUMENT_VIEWER,
+      arguments: {
+        'document': documents.isNotEmpty ? documents.first['name']?.toString() : null,
+      },
+    );
+  }
+
+  Future<void> downloadDocument(String docName) async {
+    final idx = documents.indexWhere(
+      (d) => (d['name']?.toString().toLowerCase() ?? '') == docName.toLowerCase(),
+    );
+    if (idx < 0) {
+      Get.snackbar('Not found', 'Document not found.');
+      return;
+    }
+    final doc = documents[idx];
+    final url = (doc['url'] ?? doc['fileUrl'] ?? doc['previewUrl'] ?? '').toString().trim();
+    if (url.isEmpty) {
+      Get.snackbar('Unavailable', 'No URL available for this document.');
+      return;
+    }
+    final uri = Uri.tryParse(url);
+    if (uri == null) {
+      Get.snackbar('Invalid URL', 'Could not open document URL.');
+      return;
+    }
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok) {
+      Get.snackbar('Failed', 'Unable to open document.');
+    }
+  }
   void openSettings() => Get.toNamed(AppRoutes.PARENT_SETTINGS);
   void goToLibrary() => Get.toNamed(AppRoutes.PARENT_LIBRARY);
+  void goToStudentIdCard() => Get.toNamed(AppRoutes.PARENT_STUDENT_ID_CARD);
 
   void viewDocument(String docName) => Get.toNamed(
     AppRoutes.PARENT_DOCUMENT_VIEWER,

@@ -16,7 +16,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text(title),
+      title: Text(
+        title,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
       leading:
           showBack
               ? IconButton(
@@ -24,6 +28,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 onPressed: () => Get.back(),
               )
               : null,
+      centerTitle: false,
+      titleSpacing: 8,
       actions: actions,
     );
   }

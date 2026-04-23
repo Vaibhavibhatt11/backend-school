@@ -27,6 +27,7 @@ class ParentHomeView extends GetView<ParentHomeController> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'parent-home-live-class-fab',
         onPressed: controller.goToLiveClass,
         child: const Icon(Icons.video_call),
       ),
@@ -56,8 +57,16 @@ class ParentHomeView extends GetView<ParentHomeController> {
             ),
           );
         }
-        return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final horizontalPadding = constraints.maxWidth >= 900
+                ? 28.0
+                : constraints.maxWidth >= 700
+                    ? 20.0
+                    : 16.0;
+            final statSpacing = constraints.maxWidth >= 700 ? 20.0 : 12.0;
+            return SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -72,16 +81,22 @@ class ParentHomeView extends GetView<ParentHomeController> {
               ),
               const SizedBox(height: 4),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    controller.childName.value.isEmpty
-                        ? 'Hi'
-                        : 'Hi, ${controller.childName.value.split(' ').first}',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? AppColors.textDark : AppColors.textLight,
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: Text(
+                      controller.childName.value.isEmpty
+                          ? 'Hi'
+                          : 'Hi, ${controller.childName.value.split(' ').first}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: isDark
+                            ? AppColors.textDark
+                            : AppColors.textLight,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -112,34 +127,53 @@ class ParentHomeView extends GetView<ParentHomeController> {
                                 radius: 16,
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            Obx(
-                              () => Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Viewing for',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: isDark
-                                          ? AppColors.textSecondaryDark
-                                          : Colors.grey[600],
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Obx(
+                                () => Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      controller.childName.value.isEmpty
+                                          ? 'Student'
+                                          : controller.childName.value,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                     ),
-                                  ),
-                                  Text(
-                                    '${controller.childName.value} ${controller.childGrade.value}',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
+                                    Text(
+                                      controller.childGrade.value.isEmpty
+                                          ? 'Tap to switch student'
+                                          : controller.childGrade.value,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: isDark
+                                            ? AppColors.textSecondaryDark
+                                            : Colors.grey[600],
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 2,
-
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                            const Icon(Icons.arrow_drop_down),
+                            const SizedBox(width: 8),
+                            Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? AppColors.borderDark
+                                    : Colors.grey.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(Icons.expand_more, size: 18),
+                            ),
                           ],
                         ),
                       ),
@@ -165,7 +199,7 @@ class ParentHomeView extends GetView<ParentHomeController> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: statSpacing),
                   Expanded(
                     child: GestureDetector(
                       onTap: () => Get.toNamed(AppRoutes.PARENT_FEES),
@@ -181,6 +215,63 @@ class ParentHomeView extends GetView<ParentHomeController> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: controller.goToStudentIdCard,
+                  icon: const Icon(Icons.badge_outlined),
+                  label: const Text('Student ID Card'),
+                ),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: controller.goToCommunication,
+                  icon: const Icon(Icons.forum_outlined),
+                  label: const Text('Communication Center'),
+                ),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: controller.goToEventsHub,
+                  icon: const Icon(Icons.celebration_outlined),
+                  label: const Text('Events Center'),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  // Transport module commented for now.
+                  // Expanded(
+                  //   child: OutlinedButton.icon(
+                  //     onPressed: controller.goToTransport,
+                  //     icon: const Icon(Icons.directions_bus_filled_outlined),
+                  //     label: const Text('Transport'),
+                  //   ),
+                  // ),
+                  // const SizedBox(width: 10),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: controller.goToAchievements,
+                      icon: const Icon(Icons.workspace_premium_outlined),
+                      label: const Text('Achievements'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: controller.goToFinanceHub,
+                  icon: const Icon(Icons.account_balance_wallet_outlined),
+                  label: const Text('Finance & Fees Center'),
+                ),
               ),
               const SizedBox(height: 16),
               // Upcoming class
@@ -471,6 +562,8 @@ class ParentHomeView extends GetView<ParentHomeController> {
               const SizedBox(height: 80), // bottom padding
             ],
           ),
+        );
+          },
         );
       }),
       bottomNavigationBar: embedded

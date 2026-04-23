@@ -62,5 +62,23 @@ class ParentCommunicationService {
     );
     return extractApiData(res.data, context: 'mark notifications read');
   }
+
+  Future<Map<String, dynamic>> getEventTimetable({
+    String? childId,
+    String? month,
+  }) async {
+    final scopedChildId = (childId == null || childId.isEmpty)
+        ? await _parentContext.ensureSelectedChildId()
+        : childId;
+    final query = <String, dynamic>{
+      if (scopedChildId != null && scopedChildId.isNotEmpty) 'childId': scopedChildId,
+      if (month != null && month.isNotEmpty) 'month': month,
+    };
+    final res = await _apiClient.get(
+      ApiEndpoints.parentEventTimetable,
+      query: query.isEmpty ? null : query,
+    );
+    return extractApiData(res.data, context: 'event timetable');
+  }
 }
 

@@ -1,4 +1,4 @@
-enum StudyMaterialCategory { all, notes, videos, pdfs, resources }
+enum StudyMaterialCategory { all, notes, videos, pdfs, resources, chapterResources }
 
 extension StudyMaterialCategoryX on StudyMaterialCategory {
   String get label {
@@ -12,7 +12,9 @@ extension StudyMaterialCategoryX on StudyMaterialCategory {
       case StudyMaterialCategory.pdfs:
         return 'PDFs';
       case StudyMaterialCategory.resources:
-        return 'Resources';
+        return 'Reference Materials';
+      case StudyMaterialCategory.chapterResources:
+        return 'Chapter Resources';
     }
   }
 
@@ -28,6 +30,8 @@ extension StudyMaterialCategoryX on StudyMaterialCategory {
         return 'No PDFs are available yet.';
       case StudyMaterialCategory.resources:
         return 'No learning resources are available yet.';
+      case StudyMaterialCategory.chapterResources:
+        return 'No chapter resources are available yet.';
     }
   }
 }
@@ -140,6 +144,13 @@ class StudyMaterialItem {
         typeUpper == 'URL' ||
         typeUpper == 'ARTICLE') {
       return StudyMaterialCategory.resources;
+    }
+
+    if (typeUpper == 'CHAPTER' ||
+        typeUpper == 'CHAPTER_RESOURCE' ||
+        typeUpper == 'MODULE' ||
+        typeUpper == 'TOPIC') {
+      return StudyMaterialCategory.chapterResources;
     }
 
     return StudyMaterialCategory.notes;
