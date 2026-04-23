@@ -189,6 +189,7 @@ const {
   getApplicationById,
   createApplication,
   updateApplicationStatus,
+  updateAdmissionFeeStatus,
   addApplicationDocument,
   onboardApplication,
 } = require("./school.admissions.handlers");
