@@ -217,13 +217,39 @@ class AdminPortalNavigation {
             arguments: {'initialTab': 0, 'scope': 'library'},
           ),
         ];
+      case 'operations':
+        return const [
+          AdminPortalScreen(
+            title: 'Operations Hub',
+            description: 'Manage Hostel, Transport, Events, and Inventory in one place.',
+            route: AppRoutes.ADMIN_OPERATIONS,
+          ),
+        ];
+      case 'study_material':
+        return const [
+          AdminPortalScreen(
+            title: 'Study Material Hub',
+            description: 'Centralized access to school library and resource composer.',
+            route: AppRoutes.ADMIN_STUDY_MATERIAL,
+          ),
+          AdminPortalScreen(
+            title: 'Content Library',
+            description: 'Browse and manage existing study materials.',
+            route: AppRoutes.ADMIN_STUDY_MATERIAL_LIBRARY,
+          ),
+          AdminPortalScreen(
+            title: 'Compose Material',
+            description: 'Upload new notes, videos, and PDFs.',
+            route: AppRoutes.ADMIN_STUDY_MATERIAL_COMPOSER,
+          ),
+        ];
       case 'transport':
         return const [
           AdminPortalScreen(
             title: 'Transport Desk',
             description: 'Manage routes, drivers, and student allocations.',
             route: AppRoutes.ADMIN_OPERATIONS,
-            arguments: {'initialTab': 0},
+            arguments: {'initialTab': 2},
           ),
         ];
       case 'hostel':
@@ -425,14 +451,22 @@ class AdminPortalNavigation {
     if (m == 'transport' || has('transport') || has('route') || has('bus')) {
       SafeNavigation.toNamed(
         AppRoutes.ADMIN_OPERATIONS,
-        arguments: {'initialTab': 0},
+        arguments: {'initialTab': 2},
       );
+      return;
+    }
+    if (m == 'operations') {
+      SafeNavigation.toNamed(AppRoutes.ADMIN_OPERATIONS);
+      return;
+    }
+    if (m == 'study_material' || (has('study') && has('material'))) {
+      SafeNavigation.toNamed(AppRoutes.ADMIN_STUDY_MATERIAL);
       return;
     }
     if (m == 'hostel' || has('hostel') || has('room') || has('visitor')) {
       SafeNavigation.toNamed(
         AppRoutes.ADMIN_OPERATIONS,
-        arguments: {'initialTab': 0, 'scope': 'hostel'},
+        arguments: {'initialTab': 0},
       );
       return;
     }

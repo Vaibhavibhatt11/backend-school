@@ -137,6 +137,7 @@ class AdminStaffController extends GetxController {
     final desCtrl = TextEditingController(text: existing?.designation ?? '');
     final depCtrl = TextEditingController(text: existing?.department ?? '');
     final dateCtrl = TextEditingController(text: existing?.joinDate.split('T').first ?? '');
+    final passCtrl = TextEditingController();
 
     final confirmed = await Get.dialog<bool>(
       AlertDialog(
@@ -160,6 +161,14 @@ class AdminStaffController extends GetxController {
                 TextField(controller: depCtrl, decoration: const InputDecoration(labelText: 'Department')),
                 const SizedBox(height: 12),
                 TextField(controller: dateCtrl, decoration: const InputDecoration(labelText: 'Join Date (YYYY-MM-DD)')),
+                if (existing == null) ...[
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: passCtrl,
+                    decoration: const InputDecoration(labelText: 'Login Password *'),
+                    obscureText: true,
+                  ),
+                ],
               ],
             ),
           ),
@@ -186,6 +195,7 @@ class AdminStaffController extends GetxController {
           'designation': desCtrl.text.trim().isEmpty ? null : desCtrl.text.trim(),
           'department': depCtrl.text.trim().isEmpty ? null : depCtrl.text.trim(),
           'joinDate': dateCtrl.text.trim().isEmpty ? null : dateCtrl.text.trim(),
+          'password': passCtrl.text.trim(),
         };
 
         if (existing == null) {
@@ -197,6 +207,7 @@ class AdminStaffController extends GetxController {
             designation: payload['designation'],
             department: payload['department'],
             joinDate: payload['joinDate'],
+            password: payload['password'],
           );
           AppToast.show('Staff member added.');
         } else {

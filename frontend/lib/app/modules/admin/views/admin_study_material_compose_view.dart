@@ -23,6 +23,9 @@ class _AdminStudyMaterialComposeViewState
   final TextEditingController _descriptionController = TextEditingController();
   String _selectedClassId = '';
   String _selectedSubjectId = '';
+  List<int>? _pickedFileBytes;
+  String? _pickedFileName;
+  String? _pickedFileSize;
 
   @override
   void initState() {
@@ -146,11 +149,92 @@ class _AdminStudyMaterialComposeViewState
                   const SizedBox(height: 12),
                   TextField(
                     controller: _urlController,
-                    onChanged: (_) => setState(() {}),
+                    onChanged: (val) {
+                      if (val.isNotEmpty) {
+                        setState(() {
+                          _pickedFileBytes = null;
+                          _pickedFileName = null;
+                        });
+                      }
+                      setState(() {});
+                    },
                     keyboardType: TextInputType.url,
                     decoration: InputDecoration(
                       labelText: '${category.singularLabel} URL',
                       hintText: _hintUrl(),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Expanded(child: Divider()),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Text(
+                          'OR',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.grey[600] : Colors.grey[400],
+                          ),
+                        ),
+                      ),
+                      const Expanded(child: Divider()),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  if (_pickedFileName != null)
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: color.withValues(alpha: 0.2)),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.insert_drive_file_rounded, color: color),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _pickedFileName!,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold, fontSize: 13),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  _pickedFileSize ?? '',
+                                  style: TextStyle(
+                                      color: Colors.grey[600], fontSize: 11),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _pickedFileBytes = null;
+                                _pickedFileName = null;
+                              });
+                            },
+                            icon: const Icon(Icons.close_rounded, size: 20),
+                          ),
+                        ],
+                      ),
+                    ),
+                  OutlinedButton.icon(
+                    onPressed: _pickFile,
+                    icon: const Icon(Icons.file_present_rounded),
+                    label: Text(_pickedFileName == null ? 'Upload File' : 'Change File'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 48),
+                      side: BorderSide(color: color),
+                      foregroundColor: color,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -374,8 +458,25 @@ class _AdminStudyMaterialComposeViewState
                     : const Icon(Icons.cloud_upload_rounded),
                 label: Text(
                   controller.isPublishing.value
-                      ? 'Publishing...'
-                      : 'Publish ${category.singularLabel}',
+                      ? Column(
+                          children: [
+                            Text(
+                              controller.isUploading.value
+                                  ? 'Uploading File...'
+                                  : 'Publishing...',
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            if (controller.isUploading.value) ...[
+                              const SizedBox(height: 8),
+                              LinearProgressIndicator(
+                                value: controller.uploadProgress.value,
+                                backgroundColor: Colors.white24,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ],
+                        )
+                      : Text('Publish ${category.singularLabel}'),
                 ),
               ),
             ),
@@ -389,13 +490,27 @@ class _AdminStudyMaterialComposeViewState
     final created = await controller.createMaterial(
       category: category,
       title: _titleController.text,
-      url: _urlController.text,
+      url: _urlController.text.trim().isEmpty ? null : _urlController.text.trim(),
+      fileBytes: _pickedFileBytes,
+      fileName: _pickedFileName,
       description: _descriptionController.text,
       classId: _selectedClassId,
       subjectId: _selectedSubjectId,
     );
     if (created && mounted) {
       Get.back(result: true);
+    }
+  }
+
+  Future<void> _pickFile() async {
+    final file = await controller.pickFile(category);
+    if (file != null) {
+      setState(() {
+        _pickedFileBytes = file.bytes;
+        _pickedFileName = file.name;
+        _pickedFileSize = '${(file.size / 1024).toStringAsFixed(1)} KB';
+        _urlController.clear();
+      });
     }
   }
 

@@ -132,7 +132,7 @@ class AdminAdmissionsController extends GetxController {
     'UNDER_REVIEW',
     'APPROVED',
     'REJECTED',
-    'WAITING',
+    'WAITLIST',
   ];
 
   final currentAdmissionFee = 0.0.obs;
@@ -774,7 +774,7 @@ class AdminAdmissionsController extends GetxController {
           const SizedBox(width: 8),
           Expanded(
             child: OutlinedButton(
-              onPressed: () => reviewApplication(item, 'WAITING'),
+              onPressed: () => reviewApplication(item, 'WAITLIST'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.orange,
                 side: const BorderSide(color: Colors.orange),

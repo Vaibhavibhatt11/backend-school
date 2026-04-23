@@ -57,6 +57,7 @@ class AuthRouteResolver {
       case 'HR':
       case 'ACCOUNTANT':
       case 'ADMIN':
+        return AppRoutes.ADMIN_HOME;
       case 'LIBRARIAN':
         return AppRoutes.LIBRARIAN_HOME;
       case 'TRANSPORT':

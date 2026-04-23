@@ -51,6 +51,24 @@ class AdminService {
     return extractApiData(res.data, context: context);
   }
 
+  Future<Map<String, dynamic>> uploadFile({
+    required String path,
+    required List<int> bytes,
+    required String fileName,
+    Map<String, dynamic>? extraData,
+    void Function(int, int)? onSendProgress,
+    required String context,
+  }) async {
+    final res = await _apiClient.uploadFile(
+      path,
+      bytes: bytes,
+      fileName: fileName,
+      extraData: extraData,
+      onSendProgress: onSendProgress,
+    );
+    return extractApiData(res.data, context: context);
+  }
+
   Future<Map<String, dynamic>> getSchoolAdminDashboard() async {
     final res = await _apiClient.get(ApiEndpoints.dashboardSchoolAdmin);
     return extractApiData(res.data, context: 'admin dashboard');
@@ -1045,6 +1063,7 @@ class AdminService {
     String? department,
     bool isActive = true,
     String? joinDate,
+    String? password,
   }) async {
     final res = await _apiClient.post(
       ApiEndpoints.schoolStaff,
@@ -1059,6 +1078,7 @@ class AdminService {
           'department': department.trim(),
         if (joinDate != null && joinDate.trim().isNotEmpty)
           'joinDate': joinDate.trim(),
+        if (password != null && password.isNotEmpty) 'password': password,
         'isActive': isActive,
       },
     );
@@ -1177,11 +1197,17 @@ class AdminService {
   Future<Map<String, dynamic>> createSubject({
     required String name,
     required String code,
+    String? classId,
     bool isActive = true,
   }) async {
     final res = await _apiClient.post(
       ApiEndpoints.schoolSubjects,
-      data: {'name': name, 'code': code, 'isActive': isActive},
+      data: {
+        'name': name,
+        'code': code,
+        'isActive': isActive,
+        if (classId != null && classId.trim().isNotEmpty) 'classId': classId,
+      },
     );
     return extractApiData(res.data, context: 'create subject');
   }
@@ -1236,58 +1262,68 @@ class AdminService {
     String? classId,
     String? subjectId,
   }) async {
-    final settings = await _academicManagementSettings();
-    return {'items': _academicItems(settings, 'syllabus')};
+    final res = await _apiClient.get(
+      ApiEndpoints.schoolSyllabus,
+      query: {
+        if (classId != null) 'classId': classId,
+        if (subjectId != null) 'subjectId': subjectId,
+      },
+    );
+    return extractApiData(res.data, context: 'get syllabus');
   }
 
   Future<Map<String, dynamic>> getLessonPlans({
     String? classId,
     String? subjectId,
   }) async {
-    final settings = await _academicManagementSettings();
-    return {'items': _academicItems(settings, 'lessonPlans')};
+    final res = await _apiClient.get(
+      ApiEndpoints.schoolLessonPlans,
+      query: {
+        if (classId != null) 'classId': classId,
+        if (subjectId != null) 'subjectId': subjectId,
+      },
+    );
+    return extractApiData(res.data, context: 'get lesson plans');
   }
 
   Future<Map<String, dynamic>> createSyllabus(
     Map<String, dynamic> payload,
   ) async {
-    return _upsertAcademicItem(collectionKey: 'syllabus', payload: payload);
+    final res = await _apiClient.post(ApiEndpoints.schoolSyllabus, data: payload);
+    return extractApiData(res.data, context: 'create syllabus');
   }
 
   Future<Map<String, dynamic>> updateSyllabus(
     String id,
     Map<String, dynamic> payload,
   ) async {
-    return _upsertAcademicItem(
-      collectionKey: 'syllabus',
-      id: id,
-      payload: payload,
-    );
+    final res = await _apiClient.put(ApiEndpoints.schoolSyllabusById(id), data: payload);
+    return extractApiData(res.data, context: 'update syllabus');
   }
 
   Future<Map<String, dynamic>> deleteSyllabus(String id) async {
-    return _deleteAcademicItem(collectionKey: 'syllabus', id: id);
+    final res = await _apiClient.dio.delete(ApiEndpoints.schoolSyllabusById(id));
+    return extractApiData(res.data, context: 'delete syllabus');
   }
 
   Future<Map<String, dynamic>> createLessonPlan(
     Map<String, dynamic> payload,
   ) async {
-    return _upsertAcademicItem(collectionKey: 'lessonPlans', payload: payload);
+    final res = await _apiClient.post(ApiEndpoints.schoolLessonPlans, data: payload);
+    return extractApiData(res.data, context: 'create lesson plan');
   }
 
   Future<Map<String, dynamic>> updateLessonPlan(
     String id,
     Map<String, dynamic> payload,
   ) async {
-    return _upsertAcademicItem(
-      collectionKey: 'lessonPlans',
-      id: id,
-      payload: payload,
-    );
+    final res = await _apiClient.put(ApiEndpoints.schoolLessonPlanById(id), data: payload);
+    return extractApiData(res.data, context: 'update lesson plan');
   }
 
   Future<Map<String, dynamic>> deleteLessonPlan(String id) async {
-    return _deleteAcademicItem(collectionKey: 'lessonPlans', id: id);
+    final res = await _apiClient.dio.delete(ApiEndpoints.schoolLessonPlanById(id));
+    return extractApiData(res.data, context: 'delete lesson plan');
   }
 
   Future<Map<String, dynamic>> deleteStudyMaterial(String id) async {
@@ -2676,7 +2712,13 @@ class AdminService {
     try {
       final res = await _apiClient.post(
         '/school/admissions/fees',
-        data: {'amount': fee, 'admissionFee': fee},
+        data: {
+          'amount': fee,
+          'fee': fee,
+          'admissionFee': fee,
+          'admission_fee': fee,
+          'value': fee,
+        },
       );
       return extractApiData(res.data, context: 'update admission fees');
     } catch (_) {

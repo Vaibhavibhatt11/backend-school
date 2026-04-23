@@ -2,6 +2,7 @@ import 'package:erp_frontend/app/modules/admin/models/admin_study_material_model
 import 'package:erp_frontend/common/services/admin/admin_service.dart';
 import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart';
 
 class AdminStudyMaterialController extends GetxController {
@@ -14,6 +15,8 @@ class AdminStudyMaterialController extends GetxController {
   final isSubjectsLoading = false.obs;
   final isPublishing = false.obs;
   final isDeleting = false.obs;
+  final isUploading = false.obs;
+  final uploadProgress = 0.0.obs;
 
   final errorMessage = ''.obs;
   final classError = ''.obs;
@@ -241,34 +244,61 @@ class AdminStudyMaterialController extends GetxController {
   Future<bool> createMaterial({
     required AdminStudyMaterialCategory category,
     required String title,
-    required String url,
+    String? url,
+    List<int>? fileBytes,
+    String? fileName,
     String description = '',
     String classId = '',
     String subjectId = '',
   }) async {
     final trimmedTitle = title.trim();
-    final normalizedUrl = normalizeUrl(url);
+    final normalizedUrl = url != null ? normalizeUrl(url) : '';
     final trimmedDescription = description.trim();
 
     if (trimmedTitle.isEmpty) {
       AppToast.show('${category.singularLabel} title is required.');
       return false;
     }
-    if (normalizedUrl.isEmpty) {
-      AppToast.show('${category.singularLabel} URL is required.');
+
+    if (fileBytes == null && normalizedUrl.isEmpty) {
+      AppToast.show('Please provide a URL or upload a file.');
       return false;
     }
-    if (!looksLikeHttpUrl(normalizedUrl)) {
+
+    if (normalizedUrl.isNotEmpty && !looksLikeHttpUrl(normalizedUrl)) {
       AppToast.show('Enter a valid http or https URL.');
       return false;
     }
 
     isPublishing.value = true;
+    uploadProgress.value = 0.0;
     try {
+      String finalUrl = normalizedUrl;
+
+      if (fileBytes != null && fileName != null) {
+        isUploading.value = true;
+        // Step 1: Upload the file
+        final uploadRes = await _adminService.uploadFile(
+          path: '/school/admissions/upload-document', // Using a generic upload if available, or specific
+          bytes: fileBytes,
+          fileName: fileName,
+          context: 'file upload',
+          onSendProgress: (sent, total) {
+            uploadProgress.value = sent / total;
+          },
+        );
+        finalUrl = uploadRes['url']?.toString() ?? '';
+        if (finalUrl.isEmpty) {
+          AppToast.show('Upload failed: No URL returned from server.');
+          return false;
+        }
+      }
+
+      // Step 2: Create the material record
       await _adminService.uploadStudyMaterial({
         'title': trimmedTitle,
         'type': category.apiType,
-        'url': normalizedUrl,
+        'url': finalUrl,
         'isPublished': true,
         if (trimmedDescription.isNotEmpty) 'description': trimmedDescription,
         if (classId.trim().isNotEmpty) 'classId': classId.trim(),
@@ -282,6 +312,22 @@ class AdminStudyMaterialController extends GetxController {
       return false;
     } finally {
       isPublishing.value = false;
+      isUploading.value = false;
+    }
+  }
+
+  Future<PlatformFile?> pickFile(AdminStudyMaterialCategory category) async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: category == AdminStudyMaterialCategory.videos ? FileType.video : FileType.custom,
+        allowedExtensions: category == AdminStudyMaterialCategory.pdfs ? ['pdf'] : 
+                           category == AdminStudyMaterialCategory.notes ? ['pdf', 'doc', 'docx', 'txt'] : 
+                           null,
+      );
+      return result?.files.first;
+    } catch (e) {
+      AppToast.show('Error picking file: $e');
+      return null;
     }
   }
 

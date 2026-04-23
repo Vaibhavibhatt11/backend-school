@@ -131,6 +131,10 @@ class ApiEndpoints {
       '/school/announcements/$id/send';
   static const String schoolStudyMaterials = '/school/study-materials';
   static const String schoolAuditLogs = '/school/audit-logs';
+  static const String schoolSyllabus = '/school/syllabus';
+  static String schoolSyllabusById(String id) => '/school/syllabus/$id';
+  static const String schoolLessonPlans = '/school/lesson-plans';
+  static String schoolLessonPlanById(String id) => '/school/lesson-plans/$id';
   static const String schoolParents = '/school/parents';
   static String schoolParentById(String id) => '/school/parents/$id';
   static const String schoolParentInvite = '/school/parents/invite';

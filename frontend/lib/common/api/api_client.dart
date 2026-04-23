@@ -100,6 +100,25 @@ class ApiClient {
       options: options,
     );
   }
+  
+  Future<Response<dynamic>> uploadFile(
+    String path, {
+    required List<int> bytes,
+    required String fileName,
+    Map<String, dynamic>? extraData,
+    void Function(int, int)? onSendProgress,
+  }) async {
+    _invalidateGetCache();
+    final formData = FormData.fromMap({
+      'file': MultipartFile.fromBytes(bytes, filename: fileName),
+      if (extraData != null) ...extraData,
+    });
+    return _dio.post(
+      path,
+      data: formData,
+      onSendProgress: onSendProgress,
+    );
+  }
 
   Future<Response<dynamic>> put(
     String path, {

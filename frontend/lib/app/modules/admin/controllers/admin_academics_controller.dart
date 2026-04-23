@@ -523,6 +523,8 @@ class AdminAcademicsController extends GetxController {
     final nameController = TextEditingController(text: existing?.name ?? '');
     final codeController = TextEditingController(text: existing?.code ?? '');
     bool isActive = existing?.isActive ?? true;
+    String selectedClassId = '';
+    
     final ok = await Get.dialog<bool>(
       StatefulBuilder(
         builder: (context, setState) {
@@ -554,6 +556,26 @@ class AdminAcademicsController extends GetxController {
                       onChanged: (value) => setState(() => isActive = value),
                       title: const Text('Active'),
                     ),
+                    const SizedBox(height: 10),
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedClassId,
+                      decoration: const InputDecoration(
+                        labelText: 'Assign to Class (Optional)',
+                      ),
+                      items: [
+                        const DropdownMenuItem<String>(
+                          value: '',
+                          child: Text('Global / All Classes'),
+                        ),
+                        ...classes.map(
+                          (c) => DropdownMenuItem<String>(
+                            value: c.id,
+                            child: Text(c.label),
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) => setState(() => selectedClassId = value ?? ''),
+                    ),
                   ],
                 ),
               ),
@@ -583,6 +605,7 @@ class AdminAcademicsController extends GetxController {
         await _adminService.createSubject(
           name: nameController.text.trim(),
           code: codeController.text.trim(),
+          classId: selectedClassId.isEmpty ? null : selectedClassId,
           isActive: isActive,
         );
         AppToast.show('Subject created.');
@@ -593,6 +616,7 @@ class AdminAcademicsController extends GetxController {
             'name': nameController.text.trim(),
             'code': codeController.text.trim(),
             'isActive': isActive,
+            if (selectedClassId.isNotEmpty) 'classId': selectedClassId,
           },
         );
         AppToast.show('Subject updated.');
@@ -650,45 +674,82 @@ class AdminAcademicsController extends GetxController {
   Future<void> openSyllabusDialog({AdminSyllabusRecord? existing}) async {
     final topicCtrl = TextEditingController(text: existing?.topic ?? '');
     final progressCtrl = TextEditingController(
-      text: existing?.progress.toString() ?? '0',
+      text: (existing?.progress ?? 0).toString(),
     );
+    String selectedClsId = '';
+    String selectedSubId = '';
 
     final ok = await Get.dialog<bool>(
-      AlertDialog(
-        title: Text(
-          existing == null ? 'Add Syllabus Progress' : 'Update Syllabus',
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: topicCtrl,
-              decoration: const InputDecoration(labelText: 'Topic Name'),
+      StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text(
+              existing == null ? 'Add Syllabus Progress' : 'Update Syllabus',
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: progressCtrl,
-              decoration: const InputDecoration(labelText: 'Progress %'),
-              keyboardType: TextInputType.number,
+            content: SizedBox(
+              width: 420,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedClsId,
+                      decoration: const InputDecoration(labelText: 'Select Class'),
+                      items: [
+                        const DropdownMenuItem(value: '', child: Text('Choose Class')),
+                        ...classes.map((c) => DropdownMenuItem(value: c.id, child: Text(c.label))),
+                      ],
+                      onChanged: (val) => setState(() => selectedClsId = val ?? ''),
+                    ),
+                    const SizedBox(height: 10),
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedSubId,
+                      decoration: const InputDecoration(labelText: 'Select Subject'),
+                      items: [
+                        const DropdownMenuItem(value: '', child: Text('Choose Subject')),
+                        ...subjects.map((s) => DropdownMenuItem(value: s.id, child: Text(s.name))),
+                      ],
+                      onChanged: (val) => setState(() => selectedSubId = val ?? ''),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: topicCtrl,
+                      decoration: const InputDecoration(labelText: 'Topic Name'),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: progressCtrl,
+                      decoration: const InputDecoration(labelText: 'Progress %'),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
-          FilledButton(
-            onPressed: () => Get.back(result: true),
-            child: const Text('Save'),
-          ),
-        ],
+            actions: [
+              TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+              FilledButton(
+                onPressed: () => Get.back(result: true),
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        }
       ),
     );
 
     if (ok == true) {
+      if (selectedClsId.isEmpty || selectedSubId.isEmpty) {
+        AppToast.show('Class and Subject are required for Syllabus.');
+        return;
+      }
       try {
         final payload = {
           'topic': topicCtrl.text.trim(),
           'progress': double.tryParse(progressCtrl.text) ?? 0,
-          'status': 'IN_PROGRESS',
+          'status': (double.tryParse(progressCtrl.text) ?? 0) >= 100 ? 'COMPLETED' : 'IN_PROGRESS',
+          'classId': selectedClsId,
+          'subjectId': selectedSubId,
         };
         if (existing == null) {
           await _adminService.createSyllabus(payload);
@@ -715,31 +776,76 @@ class AdminAcademicsController extends GetxController {
 
   Future<void> openLessonPlanDialog({AdminLessonPlan? existing}) async {
     final titleCtrl = TextEditingController(text: existing?.title ?? '');
+    String selectedSubId = '';
+    String selectedSylId = '';
+
     final ok = await Get.dialog<bool>(
-      AlertDialog(
-        title: Text(existing == null ? 'New Lesson Plan' : 'Edit Lesson Plan'),
-        content: TextField(
-          controller: titleCtrl,
-          decoration: const InputDecoration(labelText: 'Plan Title'),
-        ),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
-          FilledButton(
-            onPressed: () => Get.back(result: true),
-            child: const Text('Save'),
-          ),
-        ],
+      StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text(existing == null ? 'New Lesson Plan' : 'Edit Lesson Plan'),
+            content: SizedBox(
+              width: 420,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedSubId,
+                      decoration: const InputDecoration(labelText: 'Select Subject'),
+                      items: [
+                        const DropdownMenuItem(value: '', child: Text('Choose Subject')),
+                        ...subjects.map((s) => DropdownMenuItem(value: s.id, child: Text(s.name))),
+                      ],
+                      onChanged: (val) => setState(() => selectedSubId = val ?? ''),
+                    ),
+                    const SizedBox(height: 10),
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedSylId,
+                      decoration: const InputDecoration(labelText: 'Select Syllabus Topic'),
+                      items: [
+                        const DropdownMenuItem(value: '', child: Text('Choose Syllabus')),
+                        ...syllabuses.where((s) => s.subjectName == subjects.firstWhere((sub) => sub.id == selectedSubId, orElse: () => const AdminSubjectRecord(id: '', name: '', code: '', isActive: true)).name).map((s) => DropdownMenuItem(value: s.id, child: Text(s.topic))),
+                      ],
+                      onChanged: (val) => setState(() => selectedSylId = val ?? ''),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: titleCtrl,
+                      decoration: const InputDecoration(labelText: 'Plan Title'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+              FilledButton(
+                onPressed: () => Get.back(result: true),
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        }
       ),
     );
 
     if (ok == true) {
+      if (selectedSubId.isEmpty) {
+        AppToast.show('Subject is required for Lesson Plan.');
+        return;
+      }
       try {
+        final payload = {
+          'title': titleCtrl.text.trim(),
+          'subjectId': selectedSubId,
+          'syllabusId': selectedSylId,
+          'date': DateTime.now().toIso8601String().split('T')[0],
+        };
         if (existing == null) {
-          await _adminService.createLessonPlan({'title': titleCtrl.text});
+          await _adminService.createLessonPlan(payload);
         } else {
-          await _adminService.updateLessonPlan(existing.id, {
-            'title': titleCtrl.text,
-          });
+          await _adminService.updateLessonPlan(existing.id, payload);
         }
         await loadExtraData();
         AppToast.show('Lesson plan saved.');
