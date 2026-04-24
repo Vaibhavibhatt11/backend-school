@@ -254,6 +254,29 @@ async function createStudent(req, res, next) {
       );
     }
 
+    if (payload.classId) {
+      const classRoom = await prisma.classRoom.findFirst({
+        where: { id: payload.classId, schoolId },
+        select: { id: true, name: true, section: true },
+      });
+      if (!classRoom) {
+        throw badRequest("Selected class is invalid for this school", "INVALID_CLASS");
+      }
+    }
+
+    const duplicate = await prisma.student.findUnique({
+      where: {
+        schoolId_admissionNo: {
+          schoolId,
+          admissionNo: payload.admissionNo,
+        },
+      },
+      select: { id: true },
+    });
+    if (duplicate) {
+      throw badRequest("Admission number already exists", "DUPLICATE_ADMISSION_NO");
+    }
+
     const created = await prisma.student.create({
       data: {
         schoolId,
@@ -281,6 +304,11 @@ async function createStudent(req, res, next) {
       data: { student: toStudentDto(created) },
     });
   } catch (error) {
+    if (error?.code === "P2002") {
+      return next(
+        badRequest("Admission number already exists", "DUPLICATE_ADMISSION_NO")
+      );
+    }
     return next(error);
   }
 }

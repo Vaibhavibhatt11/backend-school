@@ -1,4 +1,5 @@
 import 'package:erp_frontend/common/services/admin/admin_service.dart';
+import 'package:erp_frontend/common/services/parent/parent_api_utils.dart';
 import 'package:erp_frontend/common/services/staff/staff_portal_store_service.dart';
 import 'package:erp_frontend/common/services/staff/staff_service.dart';
 import 'package:erp_frontend/common/utils/app_toast.dart';
@@ -107,17 +108,8 @@ class StaffClassTeachingController extends GetxController {
       );
       await loadData();
       AppToast.show('Student added');
-    } catch (_) {
-      await _store.upsertCollectionItem(
-        moduleKey: 'classTeaching',
-        collectionKey: 'studentList',
-        payload: {
-          'name': name.trim(),
-          'className': className.trim().isEmpty ? 'Class 1' : className.trim(),
-        },
-      );
-      await loadData();
-      AppToast.show('Student saved in staff workspace');
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
     }
   }
 

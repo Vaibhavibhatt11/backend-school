@@ -794,6 +794,10 @@ class AdminReportsController extends GetxController {
     required String mimeType,
     required String successLabel,
   }) async {
+    if (bytes.isEmpty) {
+      AppToast.show('Export failed: empty report content.');
+      return;
+    }
     try {
       if (kIsWeb) {
         final downloaded = await downloadExportBytes(
@@ -802,9 +806,9 @@ class AdminReportsController extends GetxController {
           mimeType: mimeType,
         );
         if (!downloaded) {
-          throw Exception('Unable to start download.');
+          throw Exception('Unable to start browser download.');
         }
-        AppToast.show(successLabel);
+        AppToast.show('$successLabel. File: $fileName');
         return;
       }
 
@@ -827,16 +831,21 @@ class AdminReportsController extends GetxController {
       }
       if (!launched) {
         await Clipboard.setData(ClipboardData(text: file.path));
-        AppToast.show('$successLabel. Saved to ${file.path}');
+        AppToast.show(
+          '$successLabel. Saved to ${file.path}. Path copied.',
+        );
         return;
       }
       AppToast.show('$successLabel. Saved to ${file.path}');
     } catch (e) {
-      AppToast.show(dioOrApiErrorMessage(e));
+      AppToast.show(
+        'Report download failed. Please retry. (${dioOrApiErrorMessage(e)})',
+      );
     }
   }
 
   String _buildExcelWorkbook(AdminReportPayload payload) {
+    const maxRowsPerSection = 500;
     final rows = <String>[
       '<Row><Cell ss:MergeAcross="3"><Data ss:Type="String">${_xmlEscape(payload.title)}</Data></Cell></Row>',
       '<Row><Cell><Data ss:Type="String">Filters</Data></Cell><Cell ss:MergeAcross="2"><Data ss:Type="String">${_xmlEscape(payload.subtitle)}</Data></Cell></Row>',
@@ -855,6 +864,7 @@ class AdminReportsController extends GetxController {
     ];
 
     for (final section in payload.sections) {
+      final sectionRows = section.rows.take(maxRowsPerSection).toList();
       rows.add('<Row/>');
       rows.add(
         '<Row><Cell ss:MergeAcross="${section.columns.length > 1 ? section.columns.length - 1 : 0}"><Data ss:Type="String">${_xmlEscape(section.title)}</Data></Cell></Row>',
@@ -863,11 +873,16 @@ class AdminReportsController extends GetxController {
         '<Row>${section.columns.map((column) => '<Cell><Data ss:Type="String">${_xmlEscape(column)}</Data></Cell>').join()}</Row>',
       );
       rows.addAll(
-        section.rows.map(
+        sectionRows.map(
           (row) =>
               '<Row>${row.map((value) => '<Cell><Data ss:Type="String">${_xmlEscape(value)}</Data></Cell>').join()}</Row>',
         ),
       );
+      if (section.rows.length > maxRowsPerSection) {
+        rows.add(
+          '<Row><Cell><Data ss:Type="String">Note: Export truncated to $maxRowsPerSection rows for ${_xmlEscape(section.title)}.</Data></Cell></Row>',
+        );
+      }
     }
 
     return '''<?xml version="1.0"?>
@@ -885,6 +900,7 @@ class AdminReportsController extends GetxController {
   }
 
   List<int> _buildPdfBytes(AdminReportPayload payload) {
+    const maxRowsPerSection = 300;
     final lines = <String>[
       payload.subtitle,
       'Generated: ${_formatDateTime(payload.generatedAt)}',
@@ -900,8 +916,14 @@ class AdminReportsController extends GetxController {
     for (final section in payload.sections) {
       lines.add(section.title);
       lines.add(section.columns.join(' | '));
-      for (final row in section.rows) {
+      final sectionRows = section.rows.take(maxRowsPerSection);
+      for (final row in sectionRows) {
         lines.add(row.join(' | '));
+      }
+      if (section.rows.length > maxRowsPerSection) {
+        lines.add(
+          'Note: Export truncated to $maxRowsPerSection rows for ${section.title}.',
+        );
       }
       lines.add('');
     }
