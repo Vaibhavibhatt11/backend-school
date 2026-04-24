@@ -3,6 +3,7 @@ const router = require("express").Router();
 const {
   getStaffDashboard,
   getStaffProfile,
+  updateStaffProfile,
   getStaffReports,
   getStaffCommunication,
   sendStaffMessage,
@@ -15,6 +16,7 @@ const {
 
 router.get("/dashboard", getStaffDashboard);
 router.get("/profile", getStaffProfile);
+router.put("/profile", updateStaffProfile);
 router.get("/reports", getStaffReports);
 router.get("/communication", getStaffCommunication);
 router.post("/communication/messages", sendStaffMessage);

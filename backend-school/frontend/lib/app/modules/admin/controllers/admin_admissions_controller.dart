@@ -132,7 +132,7 @@ class AdminAdmissionsController extends GetxController {
     'UNDER_REVIEW',
     'APPROVED',
     'REJECTED',
-    'WAITLIST',
+    'WAITING',
   ];
 
   final currentAdmissionFee = 0.0.obs;
@@ -247,24 +247,22 @@ class AdminAdmissionsController extends GetxController {
       final results = await Future.wait([
         loadClassOptions(),
         loadApplications(),
-        _adminService.getSchoolSettings(),
+        _adminService.getFeeStructures(page: 1, limit: 100),
       ]);
 
-      // Handle settings data
-      final rawData = results[2] as Map<String, dynamic>;
-      final settings =
-          (rawData['settings'] as Map<String, dynamic>?) ?? rawData;
-
-      if (settings.containsKey('admissionFee')) {
-        currentAdmissionFee.value =
-            double.tryParse(settings['admissionFee'].toString()) ?? 0.0;
-      } else if (settings.containsKey('admission_fee')) {
-        currentAdmissionFee.value =
-            double.tryParse(settings['admission_fee'].toString()) ?? 0.0;
-      } else if (settings.containsKey('admission_fees')) {
-        currentAdmissionFee.value =
-            double.tryParse(settings['admission_fees'].toString()) ?? 0.0;
-      }
+      final feeData = results[2] as Map<String, dynamic>;
+      final items = (feeData['items'] as List<dynamic>? ?? const <dynamic>[])
+          .whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
+      final admissionFee = items.firstWhere(
+        (item) =>
+            ((item['name'] ?? '').toString().trim().toLowerCase() ==
+                'admission fee'),
+        orElse: () => const <String, dynamic>{},
+      );
+      currentAdmissionFee.value =
+          double.tryParse((admissionFee['amount'] ?? '0').toString()) ?? 0.0;
     } catch (e) {
       errorMessage.value = dioOrApiErrorMessage(e);
     } finally {
@@ -774,7 +772,7 @@ class AdminAdmissionsController extends GetxController {
           const SizedBox(width: 8),
           Expanded(
             child: OutlinedButton(
-              onPressed: () => reviewApplication(item, 'WAITLIST'),
+              onPressed: () => reviewApplication(item, 'WAITING'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.orange,
                 side: const BorderSide(color: Colors.orange),

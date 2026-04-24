@@ -1025,31 +1025,6 @@ class StaffCommunicationController extends GetxController {
     return buffer.toString().trim();
   }
 
-  String _buildMeetingNote({
-    required StaffRecipient parent,
-    StaffRecipient? student,
-    required DateTime dateTime,
-    required String purpose,
-    required String mode,
-    required String location,
-    required String note,
-  }) {
-    final buffer = StringBuffer()
-      ..writeln('Parent: ${parent.name}')
-      ..writeln('Student: ${student?.name ?? 'N/A'}')
-      ..writeln('Purpose: $purpose')
-      ..writeln('Date: ${_formatDate(dateTime)}')
-      ..writeln('Time: ${_formatTime(dateTime)}')
-      ..writeln('Mode: $mode');
-    if (location.trim().isNotEmpty) {
-      buffer.writeln('Location: ${location.trim()}');
-    }
-    if (note.trim().isNotEmpty) {
-      buffer.writeln('Note: ${note.trim()}');
-    }
-    return buffer.toString().trim();
-  }
-
   String _formatMeetingSummary(StaffMeetingSchedule meeting) {
     return '${_formatDate(meeting.dateTime)} | ${_formatTime(meeting.dateTime)}';
   }

@@ -16,12 +16,7 @@ class AdminStudentsView extends GetView<AdminStudentsController> {
       appBar: AppBar(
         title: const Text('Student Management'),
         backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
-        actions: [
-          IconButton(
-            onPressed: controller.loadInitialData,
-            icon: const Icon(Icons.refresh_rounded),
-          ),
-        ],
+        actions: const [],
       ),
       body: Obx(() {
         if (controller.isLoading.value && controller.students.isEmpty) {

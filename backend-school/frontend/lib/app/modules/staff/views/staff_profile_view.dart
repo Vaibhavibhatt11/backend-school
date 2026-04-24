@@ -92,11 +92,6 @@ class _StaffProfileViewState extends State<StaffProfileView> {
                     ),
                   ),
                 ),
-                OutlinedButton.icon(
-                  onPressed: controller.loadProfile,
-                  icon: const Icon(Icons.refresh_rounded, size: 18),
-                  label: const Text('Reload'),
-                ),
               ],
             ),
             const SizedBox(height: 12),

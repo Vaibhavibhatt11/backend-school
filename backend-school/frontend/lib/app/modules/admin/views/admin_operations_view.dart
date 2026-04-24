@@ -17,12 +17,7 @@ class AdminOperationsView extends GetView<AdminOperationsController> {
       appBar: AppBar(
         title: const Text('Operations'),
         backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
-        actions: [
-          IconButton(
-            onPressed: controller.refreshCurrentTab,
-            icon: const Icon(Icons.refresh_rounded),
-          ),
-        ],
+        actions: const [],
       ),
       body: Obx(() {
         return IndexedStack(

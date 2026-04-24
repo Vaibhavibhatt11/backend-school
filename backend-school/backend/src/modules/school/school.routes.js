@@ -370,6 +370,7 @@ router.delete("/report-cards/templates/:id", deleteReportCardTemplate);
 
 router.get("/settings", getSettings);
 router.put("/settings", updateSettings);
+router.patch("/settings", updateSettings);
 router.get("/roles", listRoles);
 router.post("/roles", createRole);
 router.put("/roles/:id", updateRole);

@@ -39,6 +39,13 @@ const updateSettingsSchema = z.object({
   phone: z.union([z.string().trim().min(3), z.null()]).optional(),
   timezone: z.string().trim().min(1).optional(),
   currencyCode: z.string().trim().length(3).optional(),
+  feeManagement: z.record(z.string(), z.unknown()).optional(),
+  examManagement: z.record(z.string(), z.unknown()).optional(),
+  timetableManagement: z.record(z.string(), z.unknown()).optional(),
+  operationsManagement: z.record(z.string(), z.unknown()).optional(),
+  hostelManagement: z.record(z.string(), z.unknown()).optional(),
+  eventsWorkbench: z.record(z.string(), z.unknown()).optional(),
+  libraryManagement: z.record(z.string(), z.unknown()).optional(),
 });
 
 const decisionSchema = z.object({ reason: z.string().trim().min(1).optional() });
@@ -170,6 +177,10 @@ async function getSettings(req, res, next) {
   try {
     const schoolId = scopedSchoolId(req, undefined, true);
     const school = await ensureSchoolExists(schoolId);
+    const preferences =
+      school.preferences && typeof school.preferences === "object"
+        ? school.preferences
+        : {};
     return res.status(200).json({
       success: true,
       data: {
@@ -182,6 +193,7 @@ async function getSettings(req, res, next) {
           currencyCode: school.currencyCode,
           status: school.status,
         },
+        ...preferences,
       },
     });
   } catch (error) {
@@ -193,24 +205,71 @@ async function updateSettings(req, res, next) {
   try {
     const payload = updateSettingsSchema.parse(req.body);
     const schoolId = scopedSchoolId(req, undefined, true);
-    await ensureSchoolExists(schoolId);
-    const data = asUpdateData(payload);
+    const school = await ensureSchoolExists(schoolId);
+    const data = asUpdateData({
+      name: payload.name,
+      email: payload.email,
+      phone: payload.phone,
+      timezone: payload.timezone,
+      currencyCode: payload.currencyCode,
+    });
     if (data.currencyCode) data.currencyCode = data.currencyCode.toUpperCase();
-    if (!Object.keys(data).length) throw badRequest("At least one field is required");
+    const nextPreferences = {
+      ...(school.preferences && typeof school.preferences === "object"
+        ? school.preferences
+        : {}),
+      ...(payload.feeManagement !== undefined
+        ? { feeManagement: payload.feeManagement }
+        : {}),
+      ...(payload.examManagement !== undefined
+        ? { examManagement: payload.examManagement }
+        : {}),
+      ...(payload.timetableManagement !== undefined
+        ? { timetableManagement: payload.timetableManagement }
+        : {}),
+      ...(payload.operationsManagement !== undefined
+        ? { operationsManagement: payload.operationsManagement }
+        : {}),
+      ...(payload.hostelManagement !== undefined
+        ? { hostelManagement: payload.hostelManagement }
+        : {}),
+      ...(payload.eventsWorkbench !== undefined
+        ? { eventsWorkbench: payload.eventsWorkbench }
+        : {}),
+      ...(payload.libraryManagement !== undefined
+        ? { libraryManagement: payload.libraryManagement }
+        : {}),
+    };
+    const hasPrefUpdate =
+      payload.feeManagement !== undefined ||
+      payload.examManagement !== undefined ||
+      payload.timetableManagement !== undefined ||
+      payload.operationsManagement !== undefined ||
+      payload.hostelManagement !== undefined ||
+      payload.eventsWorkbench !== undefined ||
+      payload.libraryManagement !== undefined;
+    if (!Object.keys(data).length && !hasPrefUpdate) {
+      throw badRequest("At least one field is required");
+    }
+    if (hasPrefUpdate) data.preferences = nextPreferences;
 
-    const school = await prisma.school.update({ where: { id: schoolId }, data });
+    const updatedSchool = await prisma.school.update({ where: { id: schoolId }, data });
     return res.status(200).json({
       success: true,
       data: {
         settings: {
-          schoolId: school.id,
-          name: school.name,
-          email: school.email,
-          phone: school.phone,
-          timezone: school.timezone,
-          currencyCode: school.currencyCode,
-          status: school.status,
+          schoolId: updatedSchool.id,
+          name: updatedSchool.name,
+          email: updatedSchool.email,
+          phone: updatedSchool.phone,
+          timezone: updatedSchool.timezone,
+          currencyCode: updatedSchool.currencyCode,
+          status: updatedSchool.status,
         },
+        ...(updatedSchool.preferences &&
+        typeof updatedSchool.preferences === "object"
+          ? updatedSchool.preferences
+          : {}),
       },
     });
   } catch (error) {

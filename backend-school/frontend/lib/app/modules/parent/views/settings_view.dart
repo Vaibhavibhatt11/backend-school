@@ -218,7 +218,7 @@ class SettingsView extends GetView<SettingsController> {
               ),
               child: Obx(
                 () => DropdownButtonFormField<String>(
-                  value: controller.selectedLanguage.value,
+                  initialValue: controller.selectedLanguage.value,
                   items: controller.languageOptions
                       .map(
                         (lang) => DropdownMenuItem<String>(

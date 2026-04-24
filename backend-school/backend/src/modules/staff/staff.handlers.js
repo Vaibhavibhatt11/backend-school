@@ -223,6 +223,25 @@ const scheduleStaffMeetingSchema = z
     message: "Parent is required",
   });
 
+const updateStaffProfileSchema = z.object({
+  name: z.string().trim().min(1).optional(),
+  department: z.string().trim().max(120).optional(),
+  qualification: z.string().trim().max(120).optional(),
+  experience: z.string().trim().max(120).optional(),
+  contact: z.string().trim().max(40).optional(),
+  email: z.string().trim().email().optional(),
+  documentRows: z
+    .array(
+      z.object({
+        name: z.string().trim().min(1),
+        url: z.string().trim().max(2000).optional(),
+        type: z.string().trim().max(80).optional(),
+      })
+    )
+    .max(50)
+    .optional(),
+});
+
 async function openAiChatCompletion(systemPrompt, userPrompt) {
   const key = process.env.OPENAI_API_KEY;
   if (!key || !String(key).trim()) {
@@ -449,6 +468,55 @@ async function getStaffProfile(req, res, next) {
         })),
       },
     });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function updateStaffProfile(req, res, next) {
+  try {
+    const payload = updateStaffProfileSchema.parse(req.body || {});
+    const schoolId = resolveStaffSchoolId(req);
+    const staff = await findStaffProfile(req, schoolId);
+
+    const data = {};
+    if (payload.name !== undefined) data.fullName = payload.name;
+    if (payload.department !== undefined) data.department = payload.department;
+    if (payload.qualification !== undefined) data.designation = payload.qualification;
+    if (payload.contact !== undefined) data.phone = payload.contact;
+    if (payload.email !== undefined) data.email = payload.email;
+
+    const hasStaffUpdate = Object.keys(data).length > 0;
+    const hasDocumentUpdate = payload.documentRows !== undefined;
+    if (!hasStaffUpdate && !hasDocumentUpdate) {
+      throw badRequest("At least one field is required");
+    }
+
+    await prisma.$transaction(async (tx) => {
+      if (hasStaffUpdate) {
+        await tx.staff.update({
+          where: { id: staff.id },
+          data,
+        });
+      }
+      if (hasDocumentUpdate) {
+        await tx.staffDocument.deleteMany({
+          where: { schoolId, staffId: staff.id },
+        });
+        const docs = (payload.documentRows || []).map((row) => ({
+          schoolId,
+          staffId: staff.id,
+          name: row.name,
+          url: row.url || null,
+          type: row.type || "General",
+        }));
+        if (docs.length > 0) {
+          await tx.staffDocument.createMany({ data: docs });
+        }
+      }
+    });
+
+    return getStaffProfile(req, res, next);
   } catch (error) {
     return next(error);
   }
@@ -1074,6 +1142,7 @@ async function updateStaffSettings(req, res, next) {
 module.exports = {
   getStaffDashboard,
   getStaffProfile,
+  updateStaffProfile,
   getStaffReports,
   getStaffCommunication,
   sendStaffMessage,

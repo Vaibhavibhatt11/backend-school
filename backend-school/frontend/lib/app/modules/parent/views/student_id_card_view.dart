@@ -43,8 +43,9 @@ class _StudentIdCardViewState extends State<StudentIdCardView> {
       if (!mounted) return;
       setState(() => _error = dioOrApiErrorMessage(e));
     } finally {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 

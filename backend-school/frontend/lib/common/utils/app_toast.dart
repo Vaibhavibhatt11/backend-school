@@ -9,17 +9,26 @@ class AppToast {
   static Timer? _timer;
 
   static void show(String message) {
+    final normalized = _normalizeMessage(message);
     final overlay = Get.key.currentState?.overlay;
     if (overlay == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final retryOverlay = Get.key.currentState?.overlay;
         if (retryOverlay == null) return;
-        _insertToast(retryOverlay, message);
+        _insertToast(retryOverlay, normalized);
       });
       return;
     }
 
-    _insertToast(overlay, message);
+    _insertToast(overlay, normalized);
+  }
+
+  static String _normalizeMessage(String raw) {
+    final compact = raw.replaceAll(RegExp(r'\s+'), ' ').trim();
+    if (compact.isEmpty) return 'Something went wrong.';
+    // Android toast implementations can fail for very long strings.
+    if (compact.length <= 100) return compact;
+    return '${compact.substring(0, 97)}...';
   }
 
   static void _insertToast(OverlayState overlay, String message) {

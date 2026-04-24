@@ -22,12 +22,7 @@ class AdminScheduleView extends GetView<AdminScheduleController> {
         appBar: AppBar(
           title: const Text('Schedule & Exams'),
           backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
-          actions: [
-            IconButton(
-              onPressed: controller.refreshCurrentTab,
-              icon: const Icon(Icons.refresh_rounded),
-            ),
-          ],
+          actions: const [],
         ),
         body: Column(
           children: [

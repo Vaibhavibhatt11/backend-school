@@ -81,8 +81,9 @@ class _ProfileSubScreenState extends State<ProfileSubScreen> {
       if (!mounted) return;
       setState(() => _error = dioOrApiErrorMessage(e));
     } finally {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 

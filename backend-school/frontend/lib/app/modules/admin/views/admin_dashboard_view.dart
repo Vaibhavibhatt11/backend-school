@@ -117,26 +117,7 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
                         icon: const Icon(Icons.payments_outlined),
                       ),
                     ],
-                    Stack(
-                      children: [
-                        IconButton(
-                          onPressed: controller.loadDashboard,
-                          icon: const Icon(Icons.notifications_none),
-                        ),
-                        Positioned(
-                          top: 8,
-                          right: 8,
-                          child: Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    const SizedBox(width: 8),
                   ],
                 );
               },

@@ -74,8 +74,9 @@ class ParentFinanceService {
         : childId;
     final payload = <String, dynamic>{};
     if (method != null && method.isNotEmpty) payload['method'] = method;
-    if (transactionRef != null && transactionRef.isNotEmpty)
+    if (transactionRef != null && transactionRef.isNotEmpty) {
       payload['transactionRef'] = transactionRef;
+    }
     final query = <String, dynamic>{
       if (scopedChildId != null && scopedChildId.isNotEmpty)
         'childId': scopedChildId,

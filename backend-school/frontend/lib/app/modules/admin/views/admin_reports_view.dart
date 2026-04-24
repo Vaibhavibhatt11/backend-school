@@ -28,6 +28,8 @@ class AdminReportsView extends GetView<AdminReportsController> {
                   delegate: SliverChildListDelegate([
                     _buildGlobalFilters(isDark),
                     const SizedBox(height: 28),
+                    _buildQuickExportRow(isDark),
+                    const SizedBox(height: 28),
                     _buildSectionHeader('Report Modules', isDark),
                     const SizedBox(height: 12),
                     _buildModuleGrid(isDark),
@@ -202,6 +204,38 @@ class AdminReportsView extends GetView<AdminReportsController> {
         fontWeight: FontWeight.w800,
         letterSpacing: 1.2,
         color: isDark ? AppColors.textSecondaryDark : Colors.grey[600],
+      ),
+    );
+  }
+
+  Widget _buildQuickExportRow(bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () => controller.onPDFExport(AdminReportKind.all),
+              icon: const Icon(Icons.picture_as_pdf_rounded),
+              label: const Text('Export All PDF'),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () => controller.onExcelExport(AdminReportKind.all),
+              icon: const Icon(Icons.table_view_rounded),
+              label: const Text('Export All Excel'),
+            ),
+          ),
+        ],
       ),
     );
   }

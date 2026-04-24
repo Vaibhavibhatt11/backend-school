@@ -2668,31 +2668,31 @@ class AdminService {
   }
 
   Future<Map<String, dynamic>> updateAdmissionFees(double fee) async {
-    // Strategy: Try specific endpoint, then PATCH settings, then PUT settings
-    try {
-      final res = await _apiClient.post(
-        '/school/admissions/fees',
-        data: {
-          'amount': fee,
-          'fee': fee,
-          'admissionFee': fee,
-          'admission_fee': fee,
-          'value': fee,
-        },
+    final normalized = fee < 0 ? 0 : fee;
+    final list = await getFeeStructures(page: 1, limit: 100);
+    final items = (list['items'] as List<dynamic>? ?? const <dynamic>[])
+        .whereType<Map>()
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+    final existing = items.firstWhere(
+      (item) =>
+          ((item['name'] ?? '').toString().trim().toLowerCase() ==
+              'admission fee'),
+      orElse: () => const <String, dynamic>{},
+    );
+    final payload = <String, dynamic>{
+      'name': 'Admission Fee',
+      'amount': normalized,
+      'frequency': 'ONE_TIME',
+      'currency': 'INR',
+      'isActive': true,
+    };
+    if ((existing['id'] ?? '').toString().trim().isNotEmpty) {
+      return updateFeeStructure(
+        id: existing['id'].toString(),
+        payload: payload,
       );
-      return extractApiData(res.data, context: 'update admission fees');
-    } catch (_) {
-      try {
-        return await patchSchoolSettings({
-          'admissionFee': fee,
-          'admission_fee': fee,
-        });
-      } catch (e) {
-        return await updateSchoolSettings({
-          'admissionFee': fee,
-          'admission_fee': fee,
-        });
-      }
     }
+    return createFeeStructure(payload);
   }
 }

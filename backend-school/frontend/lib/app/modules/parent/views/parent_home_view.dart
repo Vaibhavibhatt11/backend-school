@@ -19,12 +19,7 @@ class ParentHomeView extends GetView<ParentHomeController> {
       appBar: CustomAppBar(
         title: '',
         showBack: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: controller.goToNotifications,
-          ),
-        ],
+        actions: const [],
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'parent-home-live-class-fab',

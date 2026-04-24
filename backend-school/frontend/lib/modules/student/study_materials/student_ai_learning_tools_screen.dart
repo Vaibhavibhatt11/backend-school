@@ -103,7 +103,7 @@ class _StudentAiLearningToolsScreenState extends State<StudentAiLearningToolsScr
           ),
           SizedBox(height: Responsive.h(context, 14)),
           DropdownButtonFormField<StudyMaterialItem>(
-            value: _selected,
+            initialValue: _selected,
             items: widget.items
                 .map((e) => DropdownMenuItem(
                       value: e,
@@ -197,7 +197,7 @@ class _StudentAiLearningToolsScreenState extends State<StudentAiLearningToolsScr
                   children: [
                     Expanded(
                       child: DropdownButtonFormField<String>(
-                        value: _difficulty,
+                        initialValue: _difficulty,
                         items: const [
                           DropdownMenuItem(value: 'Easy', child: Text('Easy')),
                           DropdownMenuItem(value: 'Medium', child: Text('Medium')),
@@ -213,7 +213,7 @@ class _StudentAiLearningToolsScreenState extends State<StudentAiLearningToolsScr
                     SizedBox(width: Responsive.w(context, 10)),
                     Expanded(
                       child: DropdownButtonFormField<int>(
-                        value: _quizQuestionCount,
+                        initialValue: _quizQuestionCount,
                         items: const [5, 8, 10, 15]
                             .map((n) => DropdownMenuItem(value: n, child: Text('$n questions')))
                             .toList(),
