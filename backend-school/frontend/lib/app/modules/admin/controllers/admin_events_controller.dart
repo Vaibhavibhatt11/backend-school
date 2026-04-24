@@ -541,10 +541,17 @@ class AdminEventsController extends GetxController {
     }
 
     try {
+      final eventTypeInput = typeController.text.trim();
+      final eventTypeNormalized =
+          eventTypeInput.isEmpty ? 'GENERAL' : eventTypeInput;
+      final eventTypeCapped = eventTypeNormalized.length > 30
+          ? eventTypeNormalized.substring(0, 30)
+          : eventTypeNormalized;
+      final locationInput = locController.text.trim();
       final payload = {
         'title': titleController.text.trim(),
-        'eventType': typeController.text.trim(),
-        'location': locController.text.trim(),
+        'eventType': eventTypeCapped,
+        if (locationInput.isNotEmpty) 'location': locationInput,
         'startDate': sDate.toIso8601String(),
         'endDate':
             _opsInputDate(endDateController.text)?.toIso8601String() ??

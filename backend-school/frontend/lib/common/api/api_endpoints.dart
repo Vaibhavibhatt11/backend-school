@@ -10,6 +10,7 @@ class ApiEndpoints {
   static const String authRefresh = '/auth/refresh';
   static const String authMe = '/auth/me';
   static const String authLogout = '/auth/logout';
+  static const String authBranches = '/auth/branches';
   static const String authForgotPassword = '/auth/forgot-password';
   static const String authVerifyOtp = '/auth/verify-otp';
   static const String authResetPassword = '/auth/reset-password';

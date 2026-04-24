@@ -2462,19 +2462,21 @@ class AdminOperationsController extends GetxController {
       return;
     }
     try {
+      final eventTypeInput = typeController.text.trim();
+      final descriptionInput = descriptionController.text.trim();
+      final locationInput = locationController.text.trim();
+      final eventTypeNormalized =
+          (eventTypeInput.isEmpty ? 'GENERAL' : eventTypeInput);
+      final eventTypeCapped = eventTypeNormalized.length > 30
+          ? eventTypeNormalized.substring(0, 30)
+          : eventTypeNormalized;
       final payload = {
         'title': titleController.text.trim(),
-        'description': descriptionController.text.trim().isEmpty
-            ? null
-            : descriptionController.text.trim(),
-        'eventType': typeController.text.trim().isEmpty
-            ? 'GENERAL'
-            : typeController.text.trim(),
+        if (descriptionInput.isNotEmpty) 'description': descriptionInput,
+        'eventType': eventTypeCapped,
         'startDate': startDate.toIso8601String(),
-        'endDate': endDate?.toIso8601String(),
-        'location': locationController.text.trim().isEmpty
-            ? null
-            : locationController.text.trim(),
+        if (endDate != null) 'endDate': endDate.toIso8601String(),
+        if (locationInput.isNotEmpty) 'location': locationInput,
         'isPublished': isPublished,
       };
       if (existing == null) {

@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import '../../api/api_client.dart';
 import '../../api/api_endpoints.dart';
 import 'package:get/get.dart';
@@ -9,6 +10,17 @@ class ParentAcademicsService {
 
   final ApiClient _apiClient;
   final ParentContextService _parentContext = Get.find<ParentContextService>();
+
+  Future<T> _retryOnceOnGatewayError<T>(Future<T> Function() action) async {
+    try {
+      return await action();
+    } on DioException catch (e) {
+      final code = e.response?.statusCode ?? 0;
+      if (code != 502 && code != 503 && code != 504) rethrow;
+      await Future<void>.delayed(const Duration(milliseconds: 700));
+      return action();
+    }
+  }
 
   Future<Map<String, dynamic>> getAttendance({
     String? childId,
@@ -66,9 +78,11 @@ class ParentAcademicsService {
         'childId': scopedChildId,
       if (day != null && day.isNotEmpty) 'day': day,
     };
-    final res = await _apiClient.get(
-      ApiEndpoints.parentTimetable,
-      query: query.isEmpty ? null : query,
+    final res = await _retryOnceOnGatewayError(
+      () => _apiClient.get(
+        ApiEndpoints.parentTimetable,
+        query: query.isEmpty ? null : query,
+      ),
     );
     return extractApiData(res.data, context: 'timetable');
   }

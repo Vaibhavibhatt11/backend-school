@@ -6,12 +6,14 @@ const {
   refresh,
   logout,
   me,
+  listPublicBranches,
   forgotPassword,
   verifyOtp,
   resetPassword,
   changePassword,
 } = require("./auth.handlers");
 
+router.get("/branches", listPublicBranches);
 router.post("/login", loginRateLimiter, login);
 router.post("/refresh", refresh);
 router.post("/logout", logout);

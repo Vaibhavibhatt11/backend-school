@@ -1,9 +1,12 @@
 import 'package:get/get.dart';
 
+import '../../../app/data/repositories/user_repository.dart';
 import '../../../common/routes/common_routes_screens.dart';
 import '../../../common/utils/app_toast.dart';
+import '../../../common/services/parent/parent_api_utils.dart';
 
 class ForgotPasswordController extends GetxController {
+  final UserRepository _userRepository = Get.find<UserRepository>();
   final RxString email = ''.obs;
   final RxBool isLoading = false.obs;
 
@@ -20,11 +23,15 @@ class ForgotPasswordController extends GetxController {
     }
 
     isLoading.value = true;
-    await Future.delayed(const Duration(seconds: 1));
-    isLoading.value = false;
-
-    AppToast.show('Reset link would be sent to your email (demo).');
-    Get.offAllNamed(CommonScreenRoutes.loginScreen);
+    try {
+      await _userRepository.sendOtp(e);
+      AppToast.show('Verification code sent. Check your email.');
+      Get.offAllNamed(CommonScreenRoutes.loginScreen);
+    } catch (e) {
+      AppToast.show(dioOrApiErrorMessage(e));
+    } finally {
+      isLoading.value = false;
+    }
   }
 }
 

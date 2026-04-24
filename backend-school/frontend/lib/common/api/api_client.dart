@@ -47,11 +47,12 @@ class ApiClient {
     Map<String, dynamic>? query,
     Options? options,
   }) {
+    final normalizedQuery = _normalizeQuery(query);
     final skipCache = options?.extra?['skipCache'] == true;
     if (skipCache || _isUncacheablePath(path)) {
-      return _dio.get(path, queryParameters: query, options: options);
+      return _dio.get(path, queryParameters: normalizedQuery, options: options);
     }
-    final cacheKey = _buildCacheKey(path, query);
+    final cacheKey = _buildCacheKey(path, normalizedQuery);
     final cached = _getCache[cacheKey];
     if (cached != null && DateTime.now().isBefore(cached.expiresAt)) {
       return Future.value(
@@ -59,7 +60,7 @@ class ApiClient {
           data: cached.data,
           requestOptions: RequestOptions(
             path: path,
-            queryParameters: query ?? const {},
+            queryParameters: normalizedQuery ?? const {},
           ),
           statusCode: cached.statusCode,
         ),
@@ -69,7 +70,7 @@ class ApiClient {
     if (inFlight != null) return inFlight;
 
     final future = _dio
-        .get(path, queryParameters: query, options: options)
+        .get(path, queryParameters: normalizedQuery, options: options)
         .then((response) {
           _getCache[cacheKey] = _CachedGetResponse(
             data: response.data,
@@ -84,6 +85,24 @@ class ApiClient {
 
     _inFlightGets[cacheKey] = future;
     return future;
+  }
+
+  Map<String, dynamic>? _normalizeQuery(Map<String, dynamic>? query) {
+    if (query == null || query.isEmpty) return query;
+    if (!query.containsKey('limit')) return query;
+
+    final next = Map<String, dynamic>.from(query);
+    final rawLimit = next['limit'];
+    int? parsed;
+    if (rawLimit is int) parsed = rawLimit;
+    if (rawLimit is String) parsed = int.tryParse(rawLimit.trim());
+    if (rawLimit is num) parsed = rawLimit.toInt();
+    if (parsed == null) return next;
+
+    // Backend list endpoints validate limit <= 100.
+    final clamped = parsed < 1 ? 1 : (parsed > 100 ? 100 : parsed);
+    next['limit'] = clamped;
+    return next;
   }
 
   Future<Response<dynamic>> post(
@@ -182,11 +201,7 @@ class _AuthRefreshInterceptor extends Interceptor {
   static bool _isForcingLogout = false;
 
   bool _isAuthPath(String path) {
-    return path.contains(ApiEndpoints.authLogin) ||
-        path.contains(ApiEndpoints.authRefresh) ||
-        path.contains(ApiEndpoints.authForgotPassword) ||
-        path.contains(ApiEndpoints.authVerifyOtp) ||
-        path.contains(ApiEndpoints.authResetPassword);
+    return path.contains('/auth/');
   }
 
   bool _isPublicPath(String path) {

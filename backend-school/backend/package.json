@@ -18,6 +18,7 @@
     "smoke:parent-admin": "node scripts/parent-admin-smoke.js",
     "smoke:staff": "node scripts/staff-smoke.js",
     "smoke:student": "node scripts/student-smoke.js",
+    "smoke:high-risk": "node scripts/high-risk-modules-smoke.js",
     "smoke:roles": "npm run smoke:parent-admin && npm run smoke:staff && npm run smoke:student",
     "audit:detailed": "node scripts/detailed-e2e-audit.js",
     "load:k6:auth": "k6 run scripts/k6-auth-load.js",

@@ -81,23 +81,29 @@ async function createEvent(req, res, next) {
     const body = z.object({
       schoolId: z.string().optional(),
       title: z.string().trim().min(1).max(200),
-      description: z.string().max(5000).optional(),
-      eventType: z.string().max(30).default("GENERAL"),
+      description: z.string().trim().max(5000).optional().nullable(),
+      eventType: z.string().trim().max(80).default("GENERAL"),
       startDate: z.coerce.date(),
       endDate: z.coerce.date().optional().nullable(),
-      location: z.string().max(200).optional(),
+      location: z.string().trim().max(200).optional().nullable(),
       isPublished: z.boolean().optional(),
     }).parse(req.body);
+    if (body.endDate && body.endDate < body.startDate) {
+      return res.status(400).json({
+        success: false,
+        error: { code: "BAD_REQUEST", message: "End date cannot be before start date" },
+      });
+    }
     const schoolId = scopedSchoolId(req, body.schoolId, true);
     const event = await prisma.event.create({
       data: {
         schoolId,
         title: body.title,
-        description: body.description || null,
-        eventType: body.eventType,
+        description: body.description?.trim() || null,
+        eventType: body.eventType.trim() || "GENERAL",
         startDate: body.startDate,
         endDate: body.endDate || null,
-        location: body.location || null,
+        location: body.location?.trim() || null,
         isPublished: body.isPublished !== false,
       },
     });
@@ -113,15 +119,29 @@ async function updateEvent(req, res, next) {
     const schoolId = scopedSchoolId(req, undefined, true);
     await findScopedOrThrow("event", req.params.id, schoolId, "Event", "NOT_FOUND");
     const body = z.object({
-      title: z.string().max(200).optional(),
-      description: z.string().max(5000).optional(),
-      eventType: z.string().max(30).optional(),
+      title: z.string().trim().max(200).optional(),
+      description: z.string().trim().max(5000).optional().nullable(),
+      eventType: z.string().trim().max(80).optional(),
       startDate: z.coerce.date().optional(),
       endDate: z.coerce.date().optional().nullable(),
-      location: z.string().max(200).optional(),
+      location: z.string().trim().max(200).optional().nullable(),
       isPublished: z.boolean().optional(),
     }).parse(req.body);
-    const event = await prisma.event.update({ where: { id: req.params.id }, data: body });
+    if (body.startDate && body.endDate && body.endDate < body.startDate) {
+      return res.status(400).json({
+        success: false,
+        error: { code: "BAD_REQUEST", message: "End date cannot be before start date" },
+      });
+    }
+    const data = {};
+    if (body.title !== undefined) data.title = body.title.trim();
+    if (body.description !== undefined) data.description = body.description?.trim() || null;
+    if (body.eventType !== undefined) data.eventType = body.eventType.trim() || "GENERAL";
+    if (body.startDate !== undefined) data.startDate = body.startDate;
+    if (body.endDate !== undefined) data.endDate = body.endDate || null;
+    if (body.location !== undefined) data.location = body.location?.trim() || null;
+    if (body.isPublished !== undefined) data.isPublished = body.isPublished;
+    const event = await prisma.event.update({ where: { id: req.params.id }, data });
     invalidateEvents(schoolId);
     return res.status(200).json({ success: true, data: event });
   } catch (e) {

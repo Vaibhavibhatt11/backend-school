@@ -25,6 +25,11 @@ const forgotPasswordSchema = z.object({
   email: z.string().email(),
 });
 
+const publicBranchesQuerySchema = z.object({
+  search: z.string().trim().max(120).optional(),
+  limit: z.coerce.number().int().min(1).max(200).default(100),
+});
+
 const verifyOtpSchema = z.object({
   email: z.string().email(),
   otp: z.string().trim().regex(/^\d{6}$/),
@@ -394,6 +399,57 @@ async function me(req, res, next) {
   }
 }
 
+async function listPublicBranches(req, res, next) {
+  try {
+    const query = publicBranchesQuerySchema.parse(req.query || {});
+    const search = query.search?.trim();
+    const where = {
+      school: { status: "ACTIVE" },
+      ...(search
+        ? {
+            OR: [
+              { name: { contains: search, mode: "insensitive" } },
+              { address: { contains: search, mode: "insensitive" } },
+              { school: { name: { contains: search, mode: "insensitive" } } },
+              { school: { code: { contains: search, mode: "insensitive" } } },
+            ],
+          }
+        : {}),
+    };
+
+    const branches = await prisma.branch.findMany({
+      where,
+      orderBy: [{ school: { name: "asc" } }, { name: "asc" }],
+      take: query.limit,
+      include: {
+        school: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+          },
+        },
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        items: branches.map((branch) => ({
+          id: branch.id,
+          name: branch.name,
+          address: branch.address || "",
+          schoolId: branch.schoolId,
+          schoolName: branch.school?.name || "",
+          schoolCode: branch.school?.code || "",
+        })),
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 async function forgotPassword(req, res, next) {
   try {
     const { email } = forgotPasswordSchema.parse(req.body);
@@ -656,6 +712,7 @@ module.exports = {
   refresh,
   logout,
   me,
+  listPublicBranches,
   forgotPassword,
   verifyOtp,
   resetPassword,

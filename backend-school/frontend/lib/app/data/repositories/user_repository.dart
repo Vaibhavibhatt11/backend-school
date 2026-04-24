@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import '../../../common/api/api_client.dart';
 import '../../../common/api/api_endpoints.dart';
 import '../../../common/services/parent/parent_api_utils.dart';
+import '../models/branch_model.dart';
 import '../models/user_model.dart';
 
 class UserRepository {
@@ -40,6 +41,28 @@ class UserRepository {
       data: {'email': phoneOrEmail.trim()},
     );
     return true;
+  }
+
+  Future<List<BranchModel>> fetchPublicBranches({String? search}) async {
+    final query = <String, dynamic>{'limit': 100};
+    final q = search?.trim() ?? '';
+    if (q.isNotEmpty) query['search'] = q;
+    final res = await _apiClient.get(ApiEndpoints.authBranches, query: query);
+    final data = extractApiData(res.data, context: 'list public branches');
+    final items = (data['items'] as List<dynamic>? ?? const <dynamic>[])
+        .whereType<Map>()
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+    return items
+        .map(
+          (item) => BranchModel(
+            id: item['id']?.toString() ?? '',
+            name: item['name']?.toString() ?? '',
+            address: item['address']?.toString() ?? '',
+          ),
+        )
+        .where((b) => b.id.isNotEmpty && b.name.isNotEmpty)
+        .toList();
   }
 
   Future<String> verifyOtpForReset({
