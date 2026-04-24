@@ -1,0 +1,541 @@
+{
+  "info": {
+    "_postman_id": "school-erp-parent-1774871006104",
+    "name": "School ERP — Parent app (PARENT role)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Parent app APIs under `/api/v1/parent`. Same family account can use PARENT login (student app may share parent phone — use this collection for parent dashboard). Production base URL: `https://backend-school-app.onrender.com/api/v1`. Use environment **School ERP - Production (Render)** or set `base_url`. Run **01 Auth → login**, then **GET /parent/children** (saves `childId`), then other requests. Most endpoints require `?childId=...` for the selected child. Source: `src/modules/parent/parent.routes.js`."
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://backend-school-app.onrender.com/api/v1"
+    },
+    {
+      "key": "auth_token",
+      "value": ""
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "parentEmail",
+      "value": "parent@school.edu"
+    },
+    {
+      "key": "parentPassword",
+      "value": "Parent123!"
+    },
+    {
+      "key": "invoiceId",
+      "value": ""
+    },
+    {
+      "key": "childId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "00 Health (public)",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/health"
+          }
+        },
+        {
+          "name": "GET /ready",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/ready"
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 Auth",
+      "item": [
+        {
+          "name": "POST /auth/login (PARENT user)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{parentEmail}}\",\n  \"password\": \"{{parentPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 2xx', function () { pm.response.to.be.success; });",
+                  "const j = pm.response.json();",
+                  "if (j && j.data && j.data.accessToken) { pm.collectionVariables.set('auth_token', j.data.accessToken); pm.collectionVariables.set('accessToken', j.data.accessToken); }",
+                  "if (j && j.data && j.data.refreshToken) pm.collectionVariables.set('refreshToken', j.data.refreshToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /auth/refresh",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/auth/refresh",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 2xx', function () { pm.response.to.be.success; });",
+                  "const j = pm.response.json();",
+                  "if (j && j.data && j.data.accessToken) { pm.collectionVariables.set('auth_token', j.data.accessToken); pm.collectionVariables.set('accessToken', j.data.accessToken); }",
+                  "if (j && j.data && j.data.refreshToken) pm.collectionVariables.set('refreshToken', j.data.refreshToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /auth/me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/auth/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Parent app (/parent/*) — requires PARENT JWT",
+      "item": [
+        {
+          "name": "GET /parent/children",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/parent/children",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 2xx', function () { pm.response.to.be.success; });",
+                  "const j = pm.response.json();",
+                  "const ch = j && j.data && j.data.children && j.data.children[0];",
+                  "if (ch && ch.id) pm.collectionVariables.set('childId', ch.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /parent/home",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/parent/home?childId={{childId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /parent/announcements",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/parent/announcements?childId={{childId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /parent/notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/parent/notifications?childId={{childId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /parent/attendance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/parent/attendance?childId={{childId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /parent/fees",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/parent/fees?childId={{childId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 2xx', function () { pm.response.to.be.success; });",
+                  "const j = pm.response.json();",
+                  "const inv = j && j.data && Array.isArray(j.data.invoices) ? j.data.invoices[0] : null;",
+                  "if (inv && inv.id) pm.collectionVariables.set('invoiceId', inv.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /parent/invoices/:invoiceId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/parent/invoices/{{invoiceId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /parent/invoices/:invoiceId/pay-balance",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/parent/invoices/{{invoiceId}}/pay-balance",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST /parent/fees/quick-pay-all",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/parent/fees/quick-pay-all",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET /parent/timetable",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/parent/timetable?childId={{childId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /parent/progress-reports",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/parent/progress-reports?childId={{childId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /parent/live-classes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/parent/live-classes?childId={{childId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /parent/profile-hub",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/parent/profile-hub?childId={{childId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /parent/library",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/parent/library?childId={{childId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /parent/documents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/parent/documents?childId={{childId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /parent/settings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/parent/settings?childId={{childId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PUT /parent/settings",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/parent/settings?childId={{childId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

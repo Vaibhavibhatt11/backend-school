@@ -1,0 +1,650 @@
+import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/widgets/app_user_avatar.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/custom_app_bar.dart';
+import '../../../navbar/parent_bottom_nav_bar.dart';
+import '../controllers/parent_home_controller.dart';
+
+class ParentHomeView extends GetView<ParentHomeController> {
+  final bool embedded;
+
+  const ParentHomeView({super.key, this.embedded = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Scaffold(
+      appBar: CustomAppBar(
+        title: '',
+        showBack: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: controller.goToNotifications,
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'parent-home-live-class-fab',
+        onPressed: controller.goToLiveClass,
+        child: const Icon(Icons.video_call),
+      ),
+      body: Obx(() {
+        if (controller.isLoading.value && controller.recentNotices.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (controller.errorMessage.value.isNotEmpty &&
+            controller.recentNotices.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    controller.errorMessage.value,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: controller.loadHome,
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final horizontalPadding = constraints.maxWidth >= 900
+                ? 28.0
+                : constraints.maxWidth >= 700
+                    ? 20.0
+                    : 16.0;
+            final statSpacing = constraints.maxWidth >= 700 ? 20.0 : 12.0;
+            return SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 8),
+              Text(
+                '${DateTime.now().weekday}, ${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().day.toString().padLeft(2, '0')}',
+                style: TextStyle(
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: Text(
+                      controller.childName.value.isEmpty
+                          ? 'Hi'
+                          : 'Hi, ${controller.childName.value.split(' ').first}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: isDark
+                            ? AppColors.textDark
+                            : AppColors.textLight,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: controller.goToChildSwitcher,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isDark ? AppColors.surfaceDark : Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: isDark
+                                ? AppColors.borderDark
+                                : AppColors.borderLight,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Obx(
+                              () => AppUserAvatar(
+                                photoUrl: controller.childPhotoUrl.value.isEmpty
+                                    ? null
+                                    : controller.childPhotoUrl.value,
+                                radius: 16,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Obx(
+                                () => Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      controller.childName.value.isEmpty
+                                          ? 'Student'
+                                          : controller.childName.value,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    Text(
+                                      controller.childGrade.value.isEmpty
+                                          ? 'Tap to switch student'
+                                          : controller.childGrade.value,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: isDark
+                                            ? AppColors.textSecondaryDark
+                                            : Colors.grey[600],
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? AppColors.borderDark
+                                    : Colors.grey.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(Icons.expand_more, size: 18),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              // Stats cards
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Get.toNamed(AppRoutes.PARENT_ATTENDANCE),
+                      child: _buildStatCard(
+                        icon: Icons.verified_user,
+                        iconColor: Colors.green,
+                        label: 'Attendance',
+                        value: '${controller.attendance.value}%',
+                        sub: 'monthly',
+                        status: 'Present',
+                        statusColor: Colors.green,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: statSpacing),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Get.toNamed(AppRoutes.PARENT_FEES),
+                      child: _buildStatCard(
+                        icon: Icons.payments,
+                        iconColor: Colors.amber,
+                        label: 'Fees Due',
+                        value: '\$${controller.feesDue.value}',
+                        sub: controller.feesDueDate.value,
+                        status: 'Pending',
+                        statusColor: Colors.amber,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: controller.goToStudentIdCard,
+                  icon: const Icon(Icons.badge_outlined),
+                  label: const Text('Student ID Card'),
+                ),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: controller.goToCommunication,
+                  icon: const Icon(Icons.forum_outlined),
+                  label: const Text('Communication Center'),
+                ),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: controller.goToEventsHub,
+                  icon: const Icon(Icons.celebration_outlined),
+                  label: const Text('Events Center'),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  // Transport module commented for now.
+                  // Expanded(
+                  //   child: OutlinedButton.icon(
+                  //     onPressed: controller.goToTransport,
+                  //     icon: const Icon(Icons.directions_bus_filled_outlined),
+                  //     label: const Text('Transport'),
+                  //   ),
+                  // ),
+                  // const SizedBox(width: 10),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: controller.goToAchievements,
+                      icon: const Icon(Icons.workspace_premium_outlined),
+                      label: const Text('Achievements'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: controller.goToFinanceHub,
+                  icon: const Icon(Icons.account_balance_wallet_outlined),
+                  label: const Text('Finance & Fees Center'),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Upcoming class
+              GestureDetector(
+                onTap: controller.goToLiveClass,
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.primary, AppColors.primaryLight],
+                    ),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Upcoming Class',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              controller.upcomingClass.value,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.schedule,
+                                  color: Colors.white70,
+                                  size: 14,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Starts in ${controller.classStartIn.value}',
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_forward,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Recent Notices
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Recent Notices',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  TextButton(
+                    onPressed: controller.goToAnnouncements,
+                    child: const Text('See All'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 200,
+                child: Obx(
+                  () => ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: controller.recentNotices.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 16),
+                    itemBuilder: (context, index) {
+                      final notice = controller.recentNotices[index];
+                      final typeStr = (notice['type'] ?? 'Notice').toString();
+                      final isUrgent =
+                          notice['urgent'] == true ||
+                          typeStr.toLowerCase().contains('urgent');
+                      return Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(24),
+                          onTap: controller.goToAnnouncements,
+                          child: Container(
+                            width: 280,
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? AppColors.surfaceDark
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(
+                                color: isDark
+                                    ? AppColors.borderDark
+                                    : AppColors.borderLight,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color: isUrgent
+                                            ? Colors.red
+                                            : Colors.orange,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      typeStr,
+                                      style: const TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  notice['title']!,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  notice['description']!,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const Spacer(),
+                                Row(
+                                  children: [
+                                    AppUserAvatar(
+                                      photoUrl:
+                                          (notice['authorPhotoUrl'] ??
+                                                  notice['photoUrl'])
+                                              ?.toString(),
+                                      radius: 12,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Posted by ${notice['postedBy']} - ${notice['time']}',
+                                      style: const TextStyle(
+                                        fontSize: 10,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Reports Summary
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Reports Summary',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      children: const [
+                        Icon(Icons.trending_up, color: Colors.green, size: 14),
+                        SizedBox(width: 4),
+                        Text(
+                          '+2.4%',
+                          style: TextStyle(color: Colors.green, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.surfaceDark : Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: isDark
+                        ? AppColors.borderDark
+                        : AppColors.borderLight,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Obx(() {
+                      final scoreEntries = controller.subjectScores.entries
+                          .toList();
+                      if (scoreEntries.isEmpty) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Text('No score data available'),
+                        );
+                      }
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: scoreEntries.map((entry) {
+                          final subject = entry.key;
+                          final score = entry.value.clamp(0, 100);
+                          return Column(
+                            children: [
+                              Container(
+                                width: 30,
+                                height: 100,
+                                color: Colors.grey[200],
+                                child: Align(
+                                  alignment: Alignment.bottomCenter,
+                                  child: Container(
+                                    height: score.toDouble(),
+                                    color: AppColors.primary.withValues(
+                                      alpha: 0.7,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                subject.length > 4
+                                    ? subject.substring(0, 4)
+                                    : subject,
+                                style: const TextStyle(fontSize: 10),
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      );
+                    }),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: controller.goToPerformance,
+                        child: const Text('View Complete Gradebook'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 80), // bottom padding
+            ],
+          ),
+        );
+          },
+        );
+      }),
+      bottomNavigationBar: embedded
+          ? null
+          : const ParentBottomNavBar(currentIndex: 0),
+    );
+  }
+
+  Widget _buildStatCard({
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+    required String value,
+    required String sub,
+    required String status,
+    required Color statusColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(Get.context!).brightness == Brightness.dark
+            ? AppColors.surfaceDark
+            : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Theme.of(Get.context!).brightness == Brightness.dark
+              ? AppColors.borderDark
+              : AppColors.borderLight,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: iconColor, size: 20),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  status,
+                  style: TextStyle(
+                    color: statusColor,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+          Row(
+            children: [
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                sub,
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
