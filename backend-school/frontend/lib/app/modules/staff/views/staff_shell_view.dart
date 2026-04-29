@@ -6,6 +6,7 @@ import 'package:erp_frontend/app/modules/staff/views/staff_profile_view.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_reports_view.dart';
 import 'package:erp_frontend/app/modules/staff/views/staff_settings_view.dart';
 import 'package:erp_frontend/common/widgets/double_back_exit_scope.dart';
+import 'package:erp_frontend/common/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -59,16 +60,27 @@ class _StaffShellViewState extends State<StaffShellView> {
           backgroundColor: isDark
               ? AppColors.backgroundDark
               : AppColors.backgroundLight,
-          body: IndexedStack(
-            index: controller.currentIndex.value,
-            children: _tabs,
+          body: ResponsivePageContainer(
+            maxWidth: 1100,
+            padding: EdgeInsets.zero,
+            child: IndexedStack(
+              index: controller.currentIndex.value,
+              children: _tabs,
+            ),
           ),
           bottomNavigationBar: Container(
-            constraints: const BoxConstraints(minHeight: 76),
-            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+            constraints: BoxConstraints(
+              minHeight: Responsive.clamp(context, 76, min: 68, max: 92),
+            ),
+            padding: EdgeInsets.symmetric(
+              vertical: Responsive.clamp(context, 6, min: 4, max: 10),
+              horizontal: Responsive.clamp(context, 12, min: 8, max: 18),
+            ),
             decoration: BoxDecoration(
               color: isDark ? AppColors.surfaceDark : Colors.white,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(Responsive.clamp(context, 20, min: 14, max: 26)),
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.05),
@@ -102,25 +114,27 @@ class _StaffShellViewState extends State<StaffShellView> {
         behavior: HitTestBehavior.opaque,
         onTap: () => controller.setTab(idx),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
+          padding: EdgeInsets.symmetric(
+            vertical: Responsive.clamp(context, 6, min: 4, max: 10),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 icon,
-                size: 22,
+                size: Responsive.clamp(context, 22, min: 18, max: 26),
                 color: active ? AppColors.primary : Colors.grey,
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: Responsive.clamp(context, 4, min: 2, max: 6)),
               SizedBox(
-                height: 12,
+                height: Responsive.clamp(context, 12, min: 10, max: 16),
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
                     label,
                     maxLines: 1,
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: Responsive.sp(context, 10),
                       color: active ? AppColors.primary : Colors.grey,
                       fontWeight: active ? FontWeight.bold : FontWeight.normal,
                     ),

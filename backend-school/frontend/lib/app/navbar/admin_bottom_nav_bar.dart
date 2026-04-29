@@ -1,5 +1,6 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/routes/app_pages.dart';
+import 'package:erp_frontend/common/utils/responsive.dart';
 import 'package:erp_frontend/common/utils/safe_navigation.dart';
 import 'package:flutter/material.dart';
 
@@ -52,11 +53,18 @@ class AdminBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      constraints: const BoxConstraints(minHeight: 76),
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+      constraints: BoxConstraints(
+        minHeight: Responsive.clamp(context, 76, min: 68, max: 92),
+      ),
+      padding: EdgeInsets.symmetric(
+        vertical: Responsive.clamp(context, 6, min: 4, max: 10),
+        horizontal: Responsive.clamp(context, 12, min: 8, max: 18),
+      ),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(Responsive.clamp(context, 20, min: 14, max: 26)),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -69,44 +77,54 @@ class AdminBottomNavBar extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildNavItem(Icons.dashboard, 'Dashboard', currentIndex == 0, 0),
-            _buildNavItem(Icons.fact_check, 'Approvals', currentIndex == 1, 1),
-            _buildNavItem(Icons.bar_chart, 'Reports', currentIndex == 2, 2),
-            _buildNavItem(Icons.campaign, 'Notices', currentIndex == 3, 3),
-            _buildNavItem(Icons.settings, 'Settings', currentIndex == 4, 4),
+            _buildNavItem(context, Icons.dashboard, 'Dashboard', currentIndex == 0, 0),
+            _buildNavItem(context, Icons.fact_check, 'Approvals', currentIndex == 1, 1),
+            _buildNavItem(context, Icons.bar_chart, 'Reports', currentIndex == 2, 2),
+            _buildNavItem(context, Icons.campaign, 'Notices', currentIndex == 3, 3),
+            _buildNavItem(context, Icons.settings, 'Settings', currentIndex == 4, 4),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, bool active, int index) {
+  Widget _buildNavItem(
+    BuildContext context,
+    IconData icon,
+    String label,
+    bool active,
+    int index,
+  ) {
     return Expanded(
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () => _onTap(index),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(
+            Responsive.clamp(context, 16, min: 12, max: 20),
+          ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
+            padding: EdgeInsets.symmetric(
+              vertical: Responsive.clamp(context, 6, min: 4, max: 10),
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
                   icon,
-                  size: 22,
+                  size: Responsive.clamp(context, 22, min: 18, max: 26),
                   color: active ? AppColors.primary : Colors.grey,
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: Responsive.clamp(context, 4, min: 2, max: 6)),
                 SizedBox(
-                  height: 12,
+                  height: Responsive.clamp(context, 12, min: 10, max: 16),
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
                       label,
                       maxLines: 1,
                       style: TextStyle(
-                        fontSize: 10,
+                        fontSize: Responsive.sp(context, 10),
                         color: active ? AppColors.primary : Colors.grey,
                       ),
                     ),

@@ -79,7 +79,9 @@ class LoginScreen extends GetView<LoginController> {
               ),
               child: Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 460),
+                  constraints: BoxConstraints(
+                    maxWidth: Responsive.isTablet(context) ? 560 : 460,
+                  ),
                   child: _AuthCard(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,8 +195,18 @@ class LoginScreen extends GetView<LoginController> {
                               ),
                               child: controller.isLoading.value
                                   ? SizedBox(
-                                      height: 18,
-                                      width: 18,
+                                      height: Responsive.clamp(
+                                        context,
+                                        18,
+                                        min: 16,
+                                        max: 22,
+                                      ),
+                                      width: Responsive.clamp(
+                                        context,
+                                        18,
+                                        min: 16,
+                                        max: 22,
+                                      ),
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
                                         color: AppColor.base,

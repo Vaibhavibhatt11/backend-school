@@ -71,8 +71,18 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
                           ),
                           child: controller.isLoading.value
                               ? SizedBox(
-                                  height: 18,
-                                  width: 18,
+                                  height: Responsive.clamp(
+                                    context,
+                                    18,
+                                    min: 16,
+                                    max: 22,
+                                  ),
+                                  width: Responsive.clamp(
+                                    context,
+                                    18,
+                                    min: 16,
+                                    max: 22,
+                                  ),
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
                                     color: AppColor.base,
@@ -152,7 +162,11 @@ class _BackToLogin extends StatelessWidget {
       children: [
         IconButton(
           onPressed: () => Get.back(),
-          icon: Icon(Icons.arrow_back_rounded, color: AppColor.primary),
+          icon: Icon(
+            Icons.arrow_back_rounded,
+            color: AppColor.primary,
+            size: Responsive.clamp(context, 24, min: 20, max: 30),
+          ),
           tooltip: 'Back',
         ),
         SizedBox(width: Responsive.w(context, 6)),

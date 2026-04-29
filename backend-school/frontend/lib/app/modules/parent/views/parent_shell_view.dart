@@ -6,6 +6,7 @@ import 'package:erp_frontend/app/modules/parent/views/parent_home_view.dart';
 import 'package:erp_frontend/app/modules/parent/views/student_profile_hub_view.dart';
 import 'package:erp_frontend/app/navbar/parent_bottom_nav_bar.dart';
 import 'package:erp_frontend/common/widgets/double_back_exit_scope.dart';
+import 'package:erp_frontend/common/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -58,9 +59,13 @@ class _ParentShellViewState extends State<ParentShellView> {
     return Obx(
       () => DoubleBackExitScope(
         child: Scaffold(
-          body: IndexedStack(
-            index: controller.currentIndex.value,
-            children: _tabs,
+          body: ResponsivePageContainer(
+            maxWidth: 1100,
+            padding: EdgeInsets.zero,
+            child: IndexedStack(
+              index: controller.currentIndex.value,
+              children: _tabs,
+            ),
           ),
           bottomNavigationBar: ParentBottomNavBar(
             currentIndex: controller.currentIndex.value,

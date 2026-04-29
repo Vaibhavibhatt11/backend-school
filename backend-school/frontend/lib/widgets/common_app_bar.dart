@@ -23,7 +23,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onProfileTap;
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 4);
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
               color: AppColor.textPrimary,
             )
           : null,
-      leadingWidth: showBackButton ? 56 : 0,
+      leadingWidth: showBackButton ? Responsive.clamp(context, 56, min: 48, max: 68) : 0,
       title: Text(
         title,
         style: TextStyle(
@@ -47,7 +47,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
           color: AppColor.textPrimary,
         ),
       ),
-      titleSpacing: showBackButton ? 0 : Responsive.w(context, 20),
+      titleSpacing: showBackButton ? 0 : Responsive.clamp(context, 20, min: 12, max: 30),
       actions: [
         IconButton(
           icon: Icon(Icons.notifications_outlined, size: Responsive.w(context, 24)),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../common/theme/app_color.dart';
+import '../common/utils/responsive.dart';
 import 'common_app_bar.dart';
 
 class AppScaffold extends StatelessWidget {
@@ -11,6 +12,7 @@ class AppScaffold extends StatelessWidget {
     this.floatingActionButton,
     this.bottomNavigationBar,
     this.drawer,
+    this.useResponsiveContainer = true,
   });
 
   final String title;
@@ -19,6 +21,7 @@ class AppScaffold extends StatelessWidget {
   final Widget? floatingActionButton;
   final Widget? bottomNavigationBar;
   final Widget? drawer;
+  final bool useResponsiveContainer;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +32,15 @@ class AppScaffold extends StatelessWidget {
         showBackButton: true,
         showProfileIcon: showProfileIcon,
       ),
-      body: SafeArea(child: body),
+      body: SafeArea(
+        child: useResponsiveContainer
+            ? ResponsivePageContainer(
+                maxWidth: 1100,
+                padding: EdgeInsets.zero,
+                child: body,
+              )
+            : body,
+      ),
       drawer: drawer,
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNavigationBar,

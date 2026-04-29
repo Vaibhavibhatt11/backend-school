@@ -252,7 +252,9 @@ class StudentCommunicationScreen extends GetView<StudentCommunicationController>
                   ),
                   decoration: BoxDecoration(
                     color: AppColor.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(
+                      Responsive.clamp(context, 20, min: 14, max: 24),
+                    ),
                   ),
                   child: Text(
                     '${meetings.length}',
@@ -371,10 +373,12 @@ class StudentCommunicationScreen extends GetView<StudentCommunicationController>
                 padding: EdgeInsets.only(top: Responsive.h(ctx, 12)),
                 child: Container(
                   width: Responsive.w(ctx, 40),
-                  height: 4,
+                  height: Responsive.clamp(ctx, 4, min: 3, max: 6),
                   decoration: BoxDecoration(
                     color: AppColor.border,
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(
+                      Responsive.clamp(ctx, 2, min: 1.5, max: 3),
+                    ),
                   ),
                 ),
               ),
@@ -535,10 +539,12 @@ class StudentCommunicationScreen extends GetView<StudentCommunicationController>
                 padding: EdgeInsets.only(top: Responsive.h(context, 12)),
                 child: Container(
                   width: Responsive.w(context, 40),
-                  height: 4,
+                  height: Responsive.clamp(context, 4, min: 3, max: 6),
                   decoration: BoxDecoration(
                     color: AppColor.border,
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(
+                      Responsive.clamp(context, 2, min: 1.5, max: 3),
+                    ),
                   ),
                 ),
               ),
@@ -835,8 +841,8 @@ class _MessageCard extends StatelessWidget {
                   Padding(
                     padding: EdgeInsets.only(left: Responsive.w(context, 8)),
                     child: Container(
-                      width: 10,
-                      height: 10,
+                      width: Responsive.clamp(context, 10, min: 8, max: 14),
+                      height: Responsive.clamp(context, 10, min: 8, max: 14),
                       decoration: BoxDecoration(
                         color: color,
                         shape: BoxShape.circle,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:erp_frontend/common/utils/responsive.dart';
 
 class CustomButton extends StatelessWidget {
   final String text;
@@ -32,16 +33,20 @@ class CustomButton extends StatelessWidget {
 
   Widget _buildChild(BuildContext context) {
     if (isLoading) {
-      return const SizedBox(
-        height: 20,
-        width: 20,
-        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+      return SizedBox(
+        height: Responsive.clamp(context, 20, min: 16, max: 24),
+        width: Responsive.clamp(context, 20, min: 16, max: 24),
+        child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
       );
     }
     if (icon != null) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [Icon(icon, size: 20), const SizedBox(width: 8), Text(text)],
+        children: [
+          Icon(icon, size: Responsive.clamp(context, 20, min: 16, max: 24)),
+          SizedBox(width: Responsive.clamp(context, 8, min: 6, max: 12)),
+          Flexible(child: Text(text, overflow: TextOverflow.ellipsis)),
+        ],
       );
     }
     return Text(text);

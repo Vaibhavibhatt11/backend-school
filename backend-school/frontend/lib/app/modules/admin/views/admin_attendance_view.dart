@@ -1,5 +1,6 @@
 import 'package:erp_frontend/app/core/theme/app_colors.dart';
 import 'package:erp_frontend/app/modules/admin/controllers/admin_attendance_controller.dart';
+import 'package:erp_frontend/common/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -24,11 +25,18 @@ class AdminAttendanceView extends GetView<AdminAttendanceController> {
           return Column(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+              padding: EdgeInsets.fromLTRB(
+                Responsive.clamp(context, 16, min: 12, max: 24),
+                Responsive.clamp(context, 16, min: 12, max: 24),
+                Responsive.clamp(context, 16, min: 12, max: 24),
+                Responsive.clamp(context, 12, min: 8, max: 18),
+              ),
                 child: _AttendanceHeaderCard(controller: controller),
               ),
               Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
+                margin: EdgeInsets.symmetric(
+                  horizontal: Responsive.clamp(context, 16, min: 12, max: 24),
+                ),
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.surfaceDark : Colors.white,
                   borderRadius: BorderRadius.circular(14),
@@ -58,7 +66,7 @@ class AdminAttendanceView extends GetView<AdminAttendanceController> {
                   ],
                 ),
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: Responsive.clamp(context, 10, min: 8, max: 14)),
               Expanded(
                 child: TabBarView(
                   children: [
@@ -86,37 +94,41 @@ class _AttendanceHeaderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(Responsive.clamp(context, 16, min: 12, max: 24)),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [AppColors.primary, AppColors.primaryDark],
         ),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(
+          Responsive.clamp(context, 18, min: 14, max: 26),
+        ),
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(Responsive.clamp(context, 12, min: 8, max: 18)),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(
+                Responsive.clamp(context, 12, min: 8, max: 18),
+              ),
             ),
             child: const Icon(Icons.fact_check_rounded, color: Colors.white),
           ),
-          const SizedBox(width: 14),
+          SizedBox(width: Responsive.clamp(context, 14, min: 10, max: 20)),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Attendance Management',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 19,
+                    fontSize: Responsive.sp(context, 19),
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: Responsive.clamp(context, 4, min: 2, max: 6)),
                 Obx(
                   () => Text(
                     'Date ${controller.selectedDateIso.value} • '

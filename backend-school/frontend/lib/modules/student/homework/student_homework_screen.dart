@@ -344,8 +344,14 @@ class _HomeworkCard extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(dueIcon, size: 14, color: dueColor),
-                            SizedBox(width: 4),
+                            Icon(
+                              dueIcon,
+                              size: Responsive.clamp(context, 14, min: 12, max: 18),
+                              color: dueColor,
+                            ),
+                            SizedBox(
+                              width: Responsive.clamp(context, 4, min: 3, max: 6),
+                            ),
                             Text(
                               item.dueLabel,
                               style: AppTextStyle.caption(context).copyWith(
@@ -373,10 +379,12 @@ class _HomeworkCard extends StatelessWidget {
                           item.status == HomeworkStatus.graded
                               ? Icons.check_circle_rounded
                               : Icons.upload_rounded,
-                          size: 14,
+                          size: Responsive.clamp(context, 14, min: 12, max: 18),
                           color: AppColor.tokenGreenFont,
                         ),
-                        SizedBox(width: 4),
+                        SizedBox(
+                          width: Responsive.clamp(context, 4, min: 3, max: 6),
+                        ),
                         Text(
                           item.status == HomeworkStatus.graded ? 'Graded' : 'Submitted',
                           style: AppTextStyle.caption(context).copyWith(
@@ -736,10 +744,10 @@ class _SubmitHomeworkSheetState extends State<_SubmitHomeworkSheet> {
             child: ElevatedButton.icon(
               onPressed: _isSubmitting ? null : _submit,
               icon: _isSubmitting
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                  ? SizedBox(
+                      width: Responsive.clamp(context, 16, min: 14, max: 20),
+                      height: Responsive.clamp(context, 16, min: 14, max: 20),
+                      child: const CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.send_rounded),
               label: Text(_isSubmitting ? 'Submitting...' : 'Submit assignment'),

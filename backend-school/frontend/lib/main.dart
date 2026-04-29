@@ -19,7 +19,12 @@ Future<void> main() async {
     Get.put<ThemeService>(ThemeService(), permanent: true);
   }
 
-  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
   runApp(const MyApp());
 }
 
@@ -47,6 +52,15 @@ class MyApp extends StatelessWidget {
         page: () => const MainShellScreen(),
         binding: MainShellBinding(),
       ),
+      builder: (context, child) {
+        if (child == null) return const SizedBox.shrink();
+        final mediaQuery = MediaQuery.of(context);
+        final textScale = mediaQuery.textScaler.clamp(minScaleFactor: 0.9, maxScaleFactor: 1.2);
+        return MediaQuery(
+          data: mediaQuery.copyWith(textScaler: textScale),
+          child: child,
+        );
+      },
     );
   }
 }

@@ -28,14 +28,18 @@ class MainShellScreen extends GetView<MainShellController> {
       child: Scaffold(
         appBar: _ShellAppBar(controller: controller, tabTitles: _tabTitles),
         body: Obx(() {
-          return IndexedStack(
-            index: controller.currentIndex.value,
-            children: const [
-              HomeDashboardTab(),
-              LearnTab(),
-              MessagesTab(),
-              MoreTab(),
-            ],
+          return ResponsivePageContainer(
+            maxWidth: 1100,
+            padding: EdgeInsets.zero,
+            child: IndexedStack(
+              index: controller.currentIndex.value,
+              children: const [
+                HomeDashboardTab(),
+                LearnTab(),
+                MessagesTab(),
+                MoreTab(),
+              ],
+            ),
           );
         }),
         bottomNavigationBar: Container(
@@ -80,7 +84,7 @@ class _ShellAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<String> tabTitles;
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 4);
 
   @override
   Widget build(BuildContext context) {

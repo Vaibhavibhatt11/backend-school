@@ -8,6 +8,7 @@ import 'package:erp_frontend/app/navbar/admin_bottom_nav_bar.dart';
 import 'package:erp_frontend/common/widgets/double_back_exit_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:erp_frontend/common/utils/responsive.dart';
 
 class AdminShellView extends StatefulWidget {
   const AdminShellView({super.key});
@@ -55,9 +56,13 @@ class _AdminShellViewState extends State<AdminShellView> {
     return Obx(
       () => DoubleBackExitScope(
         child: Scaffold(
-          body: IndexedStack(
-            index: controller.currentIndex.value,
-            children: _tabs,
+          body: ResponsivePageContainer(
+            maxWidth: 1200,
+            padding: EdgeInsets.zero,
+            child: IndexedStack(
+              index: controller.currentIndex.value,
+              children: _tabs,
+            ),
           ),
           bottomNavigationBar: AdminBottomNavBar(
             currentIndex: controller.currentIndex.value,

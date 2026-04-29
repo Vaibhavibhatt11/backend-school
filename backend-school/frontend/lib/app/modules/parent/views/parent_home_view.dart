@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/custom_app_bar.dart';
 import '../../../navbar/parent_bottom_nav_bar.dart';
+import '../../../../common/utils/responsive.dart';
 import '../controllers/parent_home_controller.dart';
 
 class ParentHomeView extends GetView<ParentHomeController> {
@@ -65,7 +66,7 @@ class ParentHomeView extends GetView<ParentHomeController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 8),
+              SizedBox(height: Responsive.clamp(context, 8, min: 6, max: 12)),
               Text(
                 '${DateTime.now().weekday}, ${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().day.toString().padLeft(2, '0')}',
                 style: TextStyle(
@@ -74,7 +75,7 @@ class ParentHomeView extends GetView<ParentHomeController> {
                       : Colors.grey[600],
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: Responsive.clamp(context, 4, min: 2, max: 8)),
               Row(
                 children: [
                   Flexible(
@@ -86,7 +87,7 @@ class ParentHomeView extends GetView<ParentHomeController> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 24,
+                        fontSize: Responsive.sp(context, 24),
                         fontWeight: FontWeight.bold,
                         color: isDark
                             ? AppColors.textDark
@@ -94,18 +95,20 @@ class ParentHomeView extends GetView<ParentHomeController> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: Responsive.clamp(context, 8, min: 6, max: 12)),
                   Expanded(
                     child: GestureDetector(
                       onTap: controller.goToChildSwitcher,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: Responsive.clamp(context, 12, min: 8, max: 18),
+                          vertical: Responsive.clamp(context, 8, min: 6, max: 12),
                         ),
                         decoration: BoxDecoration(
                           color: isDark ? AppColors.surfaceDark : Colors.white,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(
+                            Responsive.clamp(context, 16, min: 12, max: 24),
+                          ),
                           border: Border.all(
                             color: isDark
                                 ? AppColors.borderDark
@@ -119,10 +122,10 @@ class ParentHomeView extends GetView<ParentHomeController> {
                                 photoUrl: controller.childPhotoUrl.value.isEmpty
                                     ? null
                                     : controller.childPhotoUrl.value,
-                                radius: 16,
+                                radius: Responsive.clamp(context, 16, min: 12, max: 22),
                               ),
                             ),
-                            const SizedBox(width: 10),
+                            SizedBox(width: Responsive.clamp(context, 10, min: 8, max: 14)),
                             Expanded(
                               child: Obx(
                                 () => Column(
@@ -135,8 +138,8 @@ class ParentHomeView extends GetView<ParentHomeController> {
                                           : controller.childName.value,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontSize: 13,
+                                      style: TextStyle(
+                                        fontSize: Responsive.sp(context, 13),
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),
@@ -145,7 +148,7 @@ class ParentHomeView extends GetView<ParentHomeController> {
                                           ? 'Tap to switch student'
                                           : controller.childGrade.value,
                                       style: TextStyle(
-                                        fontSize: 11,
+                                        fontSize: Responsive.sp(context, 11),
                                         color: isDark
                                             ? AppColors.textSecondaryDark
                                             : Colors.grey[600],
@@ -157,17 +160,22 @@ class ParentHomeView extends GetView<ParentHomeController> {
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: Responsive.clamp(context, 8, min: 6, max: 12)),
                             Container(
-                              width: 24,
-                              height: 24,
+                              width: Responsive.clamp(context, 24, min: 20, max: 32),
+                              height: Responsive.clamp(context, 24, min: 20, max: 32),
                               decoration: BoxDecoration(
                                 color: isDark
                                     ? AppColors.borderDark
                                     : Colors.grey.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(
+                                  Responsive.clamp(context, 8, min: 6, max: 12),
+                                ),
                               ),
-                              child: const Icon(Icons.expand_more, size: 18),
+                              child: Icon(
+                                Icons.expand_more,
+                                size: Responsive.clamp(context, 18, min: 14, max: 24),
+                              ),
                             ),
                           ],
                         ),
@@ -273,12 +281,14 @@ class ParentHomeView extends GetView<ParentHomeController> {
               GestureDetector(
                 onTap: controller.goToLiveClass,
                 child: Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: EdgeInsets.all(Responsive.clamp(context, 20, min: 14, max: 28)),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [AppColors.primary, AppColors.primaryLight],
                     ),
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(
+                      Responsive.clamp(context, 24, min: 16, max: 32),
+                    ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -287,36 +297,36 @@ class ParentHomeView extends GetView<ParentHomeController> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Upcoming Class',
                               style: TextStyle(
                                 color: Colors.white70,
-                                fontSize: 12,
+                                fontSize: Responsive.sp(context, 12),
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: Responsive.clamp(context, 4, min: 2, max: 6)),
                             Text(
                               controller.upcomingClass.value,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                                fontSize: Responsive.sp(context, 16),
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: Responsive.clamp(context, 4, min: 2, max: 6)),
                             Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.schedule,
                                   color: Colors.white70,
-                                  size: 14,
+                                  size: Responsive.clamp(context, 14, min: 12, max: 18),
                                 ),
-                                const SizedBox(width: 4),
+                                SizedBox(width: Responsive.clamp(context, 4, min: 2, max: 6)),
                                 Text(
                                   'Starts in ${controller.classStartIn.value}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: Colors.white70,
-                                    fontSize: 12,
+                                    fontSize: Responsive.sp(context, 12),
                                   ),
                                 ),
                               ],
@@ -325,11 +335,13 @@ class ParentHomeView extends GetView<ParentHomeController> {
                         ),
                       ),
                       Container(
-                        width: 48,
-                        height: 48,
+                        width: Responsive.clamp(context, 48, min: 38, max: 64),
+                        height: Responsive.clamp(context, 48, min: 38, max: 64),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(
+                            Responsive.clamp(context, 16, min: 12, max: 24),
+                          ),
                         ),
                         child: const Icon(
                           Icons.arrow_forward,
@@ -357,12 +369,14 @@ class ParentHomeView extends GetView<ParentHomeController> {
               ),
               const SizedBox(height: 8),
               SizedBox(
-                height: 200,
+                height: Responsive.clamp(context, 200, min: 170, max: 260),
                 child: Obx(
                   () => ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: controller.recentNotices.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 16),
+                    separatorBuilder: (_, __) => SizedBox(
+                      width: Responsive.clamp(context, 16, min: 10, max: 24),
+                    ),
                     itemBuilder: (context, index) {
                       final notice = controller.recentNotices[index];
                       final typeStr = (notice['type'] ?? 'Notice').toString();
@@ -372,16 +386,22 @@ class ParentHomeView extends GetView<ParentHomeController> {
                       return Material(
                         color: Colors.transparent,
                         child: InkWell(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(
+                            Responsive.clamp(context, 24, min: 16, max: 30),
+                          ),
                           onTap: controller.goToAnnouncements,
                           child: Container(
-                            width: 280,
-                            padding: const EdgeInsets.all(16),
+                            width: Responsive.clamp(context, 280, min: 220, max: 360),
+                            padding: EdgeInsets.all(
+                              Responsive.clamp(context, 16, min: 12, max: 22),
+                            ),
                             decoration: BoxDecoration(
                               color: isDark
                                   ? AppColors.surfaceDark
                                   : Colors.white,
-                              borderRadius: BorderRadius.circular(24),
+                              borderRadius: BorderRadius.circular(
+                                Responsive.clamp(context, 24, min: 16, max: 30),
+                              ),
                               border: Border.all(
                                 color: isDark
                                     ? AppColors.borderDark
@@ -394,8 +414,8 @@ class ParentHomeView extends GetView<ParentHomeController> {
                                 Row(
                                   children: [
                                     Container(
-                                      width: 8,
-                                      height: 8,
+                                      width: Responsive.clamp(context, 8, min: 6, max: 12),
+                                      height: Responsive.clamp(context, 8, min: 6, max: 12),
                                       decoration: BoxDecoration(
                                         color: isUrgent
                                             ? Colors.red
@@ -406,8 +426,8 @@ class ParentHomeView extends GetView<ParentHomeController> {
                                     const SizedBox(width: 8),
                                     Text(
                                       typeStr,
-                                      style: const TextStyle(
-                                        fontSize: 10,
+                                      style: TextStyle(
+                                        fontSize: Responsive.sp(context, 10),
                                         fontWeight: FontWeight.bold,
                                         color: Colors.grey,
                                       ),
@@ -435,13 +455,13 @@ class ParentHomeView extends GetView<ParentHomeController> {
                                           (notice['authorPhotoUrl'] ??
                                                   notice['photoUrl'])
                                               ?.toString(),
-                                      radius: 12,
+                                      radius: Responsive.clamp(context, 12, min: 10, max: 18),
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
                                       'Posted by ${notice['postedBy']} - ${notice['time']}',
-                                      style: const TextStyle(
-                                        fontSize: 10,
+                                      style: TextStyle(
+                                        fontSize: Responsive.sp(context, 10),
                                         color: Colors.grey,
                                       ),
                                     ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:erp_frontend/common/utils/responsive.dart';
 
 class CustomTextField extends StatelessWidget {
   final String? label;
@@ -28,8 +29,14 @@ class CustomTextField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (label != null) ...[
-          Text(label!, style: const TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
+          Text(
+            label!,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: Responsive.sp(context, 14),
+            ),
+          ),
+          SizedBox(height: Responsive.clamp(context, 8, min: 6, max: 12)),
         ],
         TextFormField(
           controller: controller,

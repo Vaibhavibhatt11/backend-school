@@ -36,6 +36,9 @@ class Responsive {
 
   static double width(BuildContext context) => _size(context).width;
   static double height(BuildContext context) => _size(context).height;
+  static double shortestSide(BuildContext context) => _size(context).shortestSide;
+  static bool isLandscape(BuildContext context) =>
+      MediaQuery.orientationOf(context) == Orientation.landscape;
 
   /// Scale factor based on design width (e.g. 360). Use for fonts and spacing.
   static double scale(BuildContext context, {double designWidth = 360}) {
@@ -63,6 +66,17 @@ class Responsive {
     return value * scale(context, designWidth: designWidth);
   }
 
+  /// Clamp responsive values to avoid over-growth on tablets and folds.
+  static double clamp(
+    BuildContext context,
+    double value, {
+    double? min,
+    double? max,
+  }) {
+    final scaled = w(context, value);
+    return scaled.clamp(min ?? value * 0.85, max ?? value * 1.6);
+  }
+
   /// Percentage of screen width (0.0 to 1.0).
   static double wp(BuildContext context, double fraction) =>
       width(context) * fraction.clamp(0.0, 1.0);
@@ -71,11 +85,48 @@ class Responsive {
   static double hp(BuildContext context, double fraction) =>
       height(context) * fraction.clamp(0.0, 1.0);
 
-  static bool isPhone(BuildContext context) => width(context) < Breakpoints.lg;
+  static bool isPhone(BuildContext context) => shortestSide(context) < Breakpoints.lg;
   static bool isTablet(BuildContext context) =>
-      width(context) >= Breakpoints.lg && width(context) < Breakpoints.xxxl;
+      shortestSide(context) >= Breakpoints.lg && shortestSide(context) < Breakpoints.xxxl;
   static bool isDesktop(BuildContext context) => width(context) >= Breakpoints.xxxl;
-  static bool isFoldOrSmall(BuildContext context) => width(context) <= Breakpoints.sm;
+  static bool isFoldOrSmall(BuildContext context) => shortestSide(context) <= Breakpoints.sm;
+
+  static int adaptiveColumns(
+    BuildContext context, {
+    int phone = 1,
+    int tablet = 2,
+    int largeTablet = 3,
+  }) {
+    final s = shortestSide(context);
+    if (s >= Breakpoints.xl) return largeTablet;
+    if (s >= Breakpoints.lg) return tablet;
+    return phone;
+  }
+
+  static double adaptiveGap(BuildContext context) {
+    if (isFoldOrSmall(context)) return 8;
+    if (isTablet(context)) return 16;
+    return 12;
+  }
+
+  static EdgeInsets pagePadding(BuildContext context) {
+    if (isFoldOrSmall(context)) {
+      return EdgeInsets.symmetric(
+        horizontal: clamp(context, 10, min: 8, max: 14),
+        vertical: clamp(context, 10, min: 8, max: 14),
+      );
+    }
+    if (isTablet(context)) {
+      return EdgeInsets.symmetric(
+        horizontal: clamp(context, 24, min: 18, max: 32),
+        vertical: clamp(context, 16, min: 12, max: 24),
+      );
+    }
+    return EdgeInsets.symmetric(
+      horizontal: clamp(context, 16, min: 12, max: 24),
+      vertical: clamp(context, 12, min: 10, max: 18),
+    );
+  }
 }
 
 /// Widget that builds different layouts by breakpoint.
@@ -132,6 +183,35 @@ class ResponsivePadding extends StatelessWidget {
     return Padding(
       padding: padding ?? EdgeInsets.symmetric(horizontal: effectiveHorizontal, vertical: effectiveVertical),
       child: child,
+    );
+  }
+}
+
+/// Centers content and constrains line length on larger displays.
+class ResponsivePageContainer extends StatelessWidget {
+  const ResponsivePageContainer({
+    super.key,
+    required this.child,
+    this.maxWidth = 1000,
+    this.padding,
+  });
+
+  final Widget child;
+  final double maxWidth;
+  final EdgeInsets? padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final effectivePadding = padding ?? Responsive.pagePadding(context);
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: Padding(
+          padding: effectivePadding,
+          child: child,
+        ),
+      ),
     );
   }
 }
